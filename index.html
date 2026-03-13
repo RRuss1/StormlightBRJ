@@ -209,7 +209,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <p class="slots-label">Radiant Company</p>
   <div class="slots-grid" id="slots-grid"></div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-    <button class="btn btn-gold" onclick="goToCampaignPicker()">⟁ Enter the Storm</button>
+    <button class="btn btn-gold" onclick="onEnter()">⟁ Enter the Storm</button>
     <button class="btn btn-sm btn-danger" onclick="onReset()">Reset Campaign</button>
   </div>
   <div id="title-status" style="font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:22px;"></div>
@@ -223,6 +223,19 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <p class="slots-label">Your Campaigns</p>
   <div class="camp-grid" id="camp-grid"></div>
   <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;"></div>
+  <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;">
+    <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text5);text-transform:uppercase;margin-bottom:10px;">Help Keep the Stormfather Alive</div>
+    <a href="https://cash.app/%24rurich31" target="_blank" id="cashlink" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #00D632;border-radius:24px;background:rgba(0,214,50,0.07);text-decoration:none;transition:background 0.15s;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="6" fill="#00D632"/>
+        <path d="M15.5 8.5C15.5 8.5 14.5 7.5 12 7.5C9.5 7.5 8 9 8 10.5C8 12 9 12.8 11 13.3L13 13.8C14.5 14.2 15.5 15 15.5 16.5C15.5 18 14 19.5 11.5 19.5C9 19.5 7.5 18 7.5 18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="12" y1="6" x2="12" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="12" y1="19.5" x2="12" y2="21.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span style="font-family:var(--font-display);font-size:14px;color:#00D632;letter-spacing:1px;">Donate &middot; &#36;rurich31</span>
+    </a>
+    <div style="font-size:12px;color:var(--text5);margin-top:8px;font-style:italic;">API costs ~$0.003 per turn · Every bit helps</div>
+  </div>
 </div>
 
 <div id="s-create" class="screen">
@@ -333,11 +346,36 @@ const COLORS=[
 ];
 const STAT_KEYS=['str','dex','int','wis','cha','end'];
 const STAT_NAMES=['STR','DEX','INT','WIS','CHA','END'];
-const ACTS=[
-  {num:1,name:'The Shattered Plains',start:0,end:59,tag:'Act I'},
-  {num:2,name:'Secrets of Urithiru',start:60,end:119,tag:'Act II'},
-  {num:3,name:'The Everstorm Rises',start:120,end:179,tag:'Act III'},
+const ROSHAR_PHYSICAL=['Urithiru','Shattered Plains','Kholinar','Kharbranth','Thaylen City','Azimir','Purelake','Hearthstone','Rathalas','Reshi Isles','Aimia (Akinah)','Frostlands','Bavland','Herdaz','Jah Keved','Alethkar','Tukar','Triax','Liafor','Emul','Marat'];
+const ROSHAR_OTHER=['Braize (Damnation)','Ashyn — the Burning Planet','Aimian Sea','Godforge'];
+const ROSHAR_SHADESMAR=['Shadesmar — Sea of Regret','Shadesmar — Sea of Souls','Shadesmar — Sea of Lost Lights','Nexus of Imagination','Nexus of Truth','Nexus of Transition',"Honor's Perpendicularity","Cultivation's Perpendicularity"];
+const ROSHAR_STORY=['The Honor Chasm','Feverstone Keep','Stormseat (Narak)'];
+const ALL_LOCATIONS=[...ROSHAR_PHYSICAL,...ROSHAR_OTHER,...ROSHAR_SHADESMAR,...ROSHAR_STORY];
+
+function pickLocations(seed){
+  // Seeded shuffle — deterministic per campaign so all players see same locations
+  const rng=(n)=>{let x=Math.sin(seed+n)*10000;return x-Math.floor(x);};
+  const pool=[...ALL_LOCATIONS];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(rng(i)*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  return[pool[0],pool[1],pool[2]];
+}
+
+const BASE_ACTS=[
+  {num:1,tag:'Act I',start:0,end:59},
+  {num:2,tag:'Act II',start:60,end:119},
+  {num:3,tag:'Act III',start:120,end:179},
 ];
+let ACTS=BASE_ACTS.map(a=>({...a,name:a.tag,location:'The Shattered Plains'}));
+
+function buildActs(seed){
+  const locs=pickLocations(seed);
+  ACTS=[
+    {...BASE_ACTS[0],name:'The '+locs[0],location:locs[0]},
+    {...BASE_ACTS[1],name:'Secrets of '+locs[1],location:locs[1]},
+    {...BASE_ACTS[2],name:'The Storm over '+locs[2],location:locs[2]},
+  ];
+}
+function getAct(moves){return ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];}
 
 let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
 let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
@@ -365,7 +403,7 @@ async function sSet(r,v){const t=await tok();await fetch(`https://sheets.googlea
 async function sApp(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
 async function loadState(){try{const v=await sGet(stateSheet()+'!A1');if(v.length&&v[0][0])return JSON.parse(v[0][0]);}catch(e){}return null;}
 async function saveState(s){await sSet(stateSheet()+'!A1',[[JSON.stringify(s)]]);}
-async function loadLog(){try{return(await sGet(logSheet()+'!A:E')).map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''}));}catch(e){return[];}}
+async function loadLog(){try{return(await sGet(logSheet()+'!A:E')).map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''})).filter(e=>e.type&&e.type.trim()!=='');}catch(e){return[];}}
 async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
 
 async function getSheetNames(){
@@ -442,13 +480,18 @@ function renderCampaigns(camps){
 async function newCampaign(num){
   campaignId='Campaign'+num;
   document.getElementById('camp-status').textContent='Creating Campaign '+num+'...';
-  await ensureSheets();
-  gState=await loadState();
-  partySize=gState.partySize||3;
-  myChar=null;localStorage.removeItem('sc_mychar_v3');
-  renderPSZ();renderSlots(gState);
-  showScreen('title');
-  document.getElementById('camp-status').textContent='';
+  try{
+    await ensureSheets();
+    gState=await loadState();
+    partySize=3; // fresh campaign always starts at 3
+    gState.partySize=3;
+    myChar=null;
+    localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
+    renderPSZ();
+    renderSlots(gState);
+    showScreen('title');
+    document.getElementById('camp-status').textContent='';
+  }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
 }
 
 async function selectCampaign(id){
@@ -461,7 +504,8 @@ async function selectCampaign(id){
     if(gState&&gState.phase==='playing'){showGameScreen();return;}
     if(gState&&gState.phase==='pregame'&&myChar){showScreen('lobby');renderLobby();return;}
     partySize=gState?gState.partySize||3:3;
-    renderPSZ();renderSlots(gState);
+    renderPSZ();
+    renderSlots(gState||{players:new Array(partySize).fill(null),partySize});
     showScreen('title');
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
@@ -484,11 +528,11 @@ function renderPSZ(){
 function pickSize(n){
   if(gState&&gState.phase!=='pregame')return;
   partySize=n;
-  // Update gState players array size if in pregame
   if(gState&&gState.phase==='pregame'){
     const cur=gState.players||[];
-    const newPlayers=Array.from({length:n},(_,i)=>cur[i]||null);
-    gState.players=newPlayers;gState.partySize=n;
+    gState.players=Array.from({length:n},(_,i)=>cur[i]||null);
+    gState.partySize=n;
+    saveState(gState).catch(()=>{}); // persist size to sheet
   }
   renderPSZ();
   renderSlots(gState||{players:new Array(n).fill(null),partySize:n});
@@ -599,15 +643,18 @@ async function startNow(){
 }
 
 async function onEnter(){
+  if(!campaignId){goToCampaignPicker();return;}
   setStatus('Connecting to the Stormfather...');
   try{
-    await ensureSheets();gState=await loadState();
-    if(gState)partySize=gState.partySize||partySize;
+    await ensureSheets();
+    gState=await loadState();
+    if(gState){partySize=gState.partySize||partySize;}
     renderPSZ();renderSlots(gState);
     myChar=loadMyChar();
-    if(myChar){showGameScreen();return;}
+    if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
+    if(myChar&&gState&&gState.phase==='pregame'){showScreen('lobby');renderLobby();return;}
     const empty=gState&&gState.players?gState.players.findIndex(p=>!p):-1;
-    if(empty===-1){setStatus('All slots filled. Ask the party leader to reset.');return;}
+    if(empty===-1){setStatus('All slots filled. Use the lobby to assign NPCs or ask a player to reset.');return;}
     mySlot=empty;showScreen('create');renderCreate();
   }catch(e){setStatus('Could not connect: '+e.message);}
 }
@@ -648,26 +695,36 @@ async function onCreateChar(){
 
 async function startCampaign(){
   gState.phase='playing';gState.turn=0;gState.totalMoves=0;
+  if(!gState.locationSeed)gState.locationSeed=Math.floor(Math.random()*99999);
+  buildActs(gState.locationSeed);
   await saveState(gState);
-  await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The Chronicles begin.',choices:[]});
+  await addLog({type:'system',who:'',text:`The Radiants have spoken their Oaths. The saga begins in ${ACTS[0].location}. The Chronicles begin.`,choices:[]});
   showGameScreen();
   await callGM(openingPrompt());
 }
 
 function openingPrompt(){
   const sz=gState.partySize||partySize;
-  const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (AI-controlled NPC)':''}`).join(', ');
-  return`You are the Game Master for a Cosmere DND-style RPG in Brandon Sanderson's Way of Kings universe. 180-turn epic across 3 acts.
-Party (${sz}): ${names}. NPCs are AI-controlled and act automatically.
-Turn 1 / 180. Act I — The Shattered Plains.
-Write a dramatic opening in Dalinar's warcamp at dawn. Vivid atmosphere: Stormlight spheres, crem-stained stone, Parshendi war drums. An immediate crisis demands action.
-End with [CHOICES] — 4 numbered options for ${gState.players[0].name} the ${gState.players[0].className}${gState.players[0].isNPC?' (NPC — pick the most dramatic option automatically)':''}. Under 220 words. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
+  const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (AI NPC)':''}`).join(', ');
+  const a1=ACTS[0],a2=ACTS[1],a3=ACTS[2];
+  return`You are the Game Master for a Cosmere DND-style RPG set in Brandon Sanderson's Way of Kings universe. This is a 180-turn epic saga across 3 acts — each in a different Roshar location.
+
+ACT I (turns 1-60): ${a1.location}
+ACT II (turns 61-120): ${a2.location}  
+ACT III (turns 121-180): ${a3.location}
+
+Party (${sz} Radiants): ${names}. NPCs act via D4 dice roll only — no AI decisions for them.
+
+Open Act I in ${a1.location}. Describe this specific location vividly — its unique atmosphere, dangers, and what is happening there RIGHT NOW that demands immediate action. Do NOT default to a generic warcamp — this is ${a1.location}, give it its own character.
+
+End with [CHOICES] — 4 numbered options for ${gState.players[0].name} the ${gState.players[0].className}. Options should fit both the character's class AND the location. Under 230 words. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
 }
 
 async function showGameScreen(){showScreen('game');startPolling();await refreshGame();}
 
 async function refreshGame(){
   gState=await loadState();
+  if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
   const log=await loadLog();
   renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
   if(gState&&gState.phase==='playing'&&!isLoading){
@@ -680,33 +737,37 @@ async function handleNPC(log){
   if(isLoading)return;
   const cur=gState.players[gState.turn];
   if(!cur||!cur.isNPC)return;
+  // D4 roll — pure random, no AI tokens spent
   const lastGM=[...log].reverse().find(e=>e.type==='gm');
-  const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Take a defensive stance','Scout the area','Search for allies','Draw weapon and advance'];
-  const pick=opts[Math.floor(Math.random()*opts.length)];
-  await new Promise(r=>setTimeout(r,1800));
-  await addLog({type:'npc',who:cur.name,text:pick,choices:[]});
+  const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Takes a defensive stance','Scouts the area','Searches for allies','Draws weapon and advances'];
+  const d4=Math.floor(Math.random()*Math.min(4,opts.length));
+  const pick=opts[d4];
+  await new Promise(r=>setTimeout(r,900)); // brief pause for UX
+  await addLog({type:'npc',who:cur.name,text:`[D4:${d4+1}] ${pick}`,choices:[]});
   const from=gState.turn;
   const sz=gState.partySize||partySize;
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   await saveState(gState);
-  await callGM(npcPrompt(pick,cur,from));
+  // GM narrates NPC action + gives next player choices (one call covers both)
+  await callGM(npcTurnPrompt(pick,cur,from));
   await refreshGame();
 }
 
-function npcPrompt(action,npc,from){
+function npcTurnPrompt(action,npc,from){
   const moves=gState.totalMoves||0;
-  const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
+  const act=getAct(moves);
   const sz=gState.partySize||partySize;
   const next=gState.players[gState.turn];
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
-  return`GM for 180-turn Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name}.
+  const loc=act.location||act.name;
+  return`GM for Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name} — Location: ${loc}.
 Party: ${party}
-AI companion ${npc.name} (${npc.className}) acted: "${action}"
-Narrate their action and its dramatic consequence (2-3 vivid sentences).
-Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':"next turn"}.
-[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}).
-Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 200 words.`;
+${npc.name} (${npc.className}, NPC) chose at random: "${action}"
+In 1-2 vivid Cosmere sentences, narrate what happened when they did this. Keep it dramatic, atmospheric, location-specific.
+Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' — also NPC':' — human player')+')':"next turn"}.
+[CHOICES] exactly 4 numbered options for ${next?next.name:'next'} fitting their class (${next?next.className:'?'}) and the current location (${loc}).
+Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 180 words total.`;
 }
 
 function renderPill(){
@@ -748,8 +809,8 @@ function renderLog(log){
 
 function renderProgress(){
   const m=gState?gState.totalMoves:0;
-  const act=ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];
-  document.getElementById('act-label').textContent=`${act.tag} · ${act.name}`;
+  const act=getAct(m);
+  document.getElementById('act-label').textContent=`${act.tag} · ${act.location||act.name}`;
   document.getElementById('progress-count').textContent=`${m} / 180`;
   document.getElementById('progress-fill').style.width=Math.min(100,Math.round(m/180*100))+'%';
   document.getElementById('log-act-tag').textContent=act.tag;
@@ -823,17 +884,24 @@ async function callGM(prompt){
 }
 
 function turnPrompt(action,roll,sk,from){
-  const m=gState.totalMoves||0;const act=ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];
+  const m=gState.totalMoves||0;
+  const act=getAct(m);
   const sz=gState.partySize||partySize;const next=gState.players[gState.turn];
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
-  const who=gState.players[from];
-  const rd=roll>=18?'critical success':roll>=14?'strong success':roll>=10?'partial success — complications':roll>=6?'failure with consequences':'critical failure';
-  return`GM for 180-turn Cosmere RPG. Turn ${m}/180. ${act.tag}: ${act.name}.
+  const who=gState.players[from];const loc=act.location||act.name;
+  const rd=roll>=18?'critical success — exceptional outcome':roll>=14?'strong success':roll>=10?'partial success with complications':roll>=6?'failure with consequences':'critical failure — dramatic setback';
+  // Act transition hint
+  const nextAct=m===59?`
+
+NOTE: Next turn begins ${ACTS[1].tag} in ${ACTS[1].location} — hint at the transition.`:m===119?`
+
+NOTE: Next turn begins ${ACTS[2].tag} in ${ACTS[2].location} — hint at the transition.`:'';
+  return`GM for 180-turn Cosmere RPG. Turn ${m}/180. ${act.tag}: ${act.name} — Location: ${loc}.
 Party: ${party}
 ${who.name} (${who.className}) acted: "${action}" — d20 vs ${sk.toUpperCase()}: ${roll} (${rd})
-Narrate consequence (2-3 vivid Cosmere sentences). Make the roll matter.
-Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':"next turn"}.
-[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}).
+Narrate consequence (2-3 vivid sentences specific to ${loc}). Make the roll matter to the outcome.${nextAct}
+Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC — D4 picks for them':' — human player')+')':"next turn"}.
+[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}) that fit BOTH their class AND the ${loc} setting.
 Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.`;
 }
 
@@ -853,7 +921,7 @@ async function onReset(){
     localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
     await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});
     const t=await tok();
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(logSheet()+'!A:E')}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
+    await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
     gState=null;myChar=null;
     renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});
     showScreen('title');
