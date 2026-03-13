@@ -22,245 +22,231 @@
   --text:#F6F1E6;--text2:#EFE5D1;--text3:#D9BF8C;--text4:#9C7B3C;--text5:#70522B;
   --font-display:'Cinzel',serif;
   --font-body:'Crimson Pro',serif;
-  --rad:8px;--rad2:12px;--rad3:16px;
+  --rad:9px;--rad2:14px;--rad3:19px;
 }
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.7;}
-body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%, rgba(191,161,90,0.12) 0%, transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%, rgba(112,82,43,0.07) 0%, transparent 60%);}
-
-/* SCREENS */
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:19px;line-height:1.75;}
+body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90,0.12) 0%,transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%,rgba(112,82,43,0.07) 0%,transparent 60%);}
 .screen{display:none;min-height:100vh;}
 .screen.active{display:flex;flex-direction:column;}
 
-/* ══════════════════════════════════════
-   TITLE SCREEN
-══════════════════════════════════════ */
-#s-title{align-items:center;justify-content:center;padding:2rem;text-align:center;position:relative;overflow:hidden;}
-#s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(191,161,90,0.018) 40px,rgba(191,161,90,0.018) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(191,161,90,0.018) 40px,rgba(191,161,90,0.018) 41px);pointer-events:none;}
-.title-glyph{font-size:72px;color:var(--amber);letter-spacing:12px;font-family:var(--font-display);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
+#s-title{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
+#s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
+.title-glyph{font-size:86px;color:var(--amber);letter-spacing:14px;font-family:var(--font-display);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
 @keyframes glowpulse{0%,100%{text-shadow:0 0 40px rgba(191,161,90,0.45);}50%{text-shadow:0 0 80px rgba(217,191,140,0.65),0 0 120px rgba(191,161,90,0.25);}}
-.title-h1{font-family:var(--font-display);font-size:clamp(24px,5vw,42px);font-weight:700;letter-spacing:6px;color:var(--text);margin-bottom:4px;}
-.title-h2{font-family:var(--font-display);font-size:13px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
-.title-line{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.5rem;}
-.title-quote{font-style:italic;color:var(--gold-mid);font-size:15px;max-width:420px;margin:0 auto 2.5rem;line-height:1.9;}
-.title-quote cite{display:block;font-size:11px;letter-spacing:2px;color:var(--text4);margin-top:6px;font-style:normal;}
+.title-h1{font-family:var(--font-display);font-size:clamp(28px,5vw,50px);font-weight:700;letter-spacing:6px;color:var(--text);margin-bottom:5px;}
+.title-h2{font-family:var(--font-display);font-size:14px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
+.title-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.75rem;}
+.title-quote{font-style:italic;color:var(--gold-mid);font-size:17px;max-width:480px;margin:0 auto 2.5rem;line-height:1.9;}
+.title-quote cite{display:block;font-size:12px;letter-spacing:2px;color:var(--text4);margin-top:7px;font-style:normal;}
 
-/* Slot cards */
-.slots-label{font-family:var(--font-display);font-size:10px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:12px;}
-.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:480px;width:100%;margin:0 auto 2rem;}
-.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:14px 12px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
+.party-size-wrap{margin-bottom:1.75rem;}
+.party-size-label{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
+.party-size-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
+.psz{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:9px 20px;cursor:pointer;font-family:var(--font-display);font-size:14px;color:var(--text3);transition:all 0.15s;}
+.psz:hover{border-color:var(--border3);color:var(--text);}
+.psz.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.09);}
+.psz.locked{opacity:0.4;cursor:default;}
+
+.slots-label{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
+.slots-grid{display:grid;gap:10px;max-width:620px;width:100%;margin:0 auto 2rem;}
+.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
 .slot:hover{border-color:var(--border3);}
 .slot.filled{border-color:var(--gold-dim);cursor:default;}
 .slot.filled:hover{border-color:var(--gold);}
-.slot-num{font-family:var(--font-display);font-size:9px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
-.slot-pip{display:flex;align-items:center;gap:7px;margin-bottom:3px;}
-.slot-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.slot-pname{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text);}
-.slot-class{font-size:11px;color:var(--text3);font-style:italic;}
-.slot-empty-txt{font-size:12px;color:var(--text4);font-style:italic;}
-.slot-tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;background:rgba(26,107,82,0.22);color:var(--teal2);border:1px solid rgba(26,107,82,0.32);letter-spacing:1px;margin-top:5px;}
+.slot.npc-slot{border-color:var(--teal-dim);cursor:default;}
+.slot-num{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:7px;}
+.slot-pip{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.slot-pname{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);}
+.slot-class{font-size:12px;color:var(--text3);font-style:italic;}
+.slot-empty-txt{font-size:13px;color:var(--text4);font-style:italic;}
+.slot-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(26,107,82,0.22);color:var(--teal2);border:1px solid rgba(26,107,82,0.32);letter-spacing:1px;margin-top:6px;}
 .slot-tag.turn{background:rgba(191,161,90,0.15);color:var(--amber2);border-color:rgba(191,161,90,0.25);}
+.slot-tag.npc{background:rgba(26,107,82,0.15);color:var(--teal2);border-color:rgba(26,107,82,0.25);}
 
-/* Buttons */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 28px;border:1px solid var(--border3);border-radius:var(--rad);background:transparent;color:var(--text);font-family:var(--font-body);font-size:15px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--rad);background:transparent;color:var(--text);font-family:var(--font-body);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
 .btn:hover{background:var(--bg4);border-color:var(--amber-dim);}
-.btn-gold{border-color:var(--amber);color:var(--amber2);background:rgba(200,146,10,0.05);}
+.btn-gold{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.05);}
 .btn-gold:hover{background:rgba(191,161,90,0.13);border-color:var(--amber3);}
-.btn-teal{border-color:var(--teal);color:var(--teal2);background:rgba(26,107,82,0.07);}
-.btn-teal:hover{background:rgba(26,107,82,0.14);}
-.btn-sm{padding:7px 16px;font-size:13px;}
+.btn-teal{border-color:var(--teal);color:var(--teal2);}
+.btn-sm{padding:9px 20px;font-size:15px;}
 .btn-danger{border-color:var(--coral);color:var(--coral2);}
 .btn-danger:hover{background:rgba(158,56,32,0.12);}
 
-/* ══════════════════════════════════════
-   CREATE SCREEN
-══════════════════════════════════════ */
-#s-create{padding:2rem;align-items:center;}
-.create-wrap{max-width:560px;width:100%;}
-.screen-title{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:4px;}
-.screen-sub{font-size:14px;color:var(--text3);font-style:italic;margin-bottom:2rem;}
-.form-block{margin-bottom:1.5rem;}
-.form-lbl{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;display:block;}
-.form-in{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:15px;outline:none;transition:border-color 0.2s;}
-.form-in:focus{border-color:var(--amber);}
+/* Campaign selector */
+#s-campaign{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
+#s-campaign::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
+.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;max-width:700px;width:100%;margin:0 auto 2rem;}
+.camp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:18px 16px;cursor:pointer;text-align:left;transition:border-color 0.2s,background 0.2s;position:relative;}
+.camp-card:hover{border-color:var(--gold);background:var(--bg4);}
+.camp-card.active-camp{border-color:var(--amber);}
+.camp-card.new-camp{border-style:dashed;border-color:var(--border2);text-align:center;}
+.camp-card.new-camp:hover{border-color:var(--amber);border-style:dashed;}
+.camp-num{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
+.camp-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.camp-meta{font-size:12px;color:var(--text4);font-style:italic;}
+.camp-phase{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px;font-family:var(--font-display);letter-spacing:1px;}
+.phase-pregame{background:rgba(191,161,90,0.12);color:var(--amber2);border:1px solid rgba(191,161,90,0.2);}
+.phase-playing{background:rgba(26,107,82,0.15);color:var(--teal2);border:1px solid rgba(26,107,82,0.25);}
+.camp-del{position:absolute;top:8px;right:10px;font-size:11px;color:var(--text5);cursor:pointer;border:none;background:transparent;font-family:var(--font-display);letter-spacing:1px;}
+.camp-del:hover{color:var(--coral2);}
+.camp-new-icon{font-size:28px;color:var(--text4);margin-bottom:6px;}
+.camp-new-txt{font-size:14px;color:var(--text4);font-style:italic;}
+/* NPC button on empty slot */
+.slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-display);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
+.slot-npc-btn:hover{background:rgba(26,107,82,0.22);border-color:var(--teal2);}
 
-/* Colors */
-.color-row{display:flex;gap:10px;flex-wrap:wrap;}
-.cswatch{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s,transform 0.15s;}
+#s-create{padding:2.5rem;align-items:center;}
+.create-wrap{max-width:620px;width:100%;}
+.screen-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:5px;}
+.screen-sub{font-size:16px;color:var(--text3);font-style:italic;margin-bottom:2rem;}
+.form-block{margin-bottom:1.75rem;}
+.form-lbl{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;display:block;}
+.form-in{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:17px;outline:none;transition:border-color 0.2s;}
+.form-in:focus{border-color:var(--amber);}
+.color-row{display:flex;gap:12px;flex-wrap:wrap;}
+.cswatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s,transform 0.15s;}
 .cswatch:hover{transform:scale(1.1);}
 .cswatch.sel{border-color:var(--text);}
-
-/* Class cards */
-.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:12px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
+.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
 .ccard:hover{border-color:var(--border3);}
 .ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
-.ccard-name{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
-.ccard-ideal{font-size:11px;color:var(--amber2);font-style:italic;margin-bottom:4px;}
-.ccard-desc{font-size:11px;color:var(--text3);line-height:1.5;}
-.ccard-bonus{font-size:10px;color:var(--text4);margin-top:4px;letter-spacing:0.5px;}
+.ccard-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
+.ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
+.ccard-bonus{font-size:12px;color:var(--text4);margin-top:5px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
+.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:12px 10px;text-align:center;}
+.sbox-name{font-family:var(--font-display);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
+.sbox-val{font-size:26px;font-weight:600;color:var(--amber2);line-height:1.2;}
+.sbox-mod{font-size:13px;color:var(--text3);}
 
-/* Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
-.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:10px 8px;text-align:center;}
-.sbox-name{font-family:var(--font-display);font-size:9px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
-.sbox-val{font-size:22px;font-weight:600;color:var(--amber2);line-height:1.2;}
-.sbox-mod{font-size:11px;color:var(--text3);}
-
-/* ══════════════════════════════════════
-   GAME SCREEN
-══════════════════════════════════════ */
 #s-game{padding:0;flex-direction:column;}
-.game-top{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
-.game-logo{font-family:var(--font-display);font-size:13px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
-.turn-pill{font-family:var(--font-display);font-size:11px;letter-spacing:1px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
+.game-top{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+.game-logo{font-family:var(--font-display);font-size:14px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+.turn-pill{font-family:var(--font-display);font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
 .turn-pill.yours{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.12);animation:pillpulse 2s ease-in-out infinite;}
-@keyframes pillpulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0.25);}50%{box-shadow:0 0 0 6px rgba(200,146,10,0);}}
-
-.party-strip{display:flex;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;}
-.ppip{flex:1;min-width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:8px 10px;display:flex;flex-direction:column;gap:3px;transition:border-color 0.2s;}
+@keyframes pillpulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0.35);}50%{box-shadow:0 0 0 7px rgba(191,161,90,0);}}
+.party-strip{display:flex;gap:10px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;}
+.ppip{flex:1;min-width:120px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
 .ppip.active{border-color:var(--amber);}
-.ppip-top{display:flex;align-items:center;gap:7px;}
-.ppip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.ppip-name{font-family:var(--font-display);font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ppip-info{font-size:10px;color:var(--gold-mid);}
-.hp-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.ppip.npc{border-color:var(--teal-dim);}
+.ppip-top{display:flex;align-items:center;gap:8px;}
+.ppip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ppip-name{font-family:var(--font-display);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ppip-info{font-size:12px;color:var(--gold-mid);}
+.ppip-npc-tag{font-size:9px;color:var(--teal2);letter-spacing:1px;font-family:var(--font-display);}
+.hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
-
-.game-body{flex:1;display:flex;flex-direction:column;padding:20px;gap:16px;max-width:760px;width:100%;margin:0 auto;}
-
-/* Story log */
+.game-body{flex:1;display:flex;flex-direction:column;padding:24px;gap:20px;max-width:840px;width:100%;margin:0 auto;}
+.progress-wrap{padding:0;}
+.progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;margin-bottom:6px;}
+.progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
 .log-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
-.log-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.log-title{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.log-act{font-size:10px;color:var(--amber-dim);font-style:italic;}
-.log-scroll{max-height:340px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
-.log-scroll::-webkit-scrollbar{width:4px;}
-.log-scroll::-webkit-scrollbar-track{background:transparent;}
-.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-.entry-gm{font-style:italic;font-size:15px;color:var(--text);line-height:1.85;border-left:2px solid var(--gold);padding-left:12px;}
-.entry-gm .gm-label{font-family:var(--font-display);font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:4px;font-style:normal;}
-.entry-player{font-size:14px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:var(--rad);border:1px solid var(--border2);}
-.entry-player .pname{font-family:var(--font-display);font-size:10px;letter-spacing:1px;margin-bottom:2px;}
-.entry-system{text-align:center;font-size:12px;color:var(--text4);font-style:italic;padding:4px 0;}
-.entry-loading{font-style:italic;color:var(--gold-deep);font-size:14px;padding-left:14px;border-left:2px solid var(--gold-dim);}
+.log-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
+.log-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
+.log-scroll{max-height:400px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+.log-scroll::-webkit-scrollbar{width:5px;}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.entry-gm{font-style:italic;font-size:17px;color:var(--text);line-height:1.9;border-left:2px solid var(--gold);padding-left:14px;}
+.entry-gm .gm-label{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:5px;font-style:normal;}
+.entry-player{font-size:16px;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--rad);border:1px solid var(--border2);}
+.entry-player .pname{font-family:var(--font-display);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
+.entry-npc{font-size:16px;color:var(--teal2);padding:10px 14px;background:var(--bg3);border-radius:var(--rad);border:1px solid rgba(26,107,82,0.3);font-style:italic;}
+.entry-npc .pname{font-family:var(--font-display);font-size:11px;letter-spacing:1px;margin-bottom:3px;color:var(--teal2);}
+.entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 0;}
+.entry-loading{font-style:italic;color:var(--gold-deep);font-size:17px;padding-left:16px;border-left:2px solid var(--gold-dim);}
 .dots::after{content:'';animation:dotanim 1.4s steps(4,end) infinite;}
 @keyframes dotanim{0%{content:' .'}25%{content:' ..'}50%{content:' ...'}75%{content:' ....'}100%{content:' .'}}
-
-/* Combat / discovery badges */
-.event-badge{display:inline-block;font-family:var(--font-display);font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;}
+.event-badge{display:inline-block;font-family:var(--font-display);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
 .badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
-.badge-discovery{background:rgba(18,168,120,0.15);color:var(--teal2);border:1px solid rgba(18,168,120,0.25);}
-.badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.20);}
-
-/* Action panel */
+.badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
+.badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
 .action-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
-.action-header{padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.action-inner{padding:14px 16px;}
-.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:10px 12px;cursor:pointer;text-align:left;color:var(--text);font-family:var(--font-body);font-size:13px;line-height:1.5;transition:border-color 0.15s,background 0.15s;}
+.action-header{padding:12px 20px;border-bottom:1px solid var(--border);font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
+.action-inner{padding:18px 20px;}
+.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:13px 15px;cursor:pointer;text-align:left;color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;transition:border-color 0.15s,background 0.15s;}
 .achoice:hover{border-color:var(--border3);background:var(--bg4);}
 .achoice.sel{border-color:var(--gold-mid);background:rgba(191,161,90,0.12);color:var(--gold-bright);}
-.achoice-num{font-family:var(--font-display);font-size:9px;color:var(--amber-dim);display:block;margin-bottom:3px;letter-spacing:1px;}
-.custom-row{display:flex;gap:8px;}
-.custom-in{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s;}
+.achoice-num{font-family:var(--font-display);font-size:10px;color:var(--amber-dim);display:block;margin-bottom:4px;letter-spacing:1px;}
+.custom-row{display:flex;gap:10px;}
+.custom-in{flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:16px;outline:none;transition:border-color 0.2s;}
 .custom-in:focus{border-color:var(--amber);}
-.waiting-msg{text-align:center;font-style:italic;color:var(--gold-deep);font-size:14px;padding:1rem 0;}
-
-/* Character sheet */
-.sheet-toggle{font-size:12px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
+.waiting-msg{text-align:center;font-style:italic;color:var(--gold-deep);font-size:17px;padding:1.25rem 0;}
+.sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
 .sheet-toggle:hover{color:var(--text3);}
-.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:14px 16px;margin-top:8px;}
-.sheet-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:16px 20px;margin-top:10px;}
+.sheet-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:16px;}
 .sheet-row:last-child{border-bottom:none;}
 .sheet-lbl{color:var(--gold-mid);}
 .sheet-val{font-weight:600;color:var(--text);}
-.abils{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.abil{font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);letter-spacing:0.5px;}
-
-/* Progress bar */
-.progress-wrap{padding:0 20px 10px;max-width:760px;width:100%;margin:0 auto;}
-.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;margin-bottom:5px;}
-.progress-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
-
-/* Act banner */
-.act-banner{background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--rad2);padding:12px 16px;text-align:center;}
-.act-num{font-family:var(--font-display);font-size:9px;letter-spacing:3px;color:var(--amber-dim);text-transform:uppercase;margin-bottom:3px;}
-.act-title{font-family:var(--font-display);font-size:16px;color:var(--amber2);}
-
-/* Dice roll flash */
-.dice-flash{font-size:11px;color:var(--gold);font-family:var(--font-display);letter-spacing:1px;padding:4px 0;min-height:18px;}
-
-/* Error */
-.err{font-size:12px;color:var(--coral2);font-style:italic;margin-top:6px;}
-
-/* Scrollbar */
+.abils{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+.abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
+.dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-display);letter-spacing:1px;padding:5px 0;min-height:22px;}
+.err{font-size:14px;color:var(--coral2);font-style:italic;margin-top:7px;}
 ::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-
-/* Responsive */
-@media(max-width:520px){
-  .class-grid{grid-template-columns:1fr;}
-  .action-choices{grid-template-columns:1fr;}
-  .slots-grid{grid-template-columns:1fr;}
-}
+@media(max-width:580px){.class-grid,.action-choices{grid-template-columns:1fr;}.slots-grid{grid-template-columns:1fr!important;}}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════
-     TITLE SCREEN
-═══════════════════════════════════ -->
 <div id="s-title" class="screen active">
   <div class="title-glyph">⟁</div>
   <h1 class="title-h1">Stormlight Chronicles</h1>
   <p class="title-h2">A Saga of the Shattered Plains</p>
   <div class="title-line"></div>
-  <p class="title-quote">
-    "You must find the most important words a man can say."
-    <cite>— The Way of Kings</cite>
-  </p>
+  <p class="title-quote">"You must find the most important words a man can say."<cite>— The Way of Kings</cite></p>
+  <div class="party-size-wrap" id="party-size-wrap">
+    <span class="party-size-label">Party Size</span>
+    <div class="party-size-row" id="psz-row"></div>
+    <div style="font-size:13px;color:var(--text5);margin-top:8px;font-style:italic;">Unfilled slots become AI companions</div>
+  </div>
   <p class="slots-label">Radiant Company</p>
   <div class="slots-grid" id="slots-grid"></div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-    <button class="btn btn-gold" onclick="onEnter()">⟁ Enter the Storm</button>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button class="btn btn-gold" onclick="goToCampaignPicker()">⟁ Enter the Storm</button>
     <button class="btn btn-sm btn-danger" onclick="onReset()">Reset Campaign</button>
   </div>
-  <div id="title-status" style="font-size:12px;color:var(--text4);margin-top:12px;font-style:italic;min-height:18px;"></div>
+  <div id="title-status" style="font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:22px;"></div>
 </div>
 
-<!-- ═══════════════════════════════════
-     CREATE SCREEN
-═══════════════════════════════════ -->
+<div id="s-campaign" class="screen">
+  <div class="title-glyph" style="font-size:60px;margin-bottom:0.5rem;">⟁</div>
+  <h1 class="title-h1" style="margin-bottom:4px;">Stormlight Chronicles</h1>
+  <p class="title-h2">Choose Your Adventure</p>
+  <div class="title-line"></div>
+  <p class="slots-label">Your Campaigns</p>
+  <div class="camp-grid" id="camp-grid"></div>
+  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;"></div>
+</div>
+
 <div id="s-create" class="screen">
   <div class="create-wrap">
     <h2 class="screen-title">Forge Your Radiant</h2>
     <p class="screen-sub">Speak your name. Choose your Order. The Stormfather is watching.</p>
-
     <div class="form-block">
       <label class="form-lbl">Your Name</label>
       <input class="form-in" id="in-name" type="text" maxlength="24" placeholder="What do they call you on the Plains?"/>
     </div>
-
     <div class="form-block">
       <label class="form-lbl">Your Color</label>
       <div class="color-row" id="color-row"></div>
     </div>
-
     <div class="form-block">
       <label class="form-lbl">Your Order of Knights Radiant</label>
       <div class="class-grid" id="class-grid"></div>
     </div>
-
     <div class="form-block">
       <label class="form-lbl">Your Stats <span style="font-weight:300;color:var(--text4);">— rolled from the Almighty's dice</span></label>
       <div class="stats-grid" id="stats-grid"></div>
-      <button class="btn btn-sm" onclick="rollStats()" style="margin-top:6px;">↻ Reroll</button>
+      <button class="btn btn-sm" onclick="rollStats()" style="margin-top:8px;">↻ Reroll</button>
     </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:1.25rem;">
       <button class="btn" onclick="showScreen('title')">← Back</button>
       <button class="btn btn-gold" onclick="onCreateChar()">Speak the First Oath →</button>
     </div>
@@ -268,25 +254,20 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%, rgba(191,161,9
   </div>
 </div>
 
-<!-- ═══════════════════════════════════
-     GAME SCREEN
-═══════════════════════════════════ -->
 <div id="s-game" class="screen">
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
     <span class="turn-pill" id="turn-pill">Loading...</span>
   </div>
   <div class="party-strip" id="party-strip"></div>
-
   <div class="game-body">
-    <div class="progress-wrap" style="padding:0;">
+    <div class="progress-wrap">
       <div class="progress-label">
         <span id="act-label">Act I · The Shattered Plains</span>
         <span id="progress-count">0 / 180</span>
       </div>
       <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
     </div>
-
     <div class="log-wrap">
       <div class="log-header">
         <span class="log-title">The Chronicle</span>
@@ -294,12 +275,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%, rgba(191,161,9
       </div>
       <div class="log-scroll" id="log-scroll"></div>
     </div>
-
     <div>
       <button class="sheet-toggle" onclick="toggleSheet()"><span id="sheet-arrow">▸</span> Character Sheet</button>
       <div class="sheet-panel" id="sheet-panel" style="display:none;"></div>
     </div>
-
     <div class="action-wrap" id="action-wrap">
       <div class="action-header" id="action-header">Your Turn</div>
       <div class="action-inner">
@@ -316,256 +295,243 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%, rgba(191,161,9
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════
-const SHEET_ID = '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
-const PROXY_URL = 'https://stormlight-proxy.goretusk55.workers.dev';
-const SERVICE_ACCOUNT = {
-  client_email: 'stormlightbrj@stormlight-rpg.iam.gserviceaccount.com',
-  private_key: `-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClSJ0lSZVQAxUD\n44VpcHcNd2X71dz9syJ4FS3U1XOwHr4Dz4FiHThqEnm+cvjaBNaqcu4CgMOlEXt5\nsOYVy8JLvcICyhxEfh/jubSMGPUESOhGlV1T5Shmbtz2bNh7moqAeeFBiYLU5V9t\nVWO8GcMKU1KOinCrspkXq9jVCo8qLbuLC9ux6kJgZi2K2agkXaxUxKrQauZfn1YI\nBiM7SGOvdhzRlDswRhLP3xhoh0rOGXSzWzfo2/MphDfxUS9L4M6FBW3FVhHlvGNO\nDFY+gWIVD/uHlbsA1CXtjw7KdUzHtP+/QUCIyL6j6tdIsa8o9gMmW4V5m1EDg4jv\nHbwz+b+9AgMBAAECggEAGBs/pD0XtGxGp+MKxcab7pBgBPt7uFrkp5v7K8QYE/Nf\n5mFg7wTxAfOA4yiUqAO1pXWOxjmuj0g9+JE29a3awD5EajC9L7Yvg4DF1vsa3U2e\n5xCI5KATJOF9g8l7R4fSNIvSMUNTnCZ6JRGjsr8VJc/iRhzl8vzg/EVZojTgjZeS\n78GVpXHS408RuX19rsV3LEe/zeuz9SeVLc9jegbpjJk/XAb7Ipkkz6WMhvdahcya\nqheGY/SsoLhaHlensZdwDqij/DOgPMiDbbsVIUWKwegg+BnvcaLlehkn5Gl1Is6P\nSccIXiHBGB8i0g8DLA70xS6+TuEhA7fLzL1ZLlutJwKBgQDT6jZFGa2N88wNczOR\neTis8m3twI6LTSZQSdXX0nm7dd15qBaC/Ru5CuEhess+Vpv96nVmDAPyT+XBuWjl\nk6Q8810S7n/U5tk39MIBvouU+nOR/7KlIG5CxNbAILIRkVJ9W9RyYYkOIUaJ6eCM\nzsBfyei7bQtjgG46HIQSorXcnwKBgQDHqv9pYpe6ulpGbgsNwZ/ZpB5b9SiRhlGy\nZhlxA6O5C0gM0ymC3EoCi3C5Adnzm8pRNCgGxZu2u4QcuDpm5+tR8ddrz2Nsbgce\nfJbdWUFCi90U7qrQd8pAY46zdQFWqEkJY8BPHqloOlKymlGQL289BY1pR+MTpBWT\nQ6UdLoWqIwKBgQDQCbQxbh31p4uBAMF1ZP4Auxa0Oz80/g5I79NhRx1+rR06G4vO\nGFEo/cc6KORyVHBbe9q4zb7qGQnDfxO9nY200G1k8oLILcC9sCjtsXQyUxU2FUH5\n3bahEcCJaQ+nM3U53/bWO25jUsN/DP0G/snYv80cgtaVXjXYErqN2PKUnQKBgF8y\nCeAm34xpeM0HfkGqxRmxA8B4HEV1stHJl+un/pEk7c8fhjUb7jVUYgPy/AUHi+g3\nY7YG1PzEXnKK611QyYMiOMDv+ckilEZWxF74RQMDR/7I46vM0SLt1IV/DYpRZbES\nXAfc6IwG8pKwvJ5v3ytK0GcXnQ4qNxclMz28hoHdAoGAIDDnRLlZVgBdk6oijZI+\nb7jokuI9quDtomUCCHZyB+3mMq6hf9zOfKt+GsZz0Q512ezC4vbq0j5GCVT8uMRM\nYsOgyVkloyM8TeZNLE9LNVkX8MRL9gVstaBdMkqaq/Lkvn5wCuRBO69ZD5vrZPvF\n2uxw+l3wHWPcAIiPAXybsCM=\n-----END PRIVATE KEY-----\n`
+const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
+const PROXY_URL='https://stormlight-proxy.goretusk55.workers.dev';
+const SA={
+  client_email:'stormlightbrj@stormlight-rpg.iam.gserviceaccount.com',
+  private_key:`-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClSJ0lSZVQAxUD\n44VpcHcNd2X71dz9syJ4FS3U1XOwHr4Dz4FiHThqEnm+cvjaBNaqcu4CgMOlEXt5\nsOYVy8JLvcICyhxEfh/jubSMGPUESOhGlV1T5Shmbtz2bNh7moqAeeFBiYLU5V9t\nVWO8GcMKU1KOinCrspkXq9jVCo8qLbuLC9ux6kJgZi2K2agkXaxUxKrQauZfn1YI\nBiM7SGOvdhzRlDswRhLP3xhoh0rOGXSzWzfo2/MphDfxUS9L4M6FBW3FVhHlvGNO\nDFY+gWIVD/uHlbsA1CXtjw7KdUzHtP+/QUCIyL6j6tdIsa8o9gMmW4V5m1EDg4jv\nHbwz+b+9AgMBAAECggEAGBs/pD0XtGxGp+MKxcab7pBgBPt7uFrkp5v7K8QYE/Nf\n5mFg7wTxAfOA4yiUqAO1pXWOxjmuj0g9+JE29a3awD5EajC9L7Yvg4DF1vsa3U2e\n5xCI5KATJOF9g8l7R4fSNIvSMUNTnCZ6JRGjsr8VJc/iRhzl8vzg/EVZojTgjZeS\n78GVpXHS408RuX19rsV3LEe/zeuz9SeVLc9jegbpjJk/XAb7Ipkkz6WMhvdahcya\nqheGY/SsoLhaHlensZdwDqij/DOgPMiDbbsVIUWKwegg+BnvcaLlehkn5Gl1Is6P\nSccIXiHBGB8i0g8DLA70xS6+TuEhA7fLzL1ZLlutJwKBgQDT6jZFGa2N88wNczOR\neTis8m3twI6LTSZQSdXX0nm7dd15qBaC/Ru5CuEhess+Vpv96nVmDAPyT+XBuWjl\nk6Q8810S7n/U5tk39MIBvouU+nOR/7KlIG5CxNbAILIRkVJ9W9RyYYkOIUaJ6eCM\nzsBfyei7bQtjgG46HIQSorXcnwKBgQDHqv9pYpe6ulpGbgsNwZ/ZpB5b9SiRhlGy\nZhlxA6O5C0gM0ymC3EoCi3C5Adnzm8pRNCgGxZu2u4QcuDpm5+tR8ddrz2Nsbgce\nfJbdWUFCi90U7qrQd8pAY46zdQFWqEkJY8BPHqloOlKymlGQL289BY1pR+MTpBWT\nQ6UdLoWqIwKBgQDQCbQxbh31p4uBAMF1ZP4Auxa0Oz80/g5I79NhRx1+rR06G4vO\nGFEo/cc6KORyVHBbe9q4zb7qGQnDfxO9nY200G1k8oLILcC9sCjtsXQyUxU2FUH5\n3bahEcCJaQ+nM3U53/bWO25jUsN/DP0G/snYv80cgtaVXjXYErqN2PKUnQKBgF8y\nCeAm34xpeM0HfkGqxRmxA8B4HEV1stHJl+un/pEk7c8fhjUb7jVUYgPy/AUHi+g3\nY7YG1PzEXnKK611QyYMiOMDv+ckilEZWxF74RQMDR/7I46vM0SLt1IV/DYpRZbES\nXAfc6IwG8pKwvJ5v3ytK0GcXnQ4qNxclMz28hoHdAoGAIDDnRLlZVgBdk6oijZI+\nb7jokuI9quDtomUCCHZyB+3mMq6hf9zOfKt+GsZz0Q512ezC4vbq0j5GCVT8uMRM\nYsOgyVkloyM8TeZNLE9LNVkX8MRL9gVstaBdMkqaq/Lkvn5wCuRBO69ZD5vrZPvF\n2uxw+l3wHWPcAIiPAXybsCM=\n-----END PRIVATE KEY-----\n`
 };
 
-const CLASSES = [
-  {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Master of gravitation & pressure. You fly where others crawl.',bonus:{str:2,dex:2,int:0,wis:0,cha:0,end:0},abilities:['Lashing','Full Lashing','Windspren Bond','Squire Command']},
+const CLASSES=[
+  {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Master of gravitation & pressure. Flies where others crawl.',bonus:{str:2,dex:2,int:0,wis:0,cha:0,end:0},abilities:['Lashing','Full Lashing','Windspren Bond','Squire Command']},
   {id:'lightweaver',name:'Lightweaver',ideal:'I am who I needed when I was young',desc:'Weaver of illusion & soulcasting. Reality bends to your will.',bonus:{str:0,dex:1,int:2,wis:0,cha:2,end:0},abilities:['Soulcast','Major Illusion','Pattern Bond','Memory Weave']},
   {id:'edgedancer',name:'Edgedancer',ideal:'I will remember those who have been forgotten',desc:'Grace through friction & progression. Fast as the wind itself.',bonus:{str:0,dex:2,int:0,wis:2,cha:1,end:0},abilities:['Friction Control','Regrowth Healing','Wyndle Bond','Fleet Step']},
   {id:'stoneward',name:'Stoneward',ideal:'I will be there when I am needed',desc:'Unbreakable through tension & cohesion. The last wall standing.',bonus:{str:2,dex:0,int:0,wis:1,cha:0,end:2},abilities:['Stone Shaping','Cohesion Wall','Peakspren Bond','Unyielding Stance']},
+  {id:'elsecaller',name:'Elsecaller',ideal:'I will reach my potential so I may help others reach theirs',desc:'Master of transportation & transformation. Steps between realms.',bonus:{str:0,dex:0,int:2,wis:2,cha:0,end:1},abilities:['Shadesmar Step','Soulcast Expert','Inkspren Bond','Cognitive Insight']},
 ];
-
-const COLORS = [
+const NPC_NAMES=['Adolin','Shallan','Kaladin','Dalinar','Lift','Szeth','Renarin','Jasnah'];
+const NPC_COLORS=['#8060c8','#c84070','#2a6fa8','#8E6A34','#25956e','#c44a28','#BFA15A','#5a8a5a'];
+const COLORS=[
   {name:'Amber',hex:'#e8a020'},{name:'Teal',hex:'#12a878'},
   {name:'Coral',hex:'#d85030'},{name:'Blue',hex:'#2a80d0'},
   {name:'Purple',hex:'#8060c8'},{name:'Rose',hex:'#c84070'},
+  {name:'Gold',hex:'#BFA15A'},{name:'Sage',hex:'#5a8a5a'},
 ];
-
-const STAT_KEYS = ['str','dex','int','wis','cha','end'];
-const STAT_NAMES = ['STR','DEX','INT','WIS','CHA','END'];
-
-const ACTS = [
+const STAT_KEYS=['str','dex','int','wis','cha','end'];
+const STAT_NAMES=['STR','DEX','INT','WIS','CHA','END'];
+const ACTS=[
   {num:1,name:'The Shattered Plains',start:0,end:59,tag:'Act I'},
   {num:2,name:'Secrets of Urithiru',start:60,end:119,tag:'Act II'},
   {num:3,name:'The Everstorm Rises',start:120,end:179,tag:'Act III'},
 ];
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let gState = null; // loaded from Sheets
-let myChar = null; // this browser's character (localStorage)
-let mySlot = null;
-let selClass = null;
-let selColor = null;
-let rolledStats = null;
-let selActionText = '';
-let sheetOpen = false;
-let isLoading = false;
-let pollTimer = null;
+let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
+let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
+let campaignId=null; // e.g. 'Campaign1', 'Campaign2'
+function stateSheet(){return campaignId+'_State';}
+function logSheet(){return campaignId+'_Log';}
 
-// ═══════════════════════════════════════════════════════
-// GOOGLE SHEETS JWT AUTH
-// ═══════════════════════════════════════════════════════
-async function getAccessToken() {
-  const header = {alg:'RS256',typ:'JWT'};
-  const now = Math.floor(Date.now()/1000);
-  const claim = {
-    iss: SERVICE_ACCOUNT.client_email,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now, exp: now+3600
-  };
-  const b64url = s => btoa(unescape(encodeURIComponent(typeof s==='string'?s:JSON.stringify(s)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  const unsigned = b64url(header)+'.'+b64url(claim);
-
-  // Import private key
-  const pem = SERVICE_ACCOUNT.private_key.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g,'');
-  const der = Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
-  const key = await crypto.subtle.importKey('pkcs8',der,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
-  const jwt = unsigned+'.'+btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-
-  const res = await fetch('https://oauth2.googleapis.com/token',{
-    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
-  });
-  const d = await res.json();
-  return d.access_token;
+async function getAccessToken(){
+  const header={alg:'RS256',typ:'JWT'};const now=Math.floor(Date.now()/1000);
+  const claim={iss:SA.client_email,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600};
+  const b64=s=>btoa(unescape(encodeURIComponent(typeof s==='string'?s:JSON.stringify(s)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const unsigned=b64(header)+'.'+b64(claim);
+  const pem=SA.private_key.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g,'');
+  const der=Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
+  const key=await crypto.subtle.importKey('pkcs8',der,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
+  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
+  const jwt=unsigned+'.'+btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`});
+  return(await r.json()).access_token;
 }
+let _tok=null,_tokExp=0;
+async function tok(){if(_tok&&Date.now()<_tokExp)return _tok;_tok=await getAccessToken();_tokExp=Date.now()+3500000;return _tok;}
+async function sGet(r){const t=await tok();const res=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}`,{headers:{Authorization:`Bearer ${t}`}});return(await res.json()).values||[];}
+async function sSet(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
+async function sApp(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
+async function loadState(){try{const v=await sGet(stateSheet()+'!A1');if(v.length&&v[0][0])return JSON.parse(v[0][0]);}catch(e){}return null;}
+async function saveState(s){await sSet(stateSheet()+'!A1',[[JSON.stringify(s)]]);}
+async function loadLog(){try{return(await sGet(logSheet()+'!A:E')).map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''}));}catch(e){return[];}}
+async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
 
-let _tokenCache = null;
-let _tokenExp = 0;
-async function token() {
-  if(_tokenCache && Date.now() < _tokenExp) return _tokenCache;
-  _tokenCache = await getAccessToken();
-  _tokenExp = Date.now() + 3500000;
-  return _tokenCache;
+async function getSheetNames(){
+  const t=await tok();
+  const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();
+  return(info.sheets||[]).map(s=>s.properties.title);
 }
-
-// ═══════════════════════════════════════════════════════
-// SHEETS READ / WRITE
-// ═══════════════════════════════════════════════════════
-async function sheetsGet(range) {
-  const t = await token();
-  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`,
-    {headers:{Authorization:`Bearer ${t}`}});
-  const d = await r.json();
-  return d.values || [];
+async function createSheet(title){
+  const t=await tok();
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{addSheet:{properties:{title}}}]})});
 }
-
-async function sheetsSet(range, values) {
-  const t = await token();
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,
-    {method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-     body:JSON.stringify({range,majorDimension:'ROWS',values})});
+async function deleteSheet(title){
+  const t=await tok();
+  const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();
+  const sheet=(info.sheets||[]).find(s=>s.properties.title===title);
+  if(!sheet)return;
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteSheet:{sheetId:sheet.properties.sheetId}}]})});
 }
-
-async function sheetsAppend(range, values) {
-  const t = await token();
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
-    {method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-     body:JSON.stringify({range,majorDimension:'ROWS',values})});
+async function ensureSheets(){
+  const names=await getSheetNames();
+  const sn=stateSheet(),ln=logSheet();
+  if(!names.includes(sn))await createSheet(sn);
+  if(!names.includes(ln))await createSheet(ln);
+  if(!await loadState())await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});
 }
-
-// ═══════════════════════════════════════════════════════
-// STATE SCHEMA (Sheets layout)
-// Sheet "State" A1: JSON blob of {players:[...], turn:0, totalMoves:0, phase:'pregame'|'playing'|'ended'}
-// Sheet "Log" rows: [type, who, text, choices_json, timestamp]
-// ═══════════════════════════════════════════════════════
-async function loadRemoteState() {
-  try {
-    const v = await sheetsGet('State!A1');
-    if(v.length && v[0][0]) return JSON.parse(v[0][0]);
-  } catch(e){}
-  return null;
-}
-
-async function saveRemoteState(st) {
-  await sheetsSet('State!A1', [[JSON.stringify(st)]]);
-}
-
-async function loadLog() {
-  try {
-    const rows = await sheetsGet('Log!A:E');
-    return rows.map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''}));
-  } catch(e){return [];}
-}
-
-async function appendLog(entry) {
-  await sheetsAppend('Log!A:E', [[entry.type,entry.who||'',entry.text,JSON.stringify(entry.choices||[]),new Date().toISOString()]]);
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT SHEETS (create sheets if missing)
-// ═══════════════════════════════════════════════════════
-async function ensureSheets() {
-  const t = await token();
-  // Check if sheets exist
-  const meta = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}});
-  const info = await meta.json();
-  const names = (info.sheets||[]).map(s=>s.properties.title);
-  const toAdd = [];
-  if(!names.includes('State')) toAdd.push({addSheet:{properties:{title:'State'}}});
-  if(!names.includes('Log')) toAdd.push({addSheet:{properties:{title:'Log'}}});
-  if(toAdd.length) {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,
-      {method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-       body:JSON.stringify({requests:toAdd})});
+async function listCampaigns(){
+  const names=await getSheetNames();
+  const ids=[...new Set(names.filter(n=>n.endsWith('_State')).map(n=>n.replace('_State','')))];
+  const camps=[];
+  for(const id of ids){
+    try{const v=await sGet(id+'_State!A1');const st=v.length&&v[0][0]?JSON.parse(v[0][0]):null;camps.push({id,state:st});}catch(e){camps.push({id,state:null});}
   }
-  // Init state if empty
-  const existing = await loadRemoteState();
-  if(!existing) {
-    await saveRemoteState({players:[null,null,null],turn:0,totalMoves:0,phase:'pregame'});
-  }
+  return camps;
 }
 
-// ═══════════════════════════════════════════════════════
-// SCREENS
-// ═══════════════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('s-'+id).classList.add('active');
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
+
+async function goToCampaignPicker(){
+  showScreen('campaign');
+  document.getElementById('camp-status').textContent='Loading your campaigns...';
+  try{
+    const t=await tok();
+    await tok(); // ensure auth
+    const camps=await listCampaigns();
+    renderCampaigns(camps);
+    document.getElementById('camp-status').textContent='';
+  }catch(e){document.getElementById('camp-status').textContent='Could not connect: '+e.message;}
 }
 
-// ═══════════════════════════════════════════════════════
-// TITLE
-// ═══════════════════════════════════════════════════════
-function renderSlots(st) {
-  const grid = document.getElementById('slots-grid');
-  grid.innerHTML = [0,1,2].map(i=>{
-    const p = st.players[i];
-    const isMySlot = myChar && myChar.slot===i;
-    const isTurn = st.turn===i && st.phase==='playing';
-    if(!p) return `<div class="slot" onclick="pickSlot(${i})"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt">Empty — join</div></div>`;
-    return `<div class="slot filled">
-      <div class="slot-num">Slot ${i+1}${isMySlot?' · You':''}</div>
-      <div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div>
-      <div class="slot-class">${p.className}</div>
-      ${isTurn?'<span class="slot-tag turn">⟁ Their Turn</span>':'<span class="slot-tag">Ready</span>'}
+function renderCampaigns(camps){
+  const grid=document.getElementById('camp-grid');
+  const nextNum=camps.length+1;
+  grid.innerHTML=camps.map(cam=>{
+    const st=cam.state;
+    const phase=st?st.phase:'pregame';
+    const moves=st?st.totalMoves||0:0;
+    const players=st&&st.players?st.players.filter(p=>p&&!p.isNPC).map(p=>p.name).join(', '):'No players yet';
+    const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
+    return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')">
+      <button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>
+      <div class="camp-num">${cam.id.replace('Campaign','Campaign ')}</div>
+      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id}</div>
+      <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+(moves)+'/180':'Awaiting Radiants'}</div>
+      <div class="camp-meta" style="margin-top:3px;">${players}</div>
+      <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
     </div>`;
+  }).join('')+
+  `<div class="camp-card new-camp" onclick="newCampaign(${nextNum})">
+    <div class="camp-new-icon">+</div>
+    <div class="camp-new-txt">New Campaign ${nextNum}</div>
+  </div>`;
+}
+
+async function newCampaign(num){
+  campaignId='Campaign'+num;
+  document.getElementById('camp-status').textContent='Creating Campaign '+num+'...';
+  await ensureSheets();
+  gState=await loadState();
+  partySize=gState.partySize||3;
+  myChar=null;localStorage.removeItem('sc_mychar_v3');
+  renderPSZ();renderSlots(gState);
+  showScreen('title');
+  document.getElementById('camp-status').textContent='';
+}
+
+async function selectCampaign(id){
+  campaignId=id;
+  document.getElementById('camp-status').textContent='Loading '+id+'...';
+  try{
+    gState=await loadState();
+    if(gState)partySize=gState.partySize||3;
+    myChar=loadMyChar(id);
+    if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
+    renderPSZ();renderSlots(gState);
+    showScreen('title');
+    document.getElementById('camp-status').textContent='';
+  }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
+}
+
+async function deleteCampaign(id){
+  if(!confirm('Delete '+id+' permanently? This cannot be undone.'))return;
+  try{
+    await deleteSheet(id+'_State');
+    await deleteSheet(id+'_Log');
+    goToCampaignPicker();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+
+function renderPSZ(){
+  const locked=gState&&gState.phase!=='pregame';
+  if(locked)partySize=gState.partySize||3;
+  document.getElementById('psz-row').innerHTML=[2,3,4,5].map(n=>`<div class="psz${partySize===n?' sel':''}${locked?' locked':''}" onclick="${locked?'':`pickSize(${n})`}">${n} Players</div>`).join('');
+}
+function pickSize(n){if(gState&&gState.phase!=='pregame')return;partySize=n;renderPSZ();renderSlots(gState||{players:new Array(n).fill(null),partySize:n});}
+
+function genNPC(slot){
+  const cls=CLASSES[slot%CLASSES.length];
+  const used=(gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name):[]);
+  const name=NPC_NAMES.find(n=>!used.includes(n))||('Companion-'+(slot+1));
+  const color=NPC_COLORS[slot%NPC_COLORS.length];
+  const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
+  const hp=12+stats.end;
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,slot,isNPC:true};
+}
+
+function renderSlots(st){
+  const sz=st&&st.partySize?st.partySize:partySize;
+  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
+  const grid=document.getElementById('slots-grid');
+  grid.style.gridTemplateColumns=cols;
+  grid.innerHTML=Array.from({length:sz},(_,i)=>{
+    const p=st&&st.players?st.players[i]:null;
+    const isMe=myChar&&myChar.slot===i;
+    const isTurn=st&&st.turn===i&&st.phase==='playing';
+    if(!p)return`<div class="slot"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt" style="margin-bottom:8px;">Waiting for a player</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span><span style="font-size:12px;color:var(--text5);padding:5px 0;font-style:italic;cursor:pointer;" onclick="pickSlot(${i})">or join as player →</span></div></div>`;
+    if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI Companion</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span></div>`;
+    return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div>${isTurn?'<span class="slot-tag turn">⟁ Their Turn</span>':'<span class="slot-tag">Ready</span>'}</div>`;
   }).join('');
 }
 
-async function onEnter() {
+async function assignNPC(slot){
+  if(!gState)return;
+  const npc=genNPC(slot);
+  gState.players[slot]=npc;
+  await saveState(gState);
+  renderSlots(gState);
+  // Check if all slots now filled and start if so
+  const sz=gState.partySize||partySize;
+  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
+  if(allFilled&&gState.phase==='pregame')await startCampaign();
+}
+
+async function onEnter(){
   setStatus('Connecting to the Stormfather...');
-  try {
-    await ensureSheets();
-    gState = await loadRemoteState();
-    myChar = loadMyChar();
-    renderSlots(gState);
-    if(myChar) { showGameScreen(); return; }
-    const empty = gState.players.findIndex(p=>!p);
-    if(empty===-1){setStatus('All three Radiants have joined. Open in another browser if you are a different player.');return;}
-    mySlot=empty; showScreen('create'); renderCreateScreen();
-  } catch(e) {
-    setStatus('Could not connect to the storm. Check your connection. '+e.message);
-  }
+  try{
+    await ensureSheets();gState=await loadState();
+    if(gState)partySize=gState.partySize||partySize;
+    renderPSZ();renderSlots(gState);
+    myChar=loadMyChar();
+    if(myChar){showGameScreen();return;}
+    const empty=gState&&gState.players?gState.players.findIndex(p=>!p):-1;
+    if(empty===-1){setStatus('All slots filled. Ask the party leader to reset.');return;}
+    mySlot=empty;showScreen('create');renderCreate();
+  }catch(e){setStatus('Could not connect: '+e.message);}
 }
+function pickSlot(i){if(!gState||gState.players[i])return;mySlot=i;showScreen('create');renderCreate();}
+function setStatus(m){document.getElementById('title-status').textContent=m;}
 
-function pickSlot(i){
-  if(!gState||gState.players[i]) return;
-  mySlot=i; showScreen('create'); renderCreateScreen();
+function renderCreate(){renderColors();renderClasses();rollStats();}
+function renderColors(){
+  const taken=gState?gState.players.filter(Boolean).map(p=>p.color):[];
+  document.getElementById('color-row').innerHTML=COLORS.map(c=>`<div class="cswatch${selColor===c.hex?' sel':''}" style="background:${c.hex};opacity:${taken.includes(c.hex)?0.2:1};" title="${c.name}" onclick="pickColor('${c.hex}',${taken.includes(c.hex)})"></div>`).join('');
 }
-
-function setStatus(msg){document.getElementById('title-status').textContent=msg;}
-
-// ═══════════════════════════════════════════════════════
-// CREATE
-// ═══════════════════════════════════════════════════════
-function renderCreateScreen(){
-  renderColorRow(); renderClassGrid(); rollStats();
-}
-
-function renderColorRow(){
-  const taken = gState?gState.players.filter(Boolean).map(p=>p.color):[];
-  document.getElementById('color-row').innerHTML = COLORS.map(c=>`<div class="cswatch${selColor===c.hex?' sel':''}${taken.includes(c.hex)?' opacity-taken':''}" style="background:${c.hex};opacity:${taken.includes(c.hex)?0.25:1};" title="${c.name}" onclick="pickColor('${c.hex}','${taken.includes(c.hex)}')"></div>`).join('');
-}
-
-function pickColor(hex,taken){if(taken==='true')return;selColor=hex;renderColorRow();}
-
-function renderClassGrid(){
-  document.getElementById('class-grid').innerHTML = CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')">
-    <div class="ccard-name">${c.name}</div>
-    <div class="ccard-ideal">"${c.ideal}"</div>
-    <div class="ccard-desc">${c.desc}</div>
-    <div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div>
-  </div>`).join('');
-}
-
-function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClassGrid();rollStats();}
-
-function rollStats(){
-  const b = selClass?selClass.bonus:{str:0,dex:0,int:0,wis:0,cha:0,end:0};
-  rolledStats={};
-  STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,roll4d6drop1()+(b[k]||0)));
-  renderStatsGrid(rolledStats);
-}
-
-function roll4d6drop1(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,b)=>a-b);return d.slice(1).reduce((a,v)=>a+v,0);}
+function pickColor(h,t){if(t)return;selColor=h;renderColors();}
+function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
+function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClasses();rollStats();}
+function rollStats(){const b=selClass?selClass.bonus:{str:0,dex:0,int:0,wis:0,cha:0,end:0};rolledStats={};STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));renderStats(rolledStats);}
+function r4d6(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,b)=>a-b);return d.slice(1).reduce((a,v)=>a+v,0);}
 function modStr(v){const m=Math.floor((v-10)/2);return(m>=0?'+':'')+m;}
-
-function renderStatsGrid(stats){
-  document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox"><div class="sbox-name">${STAT_NAMES[i]}</div><div class="sbox-val">${stats[k]}</div><div class="sbox-mod">${modStr(stats[k])}</div></div>`).join('');
-}
+function renderStats(s){document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox"><div class="sbox-name">${STAT_NAMES[i]}</div><div class="sbox-val">${s[k]}</div><div class="sbox-mod">${modStr(s[k])}</div></div>`).join('');}
 
 async function onCreateChar(){
   const name=document.getElementById('in-name').value.trim();
@@ -576,136 +542,142 @@ async function onCreateChar(){
   err.style.display='none';
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
-  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,slot:mySlot};
-  saveMyChar(myChar);
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,slot:mySlot,isNPC:false,campaignId};
+  saveMyChar(myChar,campaignId);
   gState.players[mySlot]=myChar;
-  await saveRemoteState(gState);
-  const filled=gState.players.filter(Boolean).length;
-  if(filled===3&&gState.phase==='pregame'){await startCampaign();}
-  else{showGameScreen();}
+  await saveState(gState);
+  const sz=gState.partySize||partySize;
+  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
+  if(allFilled&&gState.phase==='pregame')await startCampaign();
+  else showGameScreen();
 }
 
-// ═══════════════════════════════════════════════════════
-// CAMPAIGN START
-// ═══════════════════════════════════════════════════════
 async function startCampaign(){
   gState.phase='playing';gState.turn=0;gState.totalMoves=0;
-  await saveRemoteState(gState);
-  await appendLog({type:'system',who:'',text:'The three Radiants have spoken their Oaths. The Chronicles begin.',choices:[]});
+  await saveState(gState);
+  await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The Chronicles begin.',choices:[]});
   showGameScreen();
-  await callGM(buildOpeningPrompt());
+  await callGM(openingPrompt());
 }
 
-function buildOpeningPrompt(){
-  const names=gState.players.map(p=>`${p.name} the ${p.className} (${statSummary(p)})`).join(', ');
-  return `You are the Game Master for a Cosmere DND-style RPG set in Brandon Sanderson's Way of Kings universe. This is a 180-turn epic saga (Act I: The Shattered Plains turns 1-60, Act II: Secrets of Urithiru turns 61-120, Act III: The Everstorm Rises turns 121-180).
-
-Three Knights Radiant: ${names}.
-
-Current: Turn 1 of 180. Act I — The Shattered Plains.
-
-Write a dramatic Act I opening scene. Describe Dalinar's warcamp at dawn — the smell of rotting crem, distant Parshendi war drums, the glow of Stormlight spheres. A crisis is unfolding that immediately requires the party to act. End with [CHOICES] — exactly 4 numbered action options for ${gState.players[0].name} the ${gState.players[0].className}. Tailor choices to their class. Mark the scene type: [COMBAT], [DISCOVERY], or [DECISION]. Keep to 200 words max.`;
+function openingPrompt(){
+  const sz=gState.partySize||partySize;
+  const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (AI-controlled NPC)':''}`).join(', ');
+  return`You are the Game Master for a Cosmere DND-style RPG in Brandon Sanderson's Way of Kings universe. 180-turn epic across 3 acts.
+Party (${sz}): ${names}. NPCs are AI-controlled and act automatically.
+Turn 1 / 180. Act I — The Shattered Plains.
+Write a dramatic opening in Dalinar's warcamp at dawn. Vivid atmosphere: Stormlight spheres, crem-stained stone, Parshendi war drums. An immediate crisis demands action.
+End with [CHOICES] — 4 numbered options for ${gState.players[0].name} the ${gState.players[0].className}${gState.players[0].isNPC?' (NPC — pick the most dramatic option automatically)':''}. Under 220 words. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
 }
 
-// ═══════════════════════════════════════════════════════
-// GAME SCREEN
-// ═══════════════════════════════════════════════════════
-async function showGameScreen(){
-  showScreen('game');
-  startPolling();
+async function showGameScreen(){showScreen('game');startPolling();await refreshGame();}
+
+async function refreshGame(){
+  gState=await loadState();
+  const log=await loadLog();
+  renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
+  if(gState&&gState.phase==='playing'&&!isLoading){
+    const cur=gState.players[gState.turn];
+    if(cur&&cur.isNPC)await handleNPC(log);
+  }
+}
+
+async function handleNPC(log){
+  if(isLoading)return;
+  const cur=gState.players[gState.turn];
+  if(!cur||!cur.isNPC)return;
+  const lastGM=[...log].reverse().find(e=>e.type==='gm');
+  const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Take a defensive stance','Scout the area','Search for allies','Draw weapon and advance'];
+  const pick=opts[Math.floor(Math.random()*opts.length)];
+  await new Promise(r=>setTimeout(r,1800));
+  await addLog({type:'npc',who:cur.name,text:pick,choices:[]});
+  const from=gState.turn;
+  const sz=gState.partySize||partySize;
+  gState.turn=(gState.turn+1)%sz;
+  gState.totalMoves=(gState.totalMoves||0)+1;
+  await saveState(gState);
+  await callGM(npcPrompt(pick,cur,from));
   await refreshGame();
 }
 
-async function refreshGame(){
-  gState = await loadRemoteState();
-  const log = await loadLog();
-  renderPartyStrip();
-  renderLog(log);
-  renderTurnPill();
-  renderProgress();
-  renderActionPanel(log);
+function npcPrompt(action,npc,from){
+  const moves=gState.totalMoves||0;
+  const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
+  const sz=gState.partySize||partySize;
+  const next=gState.players[gState.turn];
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
+  return`GM for 180-turn Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name}.
+Party: ${party}
+AI companion ${npc.name} (${npc.className}) acted: "${action}"
+Narrate their action and its dramatic consequence (2-3 vivid sentences).
+Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':"next turn"}.
+[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}).
+Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 200 words.`;
 }
 
-function renderTurnPill(){
+function renderPill(){
   const pill=document.getElementById('turn-pill');
   if(!gState||!myChar)return;
   const cur=gState.players[gState.turn];
-  const mine=cur&&cur.name===myChar.name;
-  pill.textContent=mine?'⟁ Your Turn':`Waiting for ${cur?cur.name:'...'}`;
+  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
+  pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} is acting...`:`Waiting for ${cur?cur.name:'...'}`;
   pill.className='turn-pill'+(mine?' yours':'');
 }
 
-function renderPartyStrip(){
-  const strip=document.getElementById('party-strip');
+function renderParty(){
+  const s=document.getElementById('party-strip');
   if(!gState)return;
-  strip.innerHTML=gState.players.map((p,i)=>{
-    if(!p)return`<div class="ppip"><div class="ppip-top"><div class="ppip-dot" style="background:var(--border2);"></div><span class="ppip-name" style="color:var(--text4);">Empty</span></div></div>`;
+  const sz=gState.partySize||partySize;
+  s.innerHTML=gState.players.slice(0,sz).map((p,i)=>{
+    if(!p)return`<div class="ppip"><div class="ppip-top"><div class="ppip-dot" style="background:var(--border2);"></div><span class="ppip-name" style="color:var(--text5);">Empty</span></div></div>`;
     const pct=Math.round((p.hp/p.maxHp)*100);
-    return`<div class="ppip${gState.turn===i?' active':''}">
-      <div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div>
-      <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
-      <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${p.color};"></div></div>
-    </div>`;
+    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}"><div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div><div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>${p.isNPC?'<div class="ppip-npc-tag">AI COMPANION</div>':''}<div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${p.color};"></div></div></div>`;
   }).join('');
 }
 
 function renderLog(log){
-  const scroll=document.getElementById('log-scroll');
-  if(!log.length){scroll.innerHTML='<div class="entry-system">Waiting for all three Radiants to join...</div>';return;}
-  scroll.innerHTML=log.map(e=>{
+  const s=document.getElementById('log-scroll');
+  if(!log.length){s.innerHTML='<div class="entry-system">Waiting for Radiants to join...</div>';return;}
+  s.innerHTML=log.map(e=>{
     if(e.type==='gm'){
       const badge=e.text.includes('[COMBAT]')?'<span class="event-badge badge-combat">Combat</span>':e.text.includes('[DISCOVERY]')?'<span class="event-badge badge-discovery">Discovery</span>':e.text.includes('[DECISION]')?'<span class="event-badge badge-decision">Decision</span>':'';
       const clean=e.text.replace(/\[COMBAT\]|\[DISCOVERY\]|\[DECISION\]/g,'').replace(/\[CHOICES\][\s\S]*/,'').trim();
       return`<div class="entry-gm">${badge}<span class="gm-label">The Chronicle</span>${clean.replace(/\n/g,'<br/>')}</div>`;
     }
-    if(e.type==='player'){
-      const p=gState&&gState.players.find(x=>x&&x.name===e.who);
-      return`<div class="entry-player"><div class="pname" style="color:${p?p.color:'var(--text3)'};">${e.who}</div>${e.text}</div>`;
-    }
+    if(e.type==='player'){const p=gState&&gState.players.find(x=>x&&x.name===e.who);return`<div class="entry-player"><div class="pname" style="color:${p?p.color:'var(--text3)'};">${e.who}</div>${e.text}</div>`;}
+    if(e.type==='npc')return`<div class="entry-npc"><div class="pname">${e.who} <span style="font-size:10px;">(AI)</span></div>${e.text}</div>`;
     if(e.type==='loading')return`<div class="entry-loading"><span class="dots">The Stormfather deliberates</span></div>`;
     return`<div class="entry-system">${e.text}</div>`;
   }).join('');
-  scroll.scrollTop=scroll.scrollHeight;
+  s.scrollTop=s.scrollHeight;
 }
 
 function renderProgress(){
-  const moves=gState?gState.totalMoves:0;
-  const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
+  const m=gState?gState.totalMoves:0;
+  const act=ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];
   document.getElementById('act-label').textContent=`${act.tag} · ${act.name}`;
-  document.getElementById('progress-count').textContent=`${moves} / 180`;
-  document.getElementById('progress-fill').style.width=Math.min(100,Math.round(moves/180*100))+'%';
+  document.getElementById('progress-count').textContent=`${m} / 180`;
+  document.getElementById('progress-fill').style.width=Math.min(100,Math.round(m/180*100))+'%';
   document.getElementById('log-act-tag').textContent=act.tag;
 }
 
-function renderActionPanel(log){
+function renderActions(log){
   const wrap=document.getElementById('action-wrap');
-  const header=document.getElementById('action-header');
-  const choices=document.getElementById('action-choices');
+  const hdr=document.getElementById('action-header');
+  const ch=document.getElementById('action-choices');
   if(!gState||!myChar)return;
   const cur=gState.players[gState.turn];
-  const mine=cur&&cur.name===myChar.name;
-
-  if(!mine){
-    header.textContent=cur?`Waiting for ${cur.name} to act...`:'Awaiting the next Radiant...';
-    wrap.style.opacity='0.5';wrap.style.pointerEvents='none';
-    choices.innerHTML=`<div class="waiting-msg">Check back at your next lunch break — the story continues when it's your turn.</div>`;
-    return;
-  }
-  wrap.style.opacity='1';wrap.style.pointerEvents='auto';
-  header.textContent='Your Turn — Choose Your Action';
-
+  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
+  const npc=cur&&cur.isNPC;
+  if(npc){hdr.textContent=`${cur.name} is taking their turn...`;wrap.style.opacity='0.5';wrap.style.pointerEvents='none';ch.innerHTML=`<div class="waiting-msg">The AI companion acts — one moment...</div>`;return;}
+  if(!mine){hdr.textContent=cur?`Waiting for ${cur.name} to act...`:'Awaiting the next Radiant...';wrap.style.opacity='0.5';wrap.style.pointerEvents='none';ch.innerHTML=`<div class="waiting-msg">Check back at your next lunch — the storm waits for you.</div>`;return;}
+  wrap.style.opacity='1';wrap.style.pointerEvents='auto';hdr.textContent='Your Turn — Choose Your Action';
   const lastGM=[...log].reverse().find(e=>e.type==='gm');
-  if(lastGM&&lastGM.choices&&lastGM.choices.length){
-    choices.innerHTML=lastGM.choices.map((c,i)=>`<button class="achoice" onclick="selAction(this,\`${c.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${c}</button>`).join('');
-  } else {choices.innerHTML='';}
+  if(lastGM&&lastGM.choices&&lastGM.choices.length){ch.innerHTML=lastGM.choices.map((c,i)=>`<button class="achoice" onclick="selAct(this,\`${c.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${c}</button>`).join('');}
+  else{ch.innerHTML='';}
 }
 
-function selAction(btn,txt){
-  document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  selActionText=txt;
-  document.getElementById('custom-in').value='';
-}
+function selAct(btn,txt){document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selActionText=txt;document.getElementById('custom-in').value='';}
 
 async function onSubmitAction(){
   const custom=document.getElementById('custom-in').value.trim();
@@ -714,191 +686,99 @@ async function onSubmitAction(){
   if(!action){showErr(errEl,'Choose or describe an action first.');return;}
   errEl.style.display='none';
   if(isLoading)return;
-
-  // Dice roll flavor
   const roll=Math.ceil(Math.random()*20);
-  const statKey=getRelevantStat(action);
-  const statVal=myChar.stats[statKey]||10;
-  const bonus=Math.floor((statVal-10)/2);
+  const sk=getStat(action);
+  const sv=myChar.stats[sk]||10;
+  const bonus=Math.floor((sv-10)/2);
   const total=Math.min(20,Math.max(1,roll+bonus));
-  document.getElementById('dice-flash').textContent=`d20 roll: ${roll} + ${statKey.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
-
-  await appendLog({type:'player',who:myChar.name,text:action,choices:[]});
-  const prevSlot=gState.turn;
-  gState.turn=(gState.turn+1)%3;
+  document.getElementById('dice-flash').textContent=`d20 roll: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
+  await addLog({type:'player',who:myChar.name,text:action,choices:[]});
+  const from=gState.turn;
+  const sz=gState.partySize||partySize;
+  gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
-  await saveRemoteState(gState);
-
-  selActionText='';
-  document.getElementById('custom-in').value='';
+  await saveState(gState);
+  selActionText='';document.getElementById('custom-in').value='';
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
-
-  await callGM(buildTurnPrompt(action,total,statKey,prevSlot));
+  await callGM(turnPrompt(action,total,sk,from));
   await refreshGame();
 }
 
-function getRelevantStat(action){
-  const a=action.toLowerCase();
-  if(/attack|fight|strike|slash|charge|hit/.test(a))return'str';
-  if(/run|dodge|leap|fly|sneak|move/.test(a))return'dex';
-  if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';
-  if(/search|detect|sense|notice|examine/.test(a))return'wis';
-  if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';
-  return'end';
-}
+function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
 
-// ═══════════════════════════════════════════════════════
-// GM CALL
-// ═══════════════════════════════════════════════════════
 async function callGM(prompt){
   isLoading=true;
-  await appendLog({type:'loading',who:'',text:'',choices:[]});
-  const log=await loadLog();
-  renderLog(log);
-
+  await addLog({type:'loading',who:'',text:'',choices:[]});
+  const log=await loadLog();renderLog(log);
   try{
-    const res=await fetch(PROXY_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const raw=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
-
-    // Parse choices
-    const choiceMatches=raw.match(/^\d+\.\s+.+$/gm)||[];
-    const choices=choiceMatches.map(c=>c.replace(/^\d+\.\s*/,''));
-    const sceneText=raw.replace(/\[CHOICES\][\s\S]*/,'').trim();
-
-    // Remove loading entry and append real one
+    const choices=(raw.match(/^\d+\.\s+.+$/gm)||[]).map(c=>c.replace(/^\d+\.\s*/,''));
+    const scene=raw.replace(/\[CHOICES\][\s\S]*/,'').trim();
     const allLog=await loadLog();
-    const loadIdx=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
-    if(loadIdx!==undefined){
-      const t=await token();
-      // Delete loading row by clearing it, then append real one
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${loadIdx+2}:E${loadIdx+2}?valueInputOption=RAW`,
-        {method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-         body:JSON.stringify({range:`Log!A${loadIdx+2}:E${loadIdx+2}`,majorDimension:'ROWS',values:[['gm','',sceneText,JSON.stringify(choices),new Date().toISOString()]]})});
-    } else {
-      await appendLog({type:'gm',who:'',text:sceneText,choices});
-    }
+    const li=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
+    if(li!==undefined){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${li+2}:E${li+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:`Log!A${li+2}:E${li+2}`,majorDimension:'ROWS',values:[['gm','',scene,JSON.stringify(choices),new Date().toISOString()]]})});}
+    else{await addLog({type:'gm',who:'',text:scene,choices});}
   }catch(e){
     const allLog=await loadLog();
-    const loadIdx=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
-    if(loadIdx!==undefined){
-      const t=await token();
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${loadIdx+2}:E${loadIdx+2}?valueInputOption=RAW`,
-        {method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-         body:JSON.stringify({range:`Log!A${loadIdx+2}:E${loadIdx+2}`,majorDimension:'ROWS',values:[['gm','','The Stormlight flickers... the Stormfather is silent. Refresh to try again.',JSON.stringify([]),new Date().toISOString()]]})});
-    }
+    const li=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
+    if(li!==undefined){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${li+2}:E${li+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:`Log!A${li+2}:E${li+2}`,majorDimension:'ROWS',values:[['gm','','The Stormlight flickers... refresh to try again.',JSON.stringify([]),new Date().toISOString()]]})});}
   }
   isLoading=false;
 }
 
-function buildTurnPrompt(action,roll,statKey,fromSlot){
-  const moves=(gState.totalMoves||0);
-  const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
-  const nextP=gState.players[gState.turn];
-  const party=gState.players.map(p=>p?`${p.name} the ${p.className} HP:${p.hp}/${p.maxHp}`:'Empty').join(' | ');
-  const who=gState.players[fromSlot];
-  const rollDesc=roll>=18?'critical success — exceptional outcome':roll>=14?'strong success':roll>=10?'partial success — complications arise':roll>=6?'failure with consequences':'critical failure — dramatic setback';
-
-  return `You are the GM for a 180-turn Cosmere RPG (Way of Kings). This is turn ${moves} of 180. ${act.tag}: ${act.name}.
-
+function turnPrompt(action,roll,sk,from){
+  const m=gState.totalMoves||0;const act=ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];
+  const sz=gState.partySize||partySize;const next=gState.players[gState.turn];
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
+  const who=gState.players[from];
+  const rd=roll>=18?'critical success':roll>=14?'strong success':roll>=10?'partial success — complications':roll>=6?'failure with consequences':'critical failure';
+  return`GM for 180-turn Cosmere RPG. Turn ${m}/180. ${act.tag}: ${act.name}.
 Party: ${party}
-
-${who.name} (${who.className}) just acted: "${action}"
-d20 roll vs ${statKey.toUpperCase()}: ${roll} — ${rollDesc}
-
-Narrate the consequence of this action (2-3 sentences, vivid Cosmere atmosphere — Stormlight, spren, Shards, crem, highstorm references). Make the roll matter to the outcome. Advance the plot meaningfully.
-
-It is now ${nextP?nextP.name+"'s turn ("+nextP.className+')':"the next Radiant's turn"}.
-
-[CHOICES] — Write exactly 4 numbered action options for ${nextP?nextP.name:'the next Radiant'} that fit:
-- Their class abilities (${nextP?nextP.className:'unknown'})  
-- The current scene momentum
-- The 180-turn epic arc (we are ${Math.round(moves/180*100)}% through the saga)
-- Vary between [COMBAT], [DISCOVERY], and [DECISION] moments across the campaign
-
-Mark scene type: [COMBAT], [DISCOVERY], or [DECISION] at the start of your narration.
-Keep under 220 words total.`;
+${who.name} (${who.className}) acted: "${action}" — d20 vs ${sk.toUpperCase()}: ${roll} (${rd})
+Narrate consequence (2-3 vivid Cosmere sentences). Make the roll matter.
+Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':"next turn"}.
+[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}).
+Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.`;
 }
 
-// ═══════════════════════════════════════════════════════
-// CHARACTER SHEET
-// ═══════════════════════════════════════════════════════
-function toggleSheet(){
-  sheetOpen=!sheetOpen;
-  document.getElementById('sheet-panel').style.display=sheetOpen?'block':'none';
-  document.getElementById('sheet-arrow').textContent=sheetOpen?'▾':'▸';
-  if(sheetOpen&&myChar)renderSheet();
-}
+function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('sheet-panel').style.display=sheetOpen?'block':'none';document.getElementById('sheet-arrow').textContent=sheetOpen?'▾':'▸';if(sheetOpen&&myChar)renderSheet();}
 function renderSheet(){
-  const p=document.getElementById('sheet-panel');
-  if(!myChar)return;
-  p.innerHTML=`
-    <div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div>
-    <div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div>
-    <div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>
-    ${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}
-    <div style="margin-top:8px;font-size:11px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">ABILITIES</div>
-    <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>
-  `;
+  const p=document.getElementById('sheet-panel');if(!myChar)return;
+  p.innerHTML=`<div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div><div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div><div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}<div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">ABILITIES</div><div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
 }
 
-// ═══════════════════════════════════════════════════════
-// POLLING (check for updates every 15s)
-// ═══════════════════════════════════════════════════════
-function startPolling(){
-  if(pollTimer)clearInterval(pollTimer);
-  pollTimer=setInterval(async()=>{
-    if(document.getElementById('s-game').classList.contains('active')){
-      await refreshGame();
-    }
-  },15000);
-}
+function startPolling(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(async()=>{if(document.getElementById('s-game').classList.contains('active'))await refreshGame();},15000);}
+function saveMyChar(c,cid){localStorage.setItem('sc_mychar_'+(cid||campaignId||'default'),JSON.stringify(c));}
+function loadMyChar(cid){try{const r=localStorage.getItem('sc_mychar_'+(cid||campaignId||'default'));return r?JSON.parse(r):null;}catch(e){return null;}}
 
-// ═══════════════════════════════════════════════════════
-// PERSISTENCE (this browser's character)
-// ═══════════════════════════════════════════════════════
-function saveMyChar(c){localStorage.setItem('sc_mychar_v2',JSON.stringify(c));}
-function loadMyChar(){try{const r=localStorage.getItem('sc_mychar_v2');return r?JSON.parse(r):null;}catch(e){return null;}}
-
-// ═══════════════════════════════════════════════════════
-// RESET
-// ═══════════════════════════════════════════════════════
 async function onReset(){
-  if(!confirm('Reset the entire campaign for all players? This cannot be undone.'))return;
+  if(!confirm('Reset this campaign for all players?'))return;
   try{
-    localStorage.removeItem('sc_mychar_v2');
-    await ensureSheets();
-    await saveRemoteState({players:[null,null,null],turn:0,totalMoves:0,phase:'pregame'});
-    const t=await token();
-    // Clear log sheet
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A:E?valueInputOption=RAW`,
-      {method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-       body:JSON.stringify({range:'Log!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
-    gState=null;myChar=null;location.reload();
+    localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
+    await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});
+    const t=await tok();
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(logSheet()+'!A:E')}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
+    gState=null;myChar=null;
+    renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});
+    showScreen('title');
   }catch(e){alert('Reset failed: '+e.message);}
 }
 
-// ═══════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════
 function showErr(el,msg){el.textContent=msg;el.style.display='block';}
-function statSummary(p){return STAT_KEYS.map((k,i)=>STAT_NAMES[i]+':'+p.stats[k]).join(' ');}
 
-// ═══════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════
 (async()=>{
-  myChar=loadMyChar();
-  gState=await loadRemoteState().catch(()=>null);
-  if(gState)renderSlots(gState);
+  // Start at campaign picker — no auto-load
+  showScreen('campaign');
+  try{
+    await tok(); // pre-auth
+    const camps=await listCampaigns();
+    renderCampaigns(camps);
+    document.getElementById('camp-status').textContent='';
+  }catch(e){
+    document.getElementById('camp-status').textContent='Connecting... '+e.message;
+  }
 })();
 </script>
 </body>
