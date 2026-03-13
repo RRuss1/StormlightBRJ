@@ -254,6 +254,20 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   </div>
 </div>
 
+<div id="s-lobby" class="screen">
+  <div style="max-width:680px;width:100%;margin:0 auto;padding:2.5rem;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="font-family:var(--font-display);font-size:13px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;">Campaign Ready</div>
+      <div id="lobby-title" style="font-family:var(--font-display);font-size:22px;color:var(--amber2);margin-bottom:4px;"></div>
+      <div id="lobby-sub" style="font-size:15px;color:var(--text3);font-style:italic;"></div>
+    </div>
+    <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;text-align:center;">Radiant Company</div>
+    <div class="slots-grid" id="lobby-slots" style="margin-bottom:2rem;"></div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" id="lobby-actions"></div>
+    <div id="lobby-status" style="text-align:center;font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:20px;"></div>
+  </div>
+</div>
+
 <div id="s-game" class="screen">
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
@@ -444,7 +458,9 @@ async function selectCampaign(id){
     gState=await loadState();
     if(gState)partySize=gState.partySize||3;
     myChar=loadMyChar(id);
-    if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
+    if(gState&&gState.phase==='playing'){showGameScreen();return;}
+    if(gState&&gState.phase==='pregame'&&myChar){showScreen('lobby');renderLobby();return;}
+    partySize=gState?gState.partySize||3:3;
     renderPSZ();renderSlots(gState);
     showScreen('title');
     document.getElementById('camp-status').textContent='';
@@ -465,7 +481,18 @@ function renderPSZ(){
   if(locked)partySize=gState.partySize||3;
   document.getElementById('psz-row').innerHTML=[2,3,4,5].map(n=>`<div class="psz${partySize===n?' sel':''}${locked?' locked':''}" onclick="${locked?'':`pickSize(${n})`}">${n} Players</div>`).join('');
 }
-function pickSize(n){if(gState&&gState.phase!=='pregame')return;partySize=n;renderPSZ();renderSlots(gState||{players:new Array(n).fill(null),partySize:n});}
+function pickSize(n){
+  if(gState&&gState.phase!=='pregame')return;
+  partySize=n;
+  // Update gState players array size if in pregame
+  if(gState&&gState.phase==='pregame'){
+    const cur=gState.players||[];
+    const newPlayers=Array.from({length:n},(_,i)=>cur[i]||null);
+    gState.players=newPlayers;gState.partySize=n;
+  }
+  renderPSZ();
+  renderSlots(gState||{players:new Array(n).fill(null),partySize:n});
+}
 
 function genNPC(slot){
   const cls=CLASSES[slot%CLASSES.length];
@@ -486,7 +513,7 @@ function renderSlots(st){
     const p=st&&st.players?st.players[i]:null;
     const isMe=myChar&&myChar.slot===i;
     const isTurn=st&&st.turn===i&&st.phase==='playing';
-    if(!p)return`<div class="slot"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt" style="margin-bottom:8px;">Waiting for a player</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span><span style="font-size:12px;color:var(--text5);padding:5px 0;font-style:italic;cursor:pointer;" onclick="pickSlot(${i})">or join as player →</span></div></div>`;
+    if(!p)return`<div class="slot" onclick="pickSlot(${i})"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt">Empty — click to join</div></div>`;
     if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI Companion</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span></div>`;
     return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div>${isTurn?'<span class="slot-tag turn">⟁ Their Turn</span>':'<span class="slot-tag">Ready</span>'}</div>`;
   }).join('');
@@ -494,14 +521,81 @@ function renderSlots(st){
 
 async function assignNPC(slot){
   if(!gState)return;
+  document.getElementById('lobby-status').textContent='Summoning companion...';
   const npc=genNPC(slot);
   gState.players[slot]=npc;
   await saveState(gState);
-  renderSlots(gState);
-  // Check if all slots now filled and start if so
   const sz=gState.partySize||partySize;
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  if(allFilled&&gState.phase==='pregame')await startCampaign();
+  if(allFilled&&gState.phase==='pregame'){
+    document.getElementById('lobby-status').textContent='All Radiants assembled — beginning the saga...';
+    await startCampaign();
+  } else {
+    renderLobby();
+    document.getElementById('lobby-status').textContent='';
+  }
+}
+
+function renderLobby(){
+  if(!gState)return;
+  const sz=gState.partySize||partySize;
+  const humanCount=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
+  const npcCount=gState.players.slice(0,sz).filter(p=>p&&p.isNPC).length;
+  const emptyCount=gState.players.slice(0,sz).filter(p=>!p).length;
+
+  document.getElementById('lobby-title').textContent=campaignId||'Campaign';
+  document.getElementById('lobby-sub').textContent=`${humanCount} player${humanCount!==1?'s':''} joined · ${npcCount} AI companion${npcCount!==1?'s':''} · ${emptyCount} slot${emptyCount!==1?'s':''} open`;
+
+  const grid=document.getElementById('lobby-slots');
+  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
+  grid.style.gridTemplateColumns=cols;
+  grid.innerHTML=Array.from({length:sz},(_,i)=>{
+    const p=gState.players[i];
+    const isMe=myChar&&myChar.slot===i;
+    if(!p)return`<div class="slot" style="text-align:center;">
+      <div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div>
+      <div class="slot-empty-txt" style="margin-bottom:10px;">Waiting for a player</div>
+      <span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span>
+    </div>`;
+    if(p.isNPC)return`<div class="slot npc-slot">
+      <div class="slot-num">Slot ${i+1} · AI</div>
+      <div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div>
+      <div class="slot-class">${p.className}</div>
+      <span class="slot-tag npc">NPC</span>
+      <div style="margin-top:8px;"><span style="font-size:11px;color:var(--coral2);cursor:pointer;font-family:var(--font-display);letter-spacing:1px;" onclick="removeNPC(${i})">✕ Remove</span></div>
+    </div>`;
+    return`<div class="slot filled">
+      <div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div>
+      <div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div>
+      <div class="slot-class">${p.className}</div>
+      <span class="slot-tag">Ready</span>
+    </div>`;
+  }).join('');
+
+  // Actions
+  const actions=document.getElementById('lobby-actions');
+  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
+  const hasHuman=gState.players.slice(0,sz).some(p=>p&&!p.isNPC);
+  actions.innerHTML='';
+  if(allFilled&&hasHuman&&gState.phase==='pregame'){
+    actions.innerHTML+=`<button class="btn btn-gold" onclick="startNow()">⟁ Begin the Saga →</button>`;
+  }
+  actions.innerHTML+=`<button class="btn btn-sm" onclick="showScreen('campaign')">← Campaigns</button>`;
+}
+
+async function removeNPC(slot){
+  if(!gState)return;
+  gState.players[slot]=null;
+  await saveState(gState);
+  renderLobby();
+}
+
+async function startNow(){
+  const sz=gState.partySize||partySize;
+  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
+  if(!allFilled){document.getElementById('lobby-status').textContent='Fill all slots first.';return;}
+  document.getElementById('lobby-status').textContent='Speaking the Oaths...';
+  await startCampaign();
 }
 
 async function onEnter(){
@@ -548,8 +642,8 @@ async function onCreateChar(){
   await saveState(gState);
   const sz=gState.partySize||partySize;
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  if(allFilled&&gState.phase==='pregame')await startCampaign();
-  else showGameScreen();
+  if(allFilled&&gState.phase==='pregame'){await startCampaign();}
+  else{showScreen('lobby');renderLobby();}
 }
 
 async function startCampaign(){
