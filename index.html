@@ -818,13 +818,15 @@ async function showGameScreen(){
 }
 
 async function refreshGame(){
+  const prevLastGM=gState&&gState.lastGM?{...gState.lastGM}:null; // save before reload
   gState=await loadState();
   if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
   const log=await loadLog(false);
-  // Sync lastGM from log if state doesn't have it (e.g. returning player)
+  // Restore lastGM: prefer log entry, then prev in-memory, then state
   if(gState&&!gState.lastGM){
     const lastGMEntry=[...log].reverse().find(e=>e.type==='gm');
-    if(lastGMEntry){gState.lastGM={text:lastGMEntry.text,choices:lastGMEntry.choices};}
+    if(lastGMEntry)gState.lastGM={text:lastGMEntry.text,choices:lastGMEntry.choices};
+    else if(prevLastGM)gState.lastGM=prevLastGM;
   }
   renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
   if(gState&&gState.phase==='playing'&&!isLoading){
@@ -856,14 +858,20 @@ async function handleNPC(log){
   gState.totalMoves=(gState.totalMoves||0)+1;
   await saveState(gState);
   await callGM(npcTurnPrompt(pick,cur,from));
-  // After GM writes, do one clean refresh
-  gState=await loadState();
+  // callGM already updated gState.lastGM in memory — don't overwrite with loadState
+  // Just reload the log for display (gState is already current)
   if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
-  const freshLog=await loadLog(false); // gState.lastGM handles instant display
+  const freshLog=await loadLog(false);
   renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
-  // If next turn is also NPC, handle it
+  // If next turn is also NPC, keep chaining
   const nextCur=gState.players[gState.turn];
-  if(nextCur&&nextCur.isNPC)await handleNPC(freshLog);
+  if(nextCur&&nextCur.isNPC){
+    await handleNPC(freshLog);
+  } else {
+    // It's a human's turn now — gate so they read the NPC narrative before acting
+    const myTurnNow=myChar&&nextCur&&nextCur.name===myChar.name;
+    if(myTurnNow)gateActions();
+  }
 }
 
 function npcTurnPrompt(action,npc,from){
@@ -975,12 +983,13 @@ async function onSubmitAction(){
   selActionText='';document.getElementById('custom-in').value='';
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
   await callGM(turnPrompt(action,total,sk,from));
+  const savedLastGM=gState&&gState.lastGM?{...gState.lastGM}:null; // preserve before refresh
   await refreshGame();
+  // Restore lastGM if refreshGame's loadState cleared it
+  if(savedLastGM&&gState&&!gState.lastGM)gState.lastGM=savedLastGM;
   // Gate so player reads GM response before acting again
-  if(!readGated){
-    const myTurnAgain=gState&&myChar&&gState.players[gState.turn]&&gState.players[gState.turn].name===myChar.name&&!gState.players[gState.turn].isNPC;
-    if(myTurnAgain)gateActions();
-  }
+  const myTurnAgain=gState&&myChar&&gState.players[gState.turn]&&gState.players[gState.turn].name===myChar.name&&!gState.players[gState.turn].isNPC;
+  if(myTurnAgain)gateActions();
 }
 
 function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
