@@ -410,8 +410,9 @@ async function loadLog(waitForGM){
     try{
       const rows=await sGet(logSheet()+'!A:E');
       const entries=rows.map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''})).filter(e=>e.type&&e.type.trim()!=='');
+      console.log('loadLog attempt '+(i+1)+': '+entries.length+' entries, hasGM:'+entries.some(e=>e.type==='gm'));
       if(!waitForGM||entries.some(e=>e.type==='gm'))return entries;
-    }catch(e){if(i===attempts-1)return[];}
+    }catch(e){console.error('loadLog error:',e.message);if(i===attempts-1)return[];}
     await new Promise(r=>setTimeout(r,1500));
   }
   return[];
