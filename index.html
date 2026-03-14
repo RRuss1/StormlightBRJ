@@ -146,6 +146,13 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
 .log-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
+.continue-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:12px;background:var(--bg2);}
+.continue-hint{font-size:13px;color:var(--text5);font-style:italic;font-family:var(--font-display);letter-spacing:1px;}
+.btn-continue{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-display);font-size:14px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.btn-continue:hover{background:rgba(191,161,90,0.18);border-color:var(--amber3);}
+.btn-continue:disabled{opacity:0.35;cursor:not-allowed;}
+.action-wrap.locked{opacity:0.4;pointer-events:none;}
+.action-wrap.locked .action-inner::after{content:'Read the Chronicle above to continue';display:block;text-align:center;font-size:13px;color:var(--text5);font-style:italic;padding:8px 0;}
 .log-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .log-title{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .log-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
@@ -302,6 +309,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
         <span class="log-act" id="log-act-tag"></span>
       </div>
       <div class="log-scroll" id="log-scroll"></div>
+      <div class="continue-bar" id="continue-bar" style="display:none;">
+        <span class="continue-hint" id="continue-hint">Scroll down to read →</span>
+        <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled>Continue →</button>
+      </div>
     </div>
     <div>
       <button class="sheet-toggle" onclick="toggleSheet()"><span id="sheet-arrow">▸</span> Character Sheet</button>
@@ -381,6 +392,44 @@ function getAct(moves){return ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0
 let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
 let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
 let campaignId=null; // e.g. 'Campaign1', 'Campaign2'
+let readGated=false; // true when player must read before acting
+
+function gateActions(){
+  readGated=true;
+  const wrap=document.getElementById('action-wrap');
+  const bar=document.getElementById('continue-bar');
+  const btn=document.getElementById('continue-btn');
+  const hint=document.getElementById('continue-hint');
+  if(wrap)wrap.classList.add('locked');
+  if(bar)bar.style.display='flex';
+  if(btn)btn.disabled=true;
+  if(hint)hint.textContent='Scroll down to read all →';
+  // Check if already at bottom (short text)
+  checkScrollBottom();
+}
+
+function checkScrollBottom(){
+  const scroll=document.getElementById('log-scroll');
+  const btn=document.getElementById('continue-btn');
+  const hint=document.getElementById('continue-hint');
+  if(!scroll||!btn)return;
+  const atBottom=scroll.scrollHeight<=scroll.clientHeight+10||
+                 scroll.scrollTop+scroll.clientHeight>=scroll.scrollHeight-10;
+  if(atBottom){
+    btn.disabled=false;
+    if(hint)hint.textContent='';
+  }
+}
+
+function onContinue(){
+  readGated=false;
+  const wrap=document.getElementById('action-wrap');
+  const bar=document.getElementById('continue-bar');
+  if(wrap)wrap.classList.remove('locked');
+  if(bar)bar.style.display='none';
+  // Scroll action panel into view
+  wrap&&wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function stateSheet(){return campaignId+'_State';}
 function logSheet(){const s=(campaignId||'NULL')+'_Log';return s;}
 
@@ -735,6 +784,9 @@ async function startCampaign(){
   // gState.lastGM is now set by callGM — render immediately without waiting for Sheets cache
   const freshLog=await loadLog(false);
   renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
+  // Gate actions until player reads the new GM entry
+  const myTurnNow=gState&&myChar&&gState.players[gState.turn]&&gState.players[gState.turn].name===myChar.name&&!gState.players[gState.turn].isNPC;
+  if(myTurnNow)gateActions();
   // If first turn is NPC, handle it
   if(gState&&gState.phase==='playing'){
     const cur=gState.players[gState.turn];
@@ -777,7 +829,13 @@ async function refreshGame(){
   renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
   if(gState&&gState.phase==='playing'&&!isLoading){
     const cur=gState.players[gState.turn];
-    if(cur&&cur.isNPC)await handleNPC(log);
+    if(cur&&cur.isNPC){
+      await handleNPC(log);
+    } else {
+      // Gate if it's our turn and we haven't read yet
+      const myTurnNow=myChar&&cur&&cur.name===myChar.name;
+      if(myTurnNow&&!readGated&&log.some(e=>e.type==='gm'))gateActions();
+    }
   }
 }
 
@@ -863,7 +921,8 @@ function renderLog(log){
     if(e.type==='loading')return`<div class="entry-loading"><span class="dots">The Stormfather deliberates</span></div>`;
     return`<div class="entry-system">${e.text}</div>`;
   }).join('');
-  s.scrollTop=s.scrollHeight;
+  // Only auto-scroll if NOT gated (don't steal scroll position from reader)
+  if(!readGated)s.scrollTop=s.scrollHeight;
 }
 
 function renderProgress(){
@@ -917,6 +976,11 @@ async function onSubmitAction(){
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
   await callGM(turnPrompt(action,total,sk,from));
   await refreshGame();
+  // Gate so player reads GM response before acting again
+  if(!readGated){
+    const myTurnAgain=gState&&myChar&&gState.players[gState.turn]&&gState.players[gState.turn].name===myChar.name&&!gState.players[gState.turn].isNPC;
+    if(myTurnAgain)gateActions();
+  }
 }
 
 function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
@@ -976,7 +1040,16 @@ function renderSheet(){
   p.innerHTML=`<div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div><div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div><div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}<div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">ABILITIES</div><div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
 }
 
-function startPolling(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(async()=>{if(document.getElementById('s-game').classList.contains('active'))await refreshGame();},15000);}
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{if(document.getElementById('s-game').classList.contains('active'))await refreshGame();},15000);
+  // Attach scroll listener to log-scroll for read-gate
+  const scroll=document.getElementById('log-scroll');
+  if(scroll&&!scroll._scrollListenerAdded){
+    scroll.addEventListener('scroll',checkScrollBottom);
+    scroll._scrollListenerAdded=true;
+  }
+}
 function saveMyChar(c,cid){localStorage.setItem('sc_mychar_'+(cid||campaignId||'default'),JSON.stringify(c));}
 function loadMyChar(cid){try{const r=localStorage.getItem('sc_mychar_'+(cid||campaignId||'default'));return r?JSON.parse(r):null;}catch(e){return null;}}
 
