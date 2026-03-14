@@ -403,7 +403,19 @@ async function sSet(r,v){const t=await tok();await fetch(`https://sheets.googlea
 async function sApp(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
 async function loadState(){try{const v=await sGet(stateSheet()+'!A1');if(v.length&&v[0][0])return JSON.parse(v[0][0]);}catch(e){}return null;}
 async function saveState(s){await sSet(stateSheet()+'!A1',[[JSON.stringify(s)]]);}
-async function loadLog(){try{return(await sGet(logSheet()+'!A:E')).map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''})).filter(e=>e.type&&e.type.trim()!=='');}catch(e){return[];}}
+async function loadLog(minEntries){
+  // Retry up to 4 times with delay — Sheets append has eventual consistency lag
+  const attempts=minEntries?4:1;
+  for(let i=0;i<attempts;i++){
+    try{
+      const rows=await sGet(logSheet()+'!A:E');
+      const entries=rows.map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''})).filter(e=>e.type&&e.type.trim()!=='');
+      if(!minEntries||entries.length>=minEntries)return entries;
+    }catch(e){if(i===attempts-1)return[];}
+    await new Promise(r=>setTimeout(r,1200)); // wait 1.2s before retry
+  }
+  return[];
+}
 async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
 
 async function getSheetNames(){
@@ -564,19 +576,22 @@ function renderSlots(st){
 }
 
 async function assignNPC(slot){
-  if(!gState)return;
-  document.getElementById('lobby-status').textContent='Summoning companion...';
+  if(!gState||isLoading)return;
+  isLoading=true; // prevent double-click
+  const statusEl=document.getElementById('lobby-status');
+  if(statusEl)statusEl.textContent='Summoning companion...';
   const npc=genNPC(slot);
   gState.players[slot]=npc;
   await saveState(gState);
+  isLoading=false;
   const sz=gState.partySize||partySize;
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
   if(allFilled&&gState.phase==='pregame'){
-    document.getElementById('lobby-status').textContent='All Radiants assembled — beginning the saga...';
+    if(statusEl)statusEl.textContent='All Radiants assembled — beginning the saga...';
     await startCampaign();
   } else {
     renderLobby();
-    document.getElementById('lobby-status').textContent='';
+    if(document.getElementById('lobby-status'))document.getElementById('lobby-status').textContent='';
   }
 }
 
@@ -635,10 +650,12 @@ async function removeNPC(slot){
 }
 
 async function startNow(){
+  if(isLoading)return;
   const sz=gState.partySize||partySize;
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  if(!allFilled){document.getElementById('lobby-status').textContent='Fill all slots first.';return;}
-  document.getElementById('lobby-status').textContent='Speaking the Oaths...';
+  const statusEl=document.getElementById('lobby-status');
+  if(!allFilled){if(statusEl)statusEl.textContent='Fill all slots first.';return;}
+  if(statusEl)statusEl.textContent='Speaking the Oaths...';
   await startCampaign();
 }
 
@@ -699,10 +716,17 @@ async function startCampaign(){
   buildActs(gState.locationSeed);
   await saveState(gState);
   await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The saga begins in '+ACTS[0].location+'. The Chronicles begin.',choices:[]});
-  showScreen('game'); // show screen first so loading spinner is visible
+  showScreen('game');
   startPolling();
-  await callGM(openingPrompt()); // wait for GM response to be written
-  await refreshGame(); // now load the full fresh log and render
+  await callGM(openingPrompt());
+  // Wait for at least 2 log entries (system + gm) to be readable from sheet
+  const freshLog=await loadLog(2);
+  renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
+  // If first turn is NPC, handle it
+  if(gState&&gState.phase==='playing'){
+    const cur=gState.players[gState.turn];
+    if(cur&&cur.isNPC)await handleNPC(freshLog);
+  }
 }
 
 function openingPrompt(){
@@ -731,7 +755,7 @@ async function showGameScreen(){
 async function refreshGame(){
   gState=await loadState();
   if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
-  const log=await loadLog();
+  const log=await loadLog(1);
   renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
   if(gState&&gState.phase==='playing'&&!isLoading){
     const cur=gState.players[gState.turn];
