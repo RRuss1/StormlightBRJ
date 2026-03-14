@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Stormlight Chronicles</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,8 92,88 8,88' fill='none' stroke='%23BFA15A' stroke-width='7'/><polygon points='50,28 76,72 24,72' fill='none' stroke='%23BFA15A' stroke-width='4'/></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
@@ -381,7 +382,7 @@ let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=
 let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
 let campaignId=null; // e.g. 'Campaign1', 'Campaign2'
 function stateSheet(){return campaignId+'_State';}
-function logSheet(){return campaignId+'_Log';}
+function logSheet(){const s=(campaignId||'NULL')+'_Log';return s;}
 
 async function getAccessToken(){
   const header={alg:'RS256',typ:'JWT'};const now=Math.floor(Date.now()/1000);
@@ -408,7 +409,9 @@ async function loadLog(waitForGM){
   const attempts=waitForGM?6:1;
   for(let i=0;i<attempts;i++){
     try{
-      const rows=await sGet(logSheet()+'!A:E');
+      const sheet=logSheet();
+      console.log('loadLog: reading from sheet='+sheet+' campaignId='+campaignId);
+      const rows=await sGet(sheet+'!A:E');
       const entries=rows.map(r=>({type:r[0]||'',who:r[1]||'',text:r[2]||'',choices:r[3]?JSON.parse(r[3]):[],ts:r[4]||''})).filter(e=>e.type&&e.type.trim()!=='');
       console.log('loadLog attempt '+(i+1)+': '+entries.length+' entries, hasGM:'+entries.some(e=>e.type==='gm'));
       if(!waitForGM||entries.some(e=>e.type==='gm'))return entries;
@@ -417,7 +420,11 @@ async function loadLog(waitForGM){
   }
   return[];
 }
-async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
+async function addLog(e){
+  const sheet=logSheet();
+  console.log('addLog: writing type='+e.type+' to sheet='+sheet+' campaignId='+campaignId);
+  await sApp(sheet+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);
+}
 
 async function getSheetNames(){
   const t=await tok();
