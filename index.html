@@ -699,9 +699,10 @@ async function startCampaign(){
   buildActs(gState.locationSeed);
   await saveState(gState);
   await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The saga begins in '+ACTS[0].location+'. The Chronicles begin.',choices:[]});
-  // Call GM first so log has content, THEN show game screen
-  await callGM(openingPrompt());
-  showGameScreen(true);
+  showScreen('game'); // show screen first so loading spinner is visible
+  startPolling();
+  await callGM(openingPrompt()); // wait for GM response to be written
+  await refreshGame(); // now load the full fresh log and render
 }
 
 function openingPrompt(){
@@ -721,15 +722,10 @@ Open Act I in ${a1.location}. Describe this specific location vividly — its un
 End with [CHOICES] — 4 numbered options for ${gState.players[0].name} the ${gState.players[0].className}. Options should fit both the character's class AND the location. Under 230 words. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
 }
 
-async function showGameScreen(skipRefresh){
+async function showGameScreen(){
   showScreen('game');
   startPolling();
-  if(!skipRefresh)await refreshGame();
-  else{
-    // Render with current in-memory state — log already fresh from callGM
-    const log=await loadLog();
-    renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
-  }
+  await refreshGame();
 }
 
 async function refreshGame(){
@@ -759,9 +755,15 @@ async function handleNPC(log){
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   await saveState(gState);
-  // GM narrates NPC action + gives next player choices (one call covers both)
   await callGM(npcTurnPrompt(pick,cur,from));
-  await refreshGame();
+  // After GM writes, do one clean refresh
+  gState=await loadState();
+  if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
+  const freshLog=await loadLog();
+  renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
+  // If next turn is also NPC, handle it
+  const nextCur=gState.players[gState.turn];
+  if(nextCur&&nextCur.isNPC)await handleNPC(freshLog);
 }
 
 function npcTurnPrompt(action,npc,from){
