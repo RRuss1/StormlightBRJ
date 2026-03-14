@@ -698,9 +698,10 @@ async function startCampaign(){
   if(!gState.locationSeed)gState.locationSeed=Math.floor(Math.random()*99999);
   buildActs(gState.locationSeed);
   await saveState(gState);
-  await addLog({type:'system',who:'',text:`The Radiants have spoken their Oaths. The saga begins in ${ACTS[0].location}. The Chronicles begin.`,choices:[]});
-  showGameScreen();
+  await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The saga begins in '+ACTS[0].location+'. The Chronicles begin.',choices:[]});
+  // Call GM first so log has content, THEN show game screen
   await callGM(openingPrompt());
+  showGameScreen(true);
 }
 
 function openingPrompt(){
@@ -720,7 +721,16 @@ Open Act I in ${a1.location}. Describe this specific location vividly — its un
 End with [CHOICES] — 4 numbered options for ${gState.players[0].name} the ${gState.players[0].className}. Options should fit both the character's class AND the location. Under 230 words. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
 }
 
-async function showGameScreen(){showScreen('game');startPolling();await refreshGame();}
+async function showGameScreen(skipRefresh){
+  showScreen('game');
+  startPolling();
+  if(!skipRefresh)await refreshGame();
+  else{
+    // Render with current in-memory state — log already fresh from callGM
+    const log=await loadLog();
+    renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
+  }
+}
 
 async function refreshGame(){
   gState=await loadState();
@@ -873,12 +883,12 @@ async function callGM(prompt){
     const scene=raw.replace(/\[CHOICES\][\s\S]*/,'').trim();
     const allLog=await loadLog();
     const li=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
-    if(li!==undefined){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${li+2}:E${li+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:`Log!A${li+2}:E${li+2}`,majorDimension:'ROWS',values:[['gm','',scene,JSON.stringify(choices),new Date().toISOString()]]})});}
+    if(li!==undefined){const t=await tok();const lr=logSheet()+'!A'+(li+2)+':E'+(li+2);await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(lr)+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:lr,majorDimension:'ROWS',values:[['gm','',scene,JSON.stringify(choices),new Date().toISOString()]]})});}
     else{await addLog({type:'gm',who:'',text:scene,choices});}
   }catch(e){
     const allLog=await loadLog();
     const li=allLog.map((e,i)=>e.type==='loading'?i:-1).filter(i=>i>=0).pop();
-    if(li!==undefined){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Log!A${li+2}:E${li+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:`Log!A${li+2}:E${li+2}`,majorDimension:'ROWS',values:[['gm','','The Stormlight flickers... refresh to try again.',JSON.stringify([]),new Date().toISOString()]]})});}
+    if(li!==undefined){const t=await tok();const lr2=logSheet()+'!A'+(li+2)+':E'+(li+2);await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(lr2)+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:lr2,majorDimension:'ROWS',values:[['gm','','The Stormlight flickers... refresh to try again.',JSON.stringify([]),new Date().toISOString()]]})});}
   }
   isLoading=false;
 }
