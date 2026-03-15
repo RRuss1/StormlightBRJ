@@ -8,64 +8,66 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
+/* ── RESET & ROOT ── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#1a1510;--bg2:#211c14;--bg3:#2a2318;--bg4:#33291e;
   --border:#3d3426;--border2:#51463A;--border3:#70522B;
-  --gold-bright:#E8DCC4;--gold-light:#EFE5D1;--gold-mid:#D9BF8C;
-  --gold:#BFA15A;--gold-deep:#9C7B3C;--gold-dark:#8C6B3F;
-  --gold-dim:#70522B;--bronze:#8E6A34;--bronze-dark:#51463A;
+  --gold:#BFA15A;--gold-mid:#D9BF8C;--gold-bright:#E8DCC4;
+  --gold-light:#EFE5D1;--gold-deep:#9C7B3C;--gold-dim:#70522B;
   --amber:#BFA15A;--amber2:#D9BF8C;--amber3:#E8DCC4;--amber-dim:#70522B;
   --teal:#1a6b52;--teal2:#25956e;--teal-dim:#0f3d2e;
   --coral:#9e3820;--coral2:#c44a28;
-  --blue:#1e4f7a;--blue2:#2a6fa8;
-  --purple:#5a3a7a;--purple2:#7a52a8;
   --text:#F6F1E6;--text2:#EFE5D1;--text3:#D9BF8C;--text4:#9C7B3C;--text5:#70522B;
-  --font-display:'Cinzel',serif;
-  --font-body:'Crimson Pro',serif;
-  --rad:9px;--rad2:14px;--rad3:19px;
+  --font-d:'Cinzel',serif;--font-b:'Crimson Pro',serif;
+  --r:9px;--r2:14px;--r3:19px;
 }
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:19px;line-height:1.75;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:19px;line-height:1.75;}
 body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90,0.12) 0%,transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%,rgba(112,82,43,0.07) 0%,transparent 60%);}
 .screen{display:none;min-height:100vh;}
 .screen.active{display:flex;flex-direction:column;}
 
+/* ── TITLE ── */
 #s-title{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
 #s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.title-glyph{font-size:86px;color:var(--amber);letter-spacing:14px;font-family:var(--font-display);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
+.title-glyph{font-size:86px;color:var(--amber);letter-spacing:14px;font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
 @keyframes glowpulse{0%,100%{text-shadow:0 0 40px rgba(191,161,90,0.45);}50%{text-shadow:0 0 80px rgba(217,191,140,0.65),0 0 120px rgba(191,161,90,0.25);}}
-.title-h1{font-family:var(--font-display);font-size:clamp(28px,5vw,50px);font-weight:700;letter-spacing:6px;color:var(--text);margin-bottom:5px;}
-.title-h2{font-family:var(--font-display);font-size:14px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
+.title-h1{font-family:var(--font-d);font-size:clamp(28px,5vw,50px);font-weight:700;letter-spacing:6px;margin-bottom:5px;}
+.title-h2{font-family:var(--font-d);font-size:14px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
 .title-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.75rem;}
 .title-quote{font-style:italic;color:var(--gold-mid);font-size:17px;max-width:480px;margin:0 auto 2.5rem;line-height:1.9;}
 .title-quote cite{display:block;font-size:12px;letter-spacing:2px;color:var(--text4);margin-top:7px;font-style:normal;}
 
-.party-size-wrap{margin-bottom:1.75rem;}
-.party-size-label{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
-.party-size-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
-.psz{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:9px 20px;cursor:pointer;font-family:var(--font-display);font-size:14px;color:var(--text3);transition:all 0.15s;}
+/* ── PARTY SIZE ── */
+.psz-wrap{margin-bottom:1.75rem;}
+.psz-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
+.psz-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
+.psz{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 20px;cursor:pointer;font-family:var(--font-d);font-size:14px;color:var(--text3);transition:all 0.15s;}
 .psz:hover{border-color:var(--border3);color:var(--text);}
 .psz.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.09);}
 .psz.locked{opacity:0.4;cursor:default;}
 
-.slots-label{font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
+/* ── SLOTS ── */
+.slots-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
 .slots-grid{display:grid;gap:10px;max-width:620px;width:100%;margin:0 auto 2rem;}
-.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
+.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
 .slot:hover{border-color:var(--border3);}
 .slot.filled{border-color:var(--gold-dim);cursor:default;}
-.slot.filled:hover{border-color:var(--gold);}
 .slot.npc-slot{border-color:var(--teal-dim);cursor:default;}
-.slot-num{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:7px;}
+.slot-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:7px;}
 .slot-pip{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
 .slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.slot-pname{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);}
+.slot-pname{font-family:var(--font-d);font-size:13px;font-weight:600;color:var(--text);}
 .slot-class{font-size:12px;color:var(--text3);font-style:italic;}
 .slot-empty-txt{font-size:13px;color:var(--text4);font-style:italic;}
 .slot-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(26,107,82,0.22);color:var(--teal2);border:1px solid rgba(26,107,82,0.32);letter-spacing:1px;margin-top:6px;}
 .slot-tag.turn{background:rgba(191,161,90,0.15);color:var(--amber2);border-color:rgba(191,161,90,0.25);}
 .slot-tag.npc{background:rgba(26,107,82,0.15);color:var(--teal2);border-color:rgba(26,107,82,0.25);}
+.slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-d);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
+.slot-npc-btn:hover{background:rgba(26,107,82,0.22);}
 
-.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--rad);background:transparent;color:var(--text);font-family:var(--font-body);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--r);background:transparent;color:var(--text);font-family:var(--font-b);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
 .btn:hover{background:var(--bg4);border-color:var(--amber-dim);}
 .btn-gold{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.05);}
 .btn-gold:hover{background:rgba(191,161,90,0.13);border-color:var(--amber3);}
@@ -74,36 +76,37 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .btn-danger{border-color:var(--coral);color:var(--coral2);}
 .btn-danger:hover{background:rgba(158,56,32,0.12);}
 
-/* Campaign selector */
+/* ── CAMPAIGN SCREEN ── */
 #s-campaign{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
 #s-campaign::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;max-width:700px;width:100%;margin:0 auto 2rem;}
-.camp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:18px 16px;cursor:pointer;text-align:left;transition:border-color 0.2s,background 0.2s;position:relative;}
+.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;max-width:700px;width:100%;margin:0 auto 1.5rem;}
+.camp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:18px 16px;cursor:pointer;text-align:left;transition:border-color 0.2s,background 0.2s;position:relative;}
 .camp-card:hover{border-color:var(--gold);background:var(--bg4);}
 .camp-card.active-camp{border-color:var(--amber);}
 .camp-card.new-camp{border-style:dashed;border-color:var(--border2);text-align:center;}
 .camp-card.new-camp:hover{border-color:var(--amber);border-style:dashed;}
-.camp-num{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
-.camp-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.camp-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
+.camp-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
 .camp-meta{font-size:12px;color:var(--text4);font-style:italic;}
-.camp-phase{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px;font-family:var(--font-display);letter-spacing:1px;}
+.camp-phase{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px;font-family:var(--font-d);letter-spacing:1px;}
 .phase-pregame{background:rgba(191,161,90,0.12);color:var(--amber2);border:1px solid rgba(191,161,90,0.2);}
 .phase-playing{background:rgba(26,107,82,0.15);color:var(--teal2);border:1px solid rgba(26,107,82,0.25);}
-.camp-del{position:absolute;top:8px;right:10px;font-size:11px;color:var(--text5);cursor:pointer;border:none;background:transparent;font-family:var(--font-display);letter-spacing:1px;}
+.camp-del{position:absolute;top:8px;right:10px;font-size:11px;color:var(--text5);cursor:pointer;border:none;background:transparent;font-family:var(--font-d);letter-spacing:1px;}
 .camp-del:hover{color:var(--coral2);}
 .camp-new-icon{font-size:28px;color:var(--text4);margin-bottom:6px;}
 .camp-new-txt{font-size:14px;color:var(--text4);font-style:italic;}
-/* NPC button on empty slot */
-.slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-display);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
-.slot-npc-btn:hover{background:rgba(26,107,82,0.22);border-color:var(--teal2);}
 
+/* ── CAMPAIGN NAME MODAL ── */
+#new-camp-modal{display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--r2);padding:1.5rem;max-width:420px;width:100%;text-align:left;}
+
+/* ── CREATE SCREEN ── */
 #s-create{padding:2.5rem;align-items:center;}
 .create-wrap{max-width:620px;width:100%;}
-.screen-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:5px;}
+.screen-title{font-family:var(--font-d);font-size:26px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:5px;}
 .screen-sub{font-size:16px;color:var(--text3);font-style:italic;margin-bottom:2rem;}
 .form-block{margin-bottom:1.75rem;}
-.form-lbl{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;display:block;}
-.form-in{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:17px;outline:none;transition:border-color 0.2s;}
+.form-lbl{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;display:block;}
+.form-in{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:17px;outline:none;transition:border-color 0.2s;}
 .form-in:focus{border-color:var(--amber);}
 .color-row{display:flex;gap:12px;flex-wrap:wrap;}
 .cswatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s,transform 0.15s;}
@@ -111,152 +114,209 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .cswatch.sel{border-color:var(--text);}
 .class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 @media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
-.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
+.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
 .ccard:hover{border-color:var(--border3);}
 .ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
-.ccard-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.ccard-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
 .ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
 .ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
 .ccard-bonus{font-size:12px;color:var(--text4);margin-top:5px;}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
-.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:12px 10px;text-align:center;}
-.sbox-name{font-family:var(--font-display);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
+.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;}
+.sbox-name{font-family:var(--font-d);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
 .sbox-val{font-size:26px;font-weight:600;color:var(--amber2);line-height:1.2;}
 .sbox-mod{font-size:13px;color:var(--text3);}
 
+/* ── LOBBY SCREEN ── */
+#s-lobby{padding:0;align-items:center;justify-content:center;}
+.lobby-wrap{max-width:680px;width:100%;padding:2.5rem;}
+
+/* ── GAME SCREEN ── */
 #s-game{padding:0;flex-direction:column;}
-.game-top{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
-.game-logo{font-family:var(--font-display);font-size:14px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
-.turn-pill{font-family:var(--font-display);font-size:13px;letter-spacing:1px;padding:7px 18px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
+.game-top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+.game-logo{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
+.turn-pill{font-family:var(--font-d);font-size:12px;letter-spacing:1px;padding:6px 16px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
 .turn-pill.yours{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.12);animation:pillpulse 2s ease-in-out infinite;}
 @keyframes pillpulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0.35);}50%{box-shadow:0 0 0 7px rgba(191,161,90,0);}}
 .party-strip{display:flex;gap:10px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;}
-.ppip{flex:1;min-width:120px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
+.ppip{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
 .ppip.active{border-color:var(--amber);}
 .ppip.npc{border-color:var(--teal-dim);}
 .ppip-top{display:flex;align-items:center;gap:8px;}
 .ppip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.ppip-name{font-family:var(--font-display);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ppip-name{font-family:var(--font-d);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ppip-info{font-size:12px;color:var(--gold-mid);}
-.ppip-npc-tag{font-size:9px;color:var(--teal2);letter-spacing:1px;font-family:var(--font-display);}
+.ppip-tag{font-size:9px;letter-spacing:1px;font-family:var(--font-d);}
 .hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
-.game-body{flex:1;display:flex;flex-direction:column;padding:24px;gap:20px;max-width:840px;width:100%;margin:0 auto;}
-.progress-wrap{padding:0;}
-.progress-label{display:flex;justify-content:space-between;font-size:13px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;margin-bottom:6px;}
-.progress-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
-.log-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
-.continue-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:12px;background:var(--bg2);}
-.continue-hint{font-size:13px;color:var(--text5);font-style:italic;font-family:var(--font-display);letter-spacing:1px;}
-.btn-continue{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-display);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-continue:hover{background:rgba(191,161,90,0.18);border-color:var(--amber3);}
-.btn-continue:disabled{opacity:0.30;cursor:not-allowed;border-color:var(--border2);}
-.btn-act{display:inline-flex;align-items:center;padding:13px 32px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-display);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
-.btn-act:disabled{opacity:0.30;cursor:not-allowed;}
-.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
-@keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
-.log-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.log-title{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.log-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
-.log-scroll{padding:20px;display:flex;flex-direction:column;gap:16px;max-height:55vh;overflow-y:auto;}
-.log-scroll::-webkit-scrollbar{width:5px;}
-.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.log-scroll::-webkit-scrollbar{width:5px;}
-.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-.entry-gm{font-style:normal;font-size:22px;font-family:'Times New Roman',Times,serif;color:var(--text);line-height:1.85;border-left:2px solid var(--gold);padding-left:14px;}
-.entry-gm .gm-label{font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;font-style:normal;}
-.entry-player{font-size:19px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--rad);border:1px solid var(--border2);}
-.entry-player .pname{font-family:var(--font-display);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
-.entry-npc{font-size:19px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--teal2);padding:10px 14px;background:var(--bg3);border-radius:var(--rad);border:1px solid rgba(26,107,82,0.3);}
-.entry-npc .pname{font-family:var(--font-display);font-size:11px;letter-spacing:1px;margin-bottom:3px;color:var(--teal2);}
-.entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 0;}
-.entry-loading{font-style:italic;color:var(--gold-deep);font-size:17px;padding-left:16px;border-left:2px solid var(--gold-dim);}
-.dots::after{content:'';animation:dotanim 1.4s steps(4,end) infinite;}
-@keyframes dotanim{0%{content:' .'}25%{content:' ..'}50%{content:' ...'}75%{content:' ....'}100%{content:' .'}}
-.event-badge{display:inline-block;font-family:var(--font-display);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
+.game-body{flex:1;display:flex;flex-direction:column;padding:20px;gap:18px;max-width:840px;width:100%;margin:0 auto;}
+
+/* ── PROGRESS ── */
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
+.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
+
+/* ── ENEMY / INITIATIVE PANELS ── */
+.combat-panel{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.combat-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;}
+.enemy-list{display:flex;gap:10px;flex-wrap:wrap;}
+.enemy-card{background:var(--bg2);border:1px solid rgba(196,74,40,0.3);border-radius:var(--r);padding:7px 12px;min-width:120px;}
+.enemy-name{font-family:var(--font-d);font-size:11px;color:var(--coral2);}
+.enemy-hp{font-size:12px;color:var(--text3);}
+.init-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.init-pill{padding:4px 10px;border-radius:20px;font-family:var(--font-d);font-size:10px;letter-spacing:1px;}
+
+/* ── CHRONICLE CARD ── */
+.chronicle-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;}
+.chronicle-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
+.chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
+
+/* Story text zone */
+.story-text{padding:20px;font-size:22px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text);line-height:1.9;min-height:80px;}
+
+/* Event badges */
+.event-badge{display:inline-block;font-family:var(--font-d);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
 .badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
 .badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
 .badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
-.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font-family:'Times New Roman',Times,serif;font-size:20px;font-style:normal;line-height:1.65;transition:border-color 0.15s,background 0.15s;}
+.gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;}
+
+/* NPC / player log entries */
+.entry-player{font-size:16px;font-family:'Times New Roman',Times,serif;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
+.entry-pname{font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
+.entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 20px;}
+
+/* ── BOTTOM ZONE (unified) ── */
+.bottom-zone{border-top:1px solid var(--border);}
+
+/* Loading state */
+#bottom-loading{display:none;padding:2.5rem;text-align:center;}
+.loading-text{font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
+.pulse-row{display:flex;justify-content:center;gap:8px;}
+.pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
+@keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
+
+/* Human turn — choices + act button */
+#bottom-human{display:none;padding:18px 20px;}
+.dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-d);letter-spacing:1px;padding:4px 0;min-height:20px;margin-bottom:8px;}
+.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;cursor:pointer;text-align:left;color:var(--text);font-family:'Times New Roman',Times,serif;font-size:18px;line-height:1.6;transition:border-color 0.15s,background 0.15s;}
 .achoice:hover{border-color:var(--border3);background:var(--bg4);}
 .achoice.sel{border-color:var(--gold-mid);background:rgba(191,161,90,0.12);color:var(--gold-bright);}
-.achoice-num{font-family:var(--font-display);font-size:10px;color:var(--amber-dim);display:block;margin-bottom:4px;letter-spacing:1px;}
-.custom-row{display:flex;gap:10px;}
-.custom-in{flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rad);color:var(--text);font-family:var(--font-body);font-size:16px;outline:none;transition:border-color 0.2s;}
+.achoice-num{font-family:var(--font-d);font-size:10px;color:var(--amber-dim);display:block;margin-bottom:4px;letter-spacing:1px;}
+.custom-row{display:flex;gap:10px;margin-bottom:14px;}
+.custom-in{flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:16px;outline:none;transition:border-color 0.2s;}
 .custom-in:focus{border-color:var(--amber);}
-.waiting-msg{text-align:center;font-style:italic;color:var(--gold-deep);font-size:17px;padding:1.25rem 0;}
-.sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
+.act-row{display:flex;justify-content:flex-end;align-items:center;gap:12px;}
+.btn-act{display:inline-flex;align-items:center;padding:13px 36px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-d);font-size:16px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
+.err{font-size:14px;color:var(--coral2);font-style:italic;}
+
+/* Continue state */
+#bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.continue-hint{font-family:var(--font-d);font-size:12px;letter-spacing:1px;color:var(--text5);font-style:italic;}
+.btn-continue{display:inline-flex;align-items:center;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-d);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.btn-continue:hover{background:rgba(191,161,90,0.18);}
+.btn-continue:disabled{opacity:0.28;cursor:not-allowed;border-color:var(--border2);color:var(--text4);}
+
+/* Waiting state */
+#bottom-waiting{display:none;padding:16px 20px;text-align:center;}
+.waiting-msg{font-family:var(--font-d);font-size:13px;letter-spacing:1px;color:var(--text5);}
+
+/* Share moment button */
+.share-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text4);font-size:12px;cursor:pointer;margin-top:10px;transition:all 0.15s;}
+.share-btn:hover{border-color:var(--gold-dim);color:var(--text3);}
+
+/* ── CHARACTER SHEET ── */
+.sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
 .sheet-toggle:hover{color:var(--text3);}
-.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:16px 20px;margin-top:10px;}
+.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;margin-top:10px;}
 .sheet-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:16px;}
 .sheet-row:last-child{border-bottom:none;}
 .sheet-lbl{color:var(--gold-mid);}
 .sheet-val{font-weight:600;color:var(--text);}
 .abils{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
 .abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-.dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-display);letter-spacing:1px;padding:5px 0;min-height:22px;}
-.err{font-size:14px;color:var(--coral2);font-style:italic;margin-top:7px;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-/* Audio controls */
-.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;}
-.audio-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:0;line-height:1;}
+
+/* ── AUDIO BAR ── */
+.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;}
+.audio-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:0;}
 .audio-btn:hover{color:var(--amber2);}
-.audio-label{font-family:var(--font-display);font-size:10px;letter-spacing:1px;color:var(--text4);}
+.audio-label{font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);}
 .vol-slider{width:60px;accent-color:var(--amber);}
+
+/* ── PRINT ── */
+#print-header{display:none;}
 @media print{
   body{background:#fff!important;color:#111!important;font-size:12pt;}
-  .game-top,.party-strip,.action-wrap,.continue-bar,.sheet-toggle,.sheet-panel,#enemy-panel,.progress-wrap,.turn-pill,#export-btn{display:none!important;}
-  .log-wrap{border:none;background:#fff;}
-  .log-scroll{max-height:none!important;overflow:visible!important;}
-  .entry-gm{color:#111!important;border-left:2px solid #999;font-size:12pt;}
-  .entry-player,.entry-npc{color:#333!important;background:#f5f5f5;font-size:11pt;}
-  .gm-label{color:#555!important;}
-  .event-badge{border:1px solid #999;color:#333!important;background:#eee!important;}
-  .game-body{padding:0;max-width:100%;}
-  #print-header{display:block!important;}
+  .game-top,.party-strip,.bottom-zone,.sheet-toggle,.sheet-panel,#enemy-panel,#initiative-panel,.prog-wrap,.turn-pill,.audio-bar,#export-btn,#s-game>*:not(.game-body){display:none!important;}
+  .chronicle-card{border:none;}
+  .story-text{font-size:12pt;color:#111!important;}
+  #print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #111;}
 }
-#print-header{display:none;text-align:center;margin-bottom:20px;border-bottom:2px solid #111;padding-bottom:12px;}
+
+/* ── MOBILE ── */
 @media(max-width:640px){
   .class-grid,.action-choices{grid-template-columns:1fr;}
   .slots-grid{grid-template-columns:1fr!important;}
   .party-strip{flex-direction:column;}
   .ppip{min-width:unset;width:100%;}
   .game-body{padding:12px;}
-  .game-top{padding:10px 14px;}
-  .game-logo{font-size:11px;}
-  .action-choices{grid-template-columns:1fr;}
   html,body{font-size:16px;}
-  .entry-gm{font-size:18px;}
-  .achoice{font-size:17px;}
+  .story-text{font-size:18px;}
+  .achoice{font-size:16px;}
   .title-h1{font-size:26px;letter-spacing:2px;}
   .btn{padding:11px 20px;font-size:15px;}
   .camp-grid{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:repeat(3,1fr);}
-  .sbox-val{font-size:20px;}
-  .turn-pill{font-size:11px;padding:5px 10px;}
 }
 @media(max-width:400px){
   .title-glyph{font-size:60px;}
-  .entry-gm{font-size:16px;}
-  .achoice{font-size:15px;}
+  .story-text{font-size:16px;}
 }
 </style>
 </head>
 <body>
 
-<div id="s-title" class="screen active">
+<!-- ══ CAMPAIGN SCREEN ══ -->
+<div id="s-campaign" class="screen active">
+  <div style="font-size:60px;color:var(--amber);font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;">⟁</div>
+  <h1 class="title-h1">Stormlight Chronicles</h1>
+  <p class="title-h2">Choose Your Adventure</p>
+  <div class="title-line"></div>
+  <p class="slots-label">Your Campaigns</p>
+  <div class="camp-grid" id="camp-grid"></div>
+  <div id="new-camp-modal">
+    <div style="font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:12px;">Name Your Campaign</div>
+    <input id="camp-name-input" class="form-in" type="text" maxlength="48" placeholder="e.g. The Everstorm Accord, Kaladin's Oath..." style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')confirmNewCampaign()"/>
+    <div style="font-size:13px;color:var(--text5);font-style:italic;margin-bottom:14px;">This name appears on your campaign card and in the story export.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-sm" onclick="cancelNewCampaign()">← Cancel</button>
+      <button class="btn btn-gold btn-sm" onclick="confirmNewCampaign()">Begin Campaign →</button>
+    </div>
+    <div id="new-camp-err" class="err" style="display:none;margin-top:6px;"></div>
+  </div>
+  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;margin-top:12px;"></div>
+  <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;">
+    <div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text5);text-transform:uppercase;margin-bottom:10px;">Help Keep the Stormfather Alive</div>
+    <a href="https://cash.app/%24rurich31" target="_blank" id="cashlink" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #00D632;border-radius:24px;background:rgba(0,214,50,0.07);text-decoration:none;transition:background 0.15s;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#00D632"/><path d="M15.5 8.5C15.5 8.5 14.5 7.5 12 7.5C9.5 7.5 8 9 8 10.5C8 12 9 12.8 11 13.3L13 13.8C14.5 14.2 15.5 15 15.5 16.5C15.5 18 14 19.5 11.5 19.5C9 19.5 7.5 18 7.5 18" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="6" x2="12" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="19.5" x2="12" y2="21.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span style="font-family:var(--font-d);font-size:14px;color:#00D632;letter-spacing:1px;">Donate &middot; &#36;rurich31</span>
+    </a>
+    <div style="font-size:12px;color:var(--text5);margin-top:8px;font-style:italic;">API costs ~$0.003 per turn &middot; Every bit helps</div>
+  </div>
+</div>
+
+<!-- ══ TITLE SCREEN ══ -->
+<div id="s-title" class="screen">
   <div class="title-glyph">⟁</div>
   <h1 class="title-h1">Stormlight Chronicles</h1>
-  <p class="title-h2">A Saga of the Shattered Plains</p>
+  <p class="title-h2" id="title-sub">A Saga of the Shattered Plains</p>
   <div class="title-line"></div>
   <p class="title-quote">"You must find the most important words a man can say."<cite>— The Way of Kings</cite></p>
-  <div class="party-size-wrap" id="party-size-wrap">
-    <span class="party-size-label">Party Size</span>
-    <div class="party-size-row" id="psz-row"></div>
+  <div class="psz-wrap">
+    <span class="psz-label">Party Size</span>
+    <div class="psz-row" id="psz-row"></div>
     <div style="font-size:13px;color:var(--text5);margin-top:8px;font-style:italic;">Unfilled slots become AI companions</div>
   </div>
   <p class="slots-label">Radiant Company</p>
@@ -268,42 +328,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <div id="title-status" style="font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:22px;"></div>
 </div>
 
-<div id="s-campaign" class="screen">
-  <div class="title-glyph" style="font-size:60px;margin-bottom:0.5rem;">⟁</div>
-  <h1 class="title-h1" style="margin-bottom:4px;">Stormlight Chronicles</h1>
-  <p class="title-h2">Choose Your Adventure</p>
-  <div class="title-line"></div>
-  <p class="slots-label">Your Campaigns</p>
-  <div class="camp-grid" id="camp-grid"></div>
-
-  <!-- New campaign name modal -->
-  <div id="new-camp-modal" style="display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--rad2);padding:1.5rem;max-width:420px;width:100%;text-align:left;">
-    <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:12px;">Name Your Campaign</div>
-    <input id="camp-name-input" class="form-in" type="text" maxlength="48" placeholder="e.g. The Everstorm Accord, Kaladin's Oath..." style="margin-bottom:12px;font-size:17px;" onkeydown="if(event.key==='Enter')confirmNewCampaign()"/>
-    <div style="font-size:13px;color:var(--text5);font-style:italic;margin-bottom:14px;">This name appears on your campaign card and in the story export.</div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-sm" onclick="cancelNewCampaign()">← Cancel</button>
-      <button class="btn btn-gold btn-sm" onclick="confirmNewCampaign()">Begin Campaign →</button>
-    </div>
-    <div id="new-camp-err" class="err" style="display:none;margin-top:6px;"></div>
-  </div>
-
-  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;margin-top:10px;"></div>
-  <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;">
-    <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text5);text-transform:uppercase;margin-bottom:10px;">Help Keep the Stormfather Alive</div>
-    <a href="https://cash.app/%24rurich31" target="_blank" id="cashlink" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #00D632;border-radius:24px;background:rgba(0,214,50,0.07);text-decoration:none;transition:background 0.15s;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="24" height="24" rx="6" fill="#00D632"/>
-        <path d="M15.5 8.5C15.5 8.5 14.5 7.5 12 7.5C9.5 7.5 8 9 8 10.5C8 12 9 12.8 11 13.3L13 13.8C14.5 14.2 15.5 15 15.5 16.5C15.5 18 14 19.5 11.5 19.5C9 19.5 7.5 18 7.5 18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="12" y1="6" x2="12" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="12" y1="19.5" x2="12" y2="21.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span style="font-family:var(--font-display);font-size:14px;color:#00D632;letter-spacing:1px;">Donate &middot; &#36;rurich31</span>
-    </a>
-    <div style="font-size:12px;color:var(--text5);margin-top:8px;font-style:italic;">API costs ~$0.003 per turn · Every bit helps</div>
-  </div>
-</div>
-
+<!-- ══ CREATE SCREEN ══ -->
 <div id="s-create" class="screen">
   <div class="create-wrap">
     <h2 class="screen-title">Forge Your Radiant</h2>
@@ -314,7 +339,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     </div>
     <div class="form-block">
       <label class="form-lbl">Pronouns</label>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="gender-row">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="he/him" checked style="accent-color:var(--amber);"/> He / Him</label>
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="she/her" style="accent-color:var(--amber);"/> She / Her</label>
       </div>
@@ -336,99 +361,109 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <button class="btn" onclick="showScreen('title')">← Back</button>
       <button class="btn btn-gold" onclick="onCreateChar()">Speak the First Oath →</button>
     </div>
-    <div class="err" id="create-err" style="display:none;"></div>
+    <div class="err" id="create-err" style="display:none;margin-top:8px;"></div>
   </div>
 </div>
 
+<!-- ══ LOBBY SCREEN ══ -->
 <div id="s-lobby" class="screen">
-  <div style="max-width:680px;width:100%;margin:0 auto;padding:2.5rem;">
+  <div class="lobby-wrap">
     <div style="text-align:center;margin-bottom:2rem;">
-      <div style="font-family:var(--font-display);font-size:13px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;">Campaign Ready</div>
-      <div id="lobby-title" style="font-family:var(--font-display);font-size:22px;color:var(--amber2);margin-bottom:4px;"></div>
+      <div style="font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;">Radiant Company</div>
+      <div id="lobby-title" style="font-family:var(--font-d);font-size:22px;color:var(--amber2);margin-bottom:4px;"></div>
       <div id="lobby-sub" style="font-size:15px;color:var(--text3);font-style:italic;"></div>
     </div>
-    <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;text-align:center;">Radiant Company</div>
+    <div style="font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;text-align:center;">Assign Your Party</div>
     <div class="slots-grid" id="lobby-slots" style="margin-bottom:2rem;"></div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" id="lobby-actions"></div>
     <div id="lobby-status" style="text-align:center;font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:20px;"></div>
   </div>
 </div>
 
+<!-- ══ GAME SCREEN ══ -->
 <div id="s-game" class="screen">
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
     <span class="turn-pill" id="turn-pill">Loading...</span>
   </div>
   <div class="party-strip" id="party-strip"></div>
+
   <div class="game-body">
+    <!-- Print header (hidden normally) -->
     <div id="print-header">
       <div style="font-size:24pt;font-weight:bold;">⟁ Stormlight Chronicles</div>
       <div id="print-campaign-name" style="font-size:14pt;color:#555;"></div>
       <div id="print-date" style="font-size:10pt;color:#888;"></div>
     </div>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-      <button id="export-btn" class="btn btn-sm" onclick="exportToPDF()" style="font-size:12px;border-color:var(--gold-dim);color:var(--text4);">⬇ Export Chronicle</button>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span id="act-label">Act I · The Shattered Plains</span>
-        <span id="progress-count">0 / 180</span>
-      </div>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
-    </div>
-    <div class="log-wrap">
-      <div class="log-header">
-        <span class="log-title">The Chronicle</span>
-        <span class="log-act" id="log-act-tag"></span>
-      </div>
-      <div id="enemy-panel" style="display:none;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);">
-        <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;">⚔ Enemies</div>
-        <div id="enemy-list" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
-      </div>
-      <div id="initiative-wrap" style="display:none;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);"></div>
-      <!-- Story text zone -->
-      <div class="log-scroll" id="log-scroll"></div>
 
-      <!-- Unified bottom zone: choices + button, all in one card -->
-      <div id="chronicle-bottom" style="border-top:1px solid var(--border);">
+    <!-- Export button -->
+    <div style="display:flex;justify-content:flex-end;" id="export-btn-wrap">
+      <button class="btn btn-sm" onclick="exportToPDF()" style="font-size:12px;border-color:var(--gold-dim);color:var(--text4);">⬇ Export Chronicle</button>
+    </div>
 
-        <!-- Loading state -->
-        <div id="bottom-loading" style="display:none;padding:2rem;text-align:center;">
-          <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;" class="dots">The Stormfather deliberates</div>
-          <div style="display:flex;justify-content:center;gap:6px;">
+    <!-- Progress -->
+    <div class="prog-wrap">
+      <div class="prog-label">
+        <span id="act-label">Act I</span>
+        <span id="prog-count">0 / 180</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
+    </div>
+
+    <!-- Enemy / Initiative panels -->
+    <div id="enemy-panel" style="display:none;" class="combat-panel">
+      <div class="combat-label">⚔ Enemies</div>
+      <div class="enemy-list" id="enemy-list"></div>
+    </div>
+    <div id="initiative-panel" style="display:none;" class="combat-panel">
+      <div class="combat-label" id="init-round-label">⚔ Initiative</div>
+      <div class="init-row" id="init-row"></div>
+    </div>
+
+    <!-- Chronicle card — unified -->
+    <div class="chronicle-card">
+      <div class="chronicle-header">
+        <span class="chronicle-title">The Chronicle</span>
+        <span class="chronicle-act" id="chronicle-act"></span>
+      </div>
+      <div class="story-text" id="story-text">
+        <div style="text-align:center;color:var(--text4);font-style:italic;padding:2rem 0;">Waiting for all Radiants to join...</div>
+      </div>
+      <div class="bottom-zone">
+        <!-- Loading -->
+        <div id="bottom-loading">
+          <div class="loading-text dots">The Stormfather deliberates</div>
+          <div class="pulse-row">
             <div class="pulse-dot" style="animation-delay:0s"></div>
             <div class="pulse-dot" style="animation-delay:0.2s"></div>
             <div class="pulse-dot" style="animation-delay:0.4s"></div>
           </div>
         </div>
-
-        <!-- Human turn: choices + input + Act button -->
-        <div id="bottom-human" style="display:none;padding:16px 20px;">
+        <!-- Human turn -->
+        <div id="bottom-human">
           <div class="dice-flash" id="dice-flash"></div>
-          <div class="action-choices" id="action-choices" style="margin-bottom:12px;"></div>
+          <div class="action-choices" id="action-choices"></div>
           <div class="custom-row">
             <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220"/>
           </div>
-          <div id="action-err" class="err" style="display:none;margin-top:6px;"></div>
-          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
-            <button class="btn-act" id="act-btn" onclick="onSubmitAction()">Act →</button>
+          <div class="act-row">
+            <div class="err" id="action-err" style="display:none;"></div>
+            <button class="btn-act" onclick="onSubmitAction()">Act →</button>
           </div>
         </div>
-
-        <!-- Continue / NPC / Waiting state -->
-        <div id="bottom-continue" style="display:none;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <span id="continue-hint" style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--text5);font-style:italic;"></span>
+        <!-- Continue (NPC turn or post-read gate) -->
+        <div id="bottom-continue">
+          <span class="continue-hint" id="continue-hint"></span>
           <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled>Continue →</button>
         </div>
-
         <!-- Waiting for other human -->
-        <div id="bottom-waiting" style="display:none;padding:14px 20px;text-align:center;">
-          <span id="waiting-msg" style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--text5);">Waiting...</span>
+        <div id="bottom-waiting">
+          <span class="waiting-msg" id="waiting-msg">Waiting...</span>
         </div>
-
       </div>
     </div>
 
+    <!-- Character sheet -->
     <div>
       <button class="sheet-toggle" onclick="toggleSheet()"><span id="sheet-arrow">▸</span> Character Sheet</button>
       <div class="sheet-panel" id="sheet-panel" style="display:none;"></div>
@@ -436,7 +471,17 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   </div>
 </div>
 
+<!-- Audio bar -->
+<div class="audio-bar" id="audio-bar">
+  <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()" title="Toggle Storm">🔇</button>
+  <span class="audio-label" id="audio-label">OFF</span>
+  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)"/>
+</div>
+
 <script>
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
 const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
 const PROXY_URL='https://stormlight-proxy.goretusk55.workers.dev';
 const SA={
@@ -444,6 +489,7 @@ const SA={
   private_key:`-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClSJ0lSZVQAxUD\n44VpcHcNd2X71dz9syJ4FS3U1XOwHr4Dz4FiHThqEnm+cvjaBNaqcu4CgMOlEXt5\nsOYVy8JLvcICyhxEfh/jubSMGPUESOhGlV1T5Shmbtz2bNh7moqAeeFBiYLU5V9t\nVWO8GcMKU1KOinCrspkXq9jVCo8qLbuLC9ux6kJgZi2K2agkXaxUxKrQauZfn1YI\nBiM7SGOvdhzRlDswRhLP3xhoh0rOGXSzWzfo2/MphDfxUS9L4M6FBW3FVhHlvGNO\nDFY+gWIVD/uHlbsA1CXtjw7KdUzHtP+/QUCIyL6j6tdIsa8o9gMmW4V5m1EDg4jv\nHbwz+b+9AgMBAAECggEAGBs/pD0XtGxGp+MKxcab7pBgBPt7uFrkp5v7K8QYE/Nf\n5mFg7wTxAfOA4yiUqAO1pXWOxjmuj0g9+JE29a3awD5EajC9L7Yvg4DF1vsa3U2e\n5xCI5KATJOF9g8l7R4fSNIvSMUNTnCZ6JRGjsr8VJc/iRhzl8vzg/EVZojTgjZeS\n78GVpXHS408RuX19rsV3LEe/zeuz9SeVLc9jegbpjJk/XAb7Ipkkz6WMhvdahcya\nqheGY/SsoLhaHlensZdwDqij/DOgPMiDbbsVIUWKwegg+BnvcaLlehkn5Gl1Is6P\nSccIXiHBGB8i0g8DLA70xS6+TuEhA7fLzL1ZLlutJwKBgQDT6jZFGa2N88wNczOR\neTis8m3twI6LTSZQSdXX0nm7dd15qBaC/Ru5CuEhess+Vpv96nVmDAPyT+XBuWjl\nk6Q8810S7n/U5tk39MIBvouU+nOR/7KlIG5CxNbAILIRkVJ9W9RyYYkOIUaJ6eCM\nzsBfyei7bQtjgG46HIQSorXcnwKBgQDHqv9pYpe6ulpGbgsNwZ/ZpB5b9SiRhlGy\nZhlxA6O5C0gM0ymC3EoCi3C5Adnzm8pRNCgGxZu2u4QcuDpm5+tR8ddrz2Nsbgce\nfJbdWUFCi90U7qrQd8pAY46zdQFWqEkJY8BPHqloOlKymlGQL289BY1pR+MTpBWT\nQ6UdLoWqIwKBgQDQCbQxbh31p4uBAMF1ZP4Auxa0Oz80/g5I79NhRx1+rR06G4vO\nGFEo/cc6KORyVHBbe9q4zb7qGQnDfxO9nY200G1k8oLILcC9sCjtsXQyUxU2FUH5\n3bahEcCJaQ+nM3U53/bWO25jUsN/DP0G/snYv80cgtaVXjXYErqN2PKUnQKBgF8y\nCeAm34xpeM0HfkGqxRmxA8B4HEV1stHJl+un/pEk7c8fhjUb7jVUYgPy/AUHi+g3\nY7YG1PzEXnKK611QyYMiOMDv+ckilEZWxF74RQMDR/7I46vM0SLt1IV/DYpRZbES\nXAfc6IwG8pKwvJ5v3ytK0GcXnQ4qNxclMz28hoHdAoGAIDDnRLlZVgBdk6oijZI+\nb7jokuI9quDtomUCCHZyB+3mMq6hf9zOfKt+GsZz0Q512ezC4vbq0j5GCVT8uMRM\nYsOgyVkloyM8TeZNLE9LNVkX8MRL9gVstaBdMkqaq/Lkvn5wCuRBO69ZD5vrZPvF\n2uxw+l3wHWPcAIiPAXybsCM=\n-----END PRIVATE KEY-----\n`
 };
 
+// ══ GAME DATA ══
 const CLASSES=[
   {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Gravitation & pressure. Flies where others crawl, shields those who fall.',bonus:{str:2,dex:2,int:0,wis:0,cha:0,end:0},spren:'Honorspren',abilities:['Lashing','Full Lashing','Reverse Lashing','Windspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
   {id:'lightweaver',name:'Lightweaver',ideal:'I am who I needed when I was young',desc:'Illumination & transformation. Reality bends to your will.',bonus:{str:0,dex:1,int:2,wis:0,cha:2,end:0},spren:'Cryptic (Pattern)',abilities:['Soulcast','Major Illusion','Memory Weave','Lightweaving'],dmgBonus:{crit:2,hit:1,miss:0}},
@@ -456,7 +502,7 @@ const CLASSES=[
   {id:'bondsmith',name:'Bondsmith',ideal:'I will unite instead of divide',desc:'Tension & adhesion. The rarest Order — only three Bondsmiths can exist. You do not find the Sibling. The Sibling finds you.',bonus:{str:0,dex:0,int:1,wis:2,cha:2,end:0},spren:'The Sibling (Ancient Godspren of Urithiru)',abilities:['Adhesion Field','Spiritual Connection','Perpendicularity Pull','Bondsmith Aura'],dmgBonus:{crit:1,hit:0,miss:2}},
   {id:'skybreaker',name:'Skybreaker',ideal:'I will follow the law',desc:'Gravitation & division. Absolute in justice, terrifying in execution.',bonus:{str:1,dex:2,int:0,wis:0,cha:0,end:2},spren:'Highspren',abilities:['Division Strike','Gravitation Law','Judgment Lashing','Highspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
 ];
-// Spren bond evolution — 5 stages across 180 turns
+
 const SPREN_BONDS={
   windrunner:{name:'Sylphrena',nick:'Syl',stages:['A whisper on the wind follows you...','Syl drifts beside you, curious and cautious.','Syl solidifies into a spear of light. She speaks your name.','Syl argues with you now. She has opinions. Strong ones.','Syl becomes a Shardblade of living silver. She is yours. You are hers.'],color:'#b8d4f0'},
   lightweaver:{name:'Pattern',nick:'Pattern',stages:['Patterns flicker in glass and stone around you...','Pattern hums with mathematical delight on your sleeve.','Pattern speaks in riddles that are also truths.','Pattern confronts you with your own lies. Every one.','Pattern becomes a Shardblade of living crystal. Truth made blade.'],color:'#d4b8f0'},
@@ -467,57 +513,41 @@ const SPREN_BONDS={
   willshaper:{name:"Lunu'anaki",nick:'Lunu',stages:['The winds carry whispers meant only for you...','Lunu slides into view sideways, as if through a crack in the world.','Lunu laughs at locked doors. Nothing holds you both.','Lunu grows agitated at injustice. She wants to act. Now.','Lunu becomes a Shardblade of living wind. Unchained momentum.'],color:'#b8e8f0'},
   dustbringer:{name:'Spark',nick:'Spark',stages:['Ash falls upward near you sometimes...','Spark crackles with restrained energy, studying your hands.','Spark teaches restraint. Control. The discipline of fire.','Spark burns away your excuses. What remains is clarity.','Spark becomes a Shardblade of living ember. Controlled annihilation.'],color:'#f0c8a0'},
   bondsmith:{name:'The Sibling',nick:'Sibling',stages:['Something ancient stirs in the deep stone. It has noticed you.','The Sibling speaks without words — through vibration, through warmth in the walls.','The Sibling shows you what it means to hold two realms at once. The weight is immense.','The Sibling trusts you with a secret that predates the Desolations.','The Sibling fully awakens. Urithiru breathes again. You are the reason.'],color:'#e8e0c0'},
-  skybreaker:{name:'Nale',nick:'Nale',stages:['The law feels heavier when you are near...','A Highspren circles you, measuring. Judging.','The Highspren names you. You are bound to more than yourself now.','The law is not cruel. It is clear. The Highspren shows you the difference.','The Highspren becomes a Shardblade of living law. Justice given edge.'],color:'#a8c8f0'},
+  skybreaker:{name:'Nale (Highspren)',nick:'Highspren',stages:['The law feels heavier when you are near...','A Highspren circles you, measuring. Judging.','The Highspren names you. You are bound to more than yourself now.','The law is not cruel. It is clear. The Highspren shows you the difference.','The Highspren becomes a Shardblade of living law. Justice given edge.'],color:'#a8c8f0'},
 };
-function getSprenStage(totalMoves){
-  if(totalMoves<20)return 0;
-  if(totalMoves<50)return 1;
-  if(totalMoves<90)return 2;
-  if(totalMoves<140)return 3;
-  return 4;
-}
-function getSprenDesc(player,totalMoves){
-  const bond=SPREN_BONDS[player.classId];
-  if(!bond)return'';
-  const stage=getSprenStage(totalMoves||0);
-  return bond.stages[stage];
-}
 
-// Roshar world names — common citizens, soldiers, merchants, not famous heroes
-const NPC_NAMES_MALE=['Moash','Drehy','Skar','Lopen','Bisig','Eth','Rod','Natam','Peet','Yake','Dallet','Gaz','Jaks','Leyten','Fisk','Hobber','Narm','Redin','Tevos','Grund','Sheler','Khen','Vathah','Durk','Rill','Beld','Lesh','Habid','Tur','Sas'];
-const NPC_NAMES_FEMALE=['Tarah','Laral','Roshone','Meelis','Tien','Lirin','Hesina','Kaza','Lift','Nale','Cyn','Sheler','Ishar','Ym','Baxil','Avyanna','Sani','Marta','Kef','Dreya','Veil','Radiant','Malli','Cord','Rushu','Sebarial','Isasik','Palona','Rind','Fafen'];
-const NPC_NAMES_ALL=[...NPC_NAMES_MALE,...NPC_NAMES_FEMALE];
-const NPC_NAMES=NPC_NAMES_ALL; // kept for compatibility
-const NPC_COLORS=['#8060c8','#c84070','#2a6fa8','#8E6A34','#25956e','#c44a28','#BFA15A','#5a8a5a','#7a9a5a','#a06040','#5a6a9a','#9a5a70'];
-const COLORS=[
-  {name:'Amber',hex:'#e8a020'},{name:'Teal',hex:'#12a878'},
-  {name:'Coral',hex:'#d85030'},{name:'Blue',hex:'#2a80d0'},
-  {name:'Purple',hex:'#8060c8'},{name:'Rose',hex:'#c84070'},
-  {name:'Gold',hex:'#BFA15A'},{name:'Sage',hex:'#5a8a5a'},
-];
+const NPC_M=['Moash','Drehy','Skar','Lopen','Bisig','Eth','Rod','Natam','Peet','Yake','Dallet','Gaz','Jaks','Leyten','Fisk','Hobber','Narm','Redin','Tevos','Grund','Khen','Vathah','Durk','Rill','Beld','Lesh','Habid','Tur','Sas','Vev'];
+const NPC_F=['Tarah','Laral','Meelis','Kaza','Nale','Avyanna','Sani','Marta','Kef','Dreya','Malli','Cord','Rushu','Palona','Rind','Fafen','Lyn','Sebarial','Isasik','Torfin','Dru','Wit','Vamah','Shallan','Hesina','Baxil','Klade','Roshone','Meelis','Lirin'];
+const NPC_ALL=[...NPC_M,...NPC_F];
+const COLORS=[{name:'Amber',hex:'#e8a020'},{name:'Teal',hex:'#12a878'},{name:'Coral',hex:'#d85030'},{name:'Blue',hex:'#2a80d0'},{name:'Purple',hex:'#8060c8'},{name:'Rose',hex:'#c84070'},{name:'Gold',hex:'#BFA15A'},{name:'Sage',hex:'#5a8a5a'}];
+const NPC_COLORS=['#8060c8','#c84070','#2a6fa8','#8E6A34','#25956e','#c44a28','#BFA15A','#5a8a5a','#7a9a5a','#a06040'];
 const STAT_KEYS=['str','dex','int','wis','cha','end'];
 const STAT_NAMES=['STR','DEX','INT','WIS','CHA','END'];
-const ROSHAR_PHYSICAL=['Urithiru','Shattered Plains','Kholinar','Kharbranth','Thaylen City','Azimir','Purelake','Hearthstone','Rathalas','Reshi Isles','Aimia (Akinah)','Frostlands','Bavland','Herdaz','Jah Keved','Alethkar','Tukar','Triax','Liafor','Emul','Marat'];
-const ROSHAR_OTHER=['Braize (Damnation)','Ashyn — the Burning Planet','Aimian Sea','Godforge'];
-const ROSHAR_SHADESMAR=['Shadesmar — Sea of Regret','Shadesmar — Sea of Souls','Shadesmar — Sea of Lost Lights','Nexus of Imagination','Nexus of Truth','Nexus of Transition',"Honor's Perpendicularity","Cultivation's Perpendicularity"];
-const ROSHAR_STORY=['The Honor Chasm','Feverstone Keep','Stormseat (Narak)'];
-const ALL_LOCATIONS=[...ROSHAR_PHYSICAL,...ROSHAR_OTHER,...ROSHAR_SHADESMAR,...ROSHAR_STORY];
+const ROSHAR_P=['Urithiru','Shattered Plains','Kholinar','Kharbranth','Thaylen City','Azimir','Purelake','Hearthstone','Rathalas','Reshi Isles','Aimia (Akinah)','Frostlands','Bavland','Herdaz','Jah Keved','Alethkar','Tukar','Triax','Liafor','Emul','Marat'];
+const ROSHAR_O=['Braize (Damnation)','Ashyn — the Burning Planet','Aimian Sea','Godforge'];
+const ROSHAR_S=['Shadesmar — Sea of Regret','Shadesmar — Sea of Souls','Shadesmar — Sea of Lost Lights','Nexus of Imagination','Nexus of Truth','Nexus of Transition',"Honor's Perpendicularity","Cultivation's Perpendicularity"];
+const ROSHAR_L=['The Honor Chasm','Feverstone Keep','Stormseat (Narak)'];
+const ALL_LOCS=[...ROSHAR_P,...ROSHAR_O,...ROSHAR_S,...ROSHAR_L];
+const BASE_ACTS=[{num:1,tag:'Act I',start:0,end:59},{num:2,tag:'Act II',start:60,end:119},{num:3,tag:'Act III',start:120,end:179}];
+let ACTS=BASE_ACTS.map(a=>({...a,name:a.tag,location:'Roshar'}));
+const BLADE_TIERS=['Nascent','Bonded','Ancient','Living','Divine'];
+const BLADE_NAMES={windrunner:'Silverwind Blade',lightweaver:'Illusory Edge',edgedancer:'Verdant Blade',stoneward:'Granite Shardblade',elsecaller:'Obsidian Catalyst',truthwatcher:'Starlight Blade',willshaper:'Freedom Edge',dustbringer:'Ember Blade',bondsmith:'Sibling-Touched Blade',skybreaker:'Law Blade'};
 
+// ══ STATE ══
+let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
+let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
+let campaignId=null,pendingCampNum=null;
+// Bottom zone state: 'loading' | 'human' | 'continue' | 'waiting' | ''
+let bottomState='';
+let lastGMTs=''; // timestamp of last rendered GM entry — detects new ones
+
+// ══ LOCATION SEED ══
 function pickLocations(seed){
-  // Seeded shuffle — deterministic per campaign so all players see same locations
-  const rng=(n)=>{let x=Math.sin(seed+n)*10000;return x-Math.floor(x);};
-  const pool=[...ALL_LOCATIONS];
+  const rng=n=>{let x=Math.sin(seed+n)*10000;return x-Math.floor(x);};
+  const pool=[...ALL_LOCS];
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(rng(i)*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   return[pool[0],pool[1],pool[2]];
 }
-
-const BASE_ACTS=[
-  {num:1,tag:'Act I',start:0,end:59},
-  {num:2,tag:'Act II',start:60,end:119},
-  {num:3,tag:'Act III',start:120,end:179},
-];
-let ACTS=BASE_ACTS.map(a=>({...a,name:a.tag,location:'The Shattered Plains'}));
-
 function buildActs(seed){
   const locs=pickLocations(seed);
   ACTS=[
@@ -526,151 +556,74 @@ function buildActs(seed){
     {...BASE_ACTS[2],name:'The Storm over '+locs[2],location:locs[2]},
   ];
 }
-function getAct(moves){return ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];}
+function getAct(m){return ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];}
+function getSprenStage(m){if(m<20)return 0;if(m<50)return 1;if(m<90)return 2;if(m<140)return 3;return 4;}
 
-let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
-let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
-let lastRenderedGMTs=''; // track last displayed GM entry to detect new ones
-let campaignId=null; // e.g. 'Campaign1', 'Campaign2'
-let readGated=false; // true when player must read before acting
-
-function gateActions(){
-  readGated=true;
-  const wrap=document.getElementById('action-wrap');
-  const bar=document.getElementById('continue-bar');
-  const btn=document.getElementById('continue-btn');
-  const hint=document.getElementById('continue-hint');
-  if(wrap)wrap.classList.add('locked');
-  if(bar)bar.style.display='flex';
-  if(btn)btn.disabled=true;
-  if(hint)hint.textContent='Scroll down to read all →';
-  // Check if already at bottom (short text)
-  checkScrollBottom();
-}
-
-function checkScrollBottom(){
-  const scroll=document.getElementById('log-scroll');
-  const btn=document.getElementById('continue-btn');
-  const hint=document.getElementById('continue-hint');
-  if(!scroll||!btn)return;
-  const atBottom=scroll.scrollHeight<=scroll.clientHeight+10||
-                 scroll.scrollTop+scroll.clientHeight>=scroll.scrollHeight-10;
-  if(atBottom){
-    btn.disabled=false;
-    if(hint)hint.textContent='';
-  }
-}
-
-function onContinue(){
-  readGated=false;
-  const wrap=document.getElementById('action-wrap');
-  const bar=document.getElementById('continue-bar');
-  if(wrap)wrap.classList.remove('locked');
-  if(bar)bar.style.display='none';
-  // Only scroll to actions if it's a human's turn
-  if(myChar&&gState&&gState.players[gState.turn]&&gState.players[gState.turn].name===myChar.name){
-    setTimeout(()=>wrap&&wrap.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
-  }
-}
-function stateSheet(){return campaignId+'_State';}
-function logSheet(){const s=(campaignId||'NULL')+'_Log';return s;}
-
-async function getAccessToken(){
-  const header={alg:'RS256',typ:'JWT'};const now=Math.floor(Date.now()/1000);
-  const claim={iss:SA.client_email,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600};
+// ══ JWT / SHEETS AUTH ══
+let _tok=null,_tokExp=0;
+async function tok(){if(_tok&&Date.now()<_tokExp)return _tok;_tok=await getAT();_tokExp=Date.now()+3500000;return _tok;}
+async function getAT(){
+  const h={alg:'RS256',typ:'JWT'},now=Math.floor(Date.now()/1000);
+  const cl={iss:SA.client_email,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600};
   const b64=s=>btoa(unescape(encodeURIComponent(typeof s==='string'?s:JSON.stringify(s)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  const unsigned=b64(header)+'.'+b64(claim);
+  const u=b64(h)+'.'+b64(cl);
   const pem=SA.private_key.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g,'');
   const der=Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
   const key=await crypto.subtle.importKey('pkcs8',der,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
-  const jwt=unsigned+'.'+btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(u));
+  const jwt=u+'.'+btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`});
   return(await r.json()).access_token;
 }
-let _tok=null,_tokExp=0;
-async function tok(){if(_tok&&Date.now()<_tokExp)return _tok;_tok=await getAccessToken();_tokExp=Date.now()+3500000;return _tok;}
-async function sGet(r){const t=await tok();const res=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}`,{headers:{Authorization:`Bearer ${t}`}});return(await res.json()).values||[];}
-async function sSet(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
-async function sApp(r,v){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(r)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range:r,majorDimension:'ROWS',values:v})});}
+function stateSheet(){return(campaignId||'Campaign1')+'_State';}
+function logSheet(){return(campaignId||'Campaign1')+'_Log';}
+async function sGet(range){const t=await tok();const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`,{headers:{Authorization:`Bearer ${t}`}});return(await r.json()).values||[];}
+async function sSet(range,values){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range,majorDimension:'ROWS',values})});}
+async function sApp(range,values){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range,majorDimension:'ROWS',values})});}
 async function loadState(){try{const v=await sGet(stateSheet()+'!A1');if(v.length&&v[0][0])return JSON.parse(v[0][0]);}catch(e){}return null;}
 async function saveState(s){await sSet(stateSheet()+'!A1',[[JSON.stringify(s)]]);}
 async function loadLog(waitForGM){
-  // If waitForGM=true, retry until a 'gm' type entry is visible (Sheets eventual consistency)
   const attempts=waitForGM?6:1;
   for(let i=0;i<attempts;i++){
     try{
-      const sheet=logSheet();
-      console.log('loadLog: reading from sheet='+sheet+' campaignId='+campaignId);
-      const rows=await sGet(sheet+'!A:E');
+      const rows=await sGet(logSheet()+'!A:E');
       const entries=rows.map(r=>{
-        let choices=[];
-        try{if(r[3]&&r[3].trim().startsWith('['))choices=JSON.parse(r[3]);}catch(ex){}
+        let choices=[];try{if(r[3]&&r[3].trim().startsWith('['))choices=JSON.parse(r[3]);}catch(e){}
         return{type:r[0]||'',who:r[1]||'',text:r[2]||'',choices,ts:r[4]||''};
       }).filter(e=>e.type&&e.type.trim()!=='');
-      console.log('loadLog attempt '+(i+1)+': '+entries.length+' entries, hasGM:'+entries.some(e=>e.type==='gm'));
       if(!waitForGM||entries.some(e=>e.type==='gm'))return entries;
-    }catch(e){console.error('loadLog error:',e.message);if(i===attempts-1)return[];}
+    }catch(e){if(i===attempts-1)return[];}
     await new Promise(r=>setTimeout(r,1500));
   }
   return[];
 }
-async function addLog(e){
-  const sheet=logSheet();
-  console.log('addLog: writing type='+e.type+' to sheet='+sheet+' campaignId='+campaignId);
-  await sApp(sheet+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);
-}
+async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
 
-async function getSheetNames(){
-  const t=await tok();
-  const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();
-  return(info.sheets||[]).map(s=>s.properties.title);
-}
-async function createSheet(title){
-  const t=await tok();
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{addSheet:{properties:{title}}}]})});
-}
-async function deleteSheet(title){
-  const t=await tok();
-  const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();
-  const sheet=(info.sheets||[]).find(s=>s.properties.title===title);
-  if(!sheet)return;
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteSheet:{sheetId:sheet.properties.sheetId}}]})});
-}
-async function ensureSheets(){
-  const names=await getSheetNames();
-  const sn=stateSheet(),ln=logSheet();
-  if(!names.includes(sn))await createSheet(sn);
-  if(!names.includes(ln))await createSheet(ln);
-  if(!await loadState())await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});
-}
+// ══ SHEET MANAGEMENT ══
+async function getSheetNames(){const t=await tok();const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();return(info.sheets||[]).map(s=>s.properties.title);}
+async function createSheet(title){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{addSheet:{properties:{title}}}]})});}
+async function deleteSheet(title){const t=await tok();const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();const sh=(info.sheets||[]).find(s=>s.properties.title===title);if(!sh)return;await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteSheet:{sheetId:sh.properties.sheetId}}]})});}
+async function ensureSheets(){const names=await getSheetNames();const sn=stateSheet(),ln=logSheet();if(!names.includes(sn))await createSheet(sn);if(!names.includes(ln))await createSheet(ln);if(!await loadState())await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});}
 async function listCampaigns(){
   const names=await getSheetNames();
   const ids=[...new Set(names.filter(n=>n.endsWith('_State')).map(n=>n.replace('_State','')))];
   const camps=[];
-  for(const id of ids){
-    try{const v=await sGet(id+'_State!A1');const st=v.length&&v[0][0]?JSON.parse(v[0][0]):null;camps.push({id,state:st});}catch(e){camps.push({id,state:null});}
-  }
+  for(const id of ids){try{const v=await sGet(id+'_State!A1');const st=v.length&&v[0][0]?JSON.parse(v[0][0]):null;camps.push({id,state:st});}catch(e){camps.push({id,state:null});}}
   return camps;
 }
 
+// ══ SCREEN ROUTER ══
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');}
 
-async function goToCampaignPicker(){
-  showScreen('campaign');
-  document.getElementById('camp-status').textContent='Loading your campaigns...';
-  try{
-    const t=await tok();
-    await tok(); // ensure auth
-    const camps=await listCampaigns();
-    renderCampaigns(camps);
-    document.getElementById('camp-status').textContent='';
-  }catch(e){document.getElementById('camp-status').textContent='Could not connect: '+e.message;}
+// ══ CAMPAIGN PICKER ══
+async function initCampaignPicker(){
+  document.getElementById('camp-status').textContent='Connecting...';
+  try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
+  catch(e){document.getElementById('camp-status').textContent='Could not connect: '+e.message;}
 }
-
 function renderCampaigns(camps){
   const grid=document.getElementById('camp-grid');
-  const nextNum=camps.length+1;
+  const next=camps.length+1;
   grid.innerHTML=camps.map(cam=>{
     const st=cam.state;
     const phase=st?st.phase:'pregame';
@@ -681,103 +634,65 @@ function renderCampaigns(camps){
       <button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>
       <div class="camp-num">${cam.id.replace('Campaign','Campaign ')}</div>
       <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id.replace('Campaign','Campaign ')}</div>
-      <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+(moves)+'/180':'Awaiting Radiants'}</div>
-      <div class="camp-meta" style="margin-top:3px;">${players}</div>
+      <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+moves+'/180':'Awaiting Radiants'}</div>
+      <div class="camp-meta">${players}</div>
       <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
     </div>`;
-  }).join('')+
-  `<div class="camp-card new-camp" onclick="promptNewCampaign(${nextNum})">
-    <div class="camp-new-icon">+</div>
-    <div class="camp-new-txt">New Campaign ${nextNum}</div>
-  </div>`;
+  }).join('')+`<div class="camp-card new-camp" onclick="promptNewCampaign(${next})"><div class="camp-new-icon">+</div><div class="camp-new-txt">New Campaign ${next}</div></div>`;
 }
-
-let pendingCampaignNum=null;
-
 function promptNewCampaign(num){
-  pendingCampaignNum=num;
-  const modal=document.getElementById('new-camp-modal');
-  const input=document.getElementById('camp-name-input');
-  const err=document.getElementById('new-camp-err');
-  if(modal)modal.style.display='block';
-  if(input){input.value='';setTimeout(()=>input.focus(),50);}
-  if(err)err.style.display='none';
-  // Scroll to modal
-  if(modal)modal.scrollIntoView({behavior:'smooth',block:'nearest'});
+  pendingCampNum=num;
+  const m=document.getElementById('new-camp-modal');const inp=document.getElementById('camp-name-input');
+  if(m)m.style.display='block';if(inp){inp.value='';setTimeout(()=>inp.focus(),50);}
+  document.getElementById('new-camp-err').style.display='none';
+  m&&m.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
-function cancelNewCampaign(){
-  const modal=document.getElementById('new-camp-modal');
-  if(modal)modal.style.display='none';
-  pendingCampaignNum=null;
-}
-
+function cancelNewCampaign(){document.getElementById('new-camp-modal').style.display='none';pendingCampNum=null;}
 async function confirmNewCampaign(){
-  const input=document.getElementById('camp-name-input');
-  const err=document.getElementById('new-camp-err');
-  const name=(input&&input.value.trim())||'';
-  if(!name){
-    if(err){err.textContent='Give your campaign a name first.';err.style.display='block';}
-    return;
-  }
-  const num=pendingCampaignNum||1;
-  await newCampaign(num, name);
+  const name=document.getElementById('camp-name-input').value.trim();
+  if(!name){const e=document.getElementById('new-camp-err');e.textContent='Give your campaign a name first.';e.style.display='block';return;}
+  await launchNewCampaign(pendingCampNum||1,name);
 }
-
-async function newCampaign(num, campaignName){
+async function launchNewCampaign(num,name){
   campaignId='Campaign'+num;
-  const modal=document.getElementById('new-camp-modal');
-  if(modal)modal.style.display='none';
-  document.getElementById('camp-status').textContent='Creating "'+campaignName+'"...';
+  document.getElementById('new-camp-modal').style.display='none';
+  document.getElementById('camp-status').textContent='Creating "'+name+'"...';
   try{
-    await ensureSheets();
-    gState=await loadState();
-    partySize=3;
-    gState.partySize=3;
-    gState.campaignName=campaignName||campaignId;
-    myChar=null;
-    localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
-    // Save the name immediately
+    await ensureSheets();gState=await loadState();
+    partySize=3;gState.partySize=3;gState.campaignName=name;
+    myChar=null;localStorage.removeItem('sc_mychar_'+campaignId);
     await saveState(gState);
-    renderPSZ();
-    renderSlots(gState);
+    document.getElementById('title-sub').textContent=name;
+    renderPSZ();renderSlots(gState);
     showScreen('title');
-    // Show the campaign name on the title screen
-    const h2=document.querySelector('.title-h2');
-    if(h2)h2.textContent=campaignName;
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
 }
-
 async function selectCampaign(id){
   campaignId=id;
   document.getElementById('camp-status').textContent='Loading '+id+'...';
   try{
     gState=await loadState();
+    if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
     if(gState)partySize=gState.partySize||3;
-    myChar=loadMyChar(id);
+    myChar=loadMyChar();
     if(gState&&gState.phase==='playing'){showGameScreen();return;}
     if(gState&&gState.phase==='pregame'&&myChar){showScreen('lobby');renderLobby();return;}
-    partySize=gState?gState.partySize||3:3;
     renderPSZ();
+    const sub=document.getElementById('title-sub');
+    if(sub&&gState&&gState.campaignName)sub.textContent=gState.campaignName;
     renderSlots(gState||{players:new Array(partySize).fill(null),partySize});
     showScreen('title');
-    // Show campaign name in subtitle
-    const h2=document.querySelector('.title-h2');
-    if(h2&&gState&&gState.campaignName)h2.textContent=gState.campaignName;
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
 }
-
 async function deleteCampaign(id){
-  if(!confirm('Delete '+id+' permanently? This cannot be undone.'))return;
-  try{
-    await deleteSheet(id+'_State');
-    await deleteSheet(id+'_Log');
-    goToCampaignPicker();
-  }catch(e){alert('Delete failed: '+e.message);}
+  if(!confirm('Delete '+id+' permanently?'))return;
+  try{await deleteSheet(id+'_State');await deleteSheet(id+'_Log');initCampaignPicker();}
+  catch(e){alert('Delete failed: '+e.message);}
 }
 
+// ══ PARTY SIZE ══
 function renderPSZ(){
   const locked=gState&&gState.phase!=='pregame';
   if(locked)partySize=gState.partySize||3;
@@ -786,153 +701,69 @@ function renderPSZ(){
 function pickSize(n){
   if(gState&&gState.phase!=='pregame')return;
   partySize=n;
-  if(gState&&gState.phase==='pregame'){
-    const cur=gState.players||[];
-    gState.players=Array.from({length:n},(_,i)=>cur[i]||null);
-    gState.partySize=n;
-    saveState(gState).catch(()=>{}); // persist size to sheet
-  }
-  renderPSZ();
-  renderSlots(gState||{players:new Array(n).fill(null),partySize:n});
+  if(gState&&gState.phase==='pregame'){gState.players=Array.from({length:n},(_,i)=>gState.players[i]||null);gState.partySize=n;saveState(gState).catch(()=>{});}
+  renderPSZ();renderSlots(gState||{players:new Array(n).fill(null),partySize:n});
 }
 
+// ══ NPC GENERATION ══
 function genNPC(slot){
-  const cls=CLASSES[Math.floor(Math.random()*CLASSES.length)]; // random class too
-  const used=(gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name):[]);
-  const available=NPC_NAMES.filter(n=>!used.includes(n));
-  const name=available.length?available[Math.floor(Math.random()*available.length)]:('Radiant-'+(slot+1));
+  const cls=CLASSES[Math.floor(Math.random()*CLASSES.length)];
+  const used=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name):[];
+  const avail=NPC_ALL.filter(n=>!used.includes(n));
+  const isFemale=Math.random()<0.5;
+  const pool=isFemale?NPC_F.filter(n=>!used.includes(n)):NPC_M.filter(n=>!used.includes(n));
+  const name=(pool.length?pool:avail)[Math.floor(Math.random()*Math.max(pool.length,avail.length,1))]||'Radiant-'+(slot+1);
   const color=NPC_COLORS[Math.floor(Math.random()*NPC_COLORS.length)];
   const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
   const hp=12+stats.end;
-  const npcGender=Math.random()<0.5?'he/him':'she/her';
-  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender:npcGender};
+  const gender=isFemale?'she/her':'he/him';
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender};
 }
 
+// ══ SLOT RENDERING ══
 function renderSlots(st){
   const sz=st&&st.partySize?st.partySize:partySize;
   const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
   const grid=document.getElementById('slots-grid');
+  if(!grid)return;
   grid.style.gridTemplateColumns=cols;
   grid.innerHTML=Array.from({length:sz},(_,i)=>{
     const p=st&&st.players?st.players[i]:null;
     const isMe=myChar&&myChar.slot===i;
     const isTurn=st&&st.turn===i&&st.phase==='playing';
     if(!p)return`<div class="slot" onclick="pickSlot(${i})"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt">Empty — click to join</div></div>`;
-    if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI Companion</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span></div>`;
+    if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span></div>`;
     return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div>${isTurn?'<span class="slot-tag turn">⟁ Their Turn</span>':'<span class="slot-tag">Ready</span>'}</div>`;
   }).join('');
 }
 
-async function assignNPC(slot){
-  if(!gState||isLoading)return;
-  isLoading=true; // prevent double-click
-  const statusEl=document.getElementById('lobby-status');
-  if(statusEl)statusEl.textContent='Summoning companion...';
-  const npc=genNPC(slot);
-  gState.players[slot]=npc;
-  await saveState(gState);
-  isLoading=false;
-  const sz=gState.partySize||partySize;
-  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  if(allFilled&&gState.phase==='pregame'){
-    if(statusEl)statusEl.textContent='All Radiants assembled — beginning the saga...';
-    await startCampaign();
-  } else {
-    renderLobby();
-    if(document.getElementById('lobby-status'))document.getElementById('lobby-status').textContent='';
-  }
-}
-
-function renderLobby(){
-  if(!gState)return;
-  const sz=gState.partySize||partySize;
-  const humanCount=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
-  const npcCount=gState.players.slice(0,sz).filter(p=>p&&p.isNPC).length;
-  const emptyCount=gState.players.slice(0,sz).filter(p=>!p).length;
-
-  document.getElementById('lobby-title').textContent=campaignId||'Campaign';
-  document.getElementById('lobby-sub').textContent=`${humanCount} player${humanCount!==1?'s':''} joined · ${npcCount} AI companion${npcCount!==1?'s':''} · ${emptyCount} slot${emptyCount!==1?'s':''} open`;
-
-  const grid=document.getElementById('lobby-slots');
-  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
-  grid.style.gridTemplateColumns=cols;
-  grid.innerHTML=Array.from({length:sz},(_,i)=>{
-    const p=gState.players[i];
-    const isMe=myChar&&myChar.slot===i;
-    if(!p)return`<div class="slot" style="text-align:center;">
-      <div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div>
-      <div class="slot-empty-txt" style="margin-bottom:10px;">Waiting for a player</div>
-      <span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span>
-    </div>`;
-    if(p.isNPC)return`<div class="slot npc-slot">
-      <div class="slot-num">Slot ${i+1} · AI</div>
-      <div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div>
-      <div class="slot-class">${p.className}</div>
-      <span class="slot-tag npc">NPC</span>
-      <div style="margin-top:8px;"><span style="font-size:11px;color:var(--coral2);cursor:pointer;font-family:var(--font-display);letter-spacing:1px;" onclick="removeNPC(${i})">✕ Remove</span></div>
-    </div>`;
-    return`<div class="slot filled">
-      <div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div>
-      <div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div>
-      <div class="slot-class">${p.className}</div>
-      <span class="slot-tag">Ready</span>
-    </div>`;
-  }).join('');
-
-  // Actions
-  const actions=document.getElementById('lobby-actions');
-  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  const hasHuman=gState.players.slice(0,sz).some(p=>p&&!p.isNPC);
-  actions.innerHTML='';
-  if(allFilled&&hasHuman&&gState.phase==='pregame'){
-    actions.innerHTML+=`<button class="btn btn-gold" onclick="startNow()">⟁ Begin the Saga →</button>`;
-  }
-  actions.innerHTML+=`<button class="btn btn-sm" onclick="showScreen('campaign')">← Campaigns</button>`;
-}
-
-async function removeNPC(slot){
-  if(!gState)return;
-  gState.players[slot]=null;
-  await saveState(gState);
-  renderLobby();
-}
-
-async function startNow(){
-  if(isLoading)return;
-  const sz=gState.partySize||partySize;
-  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  const statusEl=document.getElementById('lobby-status');
-  if(!allFilled){if(statusEl)statusEl.textContent='Fill all slots first.';return;}
-  if(statusEl)statusEl.textContent='Speaking the Oaths...';
-  await startCampaign();
-}
-
+// ══ ENTER / JOIN ══
 async function onEnter(){
-  if(!campaignId){goToCampaignPicker();return;}
-  setStatus('Connecting to the Stormfather...');
+  if(!campaignId){initCampaignPicker();showScreen('campaign');return;}
+  setTitleStatus('Connecting...');
   try{
-    await ensureSheets();
-    gState=await loadState();
-    if(gState){partySize=gState.partySize||partySize;}
+    await ensureSheets();gState=await loadState();
+    if(gState){partySize=gState.partySize||partySize;if(gState.locationSeed)buildActs(gState.locationSeed);}
     renderPSZ();renderSlots(gState);
     myChar=loadMyChar();
     if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
     if(myChar&&gState&&gState.phase==='pregame'){showScreen('lobby');renderLobby();return;}
     const empty=gState&&gState.players?gState.players.findIndex(p=>!p):-1;
-    if(empty===-1){setStatus('All slots filled. Use the lobby to assign NPCs or ask a player to reset.');return;}
+    if(empty===-1){setTitleStatus('All slots filled.');return;}
     mySlot=empty;showScreen('create');renderCreate();
-  }catch(e){setStatus('Could not connect: '+e.message);}
+  }catch(e){setTitleStatus('Could not connect: '+e.message);}
 }
 function pickSlot(i){if(!gState||gState.players[i])return;mySlot=i;showScreen('create');renderCreate();}
-function setStatus(m){document.getElementById('title-status').textContent=m;}
+function setTitleStatus(m){const el=document.getElementById('title-status');if(el)el.textContent=m;}
 
+// ══ CHARACTER CREATION ══
 function renderCreate(){renderColors();renderClasses();rollStats();}
 function renderColors(){
   const taken=gState?gState.players.filter(Boolean).map(p=>p.color):[];
   document.getElementById('color-row').innerHTML=COLORS.map(c=>`<div class="cswatch${selColor===c.hex?' sel':''}" style="background:${c.hex};opacity:${taken.includes(c.hex)?0.2:1};" title="${c.name}" onclick="pickColor('${c.hex}',${taken.includes(c.hex)})"></div>`).join('');
 }
 function pickColor(h,t){if(t)return;selColor=h;renderColors();}
-function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Bonds: ${c.spren}</div><div class="ccard-bonus">Stats: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
+function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Spren: ${c.spren}</div><div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
 function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClasses();rollStats();}
 function rollStats(){const b=selClass?selClass.bonus:{str:0,dex:0,int:0,wis:0,cha:0,end:0};rolledStats={};STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));renderStats(rolledStats);}
 function r4d6(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,b)=>a-b);return d.slice(1).reduce((a,v)=>a+v,0);}
@@ -942,650 +773,556 @@ function renderStats(s){document.getElementById('stats-grid').innerHTML=STAT_KEY
 async function onCreateChar(){
   const name=document.getElementById('in-name').value.trim();
   const err=document.getElementById('create-err');
-  if(!name){showErr(err,'Speak your name first.');return;}
-  if(!selClass){showErr(err,'Choose your Order.');return;}
-  if(!selColor){showErr(err,'Choose your color.');return;}
+  if(!name){err.textContent='Speak your name first.';err.style.display='block';return;}
+  if(!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
+  if(!selColor){err.textContent='Choose your color.';err.style.display='block';return;}
   err.style.display='none';
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
-  const checkedGender=document.querySelector('input[name="gender"]:checked');
-  const gender=checkedGender?checkedGender.value:'he/him';
-  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender};
-  saveMyChar(myChar,campaignId);
+  const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender,fragments:0};
+  saveMyChar(myChar);
   gState.players[mySlot]=myChar;
   await saveState(gState);
-  const sz=gState.partySize||partySize;
-  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
-  if(allFilled&&gState.phase==='pregame'){await startCampaign();}
-  else{showScreen('lobby');renderLobby();}
+  showScreen('lobby');renderLobby();
 }
 
+// ══ LOBBY ══
+async function assignNPC(slot){
+  if(!gState||isLoading)return;
+  isLoading=true;
+  const st=document.getElementById('lobby-status');
+  if(st)st.textContent='Summoning companion...';
+  const npc=genNPC(slot);
+  gState.players[slot]=npc;
+  await saveState(gState);
+  isLoading=false;
+  renderLobby();
+  if(st)st.textContent='';
+}
+async function removeNPC(slot){if(!gState)return;gState.players[slot]=null;await saveState(gState);renderLobby();}
+function renderLobby(){
+  const sz=gState.partySize||partySize;
+  const humans=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
+  const npcs=gState.players.slice(0,sz).filter(p=>p&&p.isNPC).length;
+  const empty=gState.players.slice(0,sz).filter(p=>!p).length;
+  const titleEl=document.getElementById('lobby-title');
+  const subEl=document.getElementById('lobby-sub');
+  if(titleEl)titleEl.textContent=gState.campaignName||campaignId||'Campaign';
+  if(subEl)subEl.textContent=`${humans} player${humans!==1?'s':''} · ${npcs} AI companion${npcs!==1?'s':''} · ${empty} slot${empty!==1?'s':''} open`;
+  const grid=document.getElementById('lobby-slots');
+  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
+  grid.style.gridTemplateColumns=cols;
+  grid.innerHTML=Array.from({length:sz},(_,i)=>{
+    const p=gState.players[i];const isMe=myChar&&myChar.slot===i;
+    if(!p)return`<div class="slot" style="text-align:center;"><div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div><div class="slot-empty-txt" style="margin-bottom:10px;">Waiting for a player</div><span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span></div>`;
+    if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span><div style="margin-top:8px;"><span style="font-size:11px;color:var(--coral2);cursor:pointer;font-family:var(--font-d);letter-spacing:1px;" onclick="removeNPC(${i})">✕ Remove</span></div></div>`;
+    return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag">Ready</span></div>`;
+  }).join('');
+  const actions=document.getElementById('lobby-actions');
+  const allFilled=gState.players.slice(0,sz).every(p=>!!p);
+  const hasHuman=gState.players.slice(0,sz).some(p=>p&&!p.isNPC);
+  actions.innerHTML='';
+  if(allFilled&&hasHuman&&gState.phase==='pregame'){actions.innerHTML+=`<button class="btn btn-gold" onclick="startNow()">⟁ Begin the Saga →</button>`;}
+  actions.innerHTML+=`<button class="btn btn-sm" onclick="showScreen('campaign')">← Campaigns</button>`;
+}
+async function startNow(){
+  if(isLoading)return;
+  const sz=gState.partySize||partySize;
+  if(!gState.players.slice(0,sz).every(p=>!!p)){const st=document.getElementById('lobby-status');if(st)st.textContent='Fill all slots first.';return;}
+  const st=document.getElementById('lobby-status');if(st)st.textContent='Speaking the Oaths...';
+  await startCampaign();
+}
+
+// ══ CAMPAIGN START ══
 async function startCampaign(){
   gState.phase='playing';gState.turn=0;gState.totalMoves=0;
   if(!gState.locationSeed)gState.locationSeed=Math.floor(Math.random()*99999);
   buildActs(gState.locationSeed);
   await saveState(gState);
   await addLog({type:'system',who:'',text:'The Radiants have spoken their Oaths. The saga begins in '+ACTS[0].location+'. The Chronicles begin.',choices:[]});
-  showScreen('game');
-  startPolling();
+  showGameScreen();
+  setBottomLoading();
   await callGM(openingPrompt());
-  // Wait for at least 2 log entries (system + gm) to be readable from sheet
-  // gState.lastGM is now set by callGM — render immediately without waiting for Sheets cache
-  const freshLog=await loadLog(false);
-  renderParty();renderEnemies();renderInitiativeOrder();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
-  // gateActions handled by renderLog
-  // If first turn is NPC, handle it
-  if(gState&&gState.phase==='playing'){
-    const cur=gState.players[gState.turn];
-    if(cur&&cur.isNPC)await handleNPC(freshLog);
-  }
+  const log=await loadLog(true);
+  renderAll(log);
+  setBottomFromState(log);
 }
-
 function openingPrompt(){
   const sz=gState.partySize||partySize;
-  const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (NPC)':''}`).join(', ');
+  const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (NPC — acts via D4 dice, no AI decisions)':' (human player)'}`).join(', ');
   const a1=ACTS[0],a2=ACTS[1],a3=ACTS[2];
-  return`You are the Game Master for a dramatic Cosmere RPG on Roshar (Brandon Sanderson's Way of Kings universe). This is a 180-turn saga.
+  const gctx=getGenderContext();
+  return`You are the Game Master for a Cosmere DND-style RPG on Roshar (Way of Kings universe). 180-turn epic saga across 3 acts.
 
-THE THREE ACTS:
-ACT I (turns 1-60): ${a1.location}
-ACT II (turns 61-120): ${a2.location}
-ACT III (turns 121-180): ${a3.location}
+ACTS: I (1-60): ${a1.location} | II (61-120): ${a2.location} | III (121-180): ${a3.location}
+PARTY: ${names}${gctx}
 
-PARTY: ${names}
+STORYTELLING RULES — follow every turn without exception:
+1. SHOW don't tell. No "you sense danger" — show the crumbling wall, the spren flickering.
+2. VARY sentence structure. Mix short punchy lines with long atmospheric ones.
+3. EACH SCENE CHANGES SOMETHING. End every narration with the world in a different state.
+4. NO repeated weapon draws to open scenes. Find other ways to establish action.
+5. LOCATION SPECIFIC. ${a1.location} has unique features — smells, sounds, architecture, spren behavior.
+6. USE assigned pronouns consistently — never switch mid-scene.
 
-DRAMATIC STORYTELLING RULES — follow these every single turn:
-1. SHOW, DON'T TELL. No "you sense danger." Show the crumbling wall. Show the spren flickering. 
-2. VARY YOUR SENTENCES. Mix short punchy lines with long atmospheric ones. Never start two paragraphs the same way.
-3. EACH SCENE CHANGES SOMETHING. End every narration with the world in a different state than it began.
-4. NO REPEATED WEAPONS. Do not open with a character drawing their Shardblade or weapon every turn. Find other ways to establish action.
-5. ESCALATING STAKES. Each turn the situation should feel MORE urgent than the last — raise the cost of failure.
-6. CHARACTER VOICE. Reference the characters' specific class abilities and personalities. An Edgedancer moves differently than a Stoneward.
-7. LOCATION SPECIFICITY. ${a1.location} has unique features — use them. Smells, sounds, architecture, weather, spren behavior specific to this place.
-8. DRAMATIC IRONY. Sometimes let the reader sense danger the characters cannot.
-
-Open Act I in ${a1.location}. Describe an immediate crisis — specific, sensory, urgent. NOT a generic warcamp scene.
-
-[CHOICES] — 4 numbered options for ${gState.players[0].name} (${gState.players[0].className}), each reflecting a genuinely different approach (aggressive/cautious/clever/class-specific). Under 250 words total. Mark: [COMBAT], [DISCOVERY], or [DECISION].`;
+Open Act I in ${a1.location}. Immediate crisis — specific, sensory, urgent. Not a generic camp scene.
+[CHOICES] 4 numbered options for ${gState.players[0].name} (${gState.players[0].className}). Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.`;
 }
 
+// ══ GAME SCREEN ══
 async function showGameScreen(){
   showScreen('game');
-  startPolling();
-  await refreshGame();
-  // Show audio controls and auto-start ambient sound
   const ab=document.getElementById('audio-bar');
   if(ab)ab.style.display='flex';
-  // Auto-start storm on first game load (user interaction has happened)
-  if(!audioOn)setTimeout(()=>{try{startAudio();}catch(e){}},500);
+  startPolling();
+  await refreshGame();
 }
 
 async function refreshGame(){
-  const prevLastGM=gState&&gState.lastGM?{...gState.lastGM}:null; // save before reload
+  const prev=gState&&gState.lastGM?{...gState.lastGM}:null;
   gState=await loadState();
-  if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
-  const log=await loadLog(false);
-  // Restore lastGM: prefer log entry, then prev in-memory, then state
-  if(gState&&!gState.lastGM){
-    const lastGMEntry=[...log].reverse().find(e=>e.type==='gm');
-    if(lastGMEntry)gState.lastGM={text:lastGMEntry.text,choices:lastGMEntry.choices};
-    else if(prevLastGM)gState.lastGM=prevLastGM;
-  }
-  renderParty();renderEnemies();renderInitiativeOrder();renderLog(log);renderPill();renderProgress();renderActions(log);
-  if(gState&&gState.phase==='playing'&&!isLoading){
-    const cur=gState.players[gState.turn];
-    if(cur&&cur.isNPC){
-      await handleNPC(log);
-    } else {
-      // Gate if it's our turn and we haven't read yet
-      const myTurnNow=myChar&&cur&&cur.name===myChar.name;
-      // gateActions handled by renderLog
-    }
-  }
-}
-
-async function handleNPC(log){
-  if(isLoading)return;
-  const cur=gState.players[gState.turn];
-  if(!cur||!cur.isNPC)return;
-  // D4 roll — pure random, no AI tokens spent
-  const lastGM=[...log].reverse().find(e=>e.type==='gm');
-  const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Takes a defensive stance','Scouts the area','Searches for allies','Draws weapon and advances'];
-  const d4=Math.floor(Math.random()*Math.min(4,opts.length));
-  const pick=opts[d4];
-  // NPC acts silently — no UI update during processing
-  await new Promise(r=>setTimeout(r,600));
-  // Don't log the NPC choice visibly — it will be summarised by GM
-  const from=gState.turn;
-  const sz=gState.partySize||partySize;
-  gState.turn=(gState.turn+1)%sz;
-  gState.totalMoves=(gState.totalMoves||0)+1;
-  await saveState(gState);
-  await callGM(npcTurnPrompt(pick,cur,from));
-  // callGM already updated gState.lastGM in memory — don't overwrite with loadState
-  // Just reload the log for display (gState is already current)
-  if(gState&&gState.locationSeed)buildActs(gState.locationSeed);
-  const freshLog=await loadLog(false);
-  renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
-  // If next turn is also NPC, keep chaining
-  const nextCur=gState.players[gState.turn];
-  if(nextCur&&nextCur.isNPC){
-    await handleNPC(freshLog);
-  } // gateActions handled by renderLog on next render
-}
-
-function npcTurnPrompt(action,npc,from){
-  const moves=gState.totalMoves||0;
-  const act=getAct(moves);
-  const sz=gState.partySize||partySize;
-  const next=gState.players[gState.turn];
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} SprenBond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
-  const loc=act.location||act.name;
-  return`GM for Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name} — Location: ${loc}.
-Party: ${party}
-NPC ${npc.name} (${npc.className}) acted randomly: "${action}"
-
-Write TWO paragraphs:
-PARAGRAPH 1: Narrate what ${npc.name} did and its consequence (2-3 vivid sentences). This is the NPC summary the human player will read first.
-PARAGRAPH 2: Transition to the current situation — where things stand now, what demands the next player's attention.
-Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' — also NPC':' — human player')+')':"next turn"}.
-[CHOICES] exactly 4 numbered options for ${next?next.name:'next'} fitting their class (${next?next.className:'?'}) and the current location (${loc}).
-Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 180 words total.`;
-}
-
-function renderPill(){
-  const pill=document.getElementById('turn-pill');
-  if(!gState||!myChar)return;
-  const cur=gState.players[gState.turn];
-  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
-  pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} is acting...`:`Waiting for ${cur?cur.name:'...'}`;
-  pill.className='turn-pill'+(mine?' yours':'');
-}
-
-function renderParty(){
-  const s=document.getElementById('party-strip');
   if(!gState)return;
+  if(gState.locationSeed)buildActs(gState.locationSeed);
+  if(!gState.lastGM&&prev)gState.lastGM=prev;
+  const log=await loadLog(false);
+  if(gState&&!gState.lastGM){const lg=[...log].reverse().find(e=>e.type==='gm');if(lg)gState.lastGM={text:lg.text,choices:lg.choices,ts:lg.ts};}
+  renderAll(log);
+  setBottomFromState(log);
+  if(gState.phase==='playing'&&!isLoading){
+    const cur=gState.players[gState.turn];
+    if(cur&&cur.isNPC)handleNPC(log);
+  }
+}
+
+function renderAll(log){
+  renderParty();renderEnemies();renderInitiativeOrder();renderStory(log);renderProgress();
+}
+
+// ══ RENDER PARTY STRIP ══
+function renderParty(){
+  const s=document.getElementById('party-strip');if(!gState)return;
   const sz=gState.partySize||partySize;
   s.innerHTML=gState.players.slice(0,sz).map((p,i)=>{
     if(!p)return`<div class="ppip"><div class="ppip-top"><div class="ppip-dot" style="background:var(--border2);"></div><span class="ppip-name" style="color:var(--text5);">Empty</span></div></div>`;
     const pct=Math.round((p.hp/p.maxHp)*100);
-    const hpColor=pct>60?p.color:pct>30?'#BA7517':'#c44a28';
-    const sprenBond=SPREN_BONDS[p.classId];
-    const sprenStage=getSprenStage(gState.totalMoves||0);
-    const sprenName=sprenBond?sprenBond.nick:'';
-    const sprenColor=sprenBond?sprenBond.color:'var(--teal2)';
-    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}"><div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div><div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>${sprenName?`<div class="ppip-npc-tag" style="color:${sprenColor};">✦ ${sprenName} (Bond ${sprenStage+1}/5)</div>`:''}${p.isNPC?'<div class="ppip-npc-tag">AI COMPANION</div>':''}<div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${hpColor};"></div></div></div>`;
+    const hpCol=pct>60?p.color:pct>30?'#BA7517':'#c44a28';
+    const bond=SPREN_BONDS[p.classId];
+    const stage=getSprenStage(gState.totalMoves||0);
+    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}">
+      <div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div>
+      <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
+      ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} (${stage+1}/5)</div>`:''}
+      ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
+      ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade}</div>`:''}
+      <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${hpCol};"></div></div>
+    </div>`;
   }).join('');
 }
 
-function renderLog(log){
-  const s=document.getElementById('log-scroll');
-  // If log doesn't have GM entry yet but gState.lastGM exists, inject it temporarily
-  // Inject lastGM if log doesn't have it yet (Sheets cache lag)
-  if(gState&&gState.lastGM&&!log.some(e=>e.type==='gm')){
-    log=[...log,{type:'gm',who:'',text:gState.lastGM.text,choices:gState.lastGM.choices}];
+// ══ RENDER STORY TEXT ══
+function renderStory(log){
+  const el=document.getElementById('story-text');if(!el)return;
+  // Build display log — inject lastGM if sheet cache is stale
+  let dlog=[...log];
+  if(gState&&gState.lastGM&&!dlog.some(e=>e.type==='gm')){
+    dlog=[...dlog,{type:'gm',who:'',text:gState.lastGM.text,choices:gState.lastGM.choices,ts:gState.lastGM.ts||'mem'}];
   }
-  if(!log.length){s.innerHTML='<div class="entry-system">Waiting for Radiants to join...</div>';return;}
-  s.innerHTML=log.map(e=>{
+  if(!dlog.length){el.innerHTML='<div style="text-align:center;color:var(--text4);font-style:italic;padding:2rem 0;">Waiting for all Radiants to join...</div>';return;}
+
+  // Find latest GM entry for display
+  const latestGM=[...dlog].reverse().find(e=>e.type==='gm');
+  const isNew=latestGM&&(latestGM.ts||'new')!==lastGMTs;
+
+  // Build full log HTML
+  el.innerHTML=dlog.map(e=>{
     if(e.type==='gm'){
-      const badge=e.text.includes('[COMBAT]')?'<span class="event-badge badge-combat">Combat</span>':e.text.includes('[DISCOVERY]')?'<span class="event-badge badge-discovery">Discovery</span>':e.text.includes('[DECISION]')?'<span class="event-badge badge-decision">Decision</span>':'';
-      const clean=e.text.replace(/\[COMBAT\]|\[DISCOVERY\]|\[DECISION\]/g,'').replace(/\[CHOICES\][\s\S]*/,'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/^\*+$|^#+\s*/gm,'').trim();
+      const raw=e.text.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/^\*+$|^#+\s*/gm,'').trim();
+      const badge=raw.includes('[COMBAT]')?'<span class="event-badge badge-combat">Combat</span>':raw.includes('[DISCOVERY]')?'<span class="event-badge badge-discovery">Discovery</span>':raw.includes('[DECISION]')?'<span class="event-badge badge-decision">Decision</span>':'';
+      const clean=raw.replace(/\[COMBAT\]|\[DISCOVERY\]|\[DECISION\]/g,'').replace(/\[CHOICES\][\s\S]*/,'').trim();
       const safeText=clean.replace(/`/g,"'").replace(/\\/g,'');
       const act=getAct(gState&&gState.totalMoves||0);
-      return`<div class="entry-gm">${badge}<span class="gm-label">The Chronicle</span>${clean.replace(/\n/g,'<br/>')}<div style="margin-top:8px;"><button onclick="shareStoryMoment(this)" data-text="${safeText.substring(0,300)}" data-loc="${act.location||'Roshar'}" class="btn btn-sm" style="font-size:11px;padding:4px 12px;border-color:var(--border2);color:var(--text4);">📷 Share Moment</button></div></div>`;
+      return`<div style="border-left:2px solid var(--gold);padding-left:14px;margin-bottom:12px;">${badge}<span class="gm-label">The Chronicle</span>${clean.replace(/\n/g,'<br/>')}<br/><button class="share-btn" onclick="shareStoryMoment(this)" data-text="${safeText.substring(0,300)}" data-loc="${act.location||'Roshar'}">📷 Share Moment</button></div>`;
     }
-    if(e.type==='player'){const p=gState&&gState.players.find(x=>x&&x.name===e.who);return`<div class="entry-player"><div class="pname" style="color:${p?p.color:'var(--text3)'};">${e.who}</div>${e.text}</div>`;}
-    if(e.type==='npc')return`<div class="entry-npc"><div class="pname">${e.who} <span style="font-size:10px;">(AI)</span></div>${e.text}</div>`;
-    if(e.type==='loading')return`<div class="entry-loading"><span class="dots">The Stormfather deliberates</span></div>`;
-    return`<div class="entry-system">${e.text}</div>`;
+    if(e.type==='player'){const p=gState&&gState.players.find(x=>x&&x.name===e.who);return`<div class="entry-player"><div class="entry-pname" style="color:${p?p.color:'var(--text3)'};">${e.who}</div>${e.text}</div>`;}
+    if(e.type==='npc')return`<div class="entry-player" style="border-color:rgba(26,107,82,0.3);"><div class="entry-pname" style="color:var(--teal2);">${e.who} (AI)</div>${e.text}</div>`;
+    if(e.type==='system')return`<div class="entry-system">${e.text}</div>`;
+    return'';
   }).join('');
-  // New GM entry — set appropriate bottom state and scroll to top
-  if(newGMEntry&&latestGM){
-    lastRenderedGMTs=latestGM.ts||'new';
-    const cur=gState&&gState.players[gState.turn];
-    const mine=cur&&myChar&&!cur.isNPC&&cur.name===myChar.name;
-    const npcTurn=cur&&cur.isNPC;
-    setTimeout(()=>{
-      s.scrollTop=0;
-      if(mine){showBottomState('human',{choices:latestGM.choices||[]});}
-      else if(npcTurn){showBottomState('continue');}
-      else{showBottomState('waiting',{name:cur&&cur.name});}
-    },50);
-  } else if(!readGated){
-    s.scrollTop=s.scrollHeight;
+
+  // Detect new GM entry — update bottom state
+  if(isNew&&latestGM){
+    lastGMTs=latestGM.ts||'new';
+    el.scrollTop=0;
+    setTimeout(()=>setBottomFromState(dlog),80);
   }
 }
 
-function renderProgress(){
-  const m=gState?gState.totalMoves:0;
-  const act=getAct(m);
-  document.getElementById('act-label').textContent=`${act.tag} · ${act.location||act.name}`;
-  document.getElementById('progress-count').textContent=`${m} / 180`;
-  document.getElementById('progress-fill').style.width=Math.min(100,Math.round(m/180*100))+'%';
-  document.getElementById('log-act-tag').textContent=act.tag;
+// ══ BOTTOM ZONE STATE MACHINE ══
+function setBottomLoading(){
+  bottomState='loading';
+  document.getElementById('bottom-loading').style.display='block';
+  document.getElementById('bottom-human').style.display='none';
+  document.getElementById('bottom-continue').style.display='none';
+  document.getElementById('bottom-waiting').style.display='none';
+  // Clear story text, show spinner
+  const el=document.getElementById('story-text');
+  if(el)el.innerHTML='';
 }
 
-function renderActions(log){
-  const wrap=document.getElementById('action-wrap');
-  const hdr=document.getElementById('action-header');
-  const ch=document.getElementById('action-choices');
+function setBottomFromState(log){
   if(!gState||!myChar)return;
   const cur=gState.players[gState.turn];
-  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
+  if(!cur)return;
+  const mine=!cur.isNPC&&cur.name===myChar.name;
+  const npc=cur.isNPC;
+  const lastGM=(gState.lastGM)||[...log].reverse().find(e=>e.type==='gm');
+  const choices=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:[];
+
+  if(mine){setBottomReadGate(choices);}
+  else if(npc){setBottomContinue('NPC turn — press Continue to advance');}
+  else{setBottomWaiting(cur.name);}
+}
+
+function setBottomReadGate(choices){
+  // Show Continue first — after user reads, Continue reveals the choices
+  bottomState='human-gated';
+  document.getElementById('bottom-loading').style.display='none';
+  document.getElementById('bottom-human').style.display='none';
+  document.getElementById('bottom-waiting').style.display='none';
+  const cont=document.getElementById('bottom-continue');
+  cont.style.display='flex';
+  const btn=document.getElementById('continue-btn');
+  const hint=document.getElementById('continue-hint');
+  btn.disabled=true;
+  hint.textContent='Scroll down to read →';
+  // Store choices for after Continue
+  btn._pendingChoices=choices;
+  // Enable after scroll or 4s
+  setTimeout(enableContinue,4000);
+  checkScrollEnable();
+}
+
+function setBottomContinue(hintText){
+  bottomState='continue';
+  document.getElementById('bottom-loading').style.display='none';
+  document.getElementById('bottom-human').style.display='none';
+  document.getElementById('bottom-waiting').style.display='none';
+  const cont=document.getElementById('bottom-continue');
+  cont.style.display='flex';
+  const btn=document.getElementById('continue-btn');
+  const hint=document.getElementById('continue-hint');
+  btn.disabled=true;
+  hint.textContent='Scroll to read →';
+  btn._pendingChoices=null;
+  setTimeout(enableContinue,4000);
+  checkScrollEnable();
+}
+
+function setBottomWaiting(name){
+  bottomState='waiting';
+  document.getElementById('bottom-loading').style.display='none';
+  document.getElementById('bottom-human').style.display='none';
+  document.getElementById('bottom-continue').style.display='none';
+  const wait=document.getElementById('bottom-waiting');
+  wait.style.display='block';
+  document.getElementById('waiting-msg').textContent=name?`Waiting for ${name}...`:'Waiting...';
+}
+
+function enableContinue(){
+  const btn=document.getElementById('continue-btn');
+  const hint=document.getElementById('continue-hint');
+  if(btn)btn.disabled=false;
+  if(hint)hint.textContent='';
+}
+
+function checkScrollEnable(){
+  const cont=document.getElementById('bottom-continue');
+  if(!cont||cont.style.display==='none')return;
+  const rect=cont.getBoundingClientRect();
+  const visible=rect.top<window.innerHeight+40;
+  if(visible)enableContinue();
+}
+
+function onContinue(){
+  const btn=document.getElementById('continue-btn');
+  const choices=btn&&btn._pendingChoices;
+  document.getElementById('bottom-continue').style.display='none';
+  const cur=gState&&gState.players[gState.turn];
+  const mine=cur&&myChar&&!cur.isNPC&&cur.name===myChar.name;
   const npc=cur&&cur.isNPC;
-  if(npc){hdr.textContent=`${cur.name} is taking their turn...`;wrap.style.opacity='0.5';wrap.style.pointerEvents='none';ch.innerHTML=`<div class="waiting-msg">The AI companion acts — one moment...</div>`;return;}
-  if(!mine){hdr.textContent=cur?`Waiting for ${cur.name} to act...`:'Awaiting the next Radiant...';wrap.style.opacity='0.5';wrap.style.pointerEvents='none';ch.innerHTML=`<div class="waiting-msg">Check back at your next lunch — the storm waits for you.</div>`;return;}
-  wrap.style.opacity='1';wrap.style.pointerEvents='auto';hdr.textContent='Your Turn — Choose Your Action';
-  // Prefer gState.lastGM (instant) over log scan (may be stale)
-  const lastGM=(gState&&gState.lastGM)||[...log].reverse().find(e=>e.type==='gm');
-  if(lastGM&&lastGM.choices&&lastGM.choices.length){ch.innerHTML=lastGM.choices.map((c,i)=>`<button class="achoice" onclick="selAct(this,\`${c.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${c}</button>`).join('');}
-  else{ch.innerHTML='';}
-}
 
-function selAct(btn,txt){document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selActionText=txt;document.getElementById('custom-in').value='';}
-
-function renderEnemies(){
-  if(!gState||!gState.enemies||!gState.enemies.length){
-    const p=document.getElementById('enemy-panel');if(p)p.style.display='none';return;
+  if(mine){
+    // Reveal choices for human
+    bottomState='human';
+    const h=document.getElementById('bottom-human');
+    const ch=document.getElementById('action-choices');
+    if(choices&&choices.length){
+      ch.innerHTML=choices.map((c,i)=>`<button class="achoice" onclick="selAct(this,\`${c.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${c}</button>`).join('');
+    } else {ch.innerHTML='';}
+    h.style.display='block';
+    setTimeout(()=>h.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  } else if(npc&&!isLoading){
+    // Trigger NPC silently
+    loadLog(false).then(log=>handleNPC(log));
   }
-  const living=gState.enemies.filter(e=>e.hp>0);
-  const p=document.getElementById('enemy-panel');
-  const el=document.getElementById('enemy-list');
-  if(!p||!el)return;
-  p.style.display=living.length?'block':'none';
-  el.innerHTML=living.map(e=>{
-    const pct=Math.round((e.hp/e.maxHp)*100);
-    const col=pct>60?'#c44a28':pct>30?'#BA7517':'#888';
-    return`<div style="background:var(--bg2);border:1px solid rgba(196,74,40,0.3);border-radius:8px;padding:7px 12px;min-width:120px;">
-      <div style="font-family:var(--font-display);font-size:11px;color:var(--coral2);">${e.name}</div>
-      <div style="font-size:12px;color:var(--text3);">${e.hp}/${e.maxHp} HP · ${e.type}</div>
-      <div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width 0.4s;"></div></div>
-    </div>`;
-  }).join('');
 }
 
-function spawnEnemies(sceneText){
-  // Detect combat and spawn appropriate enemies from scene text
-  if(!sceneText.includes('[COMBAT]'))return;
-  const existing=gState.enemies||[];
-  if(existing.some(e=>e.hp>0))return; // already have live enemies
+// ══ NPC TURN ══
+async function handleNPC(log){
+  if(isLoading)return;
+  const cur=gState.players[gState.turn];
+  if(!cur||!cur.isNPC)return;
+  isLoading=true;
+  // D4 pick — silent, no display
+  const lastGM=[...log].reverse().find(e=>e.type==='gm');
+  const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Takes a defensive stance','Scouts the area','Searches for allies','Draws weapon and advances'];
+  const d4=Math.floor(Math.random()*Math.min(4,opts.length));
+  const pick=opts[d4];
+  await new Promise(r=>setTimeout(r,600));
+  const from=gState.turn;
   const sz=gState.partySize||partySize;
-  const avgLvl=Math.floor((gState.totalMoves||0)/20)+1;
-  // Enemy pools by location type
-  const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
-  let pool=[];
-  if(loc.includes('shadesmar')||loc.includes('cognitive')||loc.includes('nexus'))
-    pool=[{name:'Voidspren',type:'Spirit',hp:8+avgLvl,maxHp:8+avgLvl},{name:'Gloomform',type:'Unmade Fragment',hp:12+avgLvl*2,maxHp:12+avgLvl*2}];
-  else if(loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar'))
-    pool=[{name:'Parshendi Scout',type:'Warrior',hp:10+avgLvl,maxHp:10+avgLvl},{name:'Parshendi Shardbearer',type:'Elite',hp:18+avgLvl*2,maxHp:18+avgLvl*2}];
-  else if(loc.includes('braize')||loc.includes('damnation'))
-    pool=[{name:'Fused',type:'Ancient',hp:20+avgLvl*2,maxHp:20+avgLvl*2},{name:'Regals',type:'Parsh Void',hp:12+avgLvl,maxHp:12+avgLvl}];
-  else
-    pool=[{name:'Void Creature',type:'Unknown',hp:10+avgLvl,maxHp:10+avgLvl},{name:'Darkform Warrior',type:'Soldier',hp:14+avgLvl,maxHp:14+avgLvl}];
-  // Spawn 1-2 enemies scaled to party size
-  const count=Math.min(sz,2);
-  gState.enemies=pool.slice(0,count).map(e=>({...e,id:Date.now()+Math.random()}));
-  rollInitiative(gState); // set initiative order for this combat
+  gState.turn=(gState.turn+1)%sz;
+  gState.totalMoves=(gState.totalMoves||0)+1;
+  if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
+  await saveState(gState);
+  setBottomLoading();
+  await callGM(npcPrompt(pick,cur,from));
+  isLoading=false;
+  const freshLog=await loadLog(true);
+  renderAll(freshLog);
+  setBottomFromState(freshLog);
+  // Chain NPC if next is also NPC
+  const next=gState.players[gState.turn];
+  if(next&&next.isNPC)handleNPC(freshLog);
 }
 
-// ── INITIATIVE SYSTEM ──
-function rollInitiative(st){
-  if(!st.enemies||!st.enemies.length)return;
-  const sz=st.partySize||partySize;
-  // Roll initiative for all combatants
-  const combatants=[];
-  st.players.slice(0,sz).filter(Boolean).forEach(p=>{
-    const dex=p.stats&&p.stats.dex||10;
-    const init=Math.ceil(Math.random()*20)+Math.floor((dex-10)/2);
-    combatants.push({name:p.name,type:'player',initiative:init,isNPC:p.isNPC});
-  });
-  (st.enemies||[]).filter(e=>e.hp>0).forEach(e=>{
-    const init=Math.ceil(Math.random()*20)+2;
-    combatants.push({name:e.name,type:'enemy',initiative:init});
-  });
-  // Sort by initiative descending
-  combatants.sort((a,b)=>b.initiative-a.initiative);
-  st.combatOrder=combatants;
-  st.combatRound=1;
-  st.combatActive=true;
-  console.log('Initiative order:',combatants.map(c=>c.name+'('+c.initiative+')').join(' > '));
+function npcPrompt(action,npc,from){
+  const m=gState.totalMoves||0;const act=getAct(m);
+  const sz=gState.partySize||partySize;
+  const next=gState.players[gState.turn];
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
+  const loc=act.location||act.name;
+  const gctx=getGenderContext();
+  const mctx=getSprenMemoryContext();
+  return`Cosmere RPG GM. Turn ${m}/180. ${act.tag}: ${loc}.
+Party: ${party}${gctx}${mctx}
+
+NPC ${npc.name} (${npc.className}) randomly chose: "${action}"
+
+Write TWO paragraphs:
+PARAGRAPH 1 (NPC summary): What ${npc.name} did and its immediate consequence. 2-3 vivid sentences.
+PARAGRAPH 2 (Situation): Where things stand now. What demands ${next?next.name+"'s":'the next player'} attention.
+
+It is now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':'next turn'}.
+[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}) specific to their class AND ${loc}.
+Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.`;
 }
 
-function renderInitiativeOrder(){
-  const wrap=document.getElementById('initiative-wrap');
-  if(!wrap)return;
-  if(!gState||!gState.combatActive||!gState.combatOrder||!gState.combatOrder.length){
-    wrap.style.display='none';return;
-  }
-  wrap.style.display='block';
-  const cur=gState.players&&gState.players[gState.turn];
-  wrap.innerHTML=`
-    <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;">⚔ Round ${gState.combatRound||1} — Initiative Order</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      ${gState.combatOrder.map(co=>{
-        const isEnemy=co.type==='enemy';
-        const isCurrent=cur&&co.name===cur.name;
-        const defeated=(gState.enemies||[]).find(e=>e.name===co.name&&e.hp<=0);
-        return`<div style="padding:4px 10px;border-radius:20px;font-family:var(--font-display);font-size:10px;letter-spacing:1px;
-          border:1px solid ${defeated?'var(--border)':isEnemy?'rgba(196,74,40,0.4)':'rgba(191,161,90,0.3)'};
-          background:${isCurrent?'rgba(191,161,90,0.12)':'var(--bg3)'};
-          color:${defeated?'var(--text5)':isEnemy?'var(--coral2)':'var(--amber2)'};
-          text-decoration:${defeated?'line-through':'none'};">
-          ${co.initiative} ${co.name}
-        </div>`;
-      }).join('')}
-    </div>`;
-}
-
-function applyRollDamage(roll, actor, st){
-  const cls=CLASSES.find(c=>c.id===actor.classId)||CLASSES[0];
-  const db=cls.dmgBonus||{crit:2,hit:1,miss:0};
-  const sz=st.partySize||partySize;
-  let msg='';
-  // Deal damage to a live enemy if any exist
-  const liveEnemies=(st.enemies||[]).filter(e=>e.hp>0);
-  const targetEnemy=liveEnemies.length?liveEnemies[Math.floor(Math.random()*liveEnemies.length)]:null;
-  if(roll>=18){
-    // Earn a Stormlight Fragment on crit
-    if(!actor.fragments)actor.fragments=0;
-    actor.fragments++;
-    if(targetEnemy){
-      const dmgDealt=db.crit+Math.floor(Math.random()*3)+1+(actor.bladeLevel||0);
-      targetEnemy.hp=Math.max(0,targetEnemy.hp-dmgDealt);
-      const defeatedBonus=targetEnemy.hp===0?3:0;
-      if(defeatedBonus){actor.fragments+=defeatedBonus;}
-      msg=`✦ Critical! ${targetEnemy.name} takes ${dmgDealt} dmg (${targetEnemy.hp}/${targetEnemy.maxHp} HP)${targetEnemy.hp===0?' — DEFEATED! +3 Fragments':''}  Fragments: ${actor.fragments}`;
-    } else {
-      const heal=Math.min(2,actor.maxHp-actor.hp);
-      if(heal>0){actor.hp=Math.min(actor.maxHp,actor.hp+heal);msg=`⬆ +${heal} HP (Stormlight surge)`;}
-      else msg=`✦ Critical strike`;
-    }
-  } else if(roll>=10){
-    if(targetEnemy){
-      const dmgDealt=db.hit+Math.floor(Math.random()*2);
-      targetEnemy.hp=Math.max(0,targetEnemy.hp-dmgDealt);
-      msg=`Hit! ${targetEnemy.name} -${dmgDealt} HP${targetEnemy.hp===0?' — DEFEATED!':''}`;
-      // Also take chip damage
-      const chip=Math.max(0,Math.floor(Math.random()*2));
-      if(chip>0){actor.hp=Math.max(1,actor.hp-chip);msg+=` / ⬇ -${chip} HP`;}
-    } else {
-      const dmg=Math.max(0,Math.floor(Math.random()*2));
-      if(dmg>0){actor.hp=Math.max(1,actor.hp-dmg);msg=`⬇ -${dmg} HP`;}
-      else msg='';
-    }
-  } else if(roll>=6){
-    // Failure — take real damage
-    const dmg=Math.floor(Math.random()*3)+1; // 1-3 dmg
-    actor.hp=Math.max(1,actor.hp-dmg);
-    msg=`⬇ -${dmg} HP (${actor.hp}/${actor.maxHp} remaining)`;
-  } else {
-    // Critical failure — heavy damage, could down the character
-    const dmg=Math.floor(Math.random()*4)+2; // 2-5 dmg
-    actor.hp=Math.max(0,actor.hp-dmg);
-    msg=`💀 -${dmg} HP${actor.hp===0?' — DOWNED!':''}`;
-  }
-  // Edgedancer Regrowth — passive heal on partial success
-  if(actor.classId==='edgedancer'&&roll>=10&&roll<18&&actor.hp<actor.maxHp){
-    actor.hp=Math.min(actor.maxHp,actor.hp+1);msg+=' ✦ Regrowth +1';
-  }
-  // Equipment drop on critical success in combat
-  let dropMsg='';
-  if(roll>=18&&(st.enemies||[]).some(e=>e.hp<=0)){
-    // Enemy was just defeated — chance of equipment drop
-    const dropRoll=Math.random();
-    if(dropRoll>0.7&&!actor.shardplate){
-      actor.shardplate=true;
-      actor.maxHp=Math.round(actor.maxHp*1.4);
-      actor.hp=Math.min(actor.maxHp,actor.hp+8);
-      dropMsg=' ⬛ SHARDPLATE CLAIMED! Max HP +40%, +8 HP';
-    } else if(dropRoll>0.4&&!actor.shardblade){
-      const bladeTypes=['Etched Shardblade','Honorblade Fragment','Living Blade Shard','Voidblade Remnant'];
-      actor.shardblade=bladeTypes[Math.floor(Math.random()*bladeTypes.length)];
-      dropMsg=` ⚔ ${actor.shardblade} found! +2 to all combat rolls`;
-    }
-    if(dropMsg){
-      st.enemies=(st.enemies||[]).filter(e=>e.hp>0);
-      if(!st.enemies.length){st.combatActive=false;st.combatOrder=[];st.combatRound=0;}
-    }
-  }
-  // Update in gState
-  const idx=st.players.findIndex(p=>p&&p.name===actor.name);
-  if(idx>=0){st.players[idx]=actor;if(myChar&&myChar.name===actor.name)myChar=actor;saveMyChar(actor,campaignId);}
-  return msg+dropMsg;
-}
+// ══ HUMAN TURN ══
+function selAct(btn,txt){document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selActionText=txt;document.getElementById('custom-in').value='';}
 
 async function onSubmitAction(){
   const custom=document.getElementById('custom-in').value.trim();
   const action=custom||selActionText;
   const errEl=document.getElementById('action-err');
-  if(!action){showErr(errEl,'Choose or describe an action first.');return;}
+  if(!action){errEl.textContent='Choose or describe an action first.';errEl.style.display='block';return;}
   errEl.style.display='none';
   if(isLoading)return;
-  // Show loading state immediately — clear story, show spinner
-  showBottomState('loading');
+  isLoading=true;
+  // Show loading immediately
+  setBottomLoading();
   window.scrollTo({top:0,behavior:'smooth'});
+  // Roll dice
   const roll=Math.ceil(Math.random()*20);
   const sk=getStat(action);
-  const sv=myChar.stats[sk]||10;
-  const bonus=Math.floor((sv-10)/2);
+  const sv=(myChar.stats&&myChar.stats[sk])||10;
+  const bonus=Math.floor((sv-10)/2)+(myChar.bladeLevel||0);
   const total=Math.min(20,Math.max(1,roll+bonus));
-  // Apply HP damage/healing based on roll outcome
-  const dmgResult=applyRollDamage(total,myChar,gState);
-  document.getElementById('dice-flash').textContent=`d20: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total} ${dmgResult}`;
+  document.getElementById('dice-flash').textContent=`d20: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
+  // Apply HP/damage
+  const dmgMsg=applyRollDamage(total,myChar,gState);
+  if(dmgMsg)document.getElementById('dice-flash').textContent+=` ${dmgMsg}`;
+  // Record spren memory
+  recordSprenMemory(action,total,gState.totalMoves||0);
+  // Log action
   await addLog({type:'player',who:myChar.name,text:action,choices:[]});
-  // Spren memory — record dramatic moments
-  recordSprenMemory(action, total, gState.totalMoves||0);
   const from=gState.turn;
   const sz=gState.partySize||partySize;
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
+  if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
   await saveState(gState);
   selActionText='';document.getElementById('custom-in').value='';
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
+  // GM response
   await callGM(turnPrompt(action,total,sk,from));
-  const savedLastGM=gState&&gState.lastGM?{...gState.lastGM}:null; // preserve before refresh
-  await refreshGame();
-  // Restore lastGM if refreshGame's loadState cleared it
-  if(savedLastGM&&gState&&!gState.lastGM)gState.lastGM=savedLastGM;
-  // gateActions is now handled by renderLog detecting new GM entries
+  isLoading=false;
+  const freshLog=await loadLog(true);
+  renderAll(freshLog);
+  setBottomFromState(freshLog);
 }
 
 function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
 
+// ══ GM CALL ══
 async function callGM(prompt){
-  isLoading=true;
-  const logEl=document.getElementById('log-scroll');
-  if(logEl){const d=document.createElement('div');d.className='entry-loading';d.id='gm-loading-div';d.innerHTML='<span class="dots">The Stormfather deliberates</span>';logEl.appendChild(d);}
   try{
-    console.log('callGM: calling proxy...');
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
-    console.log('callGM: response status',res.status,'error:',data.error||'none');
     if(data.error)throw new Error(JSON.stringify(data.error));
     const raw=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
-    console.log('callGM: raw length',raw.length);
     const choices=(raw.match(/^\d+\.\s+.+$/gm)||[]).map(c=>c.replace(/^\d+\.\s*/,''));
     const scene=raw.replace(/\[CHOICES\][\s\S]*/,'').trim();
-    console.log('callGM: scene length',scene.length,'choices',choices.length);
+    if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};spawnEnemies(scene);await saveState(gState);}
     await addLog({type:'gm',who:'',text:scene,choices});
-    console.log('callGM: written to sheet');
-    if(gState){
-      gState.lastGM={text:scene,choices,ts:new Date().toISOString()};
-      spawnEnemies(scene); // spawn enemies if COMBAT scene
-      await saveState(gState);
-    }
   }catch(e){
     console.error('callGM error:',e.message);
-    await addLog({type:'gm',who:'',text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[]});
+    if(gState){gState.lastGM={text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[],ts:new Date().toISOString()};await saveState(gState);}
+    await addLog({type:'gm',who:'',text:'The Stormlight flickers. Refresh to try again.',choices:[]});
   }
-  const ld=document.getElementById('gm-loading-div');if(ld)ld.remove();
-  isLoading=false;
 }
 
+// ══ TURN PROMPT ══
 function turnPrompt(action,roll,sk,from){
-  const m=gState.totalMoves||0;
-  const act=getAct(m);
-  const sz=gState.partySize||partySize;
-  const next=gState.players[gState.turn];
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
-  const who=gState.players[from];
-  const loc=act.location||act.name;
-  const rd=roll>=18?'CRITICAL SUCCESS — exceptional, surprising outcome':roll>=14?'Strong success — goal achieved with style':roll>=10?'Partial success — achieved but at a cost or complication':roll>=6?'Failure — goal missed, situation worsens':'CRITICAL FAILURE — dramatic setback, something goes very wrong';
-  const actHint=m===59?`
+  const m=gState.totalMoves||0;const act=getAct(m);
+  const sz=gState.partySize||partySize;const next=gState.players[gState.turn];
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} Bond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
+  const who=gState.players[from];const loc=act.location||act.name;
+  const rd=roll>=18?'CRITICAL SUCCESS':roll>=14?'Strong success':roll>=10?'Partial success — complications':roll>=6?'Failure with consequences':'CRITICAL FAILURE — dramatic setback';
+  const gctx=getGenderContext();const mctx=getSprenMemoryContext();
+  const actHint=m===59?`\n\nACT TRANSITION: Close out ${loc}, foreshadow ${ACTS[1].location}.`:m===119?`\n\nACT TRANSITION: Final Act II turn. Foreshadow climax in ${ACTS[2].location}.`:'';
+  return`Cosmere RPG GM. Turn ${m}/180. ${act.tag} — ${loc}.
+Party: ${party}${gctx}${mctx}
+${who.name} (${who.className}) acted: "${action}" — d20 vs ${sk.toUpperCase()}: ${roll} (${rd})${actHint}
 
-ACT TRANSITION: This is the final turn of Act I. Close out ${loc} and foreshadow the journey to ${ACTS[1].location}.`:m===119?`
-
-ACT TRANSITION: Final turn of Act II. Foreshadow the climax in ${ACTS[2].location}.`:'';
-  const sprenCtx=getSprenMemoryContext();
-  const genderCtx=getGenderContext();
-  return`Cosmere RPG Game Master. Turn ${m}/180. ${act.tag} — ${loc}.
-Party: ${party}${sprenCtx}${genderCtx}
-${who.name} (${who.className}) just did: "${action}"
-Roll result: ${roll} — ${rd}${actHint}
-
-WRITE a dramatic 2-3 sentence consequence. RULES:
+CONSEQUENCE (2-3 vivid sentences):
 - DO NOT open with a weapon being drawn or summoned
-- DO NOT repeat the same opening as recent turns  
-- Make the ${rd.split('—')[0].trim()} feel real — change something in the scene
-- Use the specific environment of ${loc}: its sounds, smells, architecture, weather
-- Reference ${who.name}'s specific ability (${who.className}) in a fresh way
+- Make the ${rd} feel real — change something in the scene
+- Use ${loc} specifically: its sounds, smells, architecture, light
+- Reference ${who.name}'s class abilities in a fresh way${actHint?'\n- Hint at the upcoming transition':''}
 
-Then it is ${next?next.name+"'s turn":"next player's turn"}${next&&next.isNPC?' (NPC — they will roll D4 to choose)':''}.
+Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' — NPC D4 choice':' — human player')+')':'next turn'}.
+[CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}):
+- Specific to their class and ${loc}
+- Genuinely different approaches (not variations of the same idea)
+- Each one vivid and concrete
 
-[CHOICES] — exactly 4 numbered options for ${next?next.name:'next'} that are:
-1. Specific to their class (${next?next.className:'?'}) 
-2. Specific to ${loc} — not generic fantasy actions
-3. Genuinely different from each other (not just "attack harder" vs "attack smarter")
-4. Each one sentence, vivid and concrete
-
-Mark scene type: [COMBAT], [DISCOVERY], or [DECISION]. Total response under 250 words.`;
+Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 240 words total.`;
 }
 
-const BLADE_TIERS=['Nascent','Bonded','Ancient','Living','Divine'];
-const BLADE_COSTS=[3,5,5,5,5];
+// ══ COMBAT SYSTEMS ══
+function spawnEnemies(sceneText){
+  if(!sceneText.includes('[COMBAT]'))return;
+  if(!gState)return;
+  const existing=gState.enemies||[];
+  if(existing.some(e=>e.hp>0))return;
+  const sz=gState.partySize||partySize;
+  const lvl=Math.floor((gState.totalMoves||0)/20)+1;
+  const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
+  let pool=[];
+  if(loc.includes('shadesmar')||loc.includes('nexus'))pool=[{name:'Voidspren',type:'Spirit',hp:8+lvl,maxHp:8+lvl},{name:'Gloomform',type:'Unmade Fragment',hp:12+lvl*2,maxHp:12+lvl*2}];
+  else if(loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar'))pool=[{name:'Parshendi Scout',type:'Warrior',hp:10+lvl,maxHp:10+lvl},{name:'Parshendi Shardbearer',type:'Elite',hp:18+lvl*2,maxHp:18+lvl*2}];
+  else if(loc.includes('braize')||loc.includes('damnation'))pool=[{name:'Fused',type:'Ancient',hp:20+lvl*2,maxHp:20+lvl*2},{name:'Regal',type:'Parsh Void',hp:12+lvl,maxHp:12+lvl}];
+  else pool=[{name:'Void Creature',type:'Unknown',hp:10+lvl,maxHp:10+lvl},{name:'Darkform',type:'Soldier',hp:14+lvl,maxHp:14+lvl}];
+  gState.enemies=pool.slice(0,Math.min(sz,2)).map(e=>({...e,id:Math.random()}));
+  rollInitiative(gState);
+}
+function rollInitiative(st){
+  const sz=st.partySize||partySize;
+  const combatants=[];
+  st.players.slice(0,sz).filter(Boolean).forEach(p=>{const dex=p.stats&&p.stats.dex||10;combatants.push({name:p.name,type:'player',initiative:Math.ceil(Math.random()*20)+Math.floor((dex-10)/2),isNPC:p.isNPC});});
+  (st.enemies||[]).filter(e=>e.hp>0).forEach(e=>{combatants.push({name:e.name,type:'enemy',initiative:Math.ceil(Math.random()*20)+2});});
+  combatants.sort((a,b)=>b.initiative-a.initiative);
+  st.combatOrder=combatants;st.combatRound=1;st.combatActive=true;
+}
+function renderEnemies(){
+  const p=document.getElementById('enemy-panel');const el=document.getElementById('enemy-list');if(!p||!el||!gState)return;
+  const living=(gState.enemies||[]).filter(e=>e.hp>0);
+  p.style.display=living.length?'block':'none';
+  el.innerHTML=living.map(e=>{const pct=Math.round((e.hp/e.maxHp)*100);const col=pct>60?'#c44a28':pct>30?'#BA7517':'#888';return`<div class="enemy-card"><div class="enemy-name">${e.name}</div><div class="enemy-hp">${e.hp}/${e.maxHp} HP · ${e.type}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width 0.4s;"></div></div></div>`;}).join('');
+}
+function renderInitiativeOrder(){
+  const p=document.getElementById('initiative-panel');if(!p||!gState)return;
+  if(!gState.combatActive||!(gState.combatOrder||[]).length){p.style.display='none';return;}
+  p.style.display='block';
+  document.getElementById('init-round-label').textContent=`⚔ Round ${gState.combatRound||1} — Initiative`;
+  const cur=gState.players&&gState.players[gState.turn];
+  document.getElementById('init-row').innerHTML=(gState.combatOrder||[]).map(co=>{
+    const isEnemy=co.type==='enemy';
+    const isCur=cur&&co.name===cur.name;
+    const dead=(gState.enemies||[]).find(e=>e.name===co.name&&e.hp<=0);
+    return`<div class="init-pill" style="border:1px solid ${dead?'var(--border)':isEnemy?'rgba(196,74,40,0.4)':'rgba(191,161,90,0.3)'};background:${isCur?'rgba(191,161,90,0.12)':'var(--bg3)'};color:${dead?'var(--text5)':isEnemy?'var(--coral2)':'var(--amber2)'};text-decoration:${dead?'line-through':'none'};">${co.initiative} ${co.name}</div>`;
+  }).join('');
+}
+function applyRollDamage(roll,actor,st){
+  const cls=CLASSES.find(c=>c.id===actor.classId)||CLASSES[0];
+  const db=cls.dmgBonus||{crit:2,hit:1,miss:0};
+  const live=(st.enemies||[]).filter(e=>e.hp>0);
+  const target=live.length?live[Math.floor(Math.random()*live.length)]:null;
+  let msg='';
+  if(roll>=18){
+    actor.fragments=(actor.fragments||0)+1;
+    if(target){const d=db.crit+Math.floor(Math.random()*3)+1;target.hp=Math.max(0,target.hp-d);if(target.hp===0){actor.fragments+=3;checkEquipDrop(actor,st);}msg=`✦ Crit! ${target.name} -${d}HP${target.hp===0?' DEFEATED! +3 frags':''}  Frags:${actor.fragments}`;}
+    else{const h=Math.min(2,actor.maxHp-actor.hp);actor.hp=Math.min(actor.maxHp,actor.hp+h);msg=h>0?`⬆ +${h} HP`:'✦ Critical strike';}
+  } else if(roll>=10){
+    if(target){const d=db.hit+Math.floor(Math.random()*2);target.hp=Math.max(0,target.hp-d);const chip=Math.floor(Math.random()*2);if(chip>0)actor.hp=Math.max(1,actor.hp-chip);msg=`Hit! ${target.name} -${d}HP${chip>0?' / ⬇-'+chip+' HP':''}`;}
+    else{const d=Math.floor(Math.random()*2);if(d>0)actor.hp=Math.max(1,actor.hp-d);msg=d>0?`⬇ -${d} HP`:''}
+  } else if(roll>=6){
+    const d=Math.floor(Math.random()*3)+1;actor.hp=Math.max(1,actor.hp-d);msg=`⬇ -${d} HP`;
+  } else {
+    const d=Math.floor(Math.random()*4)+2;actor.hp=Math.max(0,actor.hp-d);msg=`💀 -${d} HP${actor.hp===0?' DOWNED!':''}`;
+  }
+  if(actor.classId==='edgedancer'&&roll>=10&&roll<18&&actor.hp<actor.maxHp){actor.hp=Math.min(actor.maxHp,actor.hp+1);msg+=' ✦ Regrowth +1';}
+  // Clean up dead enemies
+  if(st.enemies)st.enemies=st.enemies.filter(e=>e.hp>0);
+  if(st.enemies&&!st.enemies.length){st.combatActive=false;st.combatOrder=[];st.combatRound=0;}
+  const idx=st.players.findIndex(p=>p&&p.name===actor.name);
+  if(idx>=0){st.players[idx]=actor;if(myChar&&myChar.name===actor.name){myChar=actor;saveMyChar(actor);}}
+  return msg;
+}
+function checkEquipDrop(actor,st){
+  const roll=Math.random();
+  let msg='';
+  if(roll>0.7&&!actor.shardplate){actor.shardplate=true;actor.maxHp=Math.round(actor.maxHp*1.4);actor.hp=Math.min(actor.maxHp,actor.hp+8);msg=' ⬛ SHARDPLATE!';}
+  else if(roll>0.4&&!actor.shardblade){actor.shardblade=BLADE_NAMES[actor.classId]||'Shardblade';actor.bladeLevel=1;msg=` ⚔ ${actor.shardblade}!`;}
+  return msg;
+}
 
+// ══ SHARDBLADE CRAFTING ══
 function craftBlade(){
   if(!myChar||!gState)return;
-  if((myChar.fragments||0)<3){alert('Need 3 Stormlight Fragments to forge a blade.');return;}
-  const bond=SPREN_BONDS[myChar.classId];
-  const bladeNames={'windrunner':'Silverwind Blade','lightweaver':'Illusory Edge','edgedancer':'Verdant Blade','stoneward':'Granite Shardblade','elsecaller':'Obsidian Catalyst','truthwatcher':'Starlight Blade','willshaper':'Freedom Edge','dustbringer':'Ember Blade','bondsmith':'Sibling-Touched Blade','skybreaker':'Law Blade'};
-  myChar.shardblade=bladeNames[myChar.classId]||'Nascent Shardblade';
-  myChar.bladeLevel=1;
-  myChar.fragments=(myChar.fragments||0)-3;
-  saveMyChar(myChar,campaignId);
-  const idx=gState.players.findIndex(p=>p&&p.name===myChar.name);
+  if((myChar.fragments||0)<3){alert('Need 3 Stormlight Fragments.');return;}
+  myChar.shardblade=BLADE_NAMES[myChar.classId]||'Nascent Shardblade';
+  myChar.bladeLevel=1;myChar.fragments=(myChar.fragments||0)-3;
+  saveMyChar(myChar);const idx=gState.players.findIndex(p=>p&&p.name===myChar.name);
   if(idx>=0){gState.players[idx]=myChar;saveState(gState).catch(()=>{});}
-  renderSheet();
-  alert('⚔ '+myChar.shardblade+' forged! The blade answers your call.');
+  renderSheet();alert('⚔ '+myChar.shardblade+' forged!');
 }
-
 function upgradeBlade(){
-  if(!myChar||!gState)return;
-  const tier=myChar.bladeLevel||1;
+  if(!myChar)return;const tier=myChar.bladeLevel||1;
   if(tier>=5){alert('Your blade has reached its ultimate form.');return;}
-  if((myChar.fragments||0)<5){alert('Need 5 Stormlight Fragments to upgrade.');return;}
-  myChar.fragments=(myChar.fragments||0)-5;
-  myChar.bladeLevel=tier+1;
-  const tierName=BLADE_TIERS[tier]; // tier is 1-indexed, array 0-indexed
-  myChar.shardblade=myChar.shardblade.replace(/Nascent|Bonded|Ancient|Living|Forged/,'').trim();
-  saveMyChar(myChar,campaignId);
-  const idx=gState.players.findIndex(p=>p&&p.name===myChar.name);
+  if((myChar.fragments||0)<5){alert('Need 5 Stormlight Fragments.');return;}
+  myChar.fragments=(myChar.fragments||0)-5;myChar.bladeLevel=tier+1;
+  saveMyChar(myChar);const idx=gState&&gState.players.findIndex(p=>p&&p.name===myChar.name);
   if(idx>=0){gState.players[idx]=myChar;saveState(gState).catch(()=>{});}
-  renderSheet();
-  alert('⬆ Blade upgraded to Tier '+myChar.bladeLevel+' ('+tierName+')! Combat bonus: +'+(myChar.bladeLevel)+' to all rolls.');
+  renderSheet();alert('⬆ Blade upgraded to Tier '+myChar.bladeLevel+' ('+BLADE_TIERS[myChar.bladeLevel-1]+')!');
 }
 
-function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('sheet-panel').style.display=sheetOpen?'block':'none';document.getElementById('sheet-arrow').textContent=sheetOpen?'▾':'▸';if(sheetOpen&&myChar)renderSheet();}
-function renderSheet(){
-  const p=document.getElementById('sheet-panel');if(!myChar)return;
-  const cls=CLASSES.find(c=>c.id===myChar.classId)||{dmgBonus:{crit:2,hit:1,miss:0}};
-  const sprenBond=SPREN_BONDS[myChar.classId];
-  p.innerHTML=`
-    <div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div>
-    <div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div>
-    <div class="sheet-row"><span class="sheet-lbl">Spren Bond</span><span class="sheet-val" style="color:var(--teal2);">✦ ${myChar.spren||cls.spren||'Unknown'}</span></div>
-    <div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>
-    ${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}
-    <div class="sheet-row"><span class="sheet-lbl">Crit Dmg</span><span class="sheet-val" style="color:var(--coral2);">+${cls.dmgBonus.crit} / Hit +${cls.dmgBonus.hit}</span></div>
-    ${myChar.shardblade?`<div class="sheet-row"><span class="sheet-lbl">⚔ Shardblade</span><span class="sheet-val" style="color:var(--amber2);">${myChar.shardblade} (Tier ${myChar.bladeLevel||1})</span></div>`:''}
-    ${myChar.shardplate?`<div class="sheet-row"><span class="sheet-lbl">⬛ Shardplate</span><span class="sheet-val" style="color:var(--gold);">Equipped (+40% HP)</span></div>`:''}
-    <div class="sheet-row"><span class="sheet-lbl">✦ Fragments</span><span class="sheet-val" style="color:var(--teal2);">${myChar.fragments||0} Stormlight Fragments</span></div>
-    ${myChar.fragments>=5&&(myChar.bladeLevel||0)<4?`<div style="margin-top:8px;"><button class="btn btn-sm btn-teal" onclick="upgradeBlade()" style="font-size:12px;">⬆ Upgrade Blade (5 Fragments)</button></div>`:''}
-    ${!myChar.shardblade&&(myChar.fragments||0)>=3?`<div style="margin-top:8px;"><button class="btn btn-sm btn-gold" onclick="craftBlade()" style="font-size:12px;">⚔ Forge Blade (3 Fragments)</button></div>`:''}
-    ${sprenBond?`<div class="sheet-row"><span class="sheet-lbl">✦ Spren Bond</span><span class="sheet-val" style="color:${sprenBond.color||'var(--teal2)'};">Stage ${getSprenStage(gState&&gState.totalMoves||0)+1}/5 — ${sprenBond.name}</span></div>`:''}
-    <div class="sheet-row" style="font-style:italic;font-size:13px;color:var(--text4);border:none;padding-top:4px;">${getSprenDesc(myChar,gState&&gState.totalMoves||0)}</div>
-    <div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">SURGES & ABILITIES</div>
-    <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
-}
-
-function startPolling(){
-  if(pollTimer)clearInterval(pollTimer);
-  pollTimer=setInterval(async()=>{if(document.getElementById('s-game').classList.contains('active'))await refreshGame();},15000);
-  // Attach scroll listener to log-scroll for read-gate
-  const scroll=document.getElementById('log-scroll');
-  if(scroll&&!scroll._scrollListenerAdded){
-    scroll.addEventListener('scroll',()=>{
-      if(readGated)checkScrollBottom();
-    });
-    scroll._scrollListenerAdded=true;
-  }
-}
-function saveMyChar(c,cid){localStorage.setItem('sc_mychar_'+(cid||campaignId||'default'),JSON.stringify(c));}
-function loadMyChar(cid){try{const r=localStorage.getItem('sc_mychar_'+(cid||campaignId||'default'));return r?JSON.parse(r):null;}catch(e){return null;}}
-
-async function onReset(){
-  if(!confirm('Reset this campaign for all players?'))return;
-  try{
-    localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
-    await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});
-    const t=await tok();
-    await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
-    gState=null;myChar=null;
-    renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});
-    showScreen('title');
-  }catch(e){alert('Reset failed: '+e.message);}
-}
-
-// ══════════════════════════════════════
-// SPREN MEMORY SYSTEM
-// ══════════════════════════════════════
-function recordSprenMemory(action, roll, turn){
+// ══ SPREN MEMORIES ══
+function recordSprenMemory(action,roll,turn){
   if(!myChar||!gState)return;
-  // Only record dramatic moments
-  if(roll<6||roll>=18||action.toLowerCase().includes('protect')||action.toLowerCase().includes('sacrifice')||action.toLowerCase().includes('refuse')||action.toLowerCase().includes('truth')||action.toLowerCase().includes('oath')){
-    const bond=SPREN_BONDS[myChar.classId];
-    if(!bond)return;
-    const loc=getAct(turn).location||'the field';
-    let memory='';
-    if(roll>=18)memory=`Turn ${turn}: ${myChar.name} achieved something extraordinary in ${loc} — "${action.substring(0,60)}"`;
-    else if(roll<6)memory=`Turn ${turn}: ${myChar.name} failed gravely in ${loc} — "${action.substring(0,60)}"`;
-    else memory=`Turn ${turn}: ${myChar.name} made a meaningful choice in ${loc} — "${action.substring(0,60)}"`;
-    if(!gState.sprenMemories)gState.sprenMemories={};
-    if(!gState.sprenMemories[myChar.name])gState.sprenMemories[myChar.name]=[];
-    // Keep last 5 memories per character
-    gState.sprenMemories[myChar.name].push(memory);
-    if(gState.sprenMemories[myChar.name].length>5)gState.sprenMemories[myChar.name].shift();
-    // Save to state (fire and forget)
-    saveState(gState).catch(()=>{});
-  }
+  const noteworthy=roll<6||roll>=18||/protect|sacrifice|refuse|truth|oath|remember|forget/i.test(action);
+  if(!noteworthy)return;
+  const bond=SPREN_BONDS[myChar.classId];if(!bond)return;
+  const loc=getAct(turn).location||'the field';
+  const mem=roll>=18?`Turn ${turn}: ${myChar.name} achieved something extraordinary in ${loc} — "${action.substring(0,50)}"`:roll<6?`Turn ${turn}: ${myChar.name} failed gravely in ${loc} — "${action.substring(0,50)}"`:  `Turn ${turn}: ${myChar.name} made a meaningful choice in ${loc} — "${action.substring(0,50)}"`;
+  if(!gState.sprenMemories)gState.sprenMemories={};
+  if(!gState.sprenMemories[myChar.name])gState.sprenMemories[myChar.name]=[];
+  gState.sprenMemories[myChar.name].push(mem);
+  if(gState.sprenMemories[myChar.name].length>5)gState.sprenMemories[myChar.name].shift();
+  saveState(gState).catch(()=>{});
 }
-
-function getGenderContext(){
-  if(!gState||!gState.players)return'';
-  const sz=gState.partySize||partySize;
-  const lines=[];
-  gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
-    if(p.gender){
-      const g=p.gender;
-      let subj='they',obj='them',poss='their',ref='themself';
-      if(g==='he/him'){subj='he';obj='him';poss='his';ref='himself';}
-      else if(g==='she/her'){subj='she';obj='her';poss='her';ref='herself';}
-      lines.push(`${p.name}: pronouns ${g} (${subj}/${obj}/${poss}/${ref})`);
-    }
-  });
-  return lines.length?'\n\nCHARACTER PRONOUNS — use these consistently, never switch mid-scene:\n'+lines.join('\n'):'';
-}
-
 function getSprenMemoryContext(){
   if(!gState||!gState.sprenMemories)return'';
   const sz=gState.partySize||partySize;
@@ -1593,226 +1330,221 @@ function getSprenMemoryContext(){
   gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
     const mems=gState.sprenMemories&&gState.sprenMemories[p.name];
     const bond=SPREN_BONDS[p.classId];
-    if(mems&&mems.length&&bond){
-      lines.push(`${bond.nick} (bonded to ${p.name}) remembers: ${mems.slice(-2).join(' | ')}`);
-    }
+    if(mems&&mems.length&&bond)lines.push(`${bond.nick} (bonded to ${p.name}) remembers: ${mems.slice(-2).join(' | ')}`);
   });
-  return lines.length?'\n\nSPREN MEMORIES (reference naturally in narration, do not announce them):\n'+lines.join('\n'):'';
+  return lines.length?'\n\nSPREN MEMORIES (weave naturally into narration):\n'+lines.join('\n'):'';
 }
-
-// ══════════════════════════════════════
-// STORMLIGHT AUDIO ENGINE
-// Procedural synthesis — no files needed
-// ══════════════════════════════════════
-let audioCtx=null,audioNodes={},audioOn=false,masterGain=null;
-
-function initAudio(){
-  if(audioCtx)return;
-  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  masterGain=audioCtx.createGain();
-  masterGain.gain.value=0.3;
-  masterGain.connect(audioCtx.destination);
-}
-
-function createWindLayer(freq,gainVal,speed){
-  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
-  const src=audioCtx.createBufferSource();
-  src.buffer=buf;src.loop=true;
-  const filt=audioCtx.createBiquadFilter();
-  filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=0.8;
-  const g=audioCtx.createGain();g.gain.value=gainVal;
-  // LFO for wind sway
-  const lfo=audioCtx.createOscillator();
-  lfo.frequency.value=speed;
-  const lfoGain=audioCtx.createGain();lfoGain.gain.value=gainVal*0.4;
-  lfo.connect(lfoGain);lfoGain.connect(g.gain);
-  lfo.start();src.start();
-  src.connect(filt);filt.connect(g);g.connect(masterGain);
-  return{src,filt,g,lfo};
-}
-
-function createThunderRumble(){
-  const osc=audioCtx.createOscillator();
-  osc.type='sawtooth';osc.frequency.value=55;
-  const filt=audioCtx.createBiquadFilter();
-  filt.type='lowpass';filt.frequency.value=120;
-  const g=audioCtx.createGain();g.gain.value=0;
-  osc.connect(filt);filt.connect(g);g.connect(masterGain);
-  osc.start();
-  // Occasional thunder rumble
-  function rumble(){
-    const now=audioCtx.currentTime;
-    g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(0.15,now+0.1);
-    g.gain.exponentialRampToValueAtTime(0.001,now+2.5);
-    setTimeout(rumble,8000+Math.random()*12000);
-  }
-  setTimeout(rumble,3000+Math.random()*5000);
-  return{osc,filt,g};
-}
-
-function createStormlightHum(){
-  const osc=audioCtx.createOscillator();
-  osc.type='sine';osc.frequency.value=220;
-  const osc2=audioCtx.createOscillator();
-  osc2.type='sine';osc2.frequency.value=221.5; // slight detune = shimmer
-  const g=audioCtx.createGain();g.gain.value=0.02;
-  // Pulse LFO
-  const lfo=audioCtx.createOscillator();
-  lfo.frequency.value=0.3;
-  const lg=audioCtx.createGain();lg.gain.value=0.015;
-  lfo.connect(lg);lg.connect(g.gain);
-  lfo.start();osc.start();osc2.start();
-  osc.connect(g);osc2.connect(g);g.connect(masterGain);
-  return{osc,osc2,g,lfo};
-}
-
-function startAudio(){
-  initAudio();
-  if(audioCtx.state==='suspended')audioCtx.resume();
-  audioNodes.wind1=createWindLayer(400,0.12,0.08);
-  audioNodes.wind2=createWindLayer(800,0.08,0.13);
-  audioNodes.wind3=createWindLayer(200,0.15,0.05);
-  audioNodes.thunder=createThunderRumble();
-  audioNodes.hum=createStormlightHum();
-  audioOn=true;
-  document.getElementById('audio-toggle').textContent='🌩';
-  document.getElementById('audio-label').textContent='STORM';
-}
-
-function stopAudio(){
-  if(!audioCtx)return;
-  Object.values(audioNodes).forEach(n=>{
-    try{if(n.src)n.src.stop();if(n.osc)n.osc.stop();if(n.osc2)n.osc2.stop();if(n.lfo)n.lfo.stop();}catch(e){}
+function getGenderContext(){
+  if(!gState||!gState.players)return'';
+  const sz=gState.partySize||partySize;
+  const lines=[];
+  gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
+    if(!p.gender)return;
+    let subj='they',obj='them',poss='their';
+    if(p.gender==='he/him'){subj='he';obj='him';poss='his';}
+    else if(p.gender==='she/her'){subj='she';obj='her';poss='her';}
+    lines.push(`${p.name}: ${p.gender} (${subj}/${obj}/${poss})`);
   });
-  audioNodes={};audioOn=false;
-  document.getElementById('audio-toggle').textContent='🔇';
-  document.getElementById('audio-label').textContent='MUTED';
+  return lines.length?'\n\nCHARACTER PRONOUNS — use consistently, never switch mid-scene:\n'+lines.join('\n'):'';
 }
 
-function toggleAudio(){
-  if(!audioOn)startAudio();else stopAudio();
+// ══ RENDER PROGRESS ══
+function renderProgress(){
+  const m=gState?gState.totalMoves:0;
+  const act=getAct(m);
+  document.getElementById('act-label').textContent=`${act.tag} · ${act.location||act.name}`;
+  document.getElementById('prog-count').textContent=`${m} / 180`;
+  document.getElementById('prog-fill').style.width=Math.min(100,Math.round(m/180*100))+'%';
+  document.getElementById('chronicle-act').textContent=act.tag;
 }
 
-function setVolume(val){
-  if(masterGain)masterGain.gain.value=val/100*0.6;
+// ══ TURN PILL ══
+function renderPill(){// handled by renderAll via setBottomFromState
+  const pill=document.getElementById('turn-pill');if(!gState||!myChar||!pill)return;
+  const cur=gState.players[gState.turn];
+  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
+  pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} acting...`:`Waiting for ${cur?cur.name:'...'}`;
+  pill.className='turn-pill'+(mine?' yours':'');
 }
 
-function setStormIntensity(type){
-  // Adjust wind layers based on scene type
-  if(!audioOn||!audioNodes.wind1)return;
-  const now=audioCtx.currentTime;
-  const intensities={combat:{w1:0.22,w2:0.16,w3:0.25,hum:0.04},decision:{w1:0.06,w2:0.04,w3:0.08,hum:0.06},discovery:{w1:0.09,w2:0.07,w3:0.10,hum:0.08},normal:{w1:0.12,w2:0.08,w3:0.15,hum:0.02}};
-  const t=intensities[type]||intensities.normal;
-  audioNodes.wind1.g.gain.linearRampToValueAtTime(t.w1,now+2);
-  audioNodes.wind2.g.gain.linearRampToValueAtTime(t.w2,now+2);
-  audioNodes.wind3.g.gain.linearRampToValueAtTime(t.w3,now+2);
-  if(audioNodes.hum)audioNodes.hum.g.gain.linearRampToValueAtTime(t.hum,now+1.5);
+// ══ CHARACTER SHEET ══
+function toggleSheet(){
+  sheetOpen=!sheetOpen;
+  document.getElementById('sheet-panel').style.display=sheetOpen?'block':'none';
+  document.getElementById('sheet-arrow').textContent=sheetOpen?'▾':'▸';
+  if(sheetOpen&&myChar)renderSheet();
+}
+function renderSheet(){
+  const p=document.getElementById('sheet-panel');if(!p||!myChar)return;
+  const cls=CLASSES.find(c=>c.id===myChar.classId)||{dmgBonus:{crit:2,hit:1,miss:0}};
+  const bond=SPREN_BONDS[myChar.classId];
+  const stage=getSprenStage(gState&&gState.totalMoves||0);
+  const stageDesc=bond?bond.stages[stage]:'';
+  p.innerHTML=`
+    <div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div>
+    <div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div>
+    <div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>
+    ${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}
+    <div class="sheet-row"><span class="sheet-lbl">Crit Dmg</span><span class="sheet-val" style="color:var(--coral2);">+${cls.dmgBonus.crit} / Hit +${cls.dmgBonus.hit}</span></div>
+    ${myChar.shardblade?`<div class="sheet-row"><span class="sheet-lbl">⚔ Shardblade</span><span class="sheet-val" style="color:var(--amber2);">${myChar.shardblade} (Tier ${myChar.bladeLevel||1})</span></div>`:''}
+    ${myChar.shardplate?`<div class="sheet-row"><span class="sheet-lbl">⬛ Shardplate</span><span class="sheet-val" style="color:var(--gold);">Equipped</span></div>`:''}
+    <div class="sheet-row"><span class="sheet-lbl">✦ Fragments</span><span class="sheet-val" style="color:var(--teal2);">${myChar.fragments||0}</span></div>
+    ${bond?`<div class="sheet-row"><span class="sheet-lbl">Spren Bond</span><span class="sheet-val" style="color:${bond.color};">${bond.name} (${stage+1}/5)</span></div>`:''}
+    ${stageDesc?`<div style="font-size:14px;font-style:italic;color:var(--text4);padding:6px 0;border-top:1px solid var(--border);margin-top:4px;">${stageDesc}</div>`:''}
+    ${(myChar.fragments||0)>=3&&!myChar.shardblade?`<div style="margin-top:8px;"><button class="btn btn-sm btn-gold" onclick="craftBlade()" style="font-size:12px;">⚔ Forge Blade (3 Frags)</button></div>`:''}
+    ${(myChar.fragments||0)>=5&&(myChar.bladeLevel||0)<5?`<div style="margin-top:8px;"><button class="btn btn-sm btn-teal" onclick="upgradeBlade()" style="font-size:12px;">⬆ Upgrade Blade (5 Frags)</button></div>`:''}
+    <div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;">SURGES & ABILITIES</div>
+    <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
 }
 
+// ══ SHARE MOMENT ══
 function shareStoryMoment(btn){
   const text=btn.getAttribute('data-text')||'';
   const loc=btn.getAttribute('data-loc')||'Roshar';
   const campaign=(gState&&gState.campaignName)||campaignId||'Stormlight Chronicles';
   const party=gState&&gState.players?gState.players.filter(p=>p&&!p.isNPC).map(p=>p.name).join(', '):'';
-
-  // Create canvas
-  const canvas=document.createElement('canvas');
-  canvas.width=800;canvas.height=460;
+  const canvas=document.createElement('canvas');canvas.width=800;canvas.height=460;
   const ctx=canvas.getContext('2d');
-
-  // Background — dark parchment gradient
-  const bg=ctx.createLinearGradient(0,0,0,460);
-  bg.addColorStop(0,'#1a1510');bg.addColorStop(1,'#0d0b08');
+  const bg=ctx.createLinearGradient(0,0,0,460);bg.addColorStop(0,'#1a1510');bg.addColorStop(1,'#0d0b08');
   ctx.fillStyle=bg;ctx.fillRect(0,0,800,460);
-
-  // Decorative border
   ctx.strokeStyle='#70522B';ctx.lineWidth=1;ctx.strokeRect(16,16,768,428);
   ctx.strokeStyle='#BFA15A';ctx.lineWidth=0.5;ctx.strokeRect(22,22,756,416);
-
-  // Glyph
-  ctx.fillStyle='#BFA15A';ctx.font='bold 36px serif';ctx.textAlign='center';
-  ctx.fillText('⟁',400,62);
-
-  // Title
-  ctx.fillStyle='#EFE5D1';ctx.font='bold 15px Georgia,serif';ctx.textAlign='center';
-  ctx.fillText('STORMLIGHT CHRONICLES',400,88);
-
-  // Campaign & location
-  ctx.fillStyle='#9C7B3C';ctx.font='italic 12px Georgia,serif';
-  ctx.fillText(campaign+' — '+loc,400,108);
-
-  // Divider
-  ctx.strokeStyle='#70522B';ctx.lineWidth=0.5;
-  ctx.beginPath();ctx.moveTo(60,120);ctx.lineTo(740,120);ctx.stroke();
-
-  // Story text — word wrap
+  ctx.fillStyle='#BFA15A';ctx.font='bold 36px serif';ctx.textAlign='center';ctx.fillText('⟁',400,62);
+  ctx.fillStyle='#EFE5D1';ctx.font='bold 15px Georgia,serif';ctx.fillText('STORMLIGHT CHRONICLES',400,88);
+  ctx.fillStyle='#9C7B3C';ctx.font='italic 12px Georgia,serif';ctx.fillText(campaign+' — '+loc,400,108);
+  ctx.strokeStyle='#70522B';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(60,120);ctx.lineTo(740,120);ctx.stroke();
   ctx.fillStyle='#D9BF8C';ctx.font='italic 16px Georgia,serif';ctx.textAlign='left';
-  const words=text.split(' ');
-  let line='';let y=148;const maxW=680;const lineH=26;
-  for(let i=0;i<words.length;i++){
-    const test=line+words[i]+' ';
-    if(ctx.measureText(test).width>maxW&&line!==''){
-      ctx.fillText(line.trim(),60,y);line=words[i]+' ';y+=lineH;
-      if(y>370)break;
-    } else{line=test;}
-  }
+  const words=text.split(' ');let line='';let y=148;
+  for(const word of words){const test=line+word+' ';if(ctx.measureText(test).width>680&&line){ctx.fillText(line.trim(),60,y);line=word+' ';y+=26;if(y>370)break;}else line=test;}
   if(y<=370)ctx.fillText(line.trim(),60,y);
-
-  // Bottom divider
-  ctx.strokeStyle='#70522B';ctx.lineWidth=0.5;
-  ctx.beginPath();ctx.moveTo(60,390);ctx.lineTo(740,390);ctx.stroke();
-
-  // Party & act
-  ctx.fillStyle='#70522B';ctx.font='11px Georgia,serif';ctx.textAlign='left';
-  ctx.fillText(party,60,410);
+  ctx.strokeStyle='#70522B';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(60,390);ctx.lineTo(740,390);ctx.stroke();
+  ctx.fillStyle='#70522B';ctx.font='11px Georgia,serif';ctx.textAlign='left';ctx.fillText(party,60,410);
   const act=getAct(gState&&gState.totalMoves||0);
-  ctx.textAlign='right';
-  ctx.fillText(act.tag+' · Turn '+(gState&&gState.totalMoves||0)+'/180',740,410);
-
-  // Watermark
-  ctx.fillStyle='rgba(191,161,90,0.15)';ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';
-  ctx.fillText('rruss1.github.io/StormlightBRJ',400,438);
-
-  // Download
-  const link=document.createElement('a');
-  link.download='stormlight-moment.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
+  ctx.textAlign='right';ctx.fillText(act.tag+' · Turn '+(gState&&gState.totalMoves||0)+'/180',740,410);
+  ctx.fillStyle='rgba(191,161,90,0.15)';ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText('rruss1.github.io/StormlightBRJ',400,438);
+  const link=document.createElement('a');link.download='stormlight-moment.png';link.href=canvas.toDataURL('image/png');link.click();
 }
 
+// ══ PDF EXPORT ══
 function exportToPDF(){
-  // Fill print header
-  const h=document.getElementById('print-campaign-name');
-  const d=document.getElementById('print-date');
+  const h=document.getElementById('print-campaign-name');const d=document.getElementById('print-date');
   const party=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
-  const cname=(gState&&gState.campaignName)||campaignId||'Campaign';
-  if(h)h.textContent=cname+' — '+party;
+  if(h)h.textContent=((gState&&gState.campaignName)||campaignId||'Campaign')+' — '+party;
   if(d)d.textContent='Exported '+new Date().toLocaleDateString();
   window.print();
 }
-function showErr(el,msg){el.textContent=msg;el.style.display='block';}
 
-(async()=>{
-  // Start at campaign picker — no auto-load
-  showScreen('campaign');
-  try{
-    await tok(); // pre-auth
-    const camps=await listCampaigns();
-    renderCampaigns(camps);
-    document.getElementById('camp-status').textContent='';
-  }catch(e){
-    document.getElementById('camp-status').textContent='Connecting... '+e.message;
+// ══ POLLING ══
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    if(document.getElementById('s-game').classList.contains('active')&&!isLoading)await refreshGame();
+  },15000);
+  // Window scroll listener for Continue button detection
+  if(!window._stormScroll){
+    window.addEventListener('scroll',()=>{if(bottomState==='human-gated'||bottomState==='continue')checkScrollEnable();},{passive:true});
+    window._stormScroll=true;
   }
+}
+
+// ══ PERSISTENCE ══
+function saveMyChar(c){localStorage.setItem('sc_'+(campaignId||'default'),JSON.stringify(c));}
+function loadMyChar(){try{const r=localStorage.getItem('sc_'+(campaignId||'default'));return r?JSON.parse(r):null;}catch(e){return null;}}
+
+// ══ RESET ══
+async function onReset(){
+  if(!confirm('Reset this campaign for all players?'))return;
+  try{
+    localStorage.removeItem('sc_'+(campaignId||'default'));
+    await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:gState&&gState.campaignName||campaignId});
+    const t=await tok();
+    await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
+    gState=null;myChar=null;renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});showScreen('title');
+  }catch(e){alert('Reset failed: '+e.message);}
+}
+
+// ══ AUDIO ENGINE ══
+let audioCtx=null,audioNodes={},audioOn=false,masterGain=null;
+function initAudio(){
+  if(audioCtx)return;
+  try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.3;masterGain.connect(audioCtx.destination);}
+  catch(e){console.warn('Web Audio not supported');}
+}
+function mkWind(freq,gain,speed){
+  if(!audioCtx)return null;
+  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+  const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
+  const filt=audioCtx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=0.8;
+  const g=audioCtx.createGain();g.gain.value=gain;
+  const lfo=audioCtx.createOscillator();lfo.frequency.value=speed;
+  const lg=audioCtx.createGain();lg.gain.value=gain*0.4;
+  lfo.connect(lg);lg.connect(g.gain);lfo.start();src.start();
+  src.connect(filt);filt.connect(g);g.connect(masterGain);
+  return{src,filt,g,lfo};
+}
+function mkThunder(){
+  if(!audioCtx)return null;
+  const osc=audioCtx.createOscillator();osc.type='sawtooth';osc.frequency.value=55;
+  const filt=audioCtx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=120;
+  const g=audioCtx.createGain();g.gain.value=0;
+  osc.connect(filt);filt.connect(g);g.connect(masterGain);osc.start();
+  function rumble(){const now=audioCtx.currentTime;g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(0.15,now+0.1);g.gain.exponentialRampToValueAtTime(0.001,now+2.5);setTimeout(rumble,8000+Math.random()*12000);}
+  setTimeout(rumble,3000+Math.random()*5000);
+  return{osc,filt,g};
+}
+function mkHum(){
+  if(!audioCtx)return null;
+  const o1=audioCtx.createOscillator();o1.type='sine';o1.frequency.value=220;
+  const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.value=221.5;
+  const g=audioCtx.createGain();g.gain.value=0.02;
+  const lfo=audioCtx.createOscillator();lfo.frequency.value=0.3;
+  const lg=audioCtx.createGain();lg.gain.value=0.015;
+  lfo.connect(lg);lg.connect(g.gain);lfo.start();o1.start();o2.start();
+  o1.connect(g);o2.connect(g);g.connect(masterGain);
+  return{o1,o2,g,lfo};
+}
+function startAudio(){
+  initAudio();
+  if(!audioCtx)return;
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  audioNodes.w1=mkWind(400,0.12,0.08);
+  audioNodes.w2=mkWind(800,0.08,0.13);
+  audioNodes.w3=mkWind(200,0.15,0.05);
+  audioNodes.thunder=mkThunder();
+  audioNodes.hum=mkHum();
+  audioOn=true;
+  document.getElementById('audio-toggle').textContent='🌩';
+  document.getElementById('audio-label').textContent='STORM';
+}
+function stopAudio(){
+  if(!audioCtx)return;
+  Object.values(audioNodes).forEach(n=>{try{if(n.src)n.src.stop();if(n.osc)n.osc.stop();if(n.o1)n.o1.stop();if(n.o2)n.o2.stop();if(n.lfo)n.lfo.stop();}catch(e){}});
+  audioNodes={};audioOn=false;
+  document.getElementById('audio-toggle').textContent='🔇';
+  document.getElementById('audio-label').textContent='OFF';
+}
+function toggleAudio(){
+  // Audio requires user gesture — this IS the user gesture
+  if(!audioOn)startAudio();else stopAudio();
+}
+function setVolume(v){if(masterGain)masterGain.gain.value=v/100*0.6;}
+function setStormIntensity(type){
+  if(!audioOn||!audioNodes.w1)return;
+  const now=audioCtx.currentTime;
+  const t={combat:{w1:0.22,w2:0.16,w3:0.25,hum:0.04},decision:{w1:0.06,w2:0.04,w3:0.08,hum:0.06},discovery:{w1:0.09,w2:0.07,w3:0.10,hum:0.08},normal:{w1:0.12,w2:0.08,w3:0.15,hum:0.02}}[type]||{w1:0.12,w2:0.08,w3:0.15,hum:0.02};
+  audioNodes.w1.g.gain.linearRampToValueAtTime(t.w1,now+2);
+  audioNodes.w2.g.gain.linearRampToValueAtTime(t.w2,now+2);
+  audioNodes.w3.g.gain.linearRampToValueAtTime(t.w3,now+2);
+  if(audioNodes.hum)audioNodes.hum.g.gain.linearRampToValueAtTime(t.hum,now+1.5);
+}
+
+// ══ BOOT ══
+(async()=>{
+  showScreen('campaign');
+  try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
+  catch(e){document.getElementById('camp-status').textContent='Connecting... '+e.message;}
 })();
 </script>
-<!-- Audio bar (only shows in game screen) -->
-<div class="audio-bar" id="audio-bar" style="display:none;">
-  <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()" title="Toggle Storm">🌩</button>
-  <span class="audio-label" id="audio-label">STORM</span>
-  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)"/>
-</div>
 </body>
 </html>
