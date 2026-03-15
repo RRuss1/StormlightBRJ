@@ -110,6 +110,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .cswatch:hover{transform:scale(1.1);}
 .cswatch.sel{border-color:var(--text);}
 .class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
 .ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
 .ccard:hover{border-color:var(--border3);}
 .ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
@@ -198,7 +199,43 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .err{font-size:14px;color:var(--coral2);font-style:italic;margin-top:7px;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
-@media(max-width:580px){.class-grid,.action-choices{grid-template-columns:1fr;}.slots-grid{grid-template-columns:1fr!important;}}
+@media print{
+  body{background:#fff!important;color:#111!important;font-size:12pt;}
+  .game-top,.party-strip,.action-wrap,.continue-bar,.sheet-toggle,.sheet-panel,#enemy-panel,.progress-wrap,.turn-pill,#export-btn{display:none!important;}
+  .log-wrap{border:none;background:#fff;}
+  .log-scroll{max-height:none!important;overflow:visible!important;}
+  .entry-gm{color:#111!important;border-left:2px solid #999;font-size:12pt;}
+  .entry-player,.entry-npc{color:#333!important;background:#f5f5f5;font-size:11pt;}
+  .gm-label{color:#555!important;}
+  .event-badge{border:1px solid #999;color:#333!important;background:#eee!important;}
+  .game-body{padding:0;max-width:100%;}
+  #print-header{display:block!important;}
+}
+#print-header{display:none;text-align:center;margin-bottom:20px;border-bottom:2px solid #111;padding-bottom:12px;}
+@media(max-width:640px){
+  .class-grid,.action-choices{grid-template-columns:1fr;}
+  .slots-grid{grid-template-columns:1fr!important;}
+  .party-strip{flex-direction:column;}
+  .ppip{min-width:unset;width:100%;}
+  .game-body{padding:12px;}
+  .game-top{padding:10px 14px;}
+  .game-logo{font-size:11px;}
+  .action-choices{grid-template-columns:1fr;}
+  html,body{font-size:16px;}
+  .entry-gm{font-size:18px;}
+  .achoice{font-size:17px;}
+  .title-h1{font-size:26px;letter-spacing:2px;}
+  .btn{padding:11px 20px;font-size:15px;}
+  .camp-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .sbox-val{font-size:20px;}
+  .turn-pill{font-size:11px;padding:5px 10px;}
+}
+@media(max-width:400px){
+  .title-glyph{font-size:60px;}
+  .entry-gm{font-size:16px;}
+  .achoice{font-size:15px;}
+}
 </style>
 </head>
 <body>
@@ -230,7 +267,20 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <div class="title-line"></div>
   <p class="slots-label">Your Campaigns</p>
   <div class="camp-grid" id="camp-grid"></div>
-  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;"></div>
+
+  <!-- New campaign name modal -->
+  <div id="new-camp-modal" style="display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--rad2);padding:1.5rem;max-width:420px;width:100%;text-align:left;">
+    <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:12px;">Name Your Campaign</div>
+    <input id="camp-name-input" class="form-in" type="text" maxlength="48" placeholder="e.g. The Everstorm Accord, Kaladin's Oath..." style="margin-bottom:12px;font-size:17px;" onkeydown="if(event.key==='Enter')confirmNewCampaign()"/>
+    <div style="font-size:13px;color:var(--text5);font-style:italic;margin-bottom:14px;">This name appears on your campaign card and in the story export.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-sm" onclick="cancelNewCampaign()">← Cancel</button>
+      <button class="btn btn-gold btn-sm" onclick="confirmNewCampaign()">Begin Campaign →</button>
+    </div>
+    <div id="new-camp-err" class="err" style="display:none;margin-top:6px;"></div>
+  </div>
+
+  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;margin-top:10px;"></div>
   <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;">
     <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--text5);text-transform:uppercase;margin-bottom:10px;">Help Keep the Stormfather Alive</div>
     <a href="https://cash.app/%24rurich31" target="_blank" id="cashlink" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #00D632;border-radius:24px;background:rgba(0,214,50,0.07);text-decoration:none;transition:background 0.15s;">
@@ -296,6 +346,14 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   </div>
   <div class="party-strip" id="party-strip"></div>
   <div class="game-body">
+    <div id="print-header">
+      <div style="font-size:24pt;font-weight:bold;">⟁ Stormlight Chronicles</div>
+      <div id="print-campaign-name" style="font-size:14pt;color:#555;"></div>
+      <div id="print-date" style="font-size:10pt;color:#888;"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button id="export-btn" class="btn btn-sm" onclick="exportToPDF()" style="font-size:12px;border-color:var(--gold-dim);color:var(--text4);">⬇ Export Chronicle</button>
+    </div>
     <div class="progress-wrap">
       <div class="progress-label">
         <span id="act-label">Act I · The Shattered Plains</span>
@@ -307,6 +365,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <div class="log-header">
         <span class="log-title">The Chronicle</span>
         <span class="log-act" id="log-act-tag"></span>
+      </div>
+      <div id="enemy-panel" style="display:none;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);">
+        <div style="font-family:var(--font-display);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;">⚔ Enemies</div>
+        <div id="enemy-list" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
       </div>
       <div class="log-scroll" id="log-scroll"></div>
       <div class="continue-bar" id="continue-bar" style="display:none;">
@@ -342,12 +404,44 @@ const SA={
 };
 
 const CLASSES=[
-  {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Master of gravitation & pressure. Flies where others crawl.',bonus:{str:2,dex:2,int:0,wis:0,cha:0,end:0},abilities:['Lashing','Full Lashing','Windspren Bond','Squire Command']},
-  {id:'lightweaver',name:'Lightweaver',ideal:'I am who I needed when I was young',desc:'Weaver of illusion & soulcasting. Reality bends to your will.',bonus:{str:0,dex:1,int:2,wis:0,cha:2,end:0},abilities:['Soulcast','Major Illusion','Pattern Bond','Memory Weave']},
-  {id:'edgedancer',name:'Edgedancer',ideal:'I will remember those who have been forgotten',desc:'Grace through friction & progression. Fast as the wind itself.',bonus:{str:0,dex:2,int:0,wis:2,cha:1,end:0},abilities:['Friction Control','Regrowth Healing','Wyndle Bond','Fleet Step']},
-  {id:'stoneward',name:'Stoneward',ideal:'I will be there when I am needed',desc:'Unbreakable through tension & cohesion. The last wall standing.',bonus:{str:2,dex:0,int:0,wis:1,cha:0,end:2},abilities:['Stone Shaping','Cohesion Wall','Peakspren Bond','Unyielding Stance']},
-  {id:'elsecaller',name:'Elsecaller',ideal:'I will reach my potential so I may help others reach theirs',desc:'Master of transportation & transformation. Steps between realms.',bonus:{str:0,dex:0,int:2,wis:2,cha:0,end:1},abilities:['Shadesmar Step','Soulcast Expert','Inkspren Bond','Cognitive Insight']},
+  {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Gravitation & pressure. Flies where others crawl, shields those who fall.',bonus:{str:2,dex:2,int:0,wis:0,cha:0,end:0},spren:'Honorspren',abilities:['Lashing','Full Lashing','Reverse Lashing','Windspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
+  {id:'lightweaver',name:'Lightweaver',ideal:'I am who I needed when I was young',desc:'Illumination & transformation. Reality bends to your will.',bonus:{str:0,dex:1,int:2,wis:0,cha:2,end:0},spren:'Cryptic (Pattern)',abilities:['Soulcast','Major Illusion','Memory Weave','Lightweaving'],dmgBonus:{crit:2,hit:1,miss:0}},
+  {id:'edgedancer',name:'Edgedancer',ideal:'I will remember those who have been forgotten',desc:'Abrasion & progression. Grace personified — heals allies, never stops moving.',bonus:{str:0,dex:2,int:0,wis:2,cha:1,end:0},spren:'Cultivationspren (Wyndle)',abilities:['Friction Control','Regrowth','Fleet Step','Wyndle Bond'],dmgBonus:{crit:2,hit:1,miss:1}},
+  {id:'stoneward',name:'Stoneward',ideal:'I will be there when I am needed',desc:'Tension & cohesion. Last to fall, first to hold the line.',bonus:{str:2,dex:0,int:0,wis:1,cha:0,end:2},spren:'Peakspren',abilities:['Stone Shaping','Cohesion Wall','Unyielding Stance','Peakspren Bond'],dmgBonus:{crit:2,hit:2,miss:1}},
+  {id:'elsecaller',name:'Elsecaller',ideal:'I will reach my potential so I may help others reach theirs',desc:'Transportation & transformation. Steps between the Physical and Cognitive Realms.',bonus:{str:0,dex:0,int:2,wis:2,cha:0,end:1},spren:'Inkspren',abilities:['Shadesmar Step','Soulcast Expert','Cognitive Insight','Realm Walking'],dmgBonus:{crit:3,hit:1,miss:0}},
+  {id:'truthwatcher',name:'Truthwatcher',ideal:'I will seek truth, even when it is painful',desc:'Progression & illumination. Sees what others miss, heals what others cannot.',bonus:{str:0,dex:0,int:2,wis:3,cha:0,end:0},spren:'Mistspren',abilities:['Truthsight','Progression Heal','Voidspren Detection','Mistspren Bond'],dmgBonus:{crit:2,hit:1,miss:1}},
+  {id:'willshaper',name:'Willshaper',ideal:'I will seek freedom for those in bondage',desc:'Transportation & cohesion. Unpredictable, dangerous, deeply free.',bonus:{str:1,dex:2,int:0,wis:0,cha:2,end:0},spren:'Lightspren (Reachers)',abilities:['Transport Surge','Cohesion Strike','Freedom Step','Reacher Bond'],dmgBonus:{crit:3,hit:1,miss:0}},
+  {id:'dustbringer',name:'Dustbringer',ideal:'I will seek self-mastery above all else',desc:'Division & abrasion. Controlled destruction — burns away what must not remain.',bonus:{str:2,dex:1,int:0,wis:0,cha:0,end:2},spren:'Ashspren',abilities:['Division Burn','Abrasion Surge','Self-Mastery','Ashspren Bond'],dmgBonus:{crit:4,hit:2,miss:0}},
+  {id:'bondsmith',name:'Bondsmith',ideal:'I will unite instead of divide',desc:'Tension & adhesion. Bonds worlds, mends the broken, changes everything they touch.',bonus:{str:0,dex:0,int:1,wis:2,cha:2,end:0},spren:'Godspren (Stormfather / Nightwatcher / Sibling)',abilities:['Adhesion Field','Spiritual Connection','Perpendicularity Pull','Bondsmith Aura'],dmgBonus:{crit:1,hit:0,miss:2}},
+  {id:'skybreaker',name:'Skybreaker',ideal:'I will follow the law',desc:'Gravitation & division. Absolute in justice, terrifying in execution.',bonus:{str:1,dex:2,int:0,wis:0,cha:0,end:2},spren:'Highspren',abilities:['Division Strike','Gravitation Law','Judgment Lashing','Highspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
 ];
+// Spren bond evolution — 5 stages across 180 turns
+const SPREN_BONDS={
+  windrunner:{name:'Sylphrena',nick:'Syl',stages:['A whisper on the wind follows you...','Syl drifts beside you, curious and cautious.','Syl solidifies into a spear of light. She speaks your name.','Syl argues with you now. She has opinions. Strong ones.','Syl becomes a Shardblade of living silver. She is yours. You are hers.'],color:'#b8d4f0'},
+  lightweaver:{name:'Pattern',nick:'Pattern',stages:['Patterns flicker in glass and stone around you...','Pattern hums with mathematical delight on your sleeve.','Pattern speaks in riddles that are also truths.','Pattern confronts you with your own lies. Every one.','Pattern becomes a Shardblade of living crystal. Truth made blade.'],color:'#d4b8f0'},
+  edgedancer:{name:'Wyndle',nick:'Wyndle',stages:['A trail of crystalline vines grows where you step...','Wyndle climbs your arm, leaving frost flowers.','Wyndle weeps for those you forget. He makes you remember.','Wyndle grows a garden in your wake. Even in stone.','Wyndle becomes a Shardblade of living jade. Memory made manifest.'],color:'#b8f0d4'},
+  stoneward:{name:'Roksel',nick:'Roksel',stages:['The stones remember your footfalls...','Roksel surfaces from the floor, ancient and silent.','Roksel speaks in geological time. Patient. Absolute.','Roksel argues you could do more. Be more. Hold more.','Roksel becomes a Shardblade of living granite. Immovable purpose.'],color:'#d4c8a8'},
+  elsecaller:{name:'Ivory',nick:'Ivory',stages:['The Cognitive Realm bleeds at the edges of your vision...','Ivory stands beside you, perfectly still, studying everything.','Ivory corrects you when you are wrong. Always politely. Always.','Ivory opens doors between worlds you did not know existed.','Ivory becomes a Shardblade of living obsidian. Two realms made one.'],color:'#f0d4b8'},
+  truthwatcher:{name:'Glys',nick:'Glys',stages:['Voidspren scatter from you like startled fish...','Glys pulses softly, a star between your fingers.','Glys shows you what is real beneath what appears to be.','Glys weeps tears of Stormlight at true things. At beautiful ones.','Glys becomes a Shardblade of living starlight. Truth incarnate.'],color:'#f0f0b8'},
+  willshaper:{name:"Lunu'anaki",nick:'Lunu',stages:['The winds carry whispers meant only for you...','Lunu slides into view sideways, as if through a crack in the world.','Lunu laughs at locked doors. Nothing holds you both.','Lunu grows agitated at injustice. She wants to act. Now.','Lunu becomes a Shardblade of living wind. Unchained momentum.'],color:'#b8e8f0'},
+  dustbringer:{name:'Spark',nick:'Spark',stages:['Ash falls upward near you sometimes...','Spark crackles with restrained energy, studying your hands.','Spark teaches restraint. Control. The discipline of fire.','Spark burns away your excuses. What remains is clarity.','Spark becomes a Shardblade of living ember. Controlled annihilation.'],color:'#f0c8a0'},
+  bondsmith:{name:'The Stormfather',nick:'Stormfather',stages:['Thunder answers your doubt with silence...','The Stormfather speaks. You are not sure you were ready.','The Stormfather argues. He is never wrong. You are sometimes right.','The Stormfather tests your capacity to hold what he would give you.','The Stormfather opens a Perpendicularity. The realms touch. You are the reason.'],color:'#f0e8a0'},
+  skybreaker:{name:'Nale',nick:'Nale',stages:['The law feels heavier when you are near...','A Highspren circles you, measuring. Judging.','The Highspren names you. You are bound to more than yourself now.','The law is not cruel. It is clear. The Highspren shows you the difference.','The Highspren becomes a Shardblade of living law. Justice given edge.'],color:'#a8c8f0'},
+};
+function getSprenStage(totalMoves){
+  if(totalMoves<20)return 0;
+  if(totalMoves<50)return 1;
+  if(totalMoves<90)return 2;
+  if(totalMoves<140)return 3;
+  return 4;
+}
+function getSprenDesc(player,totalMoves){
+  const bond=SPREN_BONDS[player.classId];
+  if(!bond)return'';
+  const stage=getSprenStage(totalMoves||0);
+  return bond.stages[stage];
+}
+
 // Roshar world names — common citizens, soldiers, merchants, not famous heroes
 const NPC_NAMES_MALE=['Moash','Drehy','Skar','Lopen','Bisig','Eth','Rod','Natam','Peet','Yake','Dallet','Gaz','Jaks','Leyten','Fisk','Hobber','Narm','Redin','Tevos','Grund','Sheler','Khen','Vathah','Durk','Rill','Beld','Lesh','Habid','Tur','Sas'];
 const NPC_NAMES_FEMALE=['Tarah','Laral','Roshone','Meelis','Tien','Lirin','Hesina','Kaza','Lift','Nale','Cyn','Sheler','Ishar','Ym','Baxil','Avyanna','Sani','Marta','Kef','Dreya','Veil','Radiant','Malli','Cord','Rushu','Sebarial','Isasik','Palona','Rind','Fafen'];
@@ -545,31 +639,71 @@ function renderCampaigns(camps){
     return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')">
       <button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>
       <div class="camp-num">${cam.id.replace('Campaign','Campaign ')}</div>
-      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id}</div>
+      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id.replace('Campaign','Campaign ')}</div>
       <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+(moves)+'/180':'Awaiting Radiants'}</div>
       <div class="camp-meta" style="margin-top:3px;">${players}</div>
       <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
     </div>`;
   }).join('')+
-  `<div class="camp-card new-camp" onclick="newCampaign(${nextNum})">
+  `<div class="camp-card new-camp" onclick="promptNewCampaign(${nextNum})">
     <div class="camp-new-icon">+</div>
     <div class="camp-new-txt">New Campaign ${nextNum}</div>
   </div>`;
 }
 
-async function newCampaign(num){
+let pendingCampaignNum=null;
+
+function promptNewCampaign(num){
+  pendingCampaignNum=num;
+  const modal=document.getElementById('new-camp-modal');
+  const input=document.getElementById('camp-name-input');
+  const err=document.getElementById('new-camp-err');
+  if(modal)modal.style.display='block';
+  if(input){input.value='';setTimeout(()=>input.focus(),50);}
+  if(err)err.style.display='none';
+  // Scroll to modal
+  if(modal)modal.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function cancelNewCampaign(){
+  const modal=document.getElementById('new-camp-modal');
+  if(modal)modal.style.display='none';
+  pendingCampaignNum=null;
+}
+
+async function confirmNewCampaign(){
+  const input=document.getElementById('camp-name-input');
+  const err=document.getElementById('new-camp-err');
+  const name=(input&&input.value.trim())||'';
+  if(!name){
+    if(err){err.textContent='Give your campaign a name first.';err.style.display='block';}
+    return;
+  }
+  const num=pendingCampaignNum||1;
+  await newCampaign(num, name);
+}
+
+async function newCampaign(num, campaignName){
   campaignId='Campaign'+num;
-  document.getElementById('camp-status').textContent='Creating Campaign '+num+'...';
+  const modal=document.getElementById('new-camp-modal');
+  if(modal)modal.style.display='none';
+  document.getElementById('camp-status').textContent='Creating "'+campaignName+'"...';
   try{
     await ensureSheets();
     gState=await loadState();
-    partySize=3; // fresh campaign always starts at 3
+    partySize=3;
     gState.partySize=3;
+    gState.campaignName=campaignName||campaignId;
     myChar=null;
     localStorage.removeItem('sc_mychar_'+(campaignId||'default'));
+    // Save the name immediately
+    await saveState(gState);
     renderPSZ();
     renderSlots(gState);
     showScreen('title');
+    // Show the campaign name on the title screen
+    const h2=document.querySelector('.title-h2');
+    if(h2)h2.textContent=campaignName;
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
 }
@@ -587,6 +721,9 @@ async function selectCampaign(id){
     renderPSZ();
     renderSlots(gState||{players:new Array(partySize).fill(null),partySize});
     showScreen('title');
+    // Show campaign name in subtitle
+    const h2=document.querySelector('.title-h2');
+    if(h2&&gState&&gState.campaignName)h2.textContent=gState.campaignName;
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
 }
@@ -626,7 +763,7 @@ function genNPC(slot){
   const color=NPC_COLORS[Math.floor(Math.random()*NPC_COLORS.length)];
   const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
   const hp=12+stats.end;
-  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,slot,isNPC:true};
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true};
 }
 
 function renderSlots(st){
@@ -753,7 +890,7 @@ function renderColors(){
   document.getElementById('color-row').innerHTML=COLORS.map(c=>`<div class="cswatch${selColor===c.hex?' sel':''}" style="background:${c.hex};opacity:${taken.includes(c.hex)?0.2:1};" title="${c.name}" onclick="pickColor('${c.hex}',${taken.includes(c.hex)})"></div>`).join('');
 }
 function pickColor(h,t){if(t)return;selColor=h;renderColors();}
-function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
+function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Bonds: ${c.spren}</div><div class="ccard-bonus">Stats: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
 function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClasses();rollStats();}
 function rollStats(){const b=selClass?selClass.bonus:{str:0,dex:0,int:0,wis:0,cha:0,end:0};rolledStats={};STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));renderStats(rolledStats);}
 function r4d6(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,b)=>a-b);return d.slice(1).reduce((a,v)=>a+v,0);}
@@ -769,7 +906,7 @@ async function onCreateChar(){
   err.style.display='none';
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
-  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,slot:mySlot,isNPC:false,campaignId};
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId};
   saveMyChar(myChar,campaignId);
   gState.players[mySlot]=myChar;
   await saveState(gState);
@@ -791,7 +928,7 @@ async function startCampaign(){
   // Wait for at least 2 log entries (system + gm) to be readable from sheet
   // gState.lastGM is now set by callGM — render immediately without waiting for Sheets cache
   const freshLog=await loadLog(false);
-  renderParty();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
+  renderParty();renderEnemies();renderLog(freshLog);renderPill();renderProgress();renderActions(freshLog);
   // gateActions handled by renderLog
   // If first turn is NPC, handle it
   if(gState&&gState.phase==='playing'){
@@ -845,7 +982,7 @@ async function refreshGame(){
     if(lastGMEntry)gState.lastGM={text:lastGMEntry.text,choices:lastGMEntry.choices};
     else if(prevLastGM)gState.lastGM=prevLastGM;
   }
-  renderParty();renderLog(log);renderPill();renderProgress();renderActions(log);
+  renderParty();renderEnemies();renderLog(log);renderPill();renderProgress();renderActions(log);
   if(gState&&gState.phase==='playing'&&!isLoading){
     const cur=gState.players[gState.turn];
     if(cur&&cur.isNPC){
@@ -892,7 +1029,7 @@ function npcTurnPrompt(action,npc,from){
   const act=getAct(moves);
   const sz=gState.partySize||partySize;
   const next=gState.players[gState.turn];
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} SprenBond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
   const loc=act.location||act.name;
   return`GM for Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name} — Location: ${loc}.
 Party: ${party}
@@ -919,7 +1056,12 @@ function renderParty(){
   s.innerHTML=gState.players.slice(0,sz).map((p,i)=>{
     if(!p)return`<div class="ppip"><div class="ppip-top"><div class="ppip-dot" style="background:var(--border2);"></div><span class="ppip-name" style="color:var(--text5);">Empty</span></div></div>`;
     const pct=Math.round((p.hp/p.maxHp)*100);
-    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}"><div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div><div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>${p.isNPC?'<div class="ppip-npc-tag">AI COMPANION</div>':''}<div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${p.color};"></div></div></div>`;
+    const hpColor=pct>60?p.color:pct>30?'#BA7517':'#c44a28';
+    const sprenBond=SPREN_BONDS[p.classId];
+    const sprenStage=getSprenStage(gState.totalMoves||0);
+    const sprenName=sprenBond?sprenBond.nick:'';
+    const sprenColor=sprenBond?sprenBond.color:'var(--teal2)';
+    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}"><div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div><div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>${sprenName?`<div class="ppip-npc-tag" style="color:${sprenColor};">✦ ${sprenName} (Bond ${sprenStage+1}/5)</div>`:''}${p.isNPC?'<div class="ppip-npc-tag">AI COMPANION</div>':''}<div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${hpColor};"></div></div></div>`;
   }).join('');
 }
 
@@ -983,6 +1125,121 @@ function renderActions(log){
 
 function selAct(btn,txt){document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selActionText=txt;document.getElementById('custom-in').value='';}
 
+function renderEnemies(){
+  if(!gState||!gState.enemies||!gState.enemies.length){
+    const p=document.getElementById('enemy-panel');if(p)p.style.display='none';return;
+  }
+  const living=gState.enemies.filter(e=>e.hp>0);
+  const p=document.getElementById('enemy-panel');
+  const el=document.getElementById('enemy-list');
+  if(!p||!el)return;
+  p.style.display=living.length?'block':'none';
+  el.innerHTML=living.map(e=>{
+    const pct=Math.round((e.hp/e.maxHp)*100);
+    const col=pct>60?'#c44a28':pct>30?'#BA7517':'#888';
+    return`<div style="background:var(--bg2);border:1px solid rgba(196,74,40,0.3);border-radius:8px;padding:7px 12px;min-width:120px;">
+      <div style="font-family:var(--font-display);font-size:11px;color:var(--coral2);">${e.name}</div>
+      <div style="font-size:12px;color:var(--text3);">${e.hp}/${e.maxHp} HP · ${e.type}</div>
+      <div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width 0.4s;"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function spawnEnemies(sceneText){
+  // Detect combat and spawn appropriate enemies from scene text
+  if(!sceneText.includes('[COMBAT]'))return;
+  const existing=gState.enemies||[];
+  if(existing.some(e=>e.hp>0))return; // already have live enemies
+  const sz=gState.partySize||partySize;
+  const avgLvl=Math.floor((gState.totalMoves||0)/20)+1;
+  // Enemy pools by location type
+  const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
+  let pool=[];
+  if(loc.includes('shadesmar')||loc.includes('cognitive')||loc.includes('nexus'))
+    pool=[{name:'Voidspren',type:'Spirit',hp:8+avgLvl,maxHp:8+avgLvl},{name:'Gloomform',type:'Unmade Fragment',hp:12+avgLvl*2,maxHp:12+avgLvl*2}];
+  else if(loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar'))
+    pool=[{name:'Parshendi Scout',type:'Warrior',hp:10+avgLvl,maxHp:10+avgLvl},{name:'Parshendi Shardbearer',type:'Elite',hp:18+avgLvl*2,maxHp:18+avgLvl*2}];
+  else if(loc.includes('braize')||loc.includes('damnation'))
+    pool=[{name:'Fused',type:'Ancient',hp:20+avgLvl*2,maxHp:20+avgLvl*2},{name:'Regals',type:'Parsh Void',hp:12+avgLvl,maxHp:12+avgLvl}];
+  else
+    pool=[{name:'Void Creature',type:'Unknown',hp:10+avgLvl,maxHp:10+avgLvl},{name:'Darkform Warrior',type:'Soldier',hp:14+avgLvl,maxHp:14+avgLvl}];
+  // Spawn 1-2 enemies scaled to party size
+  const count=Math.min(sz,2);
+  gState.enemies=pool.slice(0,count).map(e=>({...e,id:Date.now()+Math.random()}));
+}
+
+function applyRollDamage(roll, actor, st){
+  const cls=CLASSES.find(c=>c.id===actor.classId)||CLASSES[0];
+  const db=cls.dmgBonus||{crit:2,hit:1,miss:0};
+  const sz=st.partySize||partySize;
+  let msg='';
+  // Deal damage to a live enemy if any exist
+  const liveEnemies=(st.enemies||[]).filter(e=>e.hp>0);
+  const targetEnemy=liveEnemies.length?liveEnemies[Math.floor(Math.random()*liveEnemies.length)]:null;
+  if(roll>=18){
+    if(targetEnemy){
+      const dmgDealt=db.crit+Math.floor(Math.random()*3)+1;
+      targetEnemy.hp=Math.max(0,targetEnemy.hp-dmgDealt);
+      msg=`✦ Critical! ${targetEnemy.name} takes ${dmgDealt} dmg (${targetEnemy.hp}/${targetEnemy.maxHp} HP)${targetEnemy.hp===0?' — DEFEATED!':''}`;
+    } else {
+      const heal=Math.min(2,actor.maxHp-actor.hp);
+      if(heal>0){actor.hp=Math.min(actor.maxHp,actor.hp+heal);msg=`⬆ +${heal} HP (Stormlight surge)`;}
+      else msg=`✦ Critical strike`;
+    }
+  } else if(roll>=10){
+    if(targetEnemy){
+      const dmgDealt=db.hit+Math.floor(Math.random()*2);
+      targetEnemy.hp=Math.max(0,targetEnemy.hp-dmgDealt);
+      msg=`Hit! ${targetEnemy.name} -${dmgDealt} HP${targetEnemy.hp===0?' — DEFEATED!':''}`;
+      // Also take chip damage
+      const chip=Math.max(0,Math.floor(Math.random()*2));
+      if(chip>0){actor.hp=Math.max(1,actor.hp-chip);msg+=` / ⬇ -${chip} HP`;}
+    } else {
+      const dmg=Math.max(0,Math.floor(Math.random()*2));
+      if(dmg>0){actor.hp=Math.max(1,actor.hp-dmg);msg=`⬇ -${dmg} HP`;}
+      else msg='';
+    }
+  } else if(roll>=6){
+    // Failure — take real damage
+    const dmg=Math.floor(Math.random()*3)+1; // 1-3 dmg
+    actor.hp=Math.max(1,actor.hp-dmg);
+    msg=`⬇ -${dmg} HP (${actor.hp}/${actor.maxHp} remaining)`;
+  } else {
+    // Critical failure — heavy damage, could down the character
+    const dmg=Math.floor(Math.random()*4)+2; // 2-5 dmg
+    actor.hp=Math.max(0,actor.hp-dmg);
+    msg=`💀 -${dmg} HP${actor.hp===0?' — DOWNED!':''}`;
+  }
+  // Edgedancer Regrowth — passive heal on partial success
+  if(actor.classId==='edgedancer'&&roll>=10&&roll<18&&actor.hp<actor.maxHp){
+    actor.hp=Math.min(actor.maxHp,actor.hp+1);msg+=' ✦ Regrowth +1';
+  }
+  // Equipment drop on critical success in combat
+  let dropMsg='';
+  if(roll>=18&&(st.enemies||[]).some(e=>e.hp<=0)){
+    // Enemy was just defeated — chance of equipment drop
+    const dropRoll=Math.random();
+    if(dropRoll>0.7&&!actor.shardplate){
+      actor.shardplate=true;
+      actor.maxHp=Math.round(actor.maxHp*1.4);
+      actor.hp=Math.min(actor.maxHp,actor.hp+8);
+      dropMsg=' ⬛ SHARDPLATE CLAIMED! Max HP +40%, +8 HP';
+    } else if(dropRoll>0.4&&!actor.shardblade){
+      const bladeTypes=['Etched Shardblade','Honorblade Fragment','Living Blade Shard','Voidblade Remnant'];
+      actor.shardblade=bladeTypes[Math.floor(Math.random()*bladeTypes.length)];
+      dropMsg=` ⚔ ${actor.shardblade} found! +2 to all combat rolls`;
+    }
+    if(dropMsg){
+      // Clear defeated enemies
+      st.enemies=(st.enemies||[]).filter(e=>e.hp>0);
+    }
+  }
+  // Update in gState
+  const idx=st.players.findIndex(p=>p&&p.name===actor.name);
+  if(idx>=0){st.players[idx]=actor;if(myChar&&myChar.name===actor.name)myChar=actor;saveMyChar(actor,campaignId);}
+  return msg+dropMsg;
+}
+
 async function onSubmitAction(){
   const custom=document.getElementById('custom-in').value.trim();
   const action=custom||selActionText;
@@ -990,12 +1247,18 @@ async function onSubmitAction(){
   if(!action){showErr(errEl,'Choose or describe an action first.');return;}
   errEl.style.display='none';
   if(isLoading)return;
+  // Scroll to top of chronicle immediately so player sees the response load in
+  const logWrap=document.getElementById('log-scroll');
+  if(logWrap)logWrap.scrollTop=0;
+  window.scrollTo({top:0,behavior:'smooth'});
   const roll=Math.ceil(Math.random()*20);
   const sk=getStat(action);
   const sv=myChar.stats[sk]||10;
   const bonus=Math.floor((sv-10)/2);
   const total=Math.min(20,Math.max(1,roll+bonus));
-  document.getElementById('dice-flash').textContent=`d20 roll: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
+  // Apply HP damage/healing based on roll outcome
+  const dmgResult=applyRollDamage(total,myChar,gState);
+  document.getElementById('dice-flash').textContent=`d20: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total} ${dmgResult}`;
   await addLog({type:'player',who:myChar.name,text:action,choices:[]});
   const from=gState.turn;
   const sz=gState.partySize||partySize;
@@ -1031,8 +1294,11 @@ async function callGM(prompt){
     console.log('callGM: scene length',scene.length,'choices',choices.length);
     await addLog({type:'gm',who:'',text:scene,choices});
     console.log('callGM: written to sheet');
-    // Also store in gState for instant access (bypasses Sheets read cache)
-    if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveState(gState);}
+    if(gState){
+      gState.lastGM={text:scene,choices,ts:new Date().toISOString()};
+      spawnEnemies(scene); // spawn enemies if COMBAT scene
+      await saveState(gState);
+    }
   }catch(e){
     console.error('callGM error:',e.message);
     await addLog({type:'gm',who:'',text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[]});
@@ -1081,7 +1347,21 @@ Mark scene type: [COMBAT], [DISCOVERY], or [DECISION]. Total response under 250 
 function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('sheet-panel').style.display=sheetOpen?'block':'none';document.getElementById('sheet-arrow').textContent=sheetOpen?'▾':'▸';if(sheetOpen&&myChar)renderSheet();}
 function renderSheet(){
   const p=document.getElementById('sheet-panel');if(!myChar)return;
-  p.innerHTML=`<div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div><div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div><div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}<div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">ABILITIES</div><div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
+  const cls=CLASSES.find(c=>c.id===myChar.classId)||{dmgBonus:{crit:2,hit:1,miss:0}};
+  const sprenBond=SPREN_BONDS[myChar.classId];
+  p.innerHTML=`
+    <div class="sheet-row"><span class="sheet-lbl">Name</span><span class="sheet-val">${myChar.name}</span></div>
+    <div class="sheet-row"><span class="sheet-lbl">Order</span><span class="sheet-val">${myChar.className}</span></div>
+    <div class="sheet-row"><span class="sheet-lbl">Spren Bond</span><span class="sheet-val" style="color:var(--teal2);">✦ ${myChar.spren||cls.spren||'Unknown'}</span></div>
+    <div class="sheet-row"><span class="sheet-lbl">HP</span><span class="sheet-val">${myChar.hp} / ${myChar.maxHp}</span></div>
+    ${STAT_KEYS.map((k,i)=>`<div class="sheet-row"><span class="sheet-lbl">${STAT_NAMES[i]}</span><span class="sheet-val">${myChar.stats[k]} (${modStr(myChar.stats[k])})</span></div>`).join('')}
+    <div class="sheet-row"><span class="sheet-lbl">Crit Dmg</span><span class="sheet-val" style="color:var(--coral2);">+${cls.dmgBonus.crit} / Hit +${cls.dmgBonus.hit}</span></div>
+    ${myChar.shardblade?`<div class="sheet-row"><span class="sheet-lbl">⚔ Shardblade</span><span class="sheet-val" style="color:var(--amber2);">${myChar.shardblade}</span></div>`:''}
+    ${myChar.shardplate?`<div class="sheet-row"><span class="sheet-lbl">⬛ Shardplate</span><span class="sheet-val" style="color:var(--gold);">Equipped (+40% HP)</span></div>`:''}
+    ${sprenBond?`<div class="sheet-row"><span class="sheet-lbl">✦ Spren Bond</span><span class="sheet-val" style="color:${sprenBond.color||'var(--teal2)'};">Stage ${getSprenStage(gState&&gState.totalMoves||0)+1}/5 — ${sprenBond.name}</span></div>`:''}
+    <div class="sheet-row" style="font-style:italic;font-size:13px;color:var(--text4);border:none;padding-top:4px;">${getSprenDesc(myChar,gState&&gState.totalMoves||0)}</div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-display);letter-spacing:1px;">SURGES & ABILITIES</div>
+    <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
 }
 
 function startPolling(){
@@ -1110,6 +1390,16 @@ async function onReset(){
   }catch(e){alert('Reset failed: '+e.message);}
 }
 
+function exportToPDF(){
+  // Fill print header
+  const h=document.getElementById('print-campaign-name');
+  const d=document.getElementById('print-date');
+  const party=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
+  const cname=(gState&&gState.campaignName)||campaignId||'Campaign';
+  if(h)h.textContent=cname+' — '+party;
+  if(d)d.textContent='Exported '+new Date().toLocaleDateString();
+  window.print();
+}
 function showErr(el,msg){el.textContent=msg;el.style.display='block';}
 
 (async()=>{
