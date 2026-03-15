@@ -149,11 +149,14 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .log-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
 .continue-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:12px;background:var(--bg2);}
 .continue-hint{font-size:13px;color:var(--text5);font-style:italic;font-family:var(--font-display);letter-spacing:1px;}
-.btn-continue{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-display);font-size:14px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.btn-continue{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-display);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
 .btn-continue:hover{background:rgba(191,161,90,0.18);border-color:var(--amber3);}
-.btn-continue:disabled{opacity:0.35;cursor:not-allowed;}
-.action-wrap.locked{opacity:0.4;pointer-events:none;}
-.action-wrap.locked .action-inner::after{content:'Read the Chronicle above to continue';display:block;text-align:center;font-size:13px;color:var(--text5);font-style:italic;padding:8px 0;}
+.btn-continue:disabled{opacity:0.30;cursor:not-allowed;border-color:var(--border2);}
+.btn-act{display:inline-flex;align-items:center;padding:13px 32px;border:1px solid var(--amber);border-radius:var(--rad);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-display);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
+.btn-act:disabled{opacity:0.30;cursor:not-allowed;}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
+@keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
 .log-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .log-title{font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .log-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
@@ -174,10 +177,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
 .badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
 .badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
-.action-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rad3);overflow:hidden;}
-.action-header{padding:12px 20px;border-bottom:1px solid var(--border);font-family:var(--font-display);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.action-inner{padding:18px 20px;}
-.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rad);padding:14px 16px;cursor:pointer;text-align:left;color:var(--text);font-family:'Times New Roman',Times,serif;font-size:20px;font-style:normal;line-height:1.65;transition:border-color 0.15s,background 0.15s;}
 .achoice:hover{border-color:var(--border3);background:var(--bg4);}
 .achoice.sel{border-color:var(--gold-mid);background:rgba(191,161,90,0.12);color:var(--gold-bright);}
@@ -377,27 +377,52 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
         <div id="enemy-list" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
       </div>
       <div id="initiative-wrap" style="display:none;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);"></div>
+      <!-- Story text zone -->
       <div class="log-scroll" id="log-scroll"></div>
-      <div class="continue-bar" id="continue-bar" style="display:none;">
-        <span class="continue-hint" id="continue-hint">Scroll down to read →</span>
-        <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled>Continue →</button>
+
+      <!-- Unified bottom zone: choices + button, all in one card -->
+      <div id="chronicle-bottom" style="border-top:1px solid var(--border);">
+
+        <!-- Loading state -->
+        <div id="bottom-loading" style="display:none;padding:2rem;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;" class="dots">The Stormfather deliberates</div>
+          <div style="display:flex;justify-content:center;gap:6px;">
+            <div class="pulse-dot" style="animation-delay:0s"></div>
+            <div class="pulse-dot" style="animation-delay:0.2s"></div>
+            <div class="pulse-dot" style="animation-delay:0.4s"></div>
+          </div>
+        </div>
+
+        <!-- Human turn: choices + input + Act button -->
+        <div id="bottom-human" style="display:none;padding:16px 20px;">
+          <div class="dice-flash" id="dice-flash"></div>
+          <div class="action-choices" id="action-choices" style="margin-bottom:12px;"></div>
+          <div class="custom-row">
+            <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220"/>
+          </div>
+          <div id="action-err" class="err" style="display:none;margin-top:6px;"></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+            <button class="btn-act" id="act-btn" onclick="onSubmitAction()">Act →</button>
+          </div>
+        </div>
+
+        <!-- Continue / NPC / Waiting state -->
+        <div id="bottom-continue" style="display:none;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <span id="continue-hint" style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--text5);font-style:italic;"></span>
+          <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled>Continue →</button>
+        </div>
+
+        <!-- Waiting for other human -->
+        <div id="bottom-waiting" style="display:none;padding:14px 20px;text-align:center;">
+          <span id="waiting-msg" style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--text5);">Waiting...</span>
+        </div>
+
       </div>
     </div>
+
     <div>
       <button class="sheet-toggle" onclick="toggleSheet()"><span id="sheet-arrow">▸</span> Character Sheet</button>
       <div class="sheet-panel" id="sheet-panel" style="display:none;"></div>
-    </div>
-    <div class="action-wrap" id="action-wrap">
-      <div class="action-header" id="action-header">Your Turn</div>
-      <div class="action-inner">
-        <div class="dice-flash" id="dice-flash"></div>
-        <div class="action-choices" id="action-choices"></div>
-        <div class="custom-row">
-          <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220"/>
-          <button class="btn btn-gold btn-sm" onclick="onSubmitAction()">Act →</button>
-        </div>
-        <div id="action-err" class="err" style="display:none;"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -1014,8 +1039,9 @@ async function handleNPC(log){
   const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Takes a defensive stance','Scouts the area','Searches for allies','Draws weapon and advances'];
   const d4=Math.floor(Math.random()*Math.min(4,opts.length));
   const pick=opts[d4];
-  await new Promise(r=>setTimeout(r,900)); // brief pause for UX
-  await addLog({type:'npc',who:cur.name,text:`[D4:${d4+1}] ${pick}`,choices:[]});
+  // NPC acts silently — no UI update during processing
+  await new Promise(r=>setTimeout(r,600));
+  // Don't log the NPC choice visibly — it will be summarised by GM
   const from=gState.turn;
   const sz=gState.partySize||partySize;
   gState.turn=(gState.turn+1)%sz;
@@ -1043,8 +1069,11 @@ function npcTurnPrompt(action,npc,from){
   const loc=act.location||act.name;
   return`GM for Cosmere RPG. Turn ${moves}/180. ${act.tag}: ${act.name} — Location: ${loc}.
 Party: ${party}
-${npc.name} (${npc.className}, NPC) chose at random: "${action}"
-In 1-2 vivid Cosmere sentences, narrate what happened when they did this. Keep it dramatic, atmospheric, location-specific.
+NPC ${npc.name} (${npc.className}) acted randomly: "${action}"
+
+Write TWO paragraphs:
+PARAGRAPH 1: Narrate what ${npc.name} did and its consequence (2-3 vivid sentences). This is the NPC summary the human player will read first.
+PARAGRAPH 2: Transition to the current situation — where things stand now, what demands the next player's attention.
 Now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' — also NPC':' — human player')+')':"next turn"}.
 [CHOICES] exactly 4 numbered options for ${next?next.name:'next'} fitting their class (${next?next.className:'?'}) and the current location (${loc}).
 Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 180 words total.`;
@@ -1096,13 +1125,17 @@ function renderLog(log){
     if(e.type==='loading')return`<div class="entry-loading"><span class="dots">The Stormfather deliberates</span></div>`;
     return`<div class="entry-system">${e.text}</div>`;
   }).join('');
-  // Gate on every new GM entry — freeze actions until Continue is clicked
+  // New GM entry — set appropriate bottom state and scroll to top
   if(newGMEntry&&latestGM){
     lastRenderedGMTs=latestGM.ts||'new';
-    // Small delay to let DOM paint before gating
+    const cur=gState&&gState.players[gState.turn];
+    const mine=cur&&myChar&&!cur.isNPC&&cur.name===myChar.name;
+    const npcTurn=cur&&cur.isNPC;
     setTimeout(()=>{
-      gateActions();
-      s.scrollTop=0; // scroll to top of story to start reading
+      s.scrollTop=0;
+      if(mine){showBottomState('human',{choices:latestGM.choices||[]});}
+      else if(npcTurn){showBottomState('continue');}
+      else{showBottomState('waiting',{name:cur&&cur.name});}
     },50);
   } else if(!readGated){
     s.scrollTop=s.scrollHeight;
@@ -1314,9 +1347,8 @@ async function onSubmitAction(){
   if(!action){showErr(errEl,'Choose or describe an action first.');return;}
   errEl.style.display='none';
   if(isLoading)return;
-  // Scroll to top of chronicle immediately so player sees the response load in
-  const logWrap=document.getElementById('log-scroll');
-  if(logWrap)logWrap.scrollTop=0;
+  // Show loading state immediately — clear story, show spinner
+  showBottomState('loading');
   window.scrollTo({top:0,behavior:'smooth'});
   const roll=Math.ceil(Math.random()*20);
   const sk=getStat(action);
@@ -1477,7 +1509,9 @@ function startPolling(){
   // Attach scroll listener to log-scroll for read-gate
   const scroll=document.getElementById('log-scroll');
   if(scroll&&!scroll._scrollListenerAdded){
-    scroll.addEventListener('scroll',checkScrollBottom);
+    scroll.addEventListener('scroll',()=>{
+      if(readGated)checkScrollBottom();
+    });
     scroll._scrollListenerAdded=true;
   }
 }
