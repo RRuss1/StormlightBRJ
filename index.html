@@ -313,6 +313,13 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <input class="form-in" id="in-name" type="text" maxlength="24" placeholder="What do they call you on the Plains?"/>
     </div>
     <div class="form-block">
+      <label class="form-lbl">Pronouns</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;" id="gender-row">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="he/him" checked style="accent-color:var(--amber);"/> He / Him</label>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="she/her" style="accent-color:var(--amber);"/> She / Her</label>
+      </div>
+    </div>
+    <div class="form-block">
       <label class="form-lbl">Your Color</label>
       <div class="color-row" id="color-row"></div>
     </div>
@@ -446,7 +453,7 @@ const CLASSES=[
   {id:'truthwatcher',name:'Truthwatcher',ideal:'I will seek truth, even when it is painful',desc:'Progression & illumination. Sees what others miss, heals what others cannot.',bonus:{str:0,dex:0,int:2,wis:3,cha:0,end:0},spren:'Mistspren',abilities:['Truthsight','Progression Heal','Voidspren Detection','Mistspren Bond'],dmgBonus:{crit:2,hit:1,miss:1}},
   {id:'willshaper',name:'Willshaper',ideal:'I will seek freedom for those in bondage',desc:'Transportation & cohesion. Unpredictable, dangerous, deeply free.',bonus:{str:1,dex:2,int:0,wis:0,cha:2,end:0},spren:'Lightspren (Reachers)',abilities:['Transport Surge','Cohesion Strike','Freedom Step','Reacher Bond'],dmgBonus:{crit:3,hit:1,miss:0}},
   {id:'dustbringer',name:'Dustbringer',ideal:'I will seek self-mastery above all else',desc:'Division & abrasion. Controlled destruction — burns away what must not remain.',bonus:{str:2,dex:1,int:0,wis:0,cha:0,end:2},spren:'Ashspren',abilities:['Division Burn','Abrasion Surge','Self-Mastery','Ashspren Bond'],dmgBonus:{crit:4,hit:2,miss:0}},
-  {id:'bondsmith',name:'Bondsmith',ideal:'I will unite instead of divide',desc:'Tension & adhesion. Bonds worlds, mends the broken, changes everything they touch.',bonus:{str:0,dex:0,int:1,wis:2,cha:2,end:0},spren:'Godspren (Stormfather / Nightwatcher / Sibling)',abilities:['Adhesion Field','Spiritual Connection','Perpendicularity Pull','Bondsmith Aura'],dmgBonus:{crit:1,hit:0,miss:2}},
+  {id:'bondsmith',name:'Bondsmith',ideal:'I will unite instead of divide',desc:'Tension & adhesion. The rarest Order — only three Bondsmiths can exist. You do not find the Sibling. The Sibling finds you.',bonus:{str:0,dex:0,int:1,wis:2,cha:2,end:0},spren:'The Sibling (Ancient Godspren of Urithiru)',abilities:['Adhesion Field','Spiritual Connection','Perpendicularity Pull','Bondsmith Aura'],dmgBonus:{crit:1,hit:0,miss:2}},
   {id:'skybreaker',name:'Skybreaker',ideal:'I will follow the law',desc:'Gravitation & division. Absolute in justice, terrifying in execution.',bonus:{str:1,dex:2,int:0,wis:0,cha:0,end:2},spren:'Highspren',abilities:['Division Strike','Gravitation Law','Judgment Lashing','Highspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
 ];
 // Spren bond evolution — 5 stages across 180 turns
@@ -459,7 +466,7 @@ const SPREN_BONDS={
   truthwatcher:{name:'Glys',nick:'Glys',stages:['Voidspren scatter from you like startled fish...','Glys pulses softly, a star between your fingers.','Glys shows you what is real beneath what appears to be.','Glys weeps tears of Stormlight at true things. At beautiful ones.','Glys becomes a Shardblade of living starlight. Truth incarnate.'],color:'#f0f0b8'},
   willshaper:{name:"Lunu'anaki",nick:'Lunu',stages:['The winds carry whispers meant only for you...','Lunu slides into view sideways, as if through a crack in the world.','Lunu laughs at locked doors. Nothing holds you both.','Lunu grows agitated at injustice. She wants to act. Now.','Lunu becomes a Shardblade of living wind. Unchained momentum.'],color:'#b8e8f0'},
   dustbringer:{name:'Spark',nick:'Spark',stages:['Ash falls upward near you sometimes...','Spark crackles with restrained energy, studying your hands.','Spark teaches restraint. Control. The discipline of fire.','Spark burns away your excuses. What remains is clarity.','Spark becomes a Shardblade of living ember. Controlled annihilation.'],color:'#f0c8a0'},
-  bondsmith:{name:'The Stormfather',nick:'Stormfather',stages:['Thunder answers your doubt with silence...','The Stormfather speaks. You are not sure you were ready.','The Stormfather argues. He is never wrong. You are sometimes right.','The Stormfather tests your capacity to hold what he would give you.','The Stormfather opens a Perpendicularity. The realms touch. You are the reason.'],color:'#f0e8a0'},
+  bondsmith:{name:'The Sibling',nick:'Sibling',stages:['Something ancient stirs in the deep stone. It has noticed you.','The Sibling speaks without words — through vibration, through warmth in the walls.','The Sibling shows you what it means to hold two realms at once. The weight is immense.','The Sibling trusts you with a secret that predates the Desolations.','The Sibling fully awakens. Urithiru breathes again. You are the reason.'],color:'#e8e0c0'},
   skybreaker:{name:'Nale',nick:'Nale',stages:['The law feels heavier when you are near...','A Highspren circles you, measuring. Judging.','The Highspren names you. You are bound to more than yourself now.','The law is not cruel. It is clear. The Highspren shows you the difference.','The Highspren becomes a Shardblade of living law. Justice given edge.'],color:'#a8c8f0'},
 };
 function getSprenStage(totalMoves){
@@ -797,7 +804,8 @@ function genNPC(slot){
   const color=NPC_COLORS[Math.floor(Math.random()*NPC_COLORS.length)];
   const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
   const hp=12+stats.end;
-  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true};
+  const npcGender=Math.random()<0.5?'he/him':'she/her';
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender:npcGender};
 }
 
 function renderSlots(st){
@@ -940,7 +948,9 @@ async function onCreateChar(){
   err.style.display='none';
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
-  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId};
+  const checkedGender=document.querySelector('input[name="gender"]:checked');
+  const gender=checkedGender?checkedGender.value:'he/him';
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender};
   saveMyChar(myChar,campaignId);
   gState.players[mySlot]=myChar;
   await saveState(gState);
@@ -1427,8 +1437,9 @@ ACT TRANSITION: This is the final turn of Act I. Close out ${loc} and foreshadow
 
 ACT TRANSITION: Final turn of Act II. Foreshadow the climax in ${ACTS[2].location}.`:'';
   const sprenCtx=getSprenMemoryContext();
+  const genderCtx=getGenderContext();
   return`Cosmere RPG Game Master. Turn ${m}/180. ${act.tag} — ${loc}.
-Party: ${party}${sprenCtx}
+Party: ${party}${sprenCtx}${genderCtx}
 ${who.name} (${who.className}) just did: "${action}"
 Roll result: ${roll} — ${rd}${actHint}
 
@@ -1457,7 +1468,7 @@ function craftBlade(){
   if(!myChar||!gState)return;
   if((myChar.fragments||0)<3){alert('Need 3 Stormlight Fragments to forge a blade.');return;}
   const bond=SPREN_BONDS[myChar.classId];
-  const bladeNames={'windrunner':'Silverwind Blade','lightweaver':'Illusory Edge','edgedancer':'Verdant Blade','stoneward':'Granite Shardblade','elsecaller':'Obsidian Catalyst','truthwatcher':'Starlight Blade','willshaper':'Freedom Edge','dustbringer':'Ember Blade','bondsmith':'Unity Shard','skybreaker':'Law Blade'};
+  const bladeNames={'windrunner':'Silverwind Blade','lightweaver':'Illusory Edge','edgedancer':'Verdant Blade','stoneward':'Granite Shardblade','elsecaller':'Obsidian Catalyst','truthwatcher':'Starlight Blade','willshaper':'Freedom Edge','dustbringer':'Ember Blade','bondsmith':'Sibling-Touched Blade','skybreaker':'Law Blade'};
   myChar.shardblade=bladeNames[myChar.classId]||'Nascent Shardblade';
   myChar.bladeLevel=1;
   myChar.fragments=(myChar.fragments||0)-3;
@@ -1557,6 +1568,22 @@ function recordSprenMemory(action, roll, turn){
     // Save to state (fire and forget)
     saveState(gState).catch(()=>{});
   }
+}
+
+function getGenderContext(){
+  if(!gState||!gState.players)return'';
+  const sz=gState.partySize||partySize;
+  const lines=[];
+  gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
+    if(p.gender){
+      const g=p.gender;
+      let subj='they',obj='them',poss='their',ref='themself';
+      if(g==='he/him'){subj='he';obj='him';poss='his';ref='himself';}
+      else if(g==='she/her'){subj='she';obj='her';poss='her';ref='herself';}
+      lines.push(`${p.name}: pronouns ${g} (${subj}/${obj}/${poss}/${ref})`);
+    }
+  });
+  return lines.length?'\n\nCHARACTER PRONOUNS — use these consistently, never switch mid-scene:\n'+lines.join('\n'):'';
 }
 
 function getSprenMemoryContext(){
