@@ -678,7 +678,7 @@ async function launchNewCampaign(num,name){
   try{
     await ensureSheets();gState=await loadState();
     partySize=3;gState.partySize=3;gState.campaignName=name;
-    myChar=null;localStorage.removeItem('sc_mychar_'+campaignId);
+    myChar=null;clearMyChar();
     await saveState(gState);
     document.getElementById('title-sub').textContent=name;
     renderPSZ();renderSlots(gState);
@@ -801,7 +801,7 @@ async function onCreateChar(){
   const hp=10+rolledStats.end;
   const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
   myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender,fragments:0};
-  saveMyChar(myChar);
+  saveMyChar(myChar); // saves under charKey(mySlot)
   gState.players[mySlot]=myChar;
   await saveState(gState);
   showScreen('lobby');renderLobby();startLobbyPolling();
@@ -847,6 +847,17 @@ function stopLobbyPolling(){
   if(lobbyTimer){clearInterval(lobbyTimer);lobbyTimer=null;}
 }
 
+function claimSlot(i){
+  // Player on new device claims an existing filled slot as their own
+  if(!gState||!gState.players[i])return;
+  const p=gState.players[i];
+  if(p.isNPC){alert('That slot belongs to an NPC.');return;}
+  myChar={...p,slot:i,campaignId};
+  mySlot=i;
+  saveMyChar(myChar);
+  renderLobby();
+}
+
 function renderLobby(){
   const sz=gState.partySize||partySize;
   const humans=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
@@ -863,7 +874,9 @@ function renderLobby(){
     const p=gState.players[i];const isMe=myChar&&myChar.slot===i;
     if(!p)return`<div class="slot" style="text-align:center;"><div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div><div class="slot-empty-txt" style="margin-bottom:10px;">Waiting for a player</div><span class="slot-npc-btn" onclick="assignNPC(${i})">+ Assign NPC</span></div>`;
     if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span><div style="margin-top:8px;"><span style="font-size:11px;color:var(--coral2);cursor:pointer;font-family:var(--font-d);letter-spacing:1px;" onclick="removeNPC(${i})">✕ Remove</span></div></div>`;
-    return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag">Ready</span></div>`;
+    // Show "This is me" button if slot is filled by a human but not claimed on this device
+    const unclaimed=!isMe&&!p.isNPC&&!myChar;
+    return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag">Ready</span>${unclaimed?`<div style="margin-top:8px;"><span class="slot-npc-btn" style="border-color:var(--amber-dim);color:var(--amber2);" onclick="claimSlot(${i})">This is me →</span></div>`:''}</div>`;
   }).join('');
   const actions=document.getElementById('lobby-actions');
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
@@ -1572,14 +1585,42 @@ function startPolling(){
 }
 
 // ══ PERSISTENCE ══
-function saveMyChar(c){localStorage.setItem('sc_'+(campaignId||'default'),JSON.stringify(c));}
-function loadMyChar(){try{const r=localStorage.getItem('sc_'+(campaignId||'default'));return r?JSON.parse(r):null;}catch(e){return null;}}
+function charKey(slot){return'sc_'+(campaignId||'default')+'_slot'+(slot!=null?slot:'x');}
+function saveMyChar(ch){
+  if(ch&&ch.slot!=null)localStorage.setItem(charKey(ch.slot),JSON.stringify(ch));
+}
+function loadMyChar(){
+  // Scan all slot keys for this campaign and find one that's still valid in gState
+  if(!campaignId||!gState)return null;
+  const sz=gState.partySize||partySize;
+  for(let i=0;i<sz;i++){
+    try{
+      const raw=localStorage.getItem(charKey(i));
+      if(!raw)continue;
+      const ch=JSON.parse(raw);
+      // Verify this slot still belongs to this character in gState
+      const slotPlayer=gState.players&&gState.players[i];
+      if(slotPlayer&&slotPlayer.name===ch.name&&!slotPlayer.isNPC){
+        return ch;
+      }
+      // Slot was reassigned or cleared — remove stale key
+      localStorage.removeItem(charKey(i));
+    }catch(e){localStorage.removeItem(charKey(i));}
+  }
+  return null;
+}
+function clearMyChar(){
+  // Clear all slot keys for this campaign on this device
+  if(!campaignId)return;
+  const sz=(gState&&gState.partySize)||partySize;
+  for(let i=0;i<sz;i++)localStorage.removeItem(charKey(i));
+}
 
 // ══ RESET ══
 async function onReset(){
   if(!confirm('Reset this campaign for all players?'))return;
   try{
-    localStorage.removeItem('sc_'+(campaignId||'default'));
+    clearMyChar();
     await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:gState&&gState.campaignName||campaignId});
     const t=await tok();
     await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
