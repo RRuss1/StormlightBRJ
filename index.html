@@ -887,8 +887,12 @@ async function refreshGame(){
   if(!gState.lastGM&&prev)gState.lastGM=prev;
   const log=await loadLog(false);
   if(gState&&!gState.lastGM){const lg=[...log].reverse().find(e=>e.type==='gm');if(lg)gState.lastGM={text:lg.text,choices:lg.choices,ts:lg.ts};}
+  const prevLastGMTs=lastGMTs;
   renderAll(log);
-  setBottomFromState(log);
+  // Only update bottom state if story actually changed
+  if(lastGMTs!==prevLastGMTs||bottomState===''){
+    setBottomFromState(log);
+  }
   if(gState.phase==='playing'&&!isLoading){
     const cur=gState.players[gState.turn];
     if(cur&&cur.isNPC)handleNPC(log);
@@ -945,7 +949,7 @@ function renderStory(log){
       return`<div style="border-left:2px solid var(--gold);padding-left:14px;margin-bottom:12px;">${badge}<span class="gm-label">The Chronicle</span>${clean.replace(/\n/g,'<br/>')}<br/><button class="share-btn" onclick="shareStoryMoment(this)" data-text="${safeText.substring(0,300)}" data-loc="${act.location||'Roshar'}">📷 Share Moment</button></div>`;
     }
     if(e.type==='player'){const p=gState&&gState.players.find(x=>x&&x.name===e.who);return`<div class="entry-player"><div class="entry-pname" style="color:${p?p.color:'var(--text3)'};">${e.who}</div>${e.text}</div>`;}
-    if(e.type==='npc')return`<div class="entry-player" style="border-color:rgba(26,107,82,0.3);"><div class="entry-pname" style="color:var(--teal2);">${e.who} (AI)</div>${e.text}</div>`;
+    if(e.type==='npc')return''; // NPC actions are silent — summarised by GM in next beat
     if(e.type==='system')return`<div class="entry-system">${e.text}</div>`;
     return'';
   }).join('');
@@ -965,9 +969,7 @@ function setBottomLoading(){
   document.getElementById('bottom-human').style.display='none';
   document.getElementById('bottom-continue').style.display='none';
   document.getElementById('bottom-waiting').style.display='none';
-  // Clear story text, show spinner
-  const el=document.getElementById('story-text');
-  if(el)el.innerHTML='';
+  // Keep previous story text visible while loading — no jarring clear
 }
 
 function setBottomFromState(log){
@@ -1110,9 +1112,9 @@ Party: ${party}${gctx}${mctx}
 
 NPC ${npc.name} (${npc.className}) randomly chose: "${action}"
 
-Write TWO paragraphs:
-PARAGRAPH 1 (NPC summary): What ${npc.name} did and its immediate consequence. 2-3 vivid sentences.
-PARAGRAPH 2 (Situation): Where things stand now. What demands ${next?next.name+"'s":'the next player'} attention.
+Write two paragraphs (no labels, just continuous prose):
+First: What ${npc.name} did and its immediate consequence. 2-3 vivid sentences.
+Second: Where things stand now and what demands attention next.
 
 It is now ${next?next.name+"'s turn ("+next.className+(next.isNPC?' NPC':' human')+')':'next turn'}.
 [CHOICES] 4 numbered options for ${next?next.name:'next'} (${next?next.className:'?'}) specific to their class AND ${loc}.
