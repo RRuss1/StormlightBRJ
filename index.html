@@ -150,6 +150,13 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
 .game-body{flex:1;display:flex;flex-direction:column;padding:20px;gap:18px;max-width:840px;width:100%;margin:0 auto;}
+.game-layout{display:grid;grid-template-columns:220px 1fr 220px;gap:14px;align-items:start;}
+.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:80px;}
+.side-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
+.side-panel-body{padding:10px 14px;max-height:60vh;overflow-y:auto;font-size:12px;}
+.side-panel-body::-webkit-scrollbar{width:3px;}
+.side-panel-body::-webkit-scrollbar-thumb{background:var(--border2);}
+@media(max-width:900px){.game-layout{grid-template-columns:1fr;}.side-panel{position:static;}}
 
 /* ── PROGRESS ── */
 .prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
@@ -402,6 +409,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
     <div style="display:flex;align-items:center;gap:10px;">
+      <button id="voice-btn" onclick="toggleVoice()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:14px;" title="Read story aloud">🔈</button>
       <button id="lang-toggle" onclick="toggleLang()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);white-space:nowrap;">🌐 EN</button>
       <span class="turn-pill" id="turn-pill">Loading...</span>
     </div>
@@ -449,7 +457,18 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <div class="init-row" id="init-row"></div>
     </div>
 
-    <!-- Chronicle card — unified -->
+    <!-- 3-column game layout -->
+    <div class="game-layout">
+
+    <!-- LEFT: Action Log -->
+    <div class="side-panel">
+      <div class="side-panel-hdr">⚡ Action Log</div>
+      <div class="side-panel-body" id="action-log-list">
+        <div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No actions yet</div>
+      </div>
+    </div>
+
+    <!-- CENTER: Chronicle card — unified -->
     <div class="chronicle-card">
       <div class="chronicle-header">
         <span class="chronicle-title"><span data-tr>The Chronicle</span></span>
@@ -491,6 +510,18 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
         </div>
       </div>
     </div>
+
+    </div><!-- end chronicle-card -->
+
+    <!-- RIGHT: TLDR Summary -->
+    <div class="side-panel">
+      <div class="side-panel-hdr">📖 Summary</div>
+      <div class="side-panel-body">
+        <div id="tldr-text" style="color:var(--text3);font-size:13px;line-height:1.7;font-style:italic;">The saga unfolds...</div>
+      </div>
+    </div>
+
+    </div><!-- end game-layout -->
 
     <!-- Character sheet -->
     <div>
@@ -912,7 +943,7 @@ async function startNow(){
 
 // ══ CAMPAIGN START ══
 async function startCampaign(){
-  gState.phase='playing';gState.turn=0;gState.totalMoves=0;
+  gState.phase='playing';gState.turn=0;gState.totalMoves=0;gState.actionLog=[];
   if(!gState.locationSeed)gState.locationSeed=Math.floor(Math.random()*99999);
   buildActs(gState.locationSeed);
   await saveState(gState);
@@ -924,7 +955,7 @@ async function startCampaign(){
   const log=await loadLog(true);
   renderAll(log);
   // Small delay ensures DOM is painted and lastGM choices are available
-  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();},150);
+  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(speakStory,300);},150);
 }
 function openingPrompt(){
   const sz=gState.partySize||partySize;
@@ -991,7 +1022,69 @@ async function refreshGame(){
 }
 
 function renderAll(log){
-  renderParty();renderEnemies();renderInitiativeOrder();renderStory(log);renderProgress();
+  renderParty();renderEnemies();renderInitiativeOrder();renderStory(log);renderProgress();renderPill();renderActionLog();
+}
+
+// ══ ACTION LOG + TLDR PANELS ══
+function addActionLog(name, action, roll, hpMsg){
+  if(!gState)return;
+  if(!gState.actionLog)gState.actionLog=[];
+  const words=action.trim().split(/\s+/);
+  // Extract verb (first word) and noun (next 2-3 words)
+  const verb=words[0]||'Acts';
+  const noun=words.slice(1,4).join(' ')||(action.substring(0,20));
+  const success=roll>=18?'critical!':roll>=14?'success':roll>=10?'partial':roll>=6?'failed':'critical fail';
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const entry={name,verb,noun,success,roll,ts,hpMsg:hpMsg||''};
+  gState.actionLog.unshift(entry); // newest first
+  if(gState.actionLog.length>20)gState.actionLog.pop();
+  renderActionLog();
+  saveState(gState).catch(()=>{});
+}
+
+function renderActionLog(){
+  const el=document.getElementById('action-log-list');if(!el||!gState)return;
+  const log=gState.actionLog||[];
+  if(!log.length){el.innerHTML='<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No actions yet</div>';return;}
+  el.innerHTML=log.map(e=>{
+    const col=e.success==='critical!'?'var(--gold)':e.success==='success'?'var(--teal2)':e.success==='partial'?'var(--amber2)':e.success==='failed'?'var(--coral2)':'#c44a28';
+    const p=gState.players&&gState.players.find(x=>x&&x.name===e.name);
+    const nameCol=p?p.color:'var(--text3)';
+    return`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.5;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:${nameCol};font-family:var(--font-d);font-size:10px;letter-spacing:1px;">${e.name}</span>
+        <span style="color:var(--text5);font-size:10px;">${e.ts}</span>
+      </div>
+      <div style="color:var(--text2);margin:2px 0;">${e.verb} ${e.noun}</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="color:${col};font-family:var(--font-d);font-size:10px;letter-spacing:1px;">[${e.success}]</span>
+        <span style="color:var(--text4);font-size:10px;">d20:${e.roll}</span>
+        ${e.hpMsg?`<span style="color:${e.hpMsg.includes('⬆')?'var(--teal2)':'var(--coral2)'};font-size:10px;">${e.hpMsg.split(' ').slice(0,3).join(' ')}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// TLDR summary — generated after each GM response
+async function generateTLDR(storyText){
+  if(!storyText||storyText.trim().length<50)return;
+  const el=document.getElementById('tldr-text');if(!el)return;
+  el.textContent='Summarising...';
+  try{
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:120,
+        messages:[{role:'user',content:'Summarise this RPG story beat in exactly 2 punchy sentences. Plain text only, no formatting:\n\n'+storyText}]})});
+    const data=await res.json();
+    const summary=data.content&&data.content[0]?data.content[0].text:'';
+    el.textContent=summary;
+    if(lang==='th'&&summary){
+      const tres=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,
+          messages:[{role:'user',content:'Translate to Thai, keep proper names in English. Return only the translation:\n\n'+summary}]})});
+      const td=await tres.json();
+      if(td.content&&td.content[0])el.textContent=td.content[0].text;
+    }
+  }catch(e){el.textContent='Summary unavailable.';}
 }
 
 // ══ RENDER PARTY STRIP ══
@@ -1009,7 +1102,9 @@ function renderParty(){
       <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
       ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} (${stage+1}/5)</div>`:''}
       ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
-      ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade}</div>`:''}
+      ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade} T${p.bladeLevel||1}</div>`:''}
+      ${p.shardplate?`<div class="ppip-tag" style="color:var(--gold);">⬛ Shardplate</div>`:''}
+      ${(p.fragments||0)>0?`<div class="ppip-tag" style="color:var(--teal2);">✦ ${p.fragments} frags</div>`:''}
       <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${hpCol};"></div></div>
     </div>`;
   }).join('');
@@ -1157,6 +1252,7 @@ function checkScrollEnable(){
 }
 
 function onContinue(){
+  stopSpeaking(); // stop voice when player advances
   const btn=document.getElementById('continue-btn');
   const choices=btn&&btn._pendingChoices;
   const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
@@ -1276,6 +1372,8 @@ async function onSubmitAction(){
   if(dmgMsg)document.getElementById('dice-flash').textContent+=` ${dmgMsg}`;
   // Record spren memory
   recordSprenMemory(action,total,gState.totalMoves||0);
+  // Add to action log
+  addActionLog(myChar.name, action, total, dmgMsg);
   // Log action
   await addLog({type:'player',who:myChar.name,text:action,choices:[]});
   const from=gState.turn;
@@ -1291,13 +1389,15 @@ async function onSubmitAction(){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,300);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
 }
 
 function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
 
 // ══ GM CALL ══
 async function callGM(prompt){
+  // Show thinking bar for ALL players
+  const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='block';
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
@@ -1335,6 +1435,7 @@ async function callGM(prompt){
     }
     if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};spawnEnemies(scene);await saveState(gState);}
     await addLog({type:'gm',who:'',text:scene,choices});
+    const tb2=document.getElementById('thinking-bar');if(tb2)tb2.style.display='none';
   }catch(e){
     console.error('callGM error:',e.message);
     if(gState){gState.lastGM={text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[],ts:new Date().toISOString()};await saveState(gState);}
@@ -1520,10 +1621,13 @@ function renderProgress(){
 }
 
 // ══ TURN PILL ══
-function renderPill(){// handled by renderAll via setBottomFromState
-  const pill=document.getElementById('turn-pill');if(!gState||!myChar||!pill)return;
+function renderPill(){
+  const pill=document.getElementById('turn-pill');if(!gState||!pill)return;
+  // Don't update pill while GM is deliberating
+  const tb=document.getElementById('thinking-bar');
+  if(tb&&tb.style.display==='block'){return;} // keep showing previous turn during deliberation
   const cur=gState.players[gState.turn];
-  const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
+  const mine=myChar&&cur&&!cur.isNPC&&cur.name===myChar.name;
   pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} acting...`:`Waiting for ${cur?cur.name:'...'}`;
   pill.className='turn-pill'+(mine?' yours':'');
 }
