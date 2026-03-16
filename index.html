@@ -218,6 +218,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 /* Continue state */
 #bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 @media(max-width:640px){
+  #bottom-human{display:block!important;}
   #bottom-continue{position:sticky;bottom:0;background:var(--bg2);border-top:2px solid var(--amber-dim);z-index:20;padding:14px 16px;display:flex!important;justify-content:space-between;align-items:center;gap:10px;}
   #bottom-continue .continue-hint{font-size:11px;}
   #bottom-continue .btn-continue{padding:12px 24px;font-size:14px;min-width:130px;text-align:center;justify-content:center;}
@@ -289,9 +290,12 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 
 <!-- ══ CAMPAIGN SCREEN ══ -->
 <div id="s-campaign" class="screen active">
+  <div style="position:absolute;top:16px;right:16px;">
+    <button id="lang-toggle-camp" onclick="toggleLang()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);">🌐 EN</button>
+  </div>
   <div style="font-size:60px;color:var(--amber);font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;">⟁</div>
   <h1 class="title-h1">Stormlight Chronicles</h1>
-  <p class="title-h2">Choose Your Adventure</p>
+  <p class="title-h2" id="camp-tagline">Choose Your Adventure</p>
   <div class="title-line"></div>
   <p class="slots-label">Your Campaigns</p>
   <div class="camp-grid" id="camp-grid"></div>
@@ -393,7 +397,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 <div id="s-game" class="screen">
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
-    <span class="turn-pill" id="turn-pill">Loading...</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="lang-toggle" onclick="toggleLang()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);white-space:nowrap;">🌐 EN</button>
+      <span class="turn-pill" id="turn-pill">Loading...</span>
+    </div>
   </div>
   <!-- Thinking bar — shows at top when GM is generating -->
   <div id="thinking-bar" style="display:none;padding:10px 24px;background:var(--bg3);border-bottom:1px solid var(--border);text-align:center;">
@@ -462,11 +469,11 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
           <div class="dice-flash" id="dice-flash"></div>
           <div class="action-choices" id="action-choices"></div>
           <div class="custom-row">
-            <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220"/>
+            <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." data-i18n="Or describe your own action..." maxlength="220"/>
           </div>
           <div class="act-row">
             <div class="err" id="action-err" style="display:none;"></div>
-            <button class="btn-act" onclick="onSubmitAction()" data-i18n="Act →">Act →</button>
+            <button class="btn-act" onclick="onSubmitAction()" data-i18n="Act →" data-i18n="Act →">Act →</button>
           </div>
         </div>
         <!-- Continue (NPC turn or post-read gate) -->
@@ -938,7 +945,7 @@ Open Act I in ${a1.location}. Immediate crisis — specific, sensory, urgent. No
 3. (different approach)
 4. (different approach)
 
-One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.`;
+One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.\${getLangInstruction()}`;
 }
 
 // ══ GAME SCREEN ══
@@ -1015,6 +1022,9 @@ function renderStory(log){
   // Find latest GM entry for display
   const latestGM=[...dlog].reverse().find(e=>e.type==='gm');
   const isNew=latestGM&&(latestGM.ts||'new')!==lastGMTs;
+  // Don't re-render if nothing new — prevents flicker on 15s poll
+  const hasContent=el.innerHTML&&el.innerHTML.trim().length>50;
+  if(!isNew&&hasContent)return;
 
   // Build full log HTML
   el.innerHTML=dlog.map(e=>{
@@ -1225,7 +1235,7 @@ CRITICAL: Every option must have ${next?next.name:'the player'} as the actor. Ne
 2. (different approach using their abilities)
 3. (tactical option)
 4. (bold option)
-One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.`;
+One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.\${getLangInstruction()}`;
 }
 
 // ══ HUMAN TURN ══
@@ -1390,8 +1400,8 @@ function renderInitiativeOrder(){
     const isEnemy=co.type==='enemy';
     const isCur=cur&&co.name===cur.name;
     const dead=(gState.enemies||[]).find(e=>e.name===co.name&&e.hp<=0);
-    const activeGlow=isCur&&!dead?`box-shadow:0 0 0 2px ${isEnemy?'rgba(196,74,40,0.8)':'rgba(191,161,90,0.9)'}, 0 0 12px ${isEnemy?'rgba(196,74,40,0.5)':'rgba(191,161,90,0.5)'};transform:scale(1.08);font-weight:600;`:'';
-  return`<div class="init-pill${isCur&&!dead?' init-active':''}" style="border:1px solid ${dead?'var(--border)':isCur&&!isEnemy?'var(--amber)':isCur&&isEnemy?'var(--coral2)':isEnemy?'rgba(196,74,40,0.4)':'rgba(191,161,90,0.3)'};background:${isCur?isEnemy?'rgba(196,74,40,0.18)':'rgba(191,161,90,0.18)':'var(--bg3)'};color:${dead?'var(--text5)':isCur?isEnemy?'#ff8060':'var(--gold-bright)':isEnemy?'var(--coral2)':'var(--amber2)'};text-decoration:${dead?'line-through':'none'};transition:all 0.3s;${activeGlow}">${isCur?'⟁ ':''}${co.initiative} ${co.name}</div>`;
+    // CSS handles the glow animation via .init-active class
+  return`<div class="init-pill${isCur&&!dead?' init-active':''}" style="border:1px solid ${dead?'var(--border)':isCur&&!isEnemy?'var(--amber)':isCur&&isEnemy?'var(--coral2)':isEnemy?'rgba(196,74,40,0.4)':'rgba(191,161,90,0.3)'};background:${isCur?isEnemy?'rgba(196,74,40,0.18)':'rgba(191,161,90,0.18)':'var(--bg3)'};color:${dead?'var(--text5)':isCur?isEnemy?'#ff8060':'var(--gold-bright)':isEnemy?'var(--coral2)':'var(--amber2)'};text-decoration:${dead?'line-through':'none'};transform:${isCur&&!dead?'scale(1.1)':'scale(1)'};font-weight:${isCur&&!dead?'600':'400'};transition:all 0.3s;">${isCur?'⟁ ':''}${co.initiative} ${co.name}</div>`;
   }).join('');
 }
 function applyRollDamage(roll,actor,st){
@@ -1502,7 +1512,7 @@ function renderPill(){// handled by renderAll via setBottomFromState
   const pill=document.getElementById('turn-pill');if(!gState||!myChar||!pill)return;
   const cur=gState.players[gState.turn];
   const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
-  pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} acting...`:`Waiting for ${cur?cur.name:'...'}`;
+  pill.textContent=mine?T('⟁ Your Turn'):cur&&cur.isNPC?`${cur.name} ${T('acting...')}`:`${T('Waiting for')} ${cur?cur.name:'...'}`;
   pill.className='turn-pill'+(mine?' yours':'');
 }
 
@@ -1707,7 +1717,96 @@ function setStormIntensity(type){
 }
 
 // ══ BOOT ══
+// ══════════════════════════════════════
+// LANGUAGE / THAI TRANSLATION SYSTEM
+// ══════════════════════════════════════
+const TH={
+  'Choose Your Adventure':'เลือกการผจญภัย',
+  'Your Campaigns':'แคมเปญของคุณ',
+  'New Campaign':'แคมเปญใหม่',
+  'Name Your Campaign':'ตั้งชื่อแคมเปญ',
+  'Begin Campaign →':'เริ่มแคมเปญ →',
+  '← Cancel':'← ยกเลิก',
+  '← Campaigns':'← แคมเปญ',
+  'Connecting...':'กำลังเชื่อมต่อ...',
+  'In Progress':'กำลังดำเนินการ',
+  'Pre-Game':'ก่อนเกม',
+  'Party Size':'ขนาดปาร์ตี้',
+  'Radiant Company':'กองทหาร Radiant',
+  '⟁ Enter the Storm':'⟁ เข้าสู่พายุ',
+  'Reset Campaign':'รีเซ็ตแคมเปญ',
+  'Forge Your Radiant':'สร้าง Radiant ของคุณ',
+  'Your Name':'ชื่อของคุณ',
+  'Pronouns':'สรรพนาม',
+  'He / Him':'เขา / ของเขา',
+  'She / Her':'เธอ / ของเธอ',
+  'Your Color':'สีของคุณ',
+  'Assign Your Party':'กำหนดปาร์ตี้',
+  'Waiting for a player':'รอผู้เล่น',
+  '+ Assign NPC':'+ มอบหมาย NPC',
+  'Ready':'พร้อม',
+  'AI COMPANION':'เพื่อน AI',
+  '⟁ Begin the Saga →':'⟁ เริ่มมหากาพย์ →',
+  'The Chronicle':'พงศาวดาร',
+  'Continue →':'ดำเนินต่อ →',
+  'Act →':'กระทำ →',
+  'Scroll down to read →':'เลื่อนลงเพื่ออ่าน →',
+  'Or describe your own action...':'หรืออธิบายการกระทำของคุณ...',
+  'The Stormfather deliberates':'Stormfather กำลังคิด',
+  '⧁ Your Turn':'⧁ ตาของคุณ',
+  'acting...':'กำลังแสดง...',
+  'Waiting for':'รอ',
+  'Waiting...':'รอ...',
+  '⬇ Export Chronicle':'⬇ ส่งออกพงศาวดาร',
+  'Character Sheet':'แผ่นตัวละคร',
+  'Share Moment':'แชร์ช่วงเวลา',
+  '⚔ Enemies':'⚔ ศัตรู',
+  'Option':'ตัวเลือก',
+  'Name':'ชื่อ','Order':'Order','HP':'HP',
+  'Fragments':'เศษ Stormlight',
+  'This is me →':'นี่คือฉัน →',
+};
+
+let lang=localStorage.getItem('sc_lang')||'en';
+
+function T(str){return lang==='th'&&TH[str]?TH[str]:str;}
+
+function toggleLang(){
+  lang=lang==='en'?'th':'en';
+  localStorage.setItem('sc_lang',lang);
+  applyLang();
+}
+
+function applyLang(){
+  const isTH=lang==='th';
+  const label=isTH?'🌐 ไทย':'🌐 EN';
+  ['lang-toggle','lang-toggle-camp'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent=label;
+  });
+  // Translate all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(el.tagName==='INPUT')el.placeholder=T(k);
+    else el.textContent=T(k);
+  });
+  // Campaign tagline
+  const ct=document.getElementById('camp-tagline');
+  if(ct)ct.textContent=T('Choose Your Adventure');
+  // Refresh live game elements
+  if(gState&&myChar){
+    renderPill();
+    if(sheetOpen)renderSheet();
+  }
+}
+
+function getLangInstruction(){
+  if(lang!=='th')return'';
+  const names=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
+  return'\n\nสำคัญมาก: เขียนทั้งหมดเป็นภาษาไทย รวมถึงเนื้อเรื่อง ตัวเลือก และทุกอย่าง แต่ให้คงชื่อตัวละคร ('+names+') ไว้เหมือนเดิม';
+}
+
 (async()=>{
+  applyLang();
   showScreen('campaign');
   try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
   catch(e){document.getElementById('camp-status').textContent='Connecting... '+e.message;}
