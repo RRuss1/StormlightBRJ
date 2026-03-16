@@ -149,14 +149,25 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .ppip-tag{font-size:9px;letter-spacing:1px;font-family:var(--font-d);}
 .hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
-.game-body{flex:1;display:flex;flex-direction:column;padding:20px;gap:18px;max-width:840px;width:100%;margin:0 auto;}
-.game-layout{display:grid;grid-template-columns:220px 1fr 220px;gap:14px;align-items:start;}
-.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:80px;}
+.game-body{flex:1;display:flex;flex-direction:column;gap:0;width:100%;}
+.game-body-top{padding:16px 20px 0;max-width:840px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.game-layout{display:grid;grid-template-columns:220px minmax(300px,840px) 220px;gap:14px;align-items:start;justify-content:center;padding:16px 20px 20px;width:100%;}
+.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px;}
+.side-panel-body{padding:10px 14px;max-height:calc(100vh - 160px);overflow-y:auto;font-size:12px;}
 .side-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.side-panel-body{padding:10px 14px;max-height:60vh;overflow-y:auto;font-size:12px;}
 .side-panel-body::-webkit-scrollbar{width:3px;}
 .side-panel-body::-webkit-scrollbar-thumb{background:var(--border2);}
-@media(max-width:900px){.game-layout{grid-template-columns:1fr;}.side-panel{position:static;}}
+@media(max-width:1100px){
+  .game-layout{grid-template-columns:1fr;padding:12px;}
+  .side-panel{position:static;display:flex;flex-direction:row;gap:0;}
+  .side-panel-hdr{writing-mode:initial;}
+  .side-panel-body{max-height:200px;}
+}
+@media(max-width:640px){
+  .game-layout{grid-template-columns:1fr;}
+  .side-panel{display:block;}
+  .side-panel-body{max-height:150px;}
+}
 
 /* ── PROGRESS ── */
 .prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
@@ -426,6 +437,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <div class="party-strip" id="party-strip"></div>
 
   <div class="game-body">
+    <div class="game-body-top">
     <!-- Print header (hidden normally) -->
     <div id="print-header">
       <div style="font-size:24pt;font-weight:bold;">⟁ Stormlight Chronicles</div>
@@ -457,7 +469,9 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <div class="init-row" id="init-row"></div>
     </div>
 
-    <!-- 3-column game layout -->
+    </div><!-- /game-body-top -->
+
+    <!-- 3-column game layout — full width -->
     <div class="game-layout">
 
     <!-- LEFT: Action Log -->
@@ -1307,6 +1321,7 @@ async function handleNPC(log){
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
+  addActionLog(cur.name, pick, Math.ceil(Math.random()*4), ''); // D4 roll logged
   await saveState(gState);
   setBottomLoading();
   await callGM(npcPrompt(pick,cur,from));
