@@ -296,7 +296,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   </div>
   <div style="font-size:60px;color:var(--amber);font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;">⟁</div>
   <h1 class="title-h1">Stormlight Chronicles</h1>
-  <p class="title-h2" id="camp-tagline">Choose Your Adventure</p>
+  <p class="title-h2">Choose Your Adventure</p>
+  <div id="thai-banner" style="display:none;margin-top:8px;padding:6px 16px;background:rgba(191,161,90,0.1);border:1px solid var(--amber-dim);border-radius:20px;font-size:13px;color:var(--amber2);font-family:var(--font-d);letter-spacing:1px;">
+    🌐 โหมดภาษาไทย — เนื้อเรื่องจะแปลเป็นภาษาไทย
+  </div>
   <div class="title-line"></div>
   <p class="slots-label">Your Campaigns</p>
   <div class="camp-grid" id="camp-grid"></div>
@@ -449,7 +452,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <!-- Chronicle card — unified -->
     <div class="chronicle-card">
       <div class="chronicle-header">
-        <span class="chronicle-title" data-i18n="The Chronicle">The Chronicle</span>
+        <span class="chronicle-title">The Chronicle</span>
         <span class="chronicle-act" id="chronicle-act"></span>
       </div>
       <div class="story-text" id="story-text">
@@ -458,7 +461,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <div class="bottom-zone">
         <!-- Loading -->
         <div id="bottom-loading">
-          <div class="loading-text dots" data-i18n="The Stormfather deliberates">The Stormfather deliberates</div>
+          <div class="loading-text dots">The Stormfather deliberates</div>
           <div class="pulse-row">
             <div class="pulse-dot" style="animation-delay:0s"></div>
             <div class="pulse-dot" style="animation-delay:0.2s"></div>
@@ -470,17 +473,17 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
           <div class="dice-flash" id="dice-flash"></div>
           <div class="action-choices" id="action-choices"></div>
           <div class="custom-row">
-            <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." data-i18n="Or describe your own action..." maxlength="220"/>
+            <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220"/>
           </div>
           <div class="act-row">
             <div class="err" id="action-err" style="display:none;"></div>
-            <button class="btn-act" onclick="onSubmitAction()" data-i18n="Act →" data-i18n="Act →">Act →</button>
+            <button class="btn-act" onclick="onSubmitAction()">Act →</button>
           </div>
         </div>
         <!-- Continue (NPC turn or post-read gate) -->
         <div id="bottom-continue">
           <span class="continue-hint" id="continue-hint"></span>
-          <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled data-i18n="Continue →">Continue →</button>
+          <button class="btn-continue" id="continue-btn" onclick="onContinue()" disabled>Continue →</button>
         </div>
         <!-- Waiting for other human -->
         <div id="bottom-waiting">
@@ -920,7 +923,7 @@ async function startCampaign(){
   const log=await loadLog(true);
   renderAll(log);
   // Small delay ensures DOM is painted and lastGM choices are available
-  setTimeout(()=>setBottomFromState(log),100);
+  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();},150);
 }
 function openingPrompt(){
   const sz=gState.partySize||partySize;
@@ -947,7 +950,7 @@ Open Act I in ${a1.location}. Immediate crisis — specific, sensory, urgent. No
 3. (different approach)
 4. (different approach)
 
-One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.${getLangInstruction()}`;
+One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.`;
 }
 
 // ══ GAME SCREEN ══
@@ -1099,7 +1102,7 @@ function setBottomReadGate(choices){
   const btn=document.getElementById('continue-btn');
   const hint=document.getElementById('continue-hint');
   btn.disabled=true;
-  hint.textContent=T('Scroll down to read →');
+  hint.textContent='Scroll down to read →';
   // Store choices for after Continue
   btn._pendingChoices=choices;
   // Enable after scroll or 4s
@@ -1166,13 +1169,21 @@ function onContinue(){
     const h=document.getElementById('bottom-human');
     const ch=document.getElementById('action-choices');
     if(choices&&choices.length){
-      ch.innerHTML=choices.map((ch,i)=>{
-        const display=ch
-          .replace(/\*\*/g,'')
-          .replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'')
-          .trim();
-        return`<button class="achoice" onclick="selAct(this,\`${display.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${display}</button>`;
-      }).join('');
+      const cleanChoices=choices.map(ch=>ch.replace(/\*\*/g,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim());
+      ch.innerHTML=cleanChoices.map((display,i)=>`<button class="achoice" onclick="selAct(this,\`${display.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${display}</button>`).join('');
+      // Translate choices if Thai mode active
+      if(lang==='th'){
+        Promise.all(cleanChoices.map(d=>translateToThai(d))).then(translated=>{
+          ch.querySelectorAll('.achoice').forEach((btn,i)=>{
+            const orig=btn.getAttribute('onclick');
+            btn.querySelector('span').nextSibling?btn.childNodes[btn.childNodes.length-1].textContent=translated[i]:btn.appendChild(document.createTextNode(translated[i]));
+            // Keep English in onclick for game logic, show Thai in button text
+            const span=btn.querySelector('.achoice-num');
+            btn.innerHTML='';btn.appendChild(span);btn.appendChild(document.createTextNode(translated[i]));
+            btn.setAttribute('onclick',orig);
+          });
+        }).catch(()=>{});
+      }
     } else {ch.innerHTML='';}
     h.style.display='block';
     setTimeout(()=>h.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
@@ -1205,7 +1216,7 @@ async function handleNPC(log){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>setBottomFromState(freshLog),100);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();},150);
   // NPC chain stops here — user must press Continue to advance
   // setBottomFromState will show Continue button for next NPC turn
 }
@@ -1235,7 +1246,7 @@ CRITICAL: Every option must have ${next?next.name:'the player'} as the actor. Ne
 2. (different approach using their abilities)
 3. (tactical option)
 4. (bold option)
-One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.${getLangInstruction()}`;
+One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.`;
 }
 
 // ══ HUMAN TURN ══
@@ -1279,7 +1290,7 @@ async function onSubmitAction(){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>setBottomFromState(freshLog),100);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();},150);
 }
 
 function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
@@ -1356,7 +1367,7 @@ CRITICAL RULE: ${next?next.name:'The player'} is the ONLY actor in every option.
 2. (different approach — physical or tactical)
 3. (investigative or discovery angle)
 4. (bold or high-risk option)
-First person "I do X" or "${next?next.name:'player'} does X". One sentence each. No ** markers. Tag on its own final line: [COMBAT], [DISCOVERY], or [DECISION].${getLangInstruction()}`;
+First person "I do X" or "${next?next.name:'player'} does X". One sentence each. No ** markers. Tag on its own final line: [COMBAT], [DISCOVERY], or [DECISION].`;
 }
 
 // ══ COMBAT SYSTEMS ══
@@ -1512,7 +1523,7 @@ function renderPill(){// handled by renderAll via setBottomFromState
   const pill=document.getElementById('turn-pill');if(!gState||!myChar||!pill)return;
   const cur=gState.players[gState.turn];
   const mine=cur&&!cur.isNPC&&cur.name===myChar.name;
-  pill.textContent=mine?T('⟁ Your Turn'):cur&&cur.isNPC?`${cur.name} ${T('acting...')}`:`${T('Waiting for')} ${cur?cur.name:'...'}`;
+  pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} acting...`:`Waiting for ${cur?cur.name:'...'}`;
   pill.className='turn-pill'+(mine?' yours':'');
 }
 
@@ -1693,55 +1704,15 @@ function setStormIntensity(type){
 // ══════════════════════════════════════
 // LANGUAGE / THAI TRANSLATION SYSTEM
 // ══════════════════════════════════════
-const TH={
-  'Choose Your Adventure':'เลือกการผจญภัย',
-  'Your Campaigns':'แคมเปญของคุณ',
-  'New Campaign':'แคมเปญใหม่',
-  'Name Your Campaign':'ตั้งชื่อแคมเปญ',
-  'Begin Campaign →':'เริ่มแคมเปญ →',
-  '← Cancel':'← ยกเลิก',
-  '← Campaigns':'← แคมเปญ',
-  'Connecting...':'กำลังเชื่อมต่อ...',
-  'In Progress':'กำลังดำเนินการ',
-  'Pre-Game':'ก่อนเกม',
-  'Party Size':'ขนาดปาร์ตี้',
-  'Radiant Company':'กองทหาร Radiant',
-  '⟁ Enter the Storm':'⟁ เข้าสู่พายุ',
-  'Reset Campaign':'รีเซ็ตแคมเปญ',
-  'Forge Your Radiant':'สร้าง Radiant ของคุณ',
-  'Your Name':'ชื่อของคุณ',
-  'Pronouns':'สรรพนาม',
-  'He / Him':'เขา / ของเขา',
-  'She / Her':'เธอ / ของเธอ',
-  'Your Color':'สีของคุณ',
-  'Assign Your Party':'กำหนดปาร์ตี้',
-  'Waiting for a player':'รอผู้เล่น',
-  '+ Assign NPC':'+ มอบหมาย NPC',
-  'Ready':'พร้อม',
-  'AI COMPANION':'เพื่อน AI',
-  '⟁ Begin the Saga →':'⟁ เริ่มมหากาพย์ →',
-  'The Chronicle':'พงศาวดาร',
-  'Continue →':'ดำเนินต่อ →',
-  'Act →':'กระทำ →',
-  'Scroll down to read →':'เลื่อนลงเพื่ออ่าน →',
-  'Or describe your own action...':'หรืออธิบายการกระทำของคุณ...',
-  'The Stormfather deliberates':'Stormfather กำลังคิด',
-  '⧁ Your Turn':'⧁ ตาของคุณ',
-  'acting...':'กำลังแสดง...',
-  'Waiting for':'รอ',
-  'Waiting...':'รอ...',
-  '⬇ Export Chronicle':'⬇ ส่งออกพงศาวดาร',
-  'Character Sheet':'แผ่นตัวละคร',
-  '⚔ Enemies':'⚔ ศัตรู',
-  'Option':'ตัวเลือก',
-  'Name':'ชื่อ','Order':'Order','HP':'HP',
-  'Fragments':'เศษ Stormlight',
-  'This is me →':'นี่คือฉัน →',
-};
-
+// ══════════════════════════════════════
+// LANGUAGE SYSTEM — whole-page translation
+// Claude writes everything in English.
+// If Thai is active, we translate the rendered
+// story text via API just before showing it.
+// ══════════════════════════════════════
 let lang=localStorage.getItem('sc_lang')||'en';
 
-function T(str){return lang==='th'&&TH[str]?TH[str]:str;}
+function T(str){return str;} // No dictionary lookup — all UI stays English base
 
 function toggleLang(){
   lang=lang==='en'?'th':'en';
@@ -1755,26 +1726,48 @@ function applyLang(){
   ['lang-toggle','lang-toggle-camp'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.textContent=label;
   });
-  // Translate all data-i18n elements
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const k=el.getAttribute('data-i18n');
-    if(el.tagName==='INPUT')el.placeholder=T(k);
-    else el.textContent=T(k);
-  });
-  // Campaign tagline
-  const ct=document.getElementById('camp-tagline');
-  if(ct)ct.textContent=T('Choose Your Adventure');
-  // Refresh live game elements
-  if(gState&&myChar){
-    renderPill();
-    if(sheetOpen)renderSheet();
+  // Show/hide Thai notice banner
+  const banner=document.getElementById('thai-banner');
+  if(banner)banner.style.display=isTH?'block':'none';
+}
+
+// Translate a block of English text to Thai via Claude API
+async function translateToThai(text){
+  if(!text||!text.trim())return text;
+  try{
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:2000,
+        messages:[{role:'user',content:`Translate the following text to Thai. Keep all character names, place names (Roshar, Shattered Plains, etc), and game terms (Radiant, Stormlight, Shardblade, etc) in their original English form. Return ONLY the translated text with no explanation or preamble:
+
+${text}`}]
+      })
+    });
+    const data=await res.json();
+    return data.content&&data.content[0]?data.content[0].text:text;
+  }catch(e){
+    console.warn('Translation failed:',e.message);
+    return text;
   }
 }
 
-function getLangInstruction(){
-  if(lang!=='th')return'';
-  const names=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
-  return'\n\nสำคัญมาก: เขียนทั้งหมดเป็นภาษาไทย รวมถึงเนื้อเรื่อง ตัวเลือก และทุกอย่าง แต่ให้คงชื่อตัวละคร ('+names+') ไว้เหมือนเดิม';
+// Called after story text is rendered — translates it in place if Thai active
+async function maybeTranslateStory(){
+  if(lang!=='th')return;
+  const el=document.getElementById('story-text');
+  if(!el||!el.innerText||el.innerText.trim().length<10)return;
+  // Don't re-translate if already in Thai (contains Thai chars)
+  if(/[฀-๿]/.test(el.innerText))return;
+  // Show loading state on story while translating
+  el.style.opacity='0.5';
+  const translated=await translateToThai(el.innerText);
+  // Re-render with translated text preserving structure
+  const paras=translated.split('\n').filter(l=>l.trim());
+  el.innerHTML=paras.map(l=>'<p style="margin-bottom:1rem;">'+l+'</p>').join('');
+  el.style.opacity='1';
 }
 
 (async()=>{
