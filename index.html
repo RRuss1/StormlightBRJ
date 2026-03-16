@@ -219,7 +219,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 #bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 @media(max-width:640px){
   #bottom-human{display:block!important;}
-  #bottom-continue{position:sticky;bottom:0;background:var(--bg2);border-top:2px solid var(--amber-dim);z-index:20;padding:14px 16px;display:flex!important;justify-content:space-between;align-items:center;gap:10px;}
+  #bottom-continue.active{position:sticky;bottom:0;background:var(--bg2);border-top:2px solid var(--amber-dim);z-index:20;padding:14px 16px;display:flex!important;justify-content:space-between;align-items:center;gap:10px;}
   #bottom-continue .continue-hint{font-size:11px;}
   #bottom-continue .btn-continue{padding:12px 24px;font-size:14px;min-width:130px;text-align:center;justify-content:center;}
   #bottom-human .act-row{position:sticky;bottom:0;background:var(--bg2);padding:12px 16px;margin:0 -18px -18px;border-top:2px solid var(--amber-dim);}
@@ -947,7 +947,7 @@ Open Act I in ${a1.location}. Immediate crisis — specific, sensory, urgent. No
 3. (different approach)
 4. (different approach)
 
-One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.\${getLangInstruction()}`;
+One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.${getLangInstruction()}`;
 }
 
 // ══ GAME SCREEN ══
@@ -1067,7 +1067,7 @@ function setBottomLoading(){
   bottomState='loading';
   document.getElementById('bottom-loading').style.display='block';
   document.getElementById('bottom-human').style.display='none';
-  document.getElementById('bottom-continue').style.display='none';
+  const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   document.getElementById('bottom-waiting').style.display='none';
   // Show thinking bar at top of screen
   const tb=document.getElementById('thinking-bar');
@@ -1095,7 +1095,7 @@ function setBottomReadGate(choices){
   document.getElementById('bottom-human').style.display='none';
   document.getElementById('bottom-waiting').style.display='none';
   const cont=document.getElementById('bottom-continue');
-  cont.style.display='flex';
+  cont.style.display='flex';cont.classList.add('active');
   const btn=document.getElementById('continue-btn');
   const hint=document.getElementById('continue-hint');
   btn.disabled=true;
@@ -1114,9 +1114,9 @@ function setBottomContinue(hintText){
   document.getElementById('bottom-human').style.display='none';
   document.getElementById('bottom-waiting').style.display='none';
   const cont=document.getElementById('bottom-continue');
-  cont.style.display='flex';
+  cont.style.display='flex';cont.classList.add('active');
   cont.style.removeProperty('display'); // let CSS handle it, then force
-  cont.style.display='flex';
+  cont.style.display='flex';cont.classList.add('active');
   const btn=document.getElementById('continue-btn');
   const hint=document.getElementById('continue-hint');
   btn.disabled=true;
@@ -1131,7 +1131,7 @@ function setBottomWaiting(name){
   const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='none';
   document.getElementById('bottom-loading').style.display='none';
   document.getElementById('bottom-human').style.display='none';
-  document.getElementById('bottom-continue').style.display='none';
+  const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   const wait=document.getElementById('bottom-waiting');
   wait.style.display='block';
   document.getElementById('waiting-msg').textContent=name?`Waiting for ${name}...`:'Waiting...';
@@ -1155,7 +1155,7 @@ function checkScrollEnable(){
 function onContinue(){
   const btn=document.getElementById('continue-btn');
   const choices=btn&&btn._pendingChoices;
-  document.getElementById('bottom-continue').style.display='none';
+  const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   const cur=gState&&gState.players[gState.turn];
   const mine=cur&&myChar&&!cur.isNPC&&cur.name===myChar.name;
   const npc=cur&&cur.isNPC;
@@ -1235,7 +1235,7 @@ CRITICAL: Every option must have ${next?next.name:'the player'} as the actor. Ne
 2. (different approach using their abilities)
 3. (tactical option)
 4. (bold option)
-One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.\${getLangInstruction()}`;
+One sentence each. No ** markers. Tag at end: [COMBAT], [DISCOVERY], or [DECISION]. Under 220 words.${getLangInstruction()}`;
 }
 
 // ══ HUMAN TURN ══
