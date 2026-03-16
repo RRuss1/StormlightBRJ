@@ -523,8 +523,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
           <span class="waiting-msg" id="waiting-msg">Waiting...</span>
         </div>
       </div>
-    </div>
-
     </div><!-- end chronicle-card -->
 
     <!-- RIGHT: TLDR Summary -->
@@ -1328,7 +1326,7 @@ async function handleNPC(log){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
   // NPC chain stops here — user must press Continue to advance
   // setBottomFromState will show Continue button for next NPC turn
 }
@@ -1372,6 +1370,7 @@ async function onSubmitAction(){
   errEl.style.display='none';
   if(isLoading)return;
   isLoading=true;
+  stopSpeaking(); // stop voice when player acts
   // Show loading immediately
   setBottomLoading();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1743,6 +1742,32 @@ async function onReset(){
     gState=null;myChar=null;renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});showScreen('title');
   }catch(e){alert('Reset failed: '+e.message);}
 }
+
+// ══ VOICE OVER ══
+let voiceActive=false,voiceEnabled=true,currentUtterance=null;
+function speakStory(){
+  if(!voiceEnabled||!window.speechSynthesis)return;
+  const el=document.getElementById('story-text');
+  if(!el)return;
+  const text=(el.innerText||'').replace(/Option \d+/g,'').replace(/THE CHRONICLE/gi,'').trim();
+  if(text.length<10)return;
+  stopSpeaking();
+  const go=()=>{
+    currentUtterance=new SpeechSynthesisUtterance(text);
+    currentUtterance.rate=0.88;currentUtterance.pitch=0.95;currentUtterance.volume=0.9;
+    const vv=window.speechSynthesis.getVoices();
+    const v=vv.find(x=>x.name==='Daniel')||vv.find(x=>x.lang==='en-GB'&&x.localService)||vv.find(x=>x.lang.startsWith('en-')&&x.localService)||vv.find(x=>x.lang.startsWith('en'))||vv[0];
+    if(v)currentUtterance.voice=v;
+    currentUtterance.onend=currentUtterance.onerror=()=>{voiceActive=false;updateVoiceBtn();};
+    window.speechSynthesis.speak(currentUtterance);
+    voiceActive=true;updateVoiceBtn();
+  };
+  if(window.speechSynthesis.getVoices().length>0)go();
+  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;go();};}
+}
+function stopSpeaking(){if(window.speechSynthesis)window.speechSynthesis.cancel();voiceActive=false;updateVoiceBtn();}
+function toggleVoice(){if(voiceActive)stopSpeaking();else{voiceEnabled=true;speakStory();}}
+function updateVoiceBtn(){const b=document.getElementById('voice-btn');if(!b)return;b.textContent=voiceActive?'🔊':'🔈';b.title=voiceActive?'Stop reading':'Read story aloud';}
 
 // ══ AUDIO ENGINE ══
 let audioCtx=null,audioNodes={},audioOn=false,masterGain=null;
