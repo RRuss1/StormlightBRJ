@@ -236,6 +236,8 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 
 /* ── CHRONICLE CARD ── */
 .chronicle-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;max-width:840px;width:100%;margin:0 auto;}
+.story-reveal{animation:stormReveal 0.4s ease-out;}
+.glyph-flare{animation:glyphFlare 0.6s ease-in-out;}
 .chronicle-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
@@ -264,6 +266,21 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .pulse-row{display:flex;justify-content:center;gap:8px;}
 .pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
 @keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
+@keyframes hpDrain{0%{width:var(--hp-from);}100%{width:var(--hp-to);}}
+@keyframes dmgFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
+@keyframes healFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
+@keyframes cardShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+@keyframes cardHealShimmer{0%{box-shadow:0 0 0 0 rgba(26,107,82,0);}40%{box-shadow:0 0 0 4px rgba(26,107,82,0.5),0 0 16px rgba(26,107,82,0.25);}100%{box-shadow:0 0 0 0 rgba(26,107,82,0);}}
+@keyframes activePulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0);}50%{box-shadow:0 0 0 4px rgba(191,161,90,0.35),0 0 18px rgba(191,161,90,0.15);}}
+@keyframes stormReveal{0%{opacity:0;transform:translateY(6px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes glyphFlare{0%,100%{color:var(--amber);text-shadow:none;}50%{color:#fff9e6;text-shadow:0 0 24px rgba(255,249,200,0.8),0 0 48px rgba(191,161,90,0.6);}}
+@keyframes sprenFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+@keyframes patternSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@keyframes vinePulse{0%,100%{d:path('M8 20 Q12 12 16 8 Q18 5 20 8');}50%{d:path('M8 20 Q10 10 14 6 Q16 3 18 6');}}
+@keyframes starGlow{0%,100%{opacity:0.5;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}
+@keyframes emberFlicker{0%,100%{opacity:0.3;transform:scale(0.8) translateY(0);}33%{opacity:1;transform:scale(1.1) translateY(-2px);}66%{opacity:0.6;transform:scale(0.9) translateY(-1px);}}
+@keyframes ribbonFlow{0%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}33%{d:path('M4 20 Q10 16 14 10 Q16 7 20 10');}66%{d:path('M4 20 Q6 12 10 10 Q15 8 20 12');}100%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}}
+@keyframes parallaxDrift{0%,100%{background-position:50% 50%;}50%{background-position:52% 48%;}}
 
 /* Human turn — choices + act button */
 #bottom-human{display:none;padding:18px 20px;}
@@ -612,6 +629,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <div class="combat-center">
       <div class="combat-narrative" id="combat-narrative">
         <span class="gm-label">The Battle</span>
+        <div id="combat-hazard-banner" style="display:none;margin-bottom:8px;padding:6px 10px;background:rgba(158,56,32,0.1);border:1px solid var(--coral);border-radius:6px;font-size:11px;font-family:var(--font-d);letter-spacing:1px;color:var(--coral2);"></div>
         <span id="combat-narrative-text">Combat begins...</span>
       </div>
       <div class="combat-actions" id="combat-actions">
@@ -697,6 +715,98 @@ const ALL_LOCS=[...ROSHAR_P,...ROSHAR_O,...ROSHAR_S,...ROSHAR_L];
 const BASE_ACTS=[{num:1,tag:'Act I',start:0,end:59},{num:2,tag:'Act II',start:60,end:119},{num:3,tag:'Act III',start:120,end:179}];
 let ACTS=BASE_ACTS.map(a=>({...a,name:a.tag,location:'Roshar'}));
 const BLADE_TIERS=['Nascent','Bonded','Ancient','Living','Divine'];
+
+// ══ OATH PROGRESSION ══
+const ORDER_OATHS={
+  windrunner:['Life before death, strength before weakness, journey before destination.','I will protect those who cannot protect themselves.','I will protect even those I hate, so long as it is right.','I accept that there will be those I cannot protect.','I will protect those I hate. Even if it destroys me.'],
+  lightweaver:['I will seek truth.','I acknowledge my flaws.','I will accept what I am.','I will not hide from myself.','I am what I am.'],
+  edgedancer:['I will remember those who have been forgotten.','I will listen to those who have been ignored.','I will protect even the least of those in my care.','I will remember all.','I will never forget.'],
+  stoneward:['I will be there when I am needed.','I will not give up.','I will bear what must be borne.','I will hold firm.','I will be the rock on which others stand.'],
+  elsecaller:['I will seek knowledge.','I will improve myself.','I will push my limits.','I will not be held back.','I have exceeded what I was.'],
+  truthwatcher:['I will seek what is true.','I will not deceive myself.','I will see clearly.','I will share what I know.','Truth is the only shield.'],
+  willshaper:['I will seek freedom.','I will free those who are bound.','I will forge my own path.','I will not be constrained.','I am unbound.'],
+  dustbringer:['I will seek change.','I will burn away the old.','I will embrace destruction in service of creation.','I will unmake what must be unmade.','From ash, something new.'],
+  bondsmith:['I will unite instead of divide.','I will take responsibility for what I have done.','I will listen, and then I will act.','I will unite even those who do not want to be united.','I am the one who connects.'],
+  skybreaker:['I will follow the law.','I will protect the law.','I will be the law.','The law is absolute.','Justice is mine to deliver.'],
+};
+
+// Oath bonuses unlocked at each stage
+const OATH_BONUSES={
+  1:{desc:'First Oath spoken',combat:0,heal:0},
+  2:{desc:'Shardblade manifests',combat:1,heal:0},
+  3:{desc:'Surges strengthen',combat:1,heal:1,ability:'Enhanced surge control'},
+  4:{desc:'Shardplate begins forming',combat:2,heal:2,ability:'Partial Shardplate'},
+  5:{desc:'Full Radiant',combat:3,heal:3,ability:'Full power — Shardplate complete'},
+};
+
+async function checkOathMoment(gmText, player){
+  if(!player||!gmText)return;
+  const oathStage=(player.oathStage||1);
+  if(oathStage>=5)return;
+  // Check if the story moment seems oath-worthy using pattern matching
+  const oathKeywords=['sacrific','protect','truth','remember','justice','freedom','unity','law','knowledge'];
+  const lower=gmText.toLowerCase();
+  const isOathworthy=oathKeywords.some(k=>lower.includes(k))&&gmText.length>100;
+  if(!isOathworthy)return;
+  // Random chance + scaling with story progress
+  const chance=0.08+(gState.totalMoves||0)*0.001;
+  if(Math.random()>chance)return;
+  await progressOath(player);
+}
+
+async function progressOath(player){
+  const currentStage=player.oathStage||1;
+  if(currentStage>=5)return;
+  const newStage=currentStage+1;
+  const oaths=ORDER_OATHS[player.classId]||[];
+  const oath=oaths[newStage-1]||'I will hold to what matters.';
+  const bonus=OATH_BONUSES[newStage];
+  player.oathStage=newStage;
+  // Apply mechanical effects
+  if(newStage===4&&!player.shardplate)player.shardplate='Nascent Plate';
+  if(newStage===5)player.shardplate='Full Shardplate';
+  // Update in gState
+  const idx=gState.players.findIndex(p=>p&&p.name===player.name);
+  if(idx>=0)gState.players[idx]=player;
+  if(myChar&&myChar.name===player.name){myChar=player;saveMyChar(player);}
+  await saveState(gState);
+  // GM narrates the oath moment
+  const oathPrompt=`Cosmere RPG GM. OATH MOMENT for ${player.name} the ${player.className}.
+Oath ${newStage} of 5: "${oath}"
+${getGenderContext()}
+Write 2-3 vivid sentences: ${player.name} speaks this Oath aloud — the Stormlight surging, the spren's reaction, the world responding. Make it feel earned and dramatic.
+After, write: "NEW ABILITY UNLOCKED: ${bonus.desc}"`;
+  setBottomLoading();
+  try{
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:oathPrompt}]})});
+    const data=await res.json();
+    const oathText=data.content&&data.content[0]?data.content[0].text:'';
+    await addLog({type:'system',who:'',text:'⟁ OATH: '+oathText,choices:[]});
+  }catch(e){}
+}
+
+// ══ BRANCHING ACT CONSEQUENCES ══
+async function generateActConsequence(actNum){
+  if(!gState||!gState.worldMemory)return;
+  const choices=(gState.worldMemory.choices||[]).slice(-8);
+  if(!choices.length)return;
+  const nextAct=ACTS[actNum]||ACTS[1];
+  try{
+    const prompt=`Based on these RPG choices: ${choices.map(c=>c.summary).join('; ')}
+Generate ONE sentence of consequence flavor for Act ${actNum+1} location: ${nextAct.location}.
+Example: "The people of ${nextAct.location} have heard of your deeds — doors open more easily here."
+Return ONLY the single sentence, nothing else.`;
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:80,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const consequence=data.content&&data.content[0]?data.content[0].text.trim():'';
+    if(consequence&&gState.worldMemory){
+      gState.worldMemory.actConsequences[actNum+1]=consequence;
+      await saveState(gState);
+    }
+  }catch(e){}
+}
 
 // ══ COMBAT SYSTEM CONSTANTS ══
 const COMBAT_BEATS_MIN=3, COMBAT_BEATS_MAX=8;
@@ -1119,7 +1229,15 @@ async function startCampaign(){
   gState.combatMode=false;
   gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
   gState.beatsSinceLastCombat=0;
-  gState.preCombatTriggered=false; // the "final tension" beat before combat
+  gState.preCombatTriggered=false;
+  // World Memory — persistent state across all GM calls
+  gState.worldMemory={
+    factions:{},        // { 'Alethi':'neutral', 'Parshendi':'hostile' }
+    secrets:[],         // ['The tower has a mind of its own']
+    metNPCs:[],         // [{name:'Tarah',context:'healer, owes party favor'}]
+    choices:[],         // [{turn:12,summary:'Slac warned the refugees'}]
+    actConsequences:{}, // {2:'Kharbranth remembers you'}
+  }; // the "final tension" beat before combat
   if(!gState.locationSeed)gState.locationSeed=Math.floor(Math.random()*99999);
   buildActs(gState.locationSeed);
   await saveState(gState);
@@ -1133,11 +1251,57 @@ async function startCampaign(){
   // Small delay ensures DOM is painted and lastGM choices are available
   setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(speakStory,300);},150);
 }
+// ══ WORLD MEMORY CONTEXT ══
+function getWorldMemoryContext(){
+  const wm=gState&&gState.worldMemory;
+  if(!wm)return'';
+  const parts=[];
+  const factions=Object.entries(wm.factions||{});
+  if(factions.length)parts.push('Factions: '+factions.map(([k,v])=>`${k} (${v})`).join(', '));
+  if((wm.secrets||[]).length)parts.push('Known secrets: '+wm.secrets.slice(-3).join(' | '));
+  if((wm.metNPCs||[]).length)parts.push('Known NPCs: '+wm.metNPCs.slice(-4).map(n=>`${n.name} — ${n.context}`).join('; '));
+  if((wm.choices||[]).length)parts.push('Recent choices: '+wm.choices.slice(-3).map(ch=>`Turn ${ch.turn}: ${ch.summary}`).join(' | '));
+  const actCons=wm.actConsequences&&wm.actConsequences[getAct(gState.totalMoves||0).num];
+  if(actCons)parts.push('This act: '+actCons);
+  if(!parts.length)return'';
+  return'\n\nWORLD STATE: '+parts.join(' | ');
+}
+
+// Update world memory from GM response (called after each GM call)
+async function updateWorldMemory(gmText, action, turn){
+  if(!gState||!gState.worldMemory)return;
+  // Use Haiku to extract world state updates from the GM response
+  try{
+    const prompt=`From this RPG story beat, extract world state changes as JSON. Return ONLY valid JSON, nothing else.
+Story: "${gmText.substring(0,600)}"
+Player action: "${action||''}"
+
+Return: {"factions":{"FactionName":"disposition"},"secrets":["new secret if revealed"],"npcs":[{"name":"NPC name","context":"brief context"}],"choiceSummary":"1 sentence summary of player choice if significant"}
+If nothing notable happened, return {}`;
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,
+        messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content&&data.content[0]?data.content[0].text.trim():'{}';
+    const updates=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const wm=gState.worldMemory;
+    if(updates.factions)Object.assign(wm.factions,updates.factions);
+    if(updates.secrets&&updates.secrets.length)wm.secrets=[...wm.secrets,...updates.secrets].slice(-10);
+    if(updates.npcs&&updates.npcs.length){
+      updates.npcs.forEach(n=>{
+        if(!wm.metNPCs.find(x=>x.name===n.name))wm.metNPCs.push(n);
+      });
+      wm.metNPCs=wm.metNPCs.slice(-10);
+    }
+    if(updates.choiceSummary&&turn)wm.choices=[...wm.choices,{turn,summary:updates.choiceSummary}].slice(-10);
+  }catch(e){/* silent fail — world memory is enhancement not core */}
+}
+
 function openingPrompt(){
   const sz=gState.partySize||partySize;
   const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (NPC — acts via D4 dice, no AI decisions)':' (human player)'}`).join(', ');
   const a1=ACTS[0],a2=ACTS[1],a3=ACTS[2];
-  const gctx=getGenderContext();
+  const gctx=getGenderContext();const wmctx=getWorldMemoryContext();
   return`You are the Game Master for a Cosmere DND-style RPG on Roshar (Way of Kings universe). 180-turn epic saga across 3 acts.
 
 ACTS: I (1-60): ${a1.location} | II (61-120): ${a2.location} | III (121-180): ${a3.location}
@@ -1168,7 +1332,8 @@ async function showGameScreen(){
   if(ab)ab.style.display='flex';
   startPolling();
   await refreshGame();
-  preloadKokoroDesktop(); // silent preload on desktop
+  preloadKokoroDesktop();
+  setTimeout(initParallax,500);
 }
 
 async function refreshGame(){
@@ -1181,6 +1346,7 @@ async function refreshGame(){
     if(gState.beatsUntilCombat==null)gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
     if(gState.beatsSinceLastCombat==null)gState.beatsSinceLastCombat=0;
     if(gState.combatMode==null)gState.combatMode=false;
+    if(!gState.worldMemory)gState.worldMemory={factions:{},secrets:[],metNPCs:[],choices:[],actConsequences:{}};
   }
   if(!gState.lastGM&&prev)gState.lastGM=prev;
   const log=await loadLog(false);
@@ -1277,6 +1443,45 @@ async function generateTLDR(storyText){
   }catch(e){el.textContent='Summary unavailable.';}
 }
 
+// ══ SPREN SVG COMPANIONS ══
+function getSprenSVG(classId, bond){
+  if(!bond)return'';
+  const col=bond.color||'#aaa';
+  const svgs={
+    windrunner:`<svg class="spren-svg" viewBox="0 0 28 28"><path d="M4 22 Q10 14 14 10 Q18 6 22 10" stroke="${col}" stroke-width="1.5" fill="none" stroke-linecap="round" style="animation:ribbonFlow 2s ease-in-out infinite;"/><path d="M6 18 Q12 12 16 8" stroke="${col}" stroke-width="0.8" fill="none" opacity="0.4" stroke-linecap="round"/></svg>`,
+    lightweaver:`<svg class="spren-svg" viewBox="0 0 28 28" style="animation:patternSpin 6s linear infinite;"><polygon points="14,4 18,10 14,16 10,10" stroke="${col}" stroke-width="1.2" fill="none"/><polygon points="14,8 17,13 14,18 11,13" stroke="${col}" stroke-width="0.8" fill="none" opacity="0.5"/><circle cx="14" cy="14" r="2" fill="${col}" opacity="0.6"/></svg>`,
+    edgedancer:`<svg class="spren-svg" viewBox="0 0 28 28"><path d="M14 24 Q10 18 11 12 Q12 7 14 5 Q16 7 17 12 Q18 18 14 24" stroke="${col}" stroke-width="1.3" fill="none" stroke-linecap="round" style="animation:sprenFloat 2.5s ease-in-out infinite;"/><circle cx="14" cy="5" r="1.5" fill="${col}" style="animation:starGlow 2.5s ease-in-out infinite;"/></svg>`,
+    stoneward:`<svg class="spren-svg" viewBox="0 0 28 28"><rect x="8" y="8" width="12" height="12" rx="2" stroke="${col}" stroke-width="1.3" fill="none"/><rect x="11" y="11" width="6" height="6" rx="1" fill="${col}" opacity="0.3"/><line x1="14" y1="4" x2="14" y2="8" stroke="${col}" stroke-width="1" opacity="0.5"/><line x1="14" y1="20" x2="14" y2="24" stroke="${col}" stroke-width="1" opacity="0.5"/></svg>`,
+    elsecaller:`<svg class="spren-svg" viewBox="0 0 28 28"><circle cx="14" cy="14" r="8" stroke="${col}" stroke-width="1.2" fill="none" opacity="0.5"/><circle cx="14" cy="14" r="4" stroke="${col}" stroke-width="1" fill="none" style="animation:sprenFloat 3s ease-in-out infinite;"/><circle cx="14" cy="14" r="1.5" fill="${col}"/></svg>`,
+    truthwatcher:`<svg class="spren-svg" viewBox="0 0 28 28"><polygon points="14,5 16,12 23,12 17.5,16.5 19.5,23.5 14,19 8.5,23.5 10.5,16.5 5,12 12,12" stroke="${col}" stroke-width="1.2" fill="none" style="animation:starGlow 2s ease-in-out infinite;"/></svg>`,
+    willshaper:`<svg class="spren-svg" viewBox="0 0 28 28"><circle cx="14" cy="14" r="6" stroke="${col}" stroke-width="1" fill="none" stroke-dasharray="3 3" style="animation:patternSpin 4s linear infinite;"/><circle cx="14" cy="14" r="2.5" fill="${col}" opacity="0.6" style="animation:sprenFloat 2s ease-in-out infinite;"/></svg>`,
+    dustbringer:`<svg class="spren-svg" viewBox="0 0 28 28"><circle cx="10" cy="18" r="1.5" fill="${col}" style="animation:emberFlicker 1.2s ease-in-out infinite;"/><circle cx="14" cy="12" r="2" fill="${col}" style="animation:emberFlicker 1.6s ease-in-out infinite 0.2s;"/><circle cx="18" cy="17" r="1" fill="${col}" style="animation:emberFlicker 1s ease-in-out infinite 0.4s;"/><circle cx="12" cy="8" r="1.2" fill="${col}" opacity="0.6" style="animation:emberFlicker 1.8s ease-in-out infinite 0.6s;"/></svg>`,
+    bondsmith:`<svg class="spren-svg" viewBox="0 0 28 28"><circle cx="9" cy="14" r="4" stroke="${col}" stroke-width="1.2" fill="none"/><circle cx="19" cy="14" r="4" stroke="${col}" stroke-width="1.2" fill="none"/><line x1="13" y1="14" x2="15" y2="14" stroke="${col}" stroke-width="1.5" opacity="0.7"/></svg>`,
+    skybreaker:`<svg class="spren-svg" viewBox="0 0 28 28"><polygon points="14,4 16,12 24,12 18,17 20,25 14,20 8,25 10,17 4,12 12,12" fill="${col}" opacity="0.15"/><polygon points="14,4 16,12 24,12 18,17 20,25 14,20 8,25 10,17 4,12 12,12" stroke="${col}" stroke-width="1.2" fill="none" style="animation:starGlow 2.5s ease-in-out infinite;"/></svg>`,
+  };
+  return svgs[classId]||'';
+}
+
+// ══ HP ANIMATION ══
+function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
+  const card=document.getElementById('ppip-'+playerName.replace(/\s/g,'_'));
+  const fill=document.getElementById('hp-fill-'+playerName.replace(/\s/g,'_'));
+  if(!card)return;
+  // Float number
+  const float=document.createElement('div');
+  float.className=isHeal?'heal-float':'dmg-float';
+  float.textContent=(isHeal?'+':'-')+Math.abs(delta)+'HP';
+  float.style.color=isHeal?'var(--teal2)':'var(--coral2)';
+  card.style.position='relative';
+  card.appendChild(float);
+  setTimeout(()=>float.remove(),1100);
+  // Card animation
+  card.classList.remove('took-damage','received-heal');
+  void card.offsetWidth; // force reflow
+  card.classList.add(isHeal?'received-heal':'took-damage');
+  setTimeout(()=>card.classList.remove('took-damage','received-heal'),900);
+}
+
 // ══ RENDER PARTY STRIP ══
 function renderParty(){
   const s=document.getElementById('party-strip');if(!gState)return;
@@ -1287,15 +1492,17 @@ function renderParty(){
     const hpCol=pct>60?p.color:pct>30?'#BA7517':'#c44a28';
     const bond=SPREN_BONDS[p.classId];
     const stage=getSprenStage(gState.totalMoves||0);
-    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}">
+    const sprenSVG=getSprenSVG(p.classId,bond);
+    return`<div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}" id="ppip-${p.name.replace(/\s/g,'_')}">
       <div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div>
       <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
-      ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} (${stage+1}/5)</div>`:''}
+      ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} Oath ${p.oathStage||1}/5</div>`:''}
       ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
       ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade} T${p.bladeLevel||1}</div>`:''}
       ${p.shardplate?`<div class="ppip-tag" style="color:var(--gold);">⬛ Shardplate</div>`:''}
       ${(p.fragments||0)>0?`<div class="ppip-tag" style="color:var(--teal2);">✦ ${p.fragments} frags</div>`:''}
-      <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:${hpCol};"></div></div>
+      <div class="hp-track"><div class="hp-fill" id="hp-fill-${p.name.replace(/\s/g,'_')}" style="width:${pct}%;background:${hpCol};"></div></div>
+      ${sprenSVG}
     </div>`;
   }).join('');
 }
@@ -1380,6 +1587,12 @@ function setBottomFromState(log){
 function setBottomReadGate(choices){
   bottomState='human-gated';
   const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='none';
+  // Story reveal animation
+  const storyEl=document.getElementById('story-text');
+  if(storyEl){storyEl.classList.remove('story-reveal');void storyEl.offsetWidth;storyEl.classList.add('story-reveal');}
+  // Glyph flare on chronicle title
+  const glyph=document.querySelector('.chronicle-title');
+  if(glyph){glyph.classList.remove('glyph-flare');void glyph.offsetWidth;glyph.classList.add('glyph-flare');setTimeout(()=>glyph.classList.remove('glyph-flare'),700);}
   document.getElementById('bottom-loading').style.display='none';
   document.getElementById('bottom-human').style.display='none';
   document.getElementById('bottom-waiting').style.display='none';
@@ -1528,7 +1741,7 @@ function npcPrompt(action,npc,from){
   const gctx=getGenderContext();
   const mctx=getSprenMemoryContext();
   return`Cosmere RPG GM. Turn ${m}/180. ${act.tag}: ${loc}.
-Party: ${party}${gctx}${mctx}
+Party: ${party}${gctx}${mctx}${wmctx}
 
 NPC ${npc.name} (${npc.className}) randomly chose: "${action}"
 
@@ -1648,6 +1861,10 @@ async function callGM(prompt){
     if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};spawnEnemies(scene);await saveState(gState);}
     await addLog({type:'gm',who:'',text:scene,choices});
     const tb2=document.getElementById('thinking-bar');if(tb2)tb2.style.display='none';
+    // Update world memory async (non-blocking)
+    updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
+    // Check for oath moment for current player
+    if(gState&&myChar)checkOathMoment(scene,myChar).catch(()=>{});
   }catch(e){
     console.error('callGM error:',e.message);
     if(gState){gState.lastGM={text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[],ts:new Date().toISOString()};await saveState(gState);}
@@ -1662,7 +1879,7 @@ function turnPrompt(action,roll,sk,from){
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} Bond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
   const who=gState.players[from];const loc=act.location||act.name;
   const rd=roll>=18?'CRITICAL SUCCESS':roll>=14?'Strong success':roll>=10?'Partial success — complications':roll>=6?'Failure with consequences':'CRITICAL FAILURE — dramatic setback';
-  const gctx=getGenderContext();const mctx=getSprenMemoryContext();
+  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();
   // Phase instruction — tells GM how close to combat we are
   const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
   const preCombatNow=gState.preCombatTriggered&&!gState.combatMode;
@@ -1671,6 +1888,9 @@ function turnPrompt(action,roll,sk,from){
     beatsLeft<=1?
     '\n\nPHASE: FINAL EXPLORATION BEAT. Hint strongly that danger is imminent — something is very wrong. Maximum tension. Last beat before combat.':
     '\n\nPHASE: EXPLORATION ('+beatsLeft+' beats before conflict). Focus on discovery and world-building. Do NOT start combat yet.';
+  // Generate act consequence at transition points
+  if(m===59)generateActConsequence(1).catch(()=>{});
+  if(m===119)generateActConsequence(2).catch(()=>{});
   const actHint=m===59?`\n\nACT TRANSITION: Close out ${loc}, foreshadow ${ACTS[1].location}.`:m===119?`\n\nACT TRANSITION: Final Act II turn. Foreshadow climax in ${ACTS[2].location}.`:'';
   return`Cosmere RPG GM. Turn ${m}/180. ${act.tag} — ${loc}.
 Party: ${party}${gctx}${mctx}
@@ -1745,7 +1965,7 @@ function applyRollDamage(roll,actor,st){
   let msg='';
   if(roll>=18){
     actor.fragments=(actor.fragments||0)+1;
-    if(target){const d=db.crit+Math.floor(Math.random()*3)+1;target.hp=Math.max(0,target.hp-d);if(target.hp===0){actor.fragments+=3;checkEquipDrop(actor,st);}msg=`✦ Crit! ${target.name} -${d}HP${target.hp===0?' DEFEATED! +3 frags':''}  Frags:${actor.fragments}`;}
+    if(target){const d=db.crit+Math.floor(Math.random()*3)+1;const oldHP=target.hp;target.hp=Math.max(0,target.hp-d);setTimeout(()=>animateHPChange(target.name,Math.round((oldHP/target.maxHp)*100),Math.round((target.hp/target.maxHp)*100),d,false),50);if(target.hp===0){actor.fragments+=3;checkEquipDrop(actor,st);}msg=`✦ Crit! ${target.name} -${d}HP${target.hp===0?' DEFEATED! +3 frags':''}  Frags:${actor.fragments}`;}
     else{const h=Math.min(2,actor.maxHp-actor.hp);actor.hp=Math.min(actor.maxHp,actor.hp+h);msg=h>0?`⬆ +${h} HP`:'✦ Critical strike';}
   } else if(roll>=10){
     if(target){const d=db.hit+Math.floor(Math.random()*2);target.hp=Math.max(0,target.hp-d);const chip=Math.floor(Math.random()*2);if(chip>0)actor.hp=Math.max(1,actor.hp-chip);msg=`Hit! ${target.name} -${d}HP${chip>0?' / ⬇-'+chip+' HP':''}`;}
@@ -1961,6 +2181,102 @@ async function onReset(){
 // COMBAT ENGINE
 // ══════════════════════════════════════
 
+// ══ ENVIRONMENTAL HAZARDS ══
+const ENV_HAZARDS={
+  shattered_plains:{name:'Plateau Collapse',desc:'The plateau beneath you groans and tilts — footing is treacherous.',effect:'15% chance each round: random combatant takes 2 fall damage.',mechanic:'plateauCollapse'},
+  aimian_sea:{name:'Cognitive Drift',desc:'The water whispers old memories — concentration wavers.',effect:'Spell-like abilities cost 1 extra fragment to use.',mechanic:'cognitiveDrift'},
+  shadesmar:{name:'Cognitive Shadows',desc:'Half-real spren-shapes claw at your mind from the darkness.',effect:'Each round players lose 1 Stormlight fragment unless they spend an action resisting.',mechanic:'cognitiveDrain'},
+  urithiru:{name:'Ancient Wards',desc:'The tower Sibling-wrought defenses still hum faintly.',effect:'Party gains +1 defense rating while inside the tower.',mechanic:'ancientWards'},
+  braize:{name:'Void Whispers',desc:'The Everstorm howls across Damnation wastes.',effect:'Players must roll will or their action is disrupted this round.',mechanic:'voidWhispers'},
+  kholinar:{name:'Unmade Influence',desc:'Re-Shephir remnants press against sanity.',effect:'10% chance per round player acts against party.',mechanic:'unmaAdeMadness'},
+  default:{name:'Unknown Danger',desc:'Something is wrong with this place.',effect:'Combat is harder here.',mechanic:'none'},
+};
+
+function getHazardForLocation(loc){
+  const l=(loc||'').toLowerCase();
+  if(l.includes('shattered')||l.includes('plains'))return ENV_HAZARDS.shattered_plains;
+  if(l.includes('aimian'))return ENV_HAZARDS.aimian_sea;
+  if(l.includes('shadesmar'))return ENV_HAZARDS.shadesmar;
+  if(l.includes('urithiru'))return ENV_HAZARDS.urithiru;
+  if(l.includes('braize')||l.includes('damnation'))return ENV_HAZARDS.braize;
+  if(l.includes('kholinar'))return ENV_HAZARDS.kholinar;
+  return null; // no hazard for generic locations
+}
+
+function applyHazardEffect(hazard, gState){
+  if(!hazard||hazard.mechanic==='none')return[];
+  const sz=gState.partySize||partySize;
+  const msgs=[];
+  const living=gState.players.slice(0,sz).filter(p=>p&&!p.downed);
+  if(hazard.mechanic==='plateauCollapse'&&Math.random()<0.15){
+    const target=living[Math.floor(Math.random()*living.length)];
+    if(target){target.hp=Math.max(1,target.hp-2);msgs.push(`⚠ Plateau collapse! ${target.name} -2HP`);}
+  } else if(hazard.mechanic==='cognitiveDrain'){
+    living.forEach(p=>{if((p.fragments||0)>0){p.fragments--;msgs.push(`${p.name} -1 frag (cognitive drain)`);}});
+  } else if(hazard.mechanic==='ancientWards'){
+    msgs.push('Ancient wards active: +1 defense this round');
+  } else if(hazard.mechanic==='voidWhispers'&&Math.random()<0.3){
+    const target=living[Math.floor(Math.random()*living.length)];
+    if(target){msgs.push(`⚠ Void whispers disrupt ${target.name}'s action`);}
+  }
+  return msgs;
+}
+
+// ══ BOSS ENCOUNTERS ══
+const BOSS_TEMPLATES=[
+  {name:'The Blackthorns Shadow',type:'Alethi Traitor',phases:[{hp:40,dmg:8,atk:7,desc:'Aggressive, twin Shardblades gleaming'},{hp:25,dmg:11,atk:9,desc:'Shardplate cracking, fighting with desperate fury'},{hp:12,dmg:14,atk:12,desc:'Barely standing, Stormlight erupting wildly'}],drop:'Obsidian Shardblade'},
+  {name:'Yelig-nars Vessel',type:'Unmade Host',phases:[{hp:35,dmg:7,atk:6,desc:'Human form, dark tendrils coiling'},{hp:20,dmg:10,atk:9,desc:'Half-transformed, grotesque power'},{hp:10,dmg:15,atk:13,desc:'Full transformation — barely recognizable'}],drop:'Voidlight Crystal'},
+  {name:'The Heralds Echo',type:'Cognitive Shadow',phases:[{hp:45,dmg:9,atk:8,desc:'Calm, ancient, measuring'},{hp:28,dmg:12,atk:11,desc:'Revealing true divine fury'},{hp:14,dmg:16,atk:14,desc:'Burning with Taln fire'}],drop:'Heralds Remnant Plate'},
+];
+
+function shouldSpawnBoss(gState){
+  const actNum=getAct(gState.totalMoves||0).num||1;
+  const bossKey=`bossDefeated_act${actNum}`;
+  if(gState[bossKey])return false;
+  // Boss spawns on 2nd combat of each act
+  const actCombats=gState[`actCombats_${actNum}`]||0;
+  return actCombats===1; // 0-indexed: second combat
+}
+
+// ══ HIGHSTORM EVENTS ══
+async function checkHighstorm(){
+  if(gState.combatMode||gState.highstorm)return;
+  if(Math.random()>0.08)return; // 8% chance per beat
+  gState.highstorm=true;
+  const sz=gState.partySize||partySize;
+  await saveState(gState);
+  // GM writes the highstorm scene
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name} the ${p.className}`:'?').join(', ');
+  const loc=getAct(gState.totalMoves||0).location||'Roshar';
+  const prompt=`Cosmere RPG GM. A HIGHSTORM has struck ${loc}!
+Party: ${party}
+${getGenderContext()}
+
+Write a vivid 3-sentence highstorm scene: the wall of wind and lightning hitting, the party scrambling for shelter, the world transformed. Then present 4 survival choices — each character-class specific, under 1 sentence each.
+
+[CHOICES]
+1. (${gState.players[0]?gState.players[0].className:'Radiant'}-specific survival action)
+2. (shelter and protect allies)
+3. (use Stormlight surge to survive)
+4. (bold exposure — ride the storm for power)
+
+Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
+  setBottomLoading();
+  await callGM(prompt);
+  // After highstorm: full Stormlight recharge
+  gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
+    const healed=p.maxHp-p.hp;
+    if(healed>0)animateHPChange(p.name,Math.round((p.hp/p.maxHp)*100),100,healed,true);
+    p.hp=p.maxHp;
+    p.fragments=(p.fragments||0)+2;
+  });
+  gState.highstorm=false;
+  await saveState(gState);
+  const freshLog=await loadLog(true);
+  renderAll(freshLog);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,400);},150);
+}
+
 // Show combat screen and initialize
 async function enterCombat(){
   if(!gState)return;
@@ -1992,7 +2308,29 @@ async function enterCombat(){
   gState.combatPhase='narrative';
   gState.pendingActions={};
   gState.combatLog=[];
-  gState.diceLog=[]; // [{round, entries:[{name,roll,bonus,total,result,detail,color}]}]
+  gState.diceLog=[];
+  // Set environmental hazard
+  const combatLoc=getAct(gState.totalMoves||0).location||'';
+  gState.combatHazard=getHazardForLocation(combatLoc);
+  // Track act combats for boss spawning
+  const combatActNum=getAct(gState.totalMoves||0).num||1;
+  gState[`actCombats_${combatActNum}`]=(gState[`actCombats_${combatActNum}`]||0)+1;
+  // Check boss spawn
+  if(shouldSpawnBoss(gState)){
+    const boss=BOSS_TEMPLATES[combatActNum-1]||BOSS_TEMPLATES[0];
+    const phase=boss.phases[0];
+    gState.combatEnemies=[{
+      ...boss,id:'boss_'+actNum,
+      hp:phase.hp,maxHp:boss.phases.reduce((a,p)=>a+p.hp,0),
+      currentPhase:0,phaseHP:phase.hp,
+      dmg:phase.dmg,attackBonus:phase.atk,
+      isBoss:true,downed:false,type:boss.type
+    }];
+    gState[`bossDefeated_act${combatActNum}`]=false;
+    gState.isBossFight=true;
+  } else {
+    gState.isBossFight=false;
+  } // [{round, entries:[{name,roll,bonus,total,result,detail,color}]}]
   await saveState(gState);
   showScreen('combat');
   renderCombatScreen();
@@ -2262,6 +2600,29 @@ async function resolveRound(){
     if(myChar&&myChar.name===target.name){myChar=target;saveMyChar(target);}
   });
 
+  // Apply environmental hazard
+  if(gState.combatHazard){
+    const hazMsgs=applyHazardEffect(gState.combatHazard,gState);
+    hazMsgs.forEach(m=>roundDice.entries.push({name:'⚠ Hazard',roll:'-',bonus:null,total:null,result:'ENV',detail:m,isEnemy:false}));
+    // Show hazard in banner
+    const hb=document.getElementById('combat-hazard-banner');
+    if(hb){hb.style.display='block';hb.textContent='⚠ '+gState.combatHazard.name+': '+gState.combatHazard.effect;}
+  }
+  // Boss phase check
+  if(gState.isBossFight&&gState.combatEnemies&&gState.combatEnemies[0]){
+    const boss=gState.combatEnemies[0];
+    const phases=boss.phases||[];
+    const nextPhase=(boss.currentPhase||0)+1;
+    if(nextPhase<phases.length){
+      const phaseThreshold=phases.slice(nextPhase).reduce((a,p)=>a+p.hp,0);
+      if(boss.hp<=phaseThreshold&&boss.hp>0){
+        boss.currentPhase=nextPhase;
+        const ph=phases[nextPhase];
+        boss.dmg=ph.dmg;boss.attackBonus=ph.atk;
+        roundDice.entries.push({name:'⚡ BOSS',roll:'-',bonus:null,total:null,result:'PHASE',detail:`Phase ${nextPhase+1}: ${ph.desc}`,isEnemy:true});
+      }
+    }
+  }
   // Save dice log (keep last 10 rounds)
   if(!gState.diceLog)gState.diceLog=[];
   gState.diceLog.push(roundDice);
@@ -2385,7 +2746,7 @@ function combatAftermathPrompt(won){
   const sz=gState.partySize||partySize;
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
   const loc=getAct(gState.totalMoves||0).location||'the field';
-  const gctx=getGenderContext();const mctx=getSprenMemoryContext();
+  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();
   return`Cosmere RPG GM. Post-combat scene. Location: ${loc}.
 Party: ${party}
 Combat result: ${won?'VICTORY — enemies defeated':'DEFEAT — party was downed but survived'}${gctx}${mctx}
@@ -2798,6 +3159,19 @@ async function maybeTranslateStory(){
   const paras=translated.split('\n').filter(l=>l.trim());
   el.innerHTML=paras.map(l=>'<p style="margin-bottom:1rem;">'+l+'</p>').join('');
   el.style.opacity='1';
+}
+
+// ══ PARALLAX ══
+function initParallax(){
+  const card=document.querySelector('.chronicle-card');
+  if(!card||window.innerWidth<900)return;
+  card.style.backgroundImage='radial-gradient(ellipse at center,rgba(255,255,255,0.015) 0%,transparent 70%)';
+  card.style.backgroundSize='200% 200%';
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY;
+    const px=50+y*0.015;const py=50-y*0.008;
+    card.style.backgroundPosition=`${px}% ${py}%`;
+  },{passive:true});
 }
 
 (async()=>{
