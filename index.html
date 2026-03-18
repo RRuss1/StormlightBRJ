@@ -2370,7 +2370,10 @@ function renderCombatParty(){
     const pct=Math.round((p.hp/p.maxHp)*100);
     const hpCol=pct>60?'var(--teal2)':pct>30?'#BA7517':'var(--coral2)';
     const bond=SPREN_BONDS[p.classId];
-    const isActive=gState.combatPhase==='choosing'&&gState.players[gState.turn]&&gState.players[gState.turn].name===p.name;
+    // In simultaneous combat, highlight MY character card (not turn-based)
+    const isMyChar=myChar&&p.name===myChar.name;
+    const notYetSubmitted=!(gState.pendingActions&&gState.pendingActions[p.name]);
+    const isActive=gState.combatPhase==='choosing'&&isMyChar&&notYetSubmitted;
     const submitted=gState.pendingActions&&gState.pendingActions[p.name];
     return`<div class="char-combat-card${p.downed?' downed':''}${isActive?' active-turn':''}">
       <div class="ccard-name-row">
@@ -2477,35 +2480,43 @@ function renderCombatActions(){
     return;
   }
 
-  // phase === 'choosing'
-  const cur=gState.players[gState.turn];
-  const mine=cur&&myChar&&!cur.isNPC&&!cur.downed&&cur.name===myChar.name;
-  const mySubmitted=gState.pendingActions&&gState.pendingActions[myChar.name];
+  // phase === 'choosing' — SIMULTANEOUS: every human picks independently
+  // myChar is always the human player on this device — check them directly
+  const myPlayer=gState.players.find(p=>p&&myChar&&p.name===myChar.name);
+  const iAmHuman=myPlayer&&!myPlayer.isNPC&&!myPlayer.downed;
+  const mySubmitted=!!(gState.pendingActions&&gState.pendingActions[myChar.name]);
 
   let html='';
-  // Show submitted actions
-  gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&gState.pendingActions&&gState.pendingActions[p.name]).forEach(p=>{
+  // Show who has submitted so far
+  gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed&&gState.pendingActions&&gState.pendingActions[p.name]).forEach(p=>{
     html+=`<div class="combat-submitted">✓ ${p.name}: ready</div>`;
   });
 
-  if(mine&&!mySubmitted){
+  if(iAmHuman&&!mySubmitted){
     const choices=buildCombatChoices(myChar,gState);
-    html+=`<div class="combat-player-label">Your Action — ${myChar.name}</div>`;
-    html+=`<div class="action-choices" style="margin-bottom:12px;">${choices.map((ch,i)=>`<button class="achoice" onclick="selectCombatAction(this,'${ch.replace(/'/g,"\'")}')" ><span class="achoice-num">Option ${i+1}</span>${ch.replace(/\[ATTACK\]|\[DEFEND\]|\[HEAL\]/g,'').trim()}</button>`).join('')}</div>`;
+    html+=`<div class="combat-player-label">⟁ Your Action — ${myChar.name}</div>`;
+    const choiceHTML=choices.map((ch,i)=>{
+      const display=ch.replace(/\[ATTACK\]|\[DEFEND\]|\[HEAL\]/g,'').trim();
+      const m=ch.match(/\[(ATTACK|DEFEND|HEAL)\]/);
+      const tag=m?m[1]:'';
+      const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':'var(--coral2)';
+      const tagBadge=tag?'<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>':'';
+      const safeDisplay=display.replace(/`/g,"'").replace(/"/g,'&quot;');
+      return'<button class="achoice" onclick="selectCombatAction(this,`'+safeDisplay+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
+    }).join('');
+    html+=`<div class="action-choices" style="margin-bottom:12px;">${choiceHTML}</div>`;
     html+=`<div class="custom-row"><input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action..." maxlength="200"/></div>`;
-    html+=`<div class="act-row" style="margin-top:10px;"><button class="btn-act" onclick="submitCombatAction()">Act →</button></div>`;
-  } else if(mine&&mySubmitted){
-    html+=`<div class="combat-waiting">Waiting for others...</div>`;
-  } else if(!mine&&!mySubmitted){
-    const waiting=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name])).map(p=>p.name).join(', ');
-    html+=`<div class="combat-waiting">Waiting for ${waiting||'other players'}...</div>`;
+    html+=`<div class="act-row" style="margin-top:10px;"><button class="btn-act" onclick="submitCombatAction()">⚔ Act →</button></div>`;
+  } else if(iAmHuman&&mySubmitted){
+    const stillWaiting=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name])).map(p=>p.name);
+    html+=stillWaiting.length?`<div class="combat-waiting">Waiting for ${stillWaiting.join(', ')}...</div>`:'<div class="combat-waiting" style="color:var(--teal2);">✓ All actions ready — resolving...</div>';
+  } else if(!iAmHuman){
+    html+=`<div class="combat-waiting">Spectating — NPCs acting...</div>`;
   }
 
-  // Show resolve button if all humans submitted
-  if(allSubmitted&&!mySubmitted===false){
-    html+=`<button class="resolve-btn" id="resolve-btn" onclick="resolveRound()" ${allSubmitted?'':'disabled'}>Resolve Round →</button>`;
-  } else if(allSubmitted){
-    html+=`<button class="resolve-btn" onclick="resolveRound()">Resolve Round →</button>`;
+  // Resolve button — show when ALL humans have submitted
+  if(allSubmitted){
+    html+=`<button class="resolve-btn" onclick="resolveRound()">⚔ Resolve Round →</button>`;
   }
   el.innerHTML=html;
 }
