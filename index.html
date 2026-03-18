@@ -335,7 +335,9 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
 
 /* ── AUDIO BAR ── */
-.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;}
+.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;opacity:0.15;transition:opacity 0.25s ease;}
+.audio-bar:hover{opacity:1;}
+.audio-bar.audio-active{opacity:0.85;}
 @media(max-width:640px){.audio-bar{display:none!important;}.desktop-only{display:none!important;}}
 .audio-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:0;}
 .audio-btn:hover{color:var(--amber2);}
@@ -845,37 +847,89 @@ function enemyAttackRoll(enemy, target){
 
 // Build combat choices for a player — always 4 options
 function buildCombatChoices(player, combatState){
+  // Return GM-generated choices if available, otherwise fallback
+  const cached=gState.combatChoicesCache&&gState.combatChoicesCache[player.name];
+  if(cached&&cached.length>=4)return cached;
+  // Fallback: generate contextual choices locally until GM responds
   const stage=getSprenStage(gState.totalMoves||0);
   const cls=CLASSES.find(c=>c.id===player.classId)||CLASSES[0];
   const sz=gState.partySize||partySize;
-  const party=gState.players.slice(0,sz).filter(p=>p&&!p.downed&&p.name!==player.name);
+  const enemies=(gState.combatEnemies||[]).filter(e=>!e.downed&&e.hp>0);
   const downed=gState.players.slice(0,sz).filter(p=>p&&p.downed);
-  const enemies=(combatState.enemies||[]).filter(e=>e.hp>0);
   const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<p.maxHp&&!p.downed);
   const healAmt=getHealAmount(player,stage);
-  
+  const enemy=enemies[0];
   const choices=[];
-  // 1. Class-specific attack
-  const abil=cls.abilities[0]||'Attack';
-  choices.push(`[ATTACK] Use ${abil} against ${enemies[0]?enemies[0].name:'the enemy'}`);
-  // 2. Tactical attack
-  choices.push(`[ATTACK] Focus all Stormlight into a precise strike at the weakest enemy`);
-  // 3. Defensive/tactical
-  choices.push(`[DEFEND] Take a defensive stance, protect an ally, and wait for an opening`);
-  // 4. Heal or bold attack
+  choices.push(`[ATTACK] ${cls.abilities&&cls.abilities[0]||'Strike'} — channel Stormlight through ${player.shardblade||'your weapon'} at ${enemy?enemy.name:'the enemy'}`);
+  choices.push(`[ATTACK] Read the enemy's position and strike at the gap in their defense`);
+  choices.push(`[DEFEND] Draw their attack, absorb it with Stormlight, and create an opening for allies`);
   if(downed.length>0&&player.classId==='edgedancer'){
-    choices.push(`[HEAL] Use Regrowth to revive ${downed[0].name} (${getReviveHP(stage)} HP, costs ${getReviveCost(stage)} frags)`);
+    choices.push(`[HEAL] Regrowth — pull ${downed[0].name} back from the edge (+${getReviveHP(stage)} HP)`);
   } else if(downed.length>0&&(player.fragments||0)>=getReviveCost(stage)){
-    choices.push(`[HEAL] Channel Stormlight to revive ${downed[0].name} (costs ${getReviveCost(stage)} frags)`);
+    choices.push(`[HEAL] Sacrifice ${getReviveCost(stage)} fragments to revive ${downed[0].name}`);
   } else if(anyInjured&&player.classId==='bondsmith'){
-    const pheal=getBondsmitnPartyHeal(stage);
-    choices.push(`[HEAL] Adhesion surge — channel unity through the party (+${pheal} HP to all)`);
+    choices.push(`[HEAL] Unity pulse — send Stormlight through the party bond (+${getBondsmitnPartyHeal(stage)} HP all)`);
   } else if(anyInjured&&healAmt>=2){
-    choices.push(`[HEAL] Channel Stormlight into wounds to heal self (+${healAmt} HP)`);
+    choices.push(`[HEAL] Press Stormlight into your wounds and let it knit flesh (+${healAmt} HP)`);
   } else {
-    choices.push(`[ATTACK] Surge attack — unleash full ${cls.name} power in a devastating strike`);
+    choices.push(`[ATTACK] Full surge — burn every drop of Stormlight in one overwhelming strike`);
   }
   return choices;
+}
+
+// Generate fresh GM combat choices for a player — called after each narration
+async function generateCombatChoices(player){
+  if(!player||!gState)return;
+  const stage=getSprenStage(gState.totalMoves||0);
+  const cls=CLASSES.find(c=>c.id===player.classId)||CLASSES[0];
+  const sz=gState.partySize||partySize;
+  const enemies=(gState.combatEnemies||[]).filter(e=>!e.downed&&e.hp>0);
+  const downed=gState.players.slice(0,sz).filter(p=>p&&p.downed);
+  const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<p.maxHp&&!p.downed);
+  const healAmt=getHealAmount(player,stage);
+  const loc=getAct(gState.totalMoves||0).location||'the battlefield';
+  const round=gState.combatRound||1;
+  const enemyDesc=enemies.map(e=>`${e.name}(${e.hp}/${e.maxHp}HP)`).join(', ')||'defeated enemies';
+  const healOption=downed.length>0?`One option MUST be [HEAL] to revive ${downed[0].name}.`:
+    anyInjured?`One option MUST be [HEAL] to restore ${healAmt}HP to self or ally.`:'';
+
+  const prompt=`Cosmere RPG Combat GM. Round ${round}. ${loc}.
+Generate exactly 4 combat action options for ${player.name} the ${cls.name} (Oath ${player.oathStage||1}/5, ${player.hp}/${player.maxHp}HP${player.shardblade?', wielding '+player.shardblade:''}).
+Enemies present: ${enemyDesc}.
+${healOption}
+
+Rules:
+- Each option is ONE vivid sentence, first person ("I do X" or "${player.name} does X")
+- Options must be meaningfully different: vary between aggressive, tactical, defensive, and situational
+- Use ${cls.name} class abilities creatively: ${(cls.abilities||[]).slice(0,3).join(', ')}
+- Reference the specific location (${loc}) and current enemies
+- Tag each: [ATTACK], [DEFEND], or [HEAL]
+- Round ${round} context: escalate stakes as rounds progress
+- NO generic choices — every option should feel unique to THIS moment
+
+Return ONLY a numbered list:
+1. [TAG] action
+2. [TAG] action
+3. [TAG] action
+4. [TAG] action`;
+
+  try{
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,
+        messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content&&data.content[0]?data.content[0].text:'';
+    const parsed=(raw.match(/^\d+\.\s*.+$/gm)||[])
+      .map(l=>l.replace(/^\d+\.\s*/,'').trim())
+      .filter(l=>l.length>10)
+      .slice(0,4);
+    if(parsed.length>=3){
+      if(!gState.combatChoicesCache)gState.combatChoicesCache={};
+      gState.combatChoicesCache[player.name]=parsed;
+      // Re-render if this is the current player
+      if(myChar&&myChar.name===player.name)renderCombatActions();
+    }
+  }catch(e){/* silent — fallback choices still show */}
 }
 const BLADE_NAMES={windrunner:'Silverwind Blade',lightweaver:'Illusory Edge',edgedancer:'Verdant Blade',stoneward:'Granite Shardblade',elsecaller:'Obsidian Catalyst',truthwatcher:'Starlight Blade',willshaper:'Freedom Edge',dustbringer:'Ember Blade',bondsmith:'Sibling-Touched Blade',skybreaker:'Law Blade'};
 
@@ -1487,6 +1541,62 @@ function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
   setTimeout(()=>card.classList.remove('took-damage','received-heal'),900);
 }
 
+// ══ SKIP TURN SYSTEM ══
+function isHost(){
+  // Host = the human player occupying slot 0
+  if(!gState||!myChar)return false;
+  const sz=gState.partySize||partySize;
+  const slot0=gState.players[0];
+  return slot0&&!slot0.isNPC&&slot0.name===myChar.name;
+}
+
+function isSelfTurn(){
+  // True if it's currently MY turn in exploration
+  if(!gState||!myChar)return false;
+  const cur=gState.players[gState.turn];
+  return cur&&cur.name===myChar.name&&!cur.isNPC;
+}
+
+async function skipTurn(playerName){
+  if(!gState)return;
+  const sz=gState.partySize||partySize;
+  const idx=gState.players.findIndex(p=>p&&p.name===playerName);
+  if(idx<0)return;
+  // Log the skip
+  await addLog({type:'system',who:'',
+    text:`⏭ ${playerName}'s turn was skipped by ${myChar?myChar.name:'the host'}.`,
+    choices:[]});
+  // Advance the turn
+  gState.turn=(gState.turn+1)%sz;
+  gState.totalMoves=(gState.totalMoves||0)+1;
+  // Increment beat counter (exploration)
+  if(!gState.combatMode){
+    gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
+    const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
+    if(beatsLeft<=0&&gState.preCombatTriggered){gState.combatMode=true;}
+    else if(beatsLeft<=0&&!gState.preCombatTriggered){gState.preCombatTriggered=true;}
+  }
+  await saveState(gState);
+  const freshLog=await loadLog(true);
+  renderAll(freshLog);
+  setBottomFromState(freshLog);
+}
+
+async function skipCombatTurn(playerName){
+  if(!gState)return;
+  // Auto-assign a defensive action for the skipped player
+  if(!gState.pendingActions)gState.pendingActions={};
+  gState.pendingActions[playerName]='[DEFEND] Hold position and brace — buying time for the others';
+  await saveState(gState);
+  renderCombatActions();
+  // Check if all humans now submitted
+  const sz=gState.partySize||partySize;
+  const allSubmitted=gState.players.slice(0,sz)
+    .filter(p=>p&&!p.isNPC&&!p.downed)
+    .every(p=>gState.pendingActions&&gState.pendingActions[p.name]);
+  if(allSubmitted)resolveRound();
+}
+
 // ══ RENDER PARTY STRIP ══
 function renderParty(){
   const s=document.getElementById('party-strip');if(!gState)return;
@@ -1645,7 +1755,20 @@ function setBottomWaiting(name){
   const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   const wait=document.getElementById('bottom-waiting');
   wait.style.display='block';
-  document.getElementById('waiting-msg').textContent=name?`Waiting for ${name}...`:'Waiting...';
+  const wm=document.getElementById('waiting-msg');
+  wm.textContent=name?`Waiting for ${name}...`:'Waiting...';
+  // Add skip button for host (or self-skip)
+  const existing=document.getElementById('skip-btn-wrap');
+  if(existing)existing.remove();
+  if(name&&(isHost()||isSelfTurn())){
+    const div=document.createElement('div');
+    div.id='skip-btn-wrap';
+    div.style.cssText='margin-top:10px;';
+    const canSelfSkip=isSelfTurn();
+    const label=canSelfSkip?`⏭ Step away from my turn`:`⏭ Skip ${name}'s turn`;
+    div.innerHTML=`<button onclick="skipTurn('${name}')" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:6px 16px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);transition:all 0.15s;" onmouseover="this.style.borderColor='var(--amber-dim)';this.style.color='var(--text3)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text4)'">${label}</button>`;
+    wait.appendChild(div);
+  }
 }
 
 function enableContinue(){
@@ -2513,6 +2636,15 @@ function renderCombatActions(){
   } else if(!iAmHuman){
     html+=`<div class="combat-waiting">Spectating — NPCs acting...</div>`;
   }
+  // Host skip button for combat — show for players who haven't submitted
+  if(isHost()||isSelfTurn()){
+    const notSubmitted=gState.players.slice(0,sz)
+      .filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name]))
+      .filter(p=>p.name!==myChar.name); // don't show skip for yourself here (use self-submit)
+    notSubmitted.forEach(p=>{
+      html+=`<button onclick="skipCombatTurn('${p.name}')" style="margin-top:8px;width:100%;background:transparent;border:1px solid var(--border2);border-radius:20px;padding:6px 16px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);">⏭ Skip ${p.name}'s combat turn</button>`;
+    });
+  }
 
   // Resolve button — show when ALL humans have submitted
   if(allSubmitted){
@@ -2739,9 +2871,16 @@ Write 2 sentences: the moment of defeat — what happens as the last party membe
   // Transition to choosing phase after opening or round narration
   if(type==='opening'||type==='round'){
     gState.combatPhase='choosing';
+    // Clear old choices cache so fresh ones generate
+    gState.combatChoicesCache={};
     await saveState(gState);
     renderCombatScreen();
     renderCombatActions();
+    // Generate fresh GM choices for each human player (async, non-blocking)
+    const sz2=gState.partySize||partySize;
+    gState.players.slice(0,sz2).filter(p=>p&&!p.isNPC&&!p.downed).forEach(p=>{
+      generateCombatChoices(p).catch(()=>{});
+    });
   }
 }
 
@@ -2913,7 +3052,17 @@ async function speakStory(){
   if(!voiceEnabled||isMobile())return;
   const el=document.getElementById('story-text');
   if(!el)return;
-  const text=(el.innerText||'').replace(/Option \d+/g,'').replace(/THE CHRONICLE/gi,'').replace(/\n+/g,' ').trim();
+  const raw=(el.innerText||'');
+  // Strip UI labels that should not be read aloud
+  const text=raw
+    .replace(/\[CHOICES FOR[^\]]*\]/gi,'')
+    .replace(/\[CHOICES\]/gi,'')
+    .replace(/Option \d+/g,'')
+    .replace(/THE CHRONICLE/gi,'')
+    .replace(/DISCOVERY|COMBAT|DECISION/g,'')
+    .replace(/\n+/g,' ')
+    .replace(/\s{2,}/g,' ')
+    .trim();
   if(text.length<10)return;
   // Kokoro only if already loaded (user opted in) — never trigger load from auto-speak
   if(kokoroReady){const ok=await speakWithKokoro(text);if(ok)return;}
