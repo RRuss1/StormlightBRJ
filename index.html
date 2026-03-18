@@ -115,8 +115,8 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 @media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
 .ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
-.ccard:hover{border-color:var(--border3);}
-.ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
+.ccard:hover:not(.sel){border-color:var(--border3);background:var(--bg4);box-shadow:0 0 8px rgba(191,161,90,0.06);}
+.ccard.sel{border-color:var(--amber)!important;background:rgba(191,161,90,0.1)!important;box-shadow:0 0 0 1px var(--amber),0 0 16px rgba(191,161,90,0.2);animation:cardSelPulse 2.5s ease-in-out infinite;}
 .ccard-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
 .ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
 .ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
@@ -391,7 +391,15 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   .title-glyph{font-size:60px;}
   .story-text{font-size:16px;}
 }
-</style>
+
+.type-card{background:var(--bg3);border:2px solid var(--border2);border-radius:12px;padding:28px 20px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;text-align:center;user-select:none;}
+.type-card:hover{border-color:var(--border3);background:var(--bg4);box-shadow:0 0 12px rgba(191,161,90,0.1);}
+.type-card.sel{border-color:var(--amber)!important;background:rgba(191,161,90,0.08)!important;box-shadow:0 0 0 1px var(--amber),0 0 24px rgba(191,161,90,0.25)!important;animation:cardSelPulse 2.5s ease-in-out infinite;}
+.origin-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:7px 16px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);transition:all 0.2s;outline:none;user-select:none;}
+.origin-btn:hover{border-color:var(--border3);color:var(--text2);}
+.origin-btn.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.1);box-shadow:0 0 0 1px var(--amber),0 0 10px rgba(191,161,90,0.15);}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.2s;}
+.step-dot.active{background:var(--amber);}</style>
 </head>
 <body>
 
@@ -472,13 +480,13 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
       <h2 class="screen-title" data-tr>Who Are You?</h2>
       <p class="screen-sub" data-tr>Every great saga begins with this choice.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;">
-        <div class="type-card" id="type-radiant" onclick="pickCharType(true)">
+        <div class="type-card" id="type-radiant" onclick="pickCharType(true)" title="Click to select Knight Radiant">
           <div style="font-size:36px;margin-bottom:12px;">⟁</div>
           <div class="ccard-name" data-tr>Knight Radiant</div>
           <div class="ccard-ideal" data-tr>"Touched by a spren. Bound by Oaths."</div>
           <div style="font-size:12px;color:var(--text4);margin-top:8px;" data-tr>Spren bond · Stormlight · Shardblade · 5 Oaths</div>
         </div>
-        <div class="type-card" id="type-hero" onclick="pickCharType(false)">
+        <div class="type-card" id="type-hero" onclick="pickCharType(false)" title="Click to select Hero of Roshar">
           <div style="font-size:36px;margin-bottom:12px;">✦</div>
           <div class="ccard-name" data-tr>Hero of Roshar</div>
           <div class="ccard-ideal" data-tr>"Ungifted. Undeterred. Dangerous."</div>
@@ -713,8 +721,8 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 @media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
 .ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
-.ccard:hover{border-color:var(--border3);}
-.ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
+.ccard:hover:not(.sel){border-color:var(--border3);background:var(--bg4);box-shadow:0 0 8px rgba(191,161,90,0.06);}
+.ccard.sel{border-color:var(--amber)!important;background:rgba(191,161,90,0.1)!important;box-shadow:0 0 0 1px var(--amber),0 0 16px rgba(191,161,90,0.2);animation:cardSelPulse 2.5s ease-in-out infinite;}
 .ccard-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
 .ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
 .ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
@@ -1862,13 +1870,9 @@ function renderCreate(){
   showCreateStep(1);
   renderColors();renderClasses();renderRoles();renderWeapons();
   updateCreateSubmitBtn();
-  // Set initial selection state on type cards
-  setTimeout(()=>{
-    const r=document.getElementById('type-radiant');
-    const h=document.getElementById('type-hero');
-    if(r)r.classList.add('sel');
-    if(h)h.classList.remove('sel');
-  },50);
+  // Set initial selection immediately + after render
+  pickCharType(true);
+  setTimeout(()=>pickCharType(true),80);
 }
 
 function showCreateStep(step){
