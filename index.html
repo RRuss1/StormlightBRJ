@@ -151,9 +151,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
 .game-body{flex:1;display:flex;flex-direction:column;gap:0;width:100%;overflow:visible;}
 .game-body-top{padding:16px 20px 0;max-width:840px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
-.game-layout{display:grid;grid-template-columns:220px 1fr 220px;gap:16px;align-items:start;padding:16px 20px 20px;width:100%;box-sizing:border-box;}
-.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px;min-height:200px;}
-.side-panel-body{padding:10px 14px;max-height:calc(100vh - 160px);overflow-y:auto;font-size:12px;}
+.game-layout{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;align-items:stretch;padding:16px 20px 20px;width:100%;box-sizing:border-box;}
+.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px;min-height:300px;display:flex;flex-direction:column;}
+.side-panel-body{flex:1;overflow-y:auto;}
+.side-panel-body{padding:10px 14px;max-height:calc(100vh - 160px);font-size:12px;}
 .side-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .side-panel-body::-webkit-scrollbar{width:3px;}
 .side-panel-body::-webkit-scrollbar-thumb{background:var(--border2);}
@@ -2863,7 +2864,8 @@ function speakWithWebSpeech(text){
     const utt=new SpeechSynthesisUtterance(text);
     utt.volume=0.95;
     const vv=window.speechSynthesis.getVoices();
-    const preferred=['Daniel','Aaron','Fred','Alex','Arthur','Gordon','Microsoft David Desktop','Microsoft George Desktop'];
+    const userPrefs=window._webSpeechPreference||['Daniel','Aaron','Fred','Alex','Arthur','Gordon'];
+    const preferred=[...userPrefs,'Daniel','Aaron','Fred','Alex','Arthur','Gordon','Microsoft David Desktop','Microsoft George Desktop'];
     let v=null;
     for(const n of preferred){v=vv.find(x=>x.name===n);if(v)break;}
     if(!v)v=vv.find(x=>x.lang==='en-GB'&&x.localService)||vv.find(x=>x.lang.startsWith('en')&&x.localService)||vv.find(x=>x.lang.startsWith('en'))||vv[0];
@@ -2910,14 +2912,13 @@ function stopSpeaking(){
 }
 
 async function toggleVoice(){
-  if(isMobile())return; // no voice on mobile
+  if(isMobile())return;
   if(voiceActive){stopSpeaking();return;}
-  if(!kokoroReady&&!kokoroLoading){
-    const b=document.getElementById('voice-btn');
-    if(b)b.textContent='⏳';
-    await loadKokoro();
-  }
   voiceEnabled=true;
+  // Try Kokoro first, falls back to Web Speech automatically in speakStory
+  if(!kokoroReady&&!kokoroLoading){
+    loadKokoro().catch(()=>{}); // non-blocking attempt
+  }
   speakStory();
 }
 
@@ -2930,10 +2931,21 @@ function updateVoiceBtn(){
   });
 }
 
-function setKokoroVoice(voice){
-  window._kokoroVoice=voice;
-  // Save preference
-  localStorage.setItem('sc_voice',voice);
+function setKokoroVoice(voiceVal){
+  window._kokoroVoice=voiceVal;
+  localStorage.setItem('sc_voice',voiceVal);
+  // Map Kokoro voice to Web Speech preference
+  const webSpeechMap={
+    'am_michael':'Daniel,Aaron,Fred,Alex',
+    'am_adam':'Alex,Aaron,Daniel',
+    'am_echo':'Fred,Alex,Aaron',
+    'bf_emma':'Daniel,Arthur,Gordon', // British
+    'af_heart':'Samantha,Victoria,Karen',
+    'af_nova':'Samantha,Karen,Victoria',
+  };
+  window._webSpeechPreference=(webSpeechMap[voiceVal]||'Daniel,Aaron,Alex').split(',');
+  // If currently speaking, restart with new voice
+  if(voiceActive){stopSpeaking();setTimeout(speakStory,100);}
 }
 
 // Load saved voice preference
@@ -2943,6 +2955,7 @@ function loadVoicePreference(){
     window._kokoroVoice=saved;
     const sel=document.getElementById('voice-select');
     if(sel)sel.value=saved;
+    setKokoroVoice(saved); // apply web speech mapping too
   }
 }
 
