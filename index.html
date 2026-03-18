@@ -443,588 +443,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 <!-- ══ CREATE SCREEN ══ -->
 <div id="s-create" class="screen">
   <div class="create-wrap">
-    <!-- Step indicator -->
-    <div id="create-steps" style="display:flex;justify-content:center;gap:8px;margin-bottom:24px;">
-      <div class="step-dot active" id="sdot-1"></div>
-      <div class="step-dot" id="sdot-2"></div>
-      <div class="step-dot" id="sdot-3"></div>
-      <div class="step-dot" id="sdot-4"></div>
-    </div>
-
-    <!-- STEP 1: Radiant or Hero -->
-    <div id="create-s1">
-      <h2 class="screen-title" data-tr>Who Are You?</h2>
-      <p class="screen-sub" data-tr>Every great saga begins with this choice.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;">
-        <div class="type-card" id="type-radiant" onclick="pickCharType(true)">
-          <div style="font-size:36px;margin-bottom:12px;">⟁</div>
-          <div class="ccard-name" data-tr>Knight Radiant</div>
-          <div class="ccard-ideal" data-tr>"Touched by a spren. Bound by Oaths."</div>
-          <div style="font-size:12px;color:var(--text4);margin-top:8px;" data-tr>Spren bond · Stormlight · Shardblade · 5 Oaths</div>
-        </div>
-        <div class="type-card" id="type-hero" onclick="pickCharType(false)">
-          <div style="font-size:36px;margin-bottom:12px;">✦</div>
-          <div class="ccard-name" data-tr>Hero of Roshar</div>
-          <div class="ccard-ideal" data-tr>"Ungifted. Undeterred. Dangerous."</div>
-          <div style="font-size:12px;color:var(--text4);margin-top:8px;" data-tr>Role mastery · Weapon proficiency · Your own story</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
-        <button class="btn" onclick="createNext()" data-tr>Next →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2A: Radiant Order -->
-    <div id="create-s2r" style="display:none;">
-      <h2 class="screen-title" data-tr>Your Order</h2>
-      <p class="screen-sub" data-tr>The Stormfather watches. Choose carefully.</p>
-      <div class="class-grid" id="class-grid"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:16px;">
-        <button class="btn btn-sm" onclick="createBack()" data-tr>← Back</button>
-        <button class="btn" onclick="createNext()" data-tr>Next →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2B: Hero Role -->
-    <div id="create-s2h" style="display:none;">
-      <h2 class="screen-title" data-tr>Your Role</h2>
-      <p class="screen-sub" data-tr>What shaped you before the storm?</p>
-      <div class="class-grid" id="role-grid"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:16px;">
-        <button class="btn btn-sm" onclick="createBack()" data-tr>← Back</button>
-        <button class="btn" onclick="createNext()" data-tr>Next →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3: Identity + Backstory -->
-    <div id="create-s3" style="display:none;">
-      <h2 class="screen-title" data-tr>Your Story</h2>
-      <p class="screen-sub" data-tr>The GM will remember every word of this.</p>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Your Name</label>
-        <input class="form-in" id="in-name" type="text" maxlength="24" placeholder="What do they call you on the Plains?"/>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Pronouns</label>
-        <div style="display:flex;gap:14px;flex-wrap:wrap;">
-          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="he/him" checked style="accent-color:var(--amber);"/><span data-tr>He / Him</span></label>
-          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:16px;color:var(--text3);"><input type="radio" name="gender" value="she/her" style="accent-color:var(--amber);"/><span data-tr>She / Her</span></label>
-        </div>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Origin</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="origin-grid">
-          <button class="origin-btn" onclick="pickOrigin(this,'Alethkar')">Alethkar</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Kharbranth')">Kharbranth</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Thaylen City')">Thaylen City</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Horneater Peaks')">Horneater Peaks</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Shinovar')">Shinovar</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Herdaz')">Herdaz</button>
-          <button class="origin-btn" onclick="pickOrigin(this,'Unknown')">Unknown</button>
-        </div>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>What drives you?</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="motivation-grid">
-          <button class="origin-btn" onclick="pickMotivation(this,'Vengeance')">Vengeance</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Protection')">Protection</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Knowledge')">Knowledge</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Redemption')">Redemption</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Glory')">Glory</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Survival')">Survival</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Freedom')">Freedom</button>
-        </div>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Backstory <span style="color:var(--text5);font-size:11px;">(optional — feeds the GM)</span></label>
-        <textarea class="form-in" id="in-backstory" maxlength="200" rows="3" placeholder="Lost my squad at the Frostlands. Carries a debt I can't repay..." style="resize:none;"></textarea>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Appearance <span style="color:var(--text5);font-size:11px;">(optional)</span></label>
-        <input class="form-in" id="in-appearance" type="text" maxlength="80" placeholder="Scarred, tall, never smiles..."/>
-      </div>
-      <div class="form-block">
-        <label class="form-lbl" data-tr>Your Color</label>
-        <div class="color-row" id="color-row"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:16px;">
-        <button class="btn btn-sm" onclick="createBack()" data-tr>← Back</button>
-        <button class="btn" onclick="createNext()" data-tr>Next →</button>
-      </div>
-    </div>
-
-    <!-- STEP 4: Weapon (Hero only) / Stats (Radiant) -->
-    <div id="create-s4" style="display:none;">
-      <div id="create-s4-weapon">
-        <h2 class="screen-title" data-tr>Your Weapon</h2>
-        <p class="screen-sub" data-tr>What do you carry into battle?</p>
-        <div class="class-grid" id="weapon-grid"></div>
-        <div class="form-block" style="margin-top:16px;">
-          <label class="form-lbl" data-tr>Name your weapon <span style="color:var(--text5);font-size:11px;">(optional — leave blank for a generated name)</span></label>
-          <input class="form-in" id="in-weapon-name" type="text" maxlength="40" placeholder="My grandfather's sword..."/>
-        </div>
-      </div>
-      <div class="form-block" style="margin-top:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <label class="form-lbl" data-tr>Your Stats</label>
-          <button class="btn btn-sm" onclick="rollStats()" data-tr>↻ Reroll</button>
-        </div>
-        <div class="stats-grid" id="stats-grid"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:16px;">
-        <button class="btn btn-sm" onclick="createBack()" data-tr>← Back</button>
-        <button class="btn" id="create-submit-btn" onclick="onCreateChar()" data-tr>Speak the First Oath →</button>
-      </div>
-      <div class="err-msg" id="create-err" style="display:none;"></div>
-    </div>
-  </div>
-
-
-<!-- s-lobbytml>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Stormlight Chronicles</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,8 92,88 8,88' fill='none' stroke='%23BFA15A' stroke-width='7'/><polygon points='50,28 76,72 24,72' fill='none' stroke='%23BFA15A' stroke-width='4'/></svg>"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
-<style>
-/* ── RESET & ROOT ── */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#1a1510;--bg2:#211c14;--bg3:#2a2318;--bg4:#33291e;
-  --border:#3d3426;--border2:#51463A;--border3:#70522B;
-  --gold:#BFA15A;--gold-mid:#D9BF8C;--gold-bright:#E8DCC4;
-  --gold-light:#EFE5D1;--gold-deep:#9C7B3C;--gold-dim:#70522B;
-  --amber:#BFA15A;--amber2:#D9BF8C;--amber3:#E8DCC4;--amber-dim:#70522B;
-  --teal:#1a6b52;--teal2:#25956e;--teal-dim:#0f3d2e;
-  --coral:#9e3820;--coral2:#c44a28;
-  --text:#F6F1E6;--text2:#EFE5D1;--text3:#D9BF8C;--text4:#9C7B3C;--text5:#70522B;
-  --font-d:'Cinzel',serif;--font-b:'Crimson Pro',serif;
-  --r:9px;--r2:14px;--r3:19px;
-}
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:19px;line-height:1.75;}
-body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90,0.12) 0%,transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%,rgba(112,82,43,0.07) 0%,transparent 60%);}
-.screen{display:none;min-height:100vh;}
-.screen.active{display:flex;flex-direction:column;}
-
-/* ── TITLE ── */
-#s-title{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
-#s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.title-glyph{font-size:86px;color:var(--amber);letter-spacing:14px;font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
-@keyframes glowpulse{0%,100%{text-shadow:0 0 40px rgba(191,161,90,0.45);}50%{text-shadow:0 0 80px rgba(217,191,140,0.65),0 0 120px rgba(191,161,90,0.25);}}
-.title-h1{font-family:var(--font-d);font-size:clamp(28px,5vw,50px);font-weight:700;letter-spacing:6px;margin-bottom:5px;}
-.title-h2{font-family:var(--font-d);font-size:14px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
-.title-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.75rem;}
-.title-quote{font-style:italic;color:var(--gold-mid);font-size:17px;max-width:480px;margin:0 auto 2.5rem;line-height:1.9;}
-.title-quote cite{display:block;font-size:12px;letter-spacing:2px;color:var(--text4);margin-top:7px;font-style:normal;}
-
-/* ── PARTY SIZE ── */
-.psz-wrap{margin-bottom:1.75rem;}
-.psz-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
-.psz-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
-.psz{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 20px;cursor:pointer;font-family:var(--font-d);font-size:14px;color:var(--text3);transition:all 0.15s;}
-.psz:hover{border-color:var(--border3);color:var(--text);}
-.psz.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.09);}
-.psz.locked{opacity:0.4;cursor:default;}
-
-/* ── SLOTS ── */
-.slots-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
-.slots-grid{display:grid;gap:10px;max-width:620px;width:100%;margin:0 auto 2rem;}
-.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
-.slot:hover{border-color:var(--border3);}
-.slot.filled{border-color:var(--gold-dim);cursor:default;}
-.slot.npc-slot{border-color:var(--teal-dim);cursor:default;}
-.slot-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:7px;}
-.slot-pip{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
-.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.slot-pname{font-family:var(--font-d);font-size:13px;font-weight:600;color:var(--text);}
-.slot-class{font-size:12px;color:var(--text3);font-style:italic;}
-.slot-empty-txt{font-size:13px;color:var(--text4);font-style:italic;}
-.slot-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(26,107,82,0.22);color:var(--teal2);border:1px solid rgba(26,107,82,0.32);letter-spacing:1px;margin-top:6px;}
-.slot-tag.turn{background:rgba(191,161,90,0.15);color:var(--amber2);border-color:rgba(191,161,90,0.25);}
-.slot-tag.npc{background:rgba(26,107,82,0.15);color:var(--teal2);border-color:rgba(26,107,82,0.25);}
-.slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-d);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
-.slot-npc-btn:hover{background:rgba(26,107,82,0.22);}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--r);background:transparent;color:var(--text);font-family:var(--font-b);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
-.btn:hover{background:var(--bg4);border-color:var(--amber-dim);}
-.btn-gold{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.05);}
-.btn-gold:hover{background:rgba(191,161,90,0.13);border-color:var(--amber3);}
-.btn-teal{border-color:var(--teal);color:var(--teal2);}
-.btn-sm{padding:9px 20px;font-size:15px;}
-.btn-danger{border-color:var(--coral);color:var(--coral2);}
-.btn-danger:hover{background:rgba(158,56,32,0.12);}
-
-/* ── CAMPAIGN SCREEN ── */
-#s-campaign{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
-#s-campaign::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;max-width:700px;width:100%;margin:0 auto 1.5rem;}
-.camp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:18px 16px;cursor:pointer;text-align:left;transition:border-color 0.2s,background 0.2s;position:relative;}
-.camp-card:hover{border-color:var(--gold);background:var(--bg4);}
-.camp-card.active-camp{border-color:var(--amber);}
-.camp-card.new-camp{border-style:dashed;border-color:var(--border2);text-align:center;}
-.camp-card.new-camp:hover{border-color:var(--amber);border-style:dashed;}
-.camp-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
-.camp-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
-.camp-meta{font-size:12px;color:var(--text4);font-style:italic;}
-.camp-phase{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px;font-family:var(--font-d);letter-spacing:1px;}
-.phase-pregame{background:rgba(191,161,90,0.12);color:var(--amber2);border:1px solid rgba(191,161,90,0.2);}
-.phase-playing{background:rgba(26,107,82,0.15);color:var(--teal2);border:1px solid rgba(26,107,82,0.25);}
-.camp-del{position:absolute;top:8px;right:10px;font-size:11px;color:var(--text5);cursor:pointer;border:none;background:transparent;font-family:var(--font-d);letter-spacing:1px;}
-.camp-del:hover{color:var(--coral2);}
-.camp-new-icon{font-size:28px;color:var(--text4);margin-bottom:6px;}
-.camp-new-txt{font-size:14px;color:var(--text4);font-style:italic;}
-
-/* ── CAMPAIGN NAME MODAL ── */
-#new-camp-modal{display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--r2);padding:1.5rem;max-width:420px;width:100%;text-align:left;}
-
-/* ── CREATE SCREEN ── */
-#s-create{padding:2.5rem;align-items:center;}
-.create-wrap{max-width:620px;width:100%;}
-.screen-title{font-family:var(--font-d);font-size:26px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:5px;}
-.screen-sub{font-size:16px;color:var(--text3);font-style:italic;margin-bottom:2rem;}
-.form-block{margin-bottom:1.75rem;}
-.form-lbl{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;display:block;}
-.form-in{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:17px;outline:none;transition:border-color 0.2s;}
-.form-in:focus{border-color:var(--amber);}
-.color-row{display:flex;gap:12px;flex-wrap:wrap;}
-.cswatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s,transform 0.15s;}
-.cswatch:hover{transform:scale(1.1);}
-.cswatch.sel{border-color:var(--text);}
-.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
-.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
-.ccard:hover{border-color:var(--border3);}
-.ccard.sel{border-color:var(--amber);background:rgba(191,161,90,0.08);}
-.ccard-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
-.ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
-.ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
-.ccard-bonus{font-size:12px;color:var(--text4);margin-top:5px;}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
-.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;}
-.sbox-name{font-family:var(--font-d);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
-.sbox-val{font-size:26px;font-weight:600;color:var(--amber2);line-height:1.2;}
-.sbox-mod{font-size:13px;color:var(--text3);}
-
-/* ── LOBBY SCREEN ── */
-#s-lobby{padding:0;align-items:center;justify-content:center;}
-.lobby-wrap{max-width:680px;width:100%;padding:2.5rem;}
-
-/* ── GAME SCREEN ── */
-#s-game{padding:0;flex-direction:column;}
-.game-top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
-.game-logo{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
-.turn-pill{font-family:var(--font-d);font-size:12px;letter-spacing:1px;padding:6px 16px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
-.turn-pill.yours{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.12);animation:pillpulse 2s ease-in-out infinite;}
-@keyframes pillpulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0.35);}50%{box-shadow:0 0 0 7px rgba(191,161,90,0);}}
-.party-strip{display:flex;gap:6px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;align-items:stretch;}
-.ppip-pair{display:flex;gap:4px;align-items:stretch;flex:1;min-width:0;}
-.spren-card{width:54px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-.spren-card svg{width:44px;height:44px;}
-.ppip{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
-.ppip.active{border-color:var(--amber);}
-.ppip.npc{border-color:var(--teal-dim);}
-.ppip-top{display:flex;align-items:center;gap:8px;}
-.ppip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.ppip-name{font-family:var(--font-d);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ppip-info{font-size:12px;color:var(--gold-mid);}
-.ppip-tag{font-size:9px;letter-spacing:1px;font-family:var(--font-d);}
-.hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
-.game-body{flex:1;display:flex;flex-direction:column;gap:0;width:100%;overflow:visible;}
-.game-body-top{padding:16px 20px 0;max-width:840px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
-.game-layout{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;align-items:stretch;padding:16px 20px 20px;width:100%;box-sizing:border-box;}
-.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px;min-height:300px;display:flex;flex-direction:column;}
-.side-panel-body{flex:1;overflow-y:auto;}
-.side-panel-body{padding:10px 14px;max-height:calc(100vh - 160px);font-size:12px;}
-.side-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.side-panel-body::-webkit-scrollbar{width:3px;}
-.side-panel-body::-webkit-scrollbar-thumb{background:var(--border2);}
-/* ══ COMBAT SCREEN ══ */
-#s-combat{padding:0;flex-direction:column;background:var(--bg);}
-.combat-top{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--coral);background:rgba(158,56,32,0.08);}
-.combat-title{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--coral2);text-transform:uppercase;}
-.combat-round-pill{font-family:var(--font-d);font-size:11px;letter-spacing:1px;padding:5px 14px;border-radius:20px;border:1px solid var(--coral);color:var(--coral2);}
-.combat-body{flex:1;display:grid;grid-template-columns:240px 1fr 240px;gap:0;height:calc(100vh - 52px);}
-.combat-party-col,.combat-enemy-col{display:flex;flex-direction:column;gap:10px;padding:16px 12px;overflow-y:auto;border-right:1px solid var(--border);}
-.combat-enemy-col{border-right:none;border-left:1px solid var(--border);}
-.combat-center{display:flex;flex-direction:column;overflow:hidden;}
-.char-combat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;transition:border-color 0.2s;}
-.char-combat-card.active-turn{border-color:var(--amber);box-shadow:0 0 12px rgba(191,161,90,0.25);}
-.char-combat-card.downed{opacity:0.45;border-color:var(--coral);background:rgba(158,56,32,0.05);}
-.char-combat-card.enemy-card{border-color:rgba(196,74,40,0.3);}
-.char-combat-card.enemy-card.active-turn{border-color:var(--coral2);box-shadow:0 0 12px rgba(196,74,40,0.3);}
-.ccard-name-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.ccard-hp-big{font-size:18px;font-weight:600;color:var(--text);}
-.ccard-hp-label{font-size:11px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;}
-.ccard-status{font-size:11px;letter-spacing:1px;font-family:var(--font-d);}
-.combat-narrative{padding:20px;border-bottom:1px solid var(--border);background:var(--bg2);font-family:'Times New Roman',Times,serif;font-size:18px;line-height:1.85;color:var(--text);min-height:120px;flex-shrink:0;}
-.combat-narrative .gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;display:block;margin-bottom:8px;}
-.combat-actions{flex:1;overflow-y:auto;padding:16px 20px;}
-.combat-waiting{text-align:center;padding:24px;font-family:var(--font-d);font-size:12px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.combat-player-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:10px;}
-.combat-submitted{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(26,107,82,0.12);border:1px solid rgba(26,107,82,0.25);border-radius:var(--r);font-size:13px;color:var(--teal2);margin-bottom:8px;}
-.resolve-btn{width:100%;padding:14px;border:1px solid var(--coral);border-radius:var(--r);background:rgba(158,56,32,0.1);color:var(--coral2);font-family:var(--font-d);font-size:14px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;margin-top:12px;}
-.resolve-btn:hover{background:rgba(158,56,32,0.2);}
-.resolve-btn:disabled{opacity:0.3;cursor:not-allowed;}
-.combat-dice-ticker{padding:10px 20px;border-top:1px solid var(--border);background:var(--bg3);max-height:140px;overflow-y:auto;font-size:12px;font-family:var(--font-d);letter-spacing:0.5px;}
-.combat-dice-ticker::-webkit-scrollbar{width:3px;}
-.combat-dice-ticker::-webkit-scrollbar-thumb{background:var(--border2);}
-.dice-round-header{font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin:6px 0 4px;padding-top:6px;border-top:1px solid var(--border);}
-.dice-round-header:first-child{border-top:none;margin-top:0;padding-top:0;}
-.dice-row{display:flex;align-items:center;gap:6px;padding:2px 0;line-height:1.4;}
-.dice-name{min-width:70px;font-weight:600;}
-.dice-roll{color:var(--text3);}
-.dice-result-crit{color:var(--gold);}
-.dice-result-hit{color:var(--teal2);}
-.dice-result-miss{color:var(--text5);}
-.dice-result-dmg{color:var(--coral2);}
-.dice-result-heal{color:var(--teal2);}
-.combat-init-strip{padding:8px 20px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-
-@media(max-width:900px){
-  .combat-body{grid-template-columns:1fr;}
-  .combat-party-col,.combat-enemy-col{flex-direction:row;flex-wrap:wrap;border:none;border-bottom:1px solid var(--border);padding:8px;}
-  .char-combat-card{min-width:140px;flex:1;}
-}
-
-@media(max-width:1100px){
-  .game-layout{grid-template-columns:1fr;padding:12px;}
-  .side-panel{position:static;display:flex;flex-direction:row;gap:0;}
-  .side-panel-hdr{writing-mode:initial;}
-  .side-panel-body{max-height:200px;}
-}
-@media(max-width:640px){
-  .game-layout{grid-template-columns:1fr;}
-  .side-panel{display:block;}
-  .side-panel-body{max-height:150px;}
-}
-
-/* ── PROGRESS ── */
-.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
-.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
-
-/* ── ENEMY / INITIATIVE PANELS ── */
-.combat-panel{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);}
-.combat-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;}
-.enemy-list{display:flex;gap:10px;flex-wrap:wrap;}
-.enemy-card{background:var(--bg2);border:1px solid rgba(196,74,40,0.3);border-radius:var(--r);padding:7px 12px;min-width:120px;}
-.enemy-name{font-family:var(--font-d);font-size:11px;color:var(--coral2);}
-.enemy-hp{font-size:12px;color:var(--text3);}
-.init-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.init-pill{padding:4px 10px;border-radius:20px;font-family:var(--font-d);font-size:10px;letter-spacing:1px;transition:all 0.3s;}
-.init-pill.init-active{animation:initpulse 2s ease-in-out infinite;}
-@keyframes initpulse{0%,100%{box-shadow:0 0 0 2px rgba(191,161,90,0.9),0 0 12px rgba(191,161,90,0.4);}50%{box-shadow:0 0 0 3px rgba(191,161,90,0.7),0 0 20px rgba(191,161,90,0.6);}}
-
-/* ── CHRONICLE CARD ── */
-.chronicle-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;max-width:840px;width:100%;margin:0 auto;}
-.story-reveal{animation:stormReveal 0.4s ease-out;}
-.glyph-flare{animation:glyphFlare 0.6s ease-in-out;}
-.chronicle-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
-
-/* Story text zone */
-.story-text{padding:20px;font-size:22px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text);line-height:1.9;min-height:80px;}
-
-/* Event badges */
-.event-badge{display:inline-block;font-family:var(--font-d);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
-.badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
-.badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-.badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
-.gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;}
-
-/* NPC / player log entries */
-.entry-player{font-size:16px;font-family:'Times New Roman',Times,serif;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
-.entry-pname{font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
-.entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 20px;}
-
-/* ── BOTTOM ZONE (unified) ── */
-.bottom-zone{border-top:1px solid var(--border);}
-
-/* Loading state */
-#bottom-loading{display:none;padding:2.5rem;text-align:center;}
-.loading-text{font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
-.pulse-row{display:flex;justify-content:center;gap:8px;}
-.pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
-@keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
-@keyframes hpDrain{0%{width:var(--hp-from);}100%{width:var(--hp-to);}}
-@keyframes dmgFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
-@keyframes healFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
-@keyframes cardShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
-@keyframes cardHealShimmer{0%{box-shadow:0 0 0 0 rgba(26,107,82,0);}40%{box-shadow:0 0 0 4px rgba(26,107,82,0.5),0 0 16px rgba(26,107,82,0.25);}100%{box-shadow:0 0 0 0 rgba(26,107,82,0);}}
-@keyframes activePulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0);}50%{box-shadow:0 0 0 4px rgba(191,161,90,0.35),0 0 18px rgba(191,161,90,0.15);}}
-@keyframes stormReveal{0%{opacity:0;transform:translateY(6px);}100%{opacity:1;transform:translateY(0);}}
-@keyframes glyphFlare{0%,100%{color:var(--amber);text-shadow:none;}50%{color:#fff9e6;text-shadow:0 0 24px rgba(255,249,200,0.8),0 0 48px rgba(191,161,90,0.6);}}
-@keyframes sprenFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
-@keyframes patternSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-@keyframes vinePulse{0%,100%{d:path('M8 20 Q12 12 16 8 Q18 5 20 8');}50%{d:path('M8 20 Q10 10 14 6 Q16 3 18 6');}}
-@keyframes starGlow{0%,100%{opacity:0.5;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}
-@keyframes emberFlicker{0%,100%{opacity:0.3;transform:scale(0.8) translateY(0);}33%{opacity:1;transform:scale(1.1) translateY(-2px);}66%{opacity:0.6;transform:scale(0.9) translateY(-1px);}}
-@keyframes ribbonFlow{0%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}33%{d:path('M4 20 Q10 16 14 10 Q16 7 20 10');}66%{d:path('M4 20 Q6 12 10 10 Q15 8 20 12');}100%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}}
-@keyframes parallaxDrift{0%,100%{background-position:50% 50%;}50%{background-position:52% 48%;}}
-
-/* Human turn — choices + act button */
-#bottom-human{display:none;padding:18px 20px;}
-.dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-d);letter-spacing:1px;padding:4px 0;min-height:20px;margin-bottom:8px;}
-.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;cursor:pointer;text-align:left;color:var(--text);font-family:'Times New Roman',Times,serif;font-size:18px;line-height:1.6;transition:border-color 0.15s,background 0.15s;}
-.achoice:hover{border-color:var(--border3);background:var(--bg4);}
-.achoice.sel{border-color:var(--gold-mid);background:rgba(191,161,90,0.12);color:var(--gold-bright);}
-.achoice-num{font-family:var(--font-d);font-size:10px;color:var(--amber-dim);display:block;margin-bottom:4px;letter-spacing:1px;}
-.custom-row{display:flex;gap:10px;margin-bottom:14px;}
-.custom-in{flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:16px;outline:none;transition:border-color 0.2s;}
-.custom-in:focus{border-color:var(--amber);}
-.act-row{display:flex;justify-content:flex-end;align-items:center;gap:12px;}
-.btn-act{display:inline-flex;align-items:center;padding:13px 36px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-d);font-size:16px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
-.err{font-size:14px;color:var(--coral2);font-style:italic;}
-
-/* Continue state */
-#bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-@media(max-width:640px){
-  #bottom-human{display:block!important;}
-  #bottom-continue.active{position:sticky;bottom:0;background:var(--bg2);border-top:2px solid var(--amber-dim);z-index:20;padding:14px 16px;display:flex!important;justify-content:space-between;align-items:center;gap:10px;}
-  #bottom-continue .continue-hint{font-size:11px;}
-  #bottom-continue .btn-continue{padding:12px 24px;font-size:14px;min-width:130px;text-align:center;justify-content:center;}
-  #bottom-human .act-row{position:sticky;bottom:0;background:var(--bg2);padding:12px 16px;margin:0 -18px -18px;border-top:2px solid var(--amber-dim);}
-  .btn-act{width:100%;justify-content:center;padding:14px;}
-}
-.continue-hint{font-family:var(--font-d);font-size:12px;letter-spacing:1px;color:var(--text5);font-style:italic;}
-.btn-continue{display:inline-flex;align-items:center;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-d);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-continue:hover{background:rgba(191,161,90,0.18);}
-.btn-continue:disabled{opacity:0.28;cursor:not-allowed;border-color:var(--border2);color:var(--text4);}
-
-/* Waiting state */
-#bottom-waiting{display:none;padding:16px 20px;text-align:center;}
-.waiting-msg{font-family:var(--font-d);font-size:13px;letter-spacing:1px;color:var(--text5);}
-
-
-
-/* ── CHARACTER SHEET ── */
-.sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
-.sheet-toggle:hover{color:var(--text3);}
-.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;margin-top:10px;}
-.sheet-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:16px;}
-.sheet-row:last-child{border-bottom:none;}
-.sheet-lbl{color:var(--gold-mid);}
-.sheet-val{font-weight:600;color:var(--text);}
-.abils{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
-.abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-
-/* ── AUDIO BAR ── */
-.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;opacity:0.15;transition:opacity 0.25s ease;}
-.audio-bar:hover{opacity:1;}
-.audio-bar.audio-active{opacity:0.85;}
-@media(max-width:640px){.audio-bar{display:none!important;}.desktop-only{display:none!important;}}
-.audio-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:0;}
-.audio-btn:hover{color:var(--amber2);}
-.audio-label{font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);}
-.vol-slider{width:60px;accent-color:var(--amber);}
-
-/* ── PRINT ── */
-#print-header{display:none;}
-@media print{
-  body{background:#fff!important;color:#111!important;font-size:12pt;}
-  .party-strip,.bottom-zone,.sheet-toggle,.sheet-panel,#enemy-panel,#initiative-panel,.prog-wrap,.turn-pill,.audio-bar,#export-btn,#export-btn-wrap,#thinking-bar{display:none!important;}
-  .game-top{border-bottom:1px solid #ccc;padding:10px 0;margin-bottom:16px;}
-  .game-logo{font-size:16pt;font-weight:bold;}
-  #lang-toggle{display:none!important;}
-  .chronicle-card{border:none;}
-  .story-text{font-size:12pt;color:#111!important;}
-  #print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #111;}
-}
-
-/* ── MOBILE ── */
-@media(max-width:640px){
-  .class-grid,.action-choices{grid-template-columns:1fr;}
-  .slots-grid{grid-template-columns:1fr!important;}
-  .party-strip{flex-direction:column;}
-  .ppip{min-width:unset;width:100%;}
-  .game-body{padding:12px;}
-  html,body{font-size:16px;}
-  .story-text{font-size:18px;}
-  .achoice{font-size:16px;}
-  .title-h1{font-size:26px;letter-spacing:2px;}
-  .btn{padding:11px 20px;font-size:15px;}
-  .camp-grid{grid-template-columns:1fr;}
-}
-@media(max-width:400px){
-  .title-glyph{font-size:60px;}
-  .story-text{font-size:16px;}
-}
-</style>
-</head>
-<body>
-
-<!-- ══ CAMPAIGN SCREEN ══ -->
-<div id="s-campaign" class="screen active">
-  <div style="position:absolute;top:16px;right:16px;">
-    <button id="lang-toggle-camp" onclick="toggleLang()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);">🌐 EN</button>
-  </div>
-  <div style="font-size:60px;color:var(--amber);font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;">⟁</div>
-  <h1 class="title-h1">Stormlight Chronicles</h1>
-  <p class="title-h2"><span data-tr>Choose Your Adventure</span></p>
-  <div id="thai-banner" style="display:none;margin-top:8px;padding:6px 16px;background:rgba(191,161,90,0.1);border:1px solid var(--amber-dim);border-radius:20px;font-size:13px;color:var(--amber2);font-family:var(--font-d);letter-spacing:1px;">
-    🌐 โหมดภาษาไทย — เนื้อเรื่องจะแปลเป็นภาษาไทย
-  </div>
-  <div class="title-line"></div>
-  <p class="slots-label"><span data-tr>Your Campaigns</span></p>
-  <div class="camp-grid" id="camp-grid"></div>
-  <div id="new-camp-modal">
-    <div style="font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:12px;"><span data-tr>Name Your Campaign</span></div>
-    <input id="camp-name-input" class="form-in" type="text" maxlength="48" placeholder="e.g. The Everstorm Accord, Kaladin's Oath..." style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')confirmNewCampaign()"/>
-    <div style="font-size:13px;color:var(--text5);font-style:italic;margin-bottom:14px;"><span data-tr>This name appears on your campaign card and in the story export.</span></div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-sm" onclick="cancelNewCampaign()"><span data-tr>← Cancel</span></button>
-      <button class="btn btn-gold btn-sm" onclick="confirmNewCampaign()"><span data-tr>Begin Campaign →</span></button>
-    </div>
-    <div id="new-camp-err" class="err" style="display:none;margin-top:6px;"></div>
-  </div>
-  <div id="camp-status" style="font-size:14px;color:var(--text4);font-style:italic;min-height:20px;margin-top:12px;"></div>
-  <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;">
-    <div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text5);text-transform:uppercase;margin-bottom:10px;"><span data-tr>Help Keep the Stormfather Alive</span></div>
-    <a href="https://venmo.com/u/goretusker" target="_blank" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #008CFF;border-radius:24px;background:rgba(0,140,255,0.07);text-decoration:none;transition:background 0.15s;margin-bottom:6px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#008CFF"/><path d="M17.5 5.5C17.9 6.3 18.1 7.1 18.1 8.2C18.1 11.5 15.2 15.8 12.8 18.5H7.2L5 6.2L10 5.7L11.1 13.4C12.2 11.5 13.6 8.5 13.6 6.5C13.6 5.4 13.4 4.6 13 4L17.5 5.5Z" fill="white"/></svg>
-      <span style="font-family:var(--font-d);font-size:14px;color:#008CFF;letter-spacing:1px;">Venmo &middot; @goretusker</span>
-    </a>
-    <div style="font-size:12px;color:var(--text4);margin-bottom:10px;">(XXX) XXX - 6991</div><br/>
-    <a href="https://cash.app/%24rurich31" target="_blank" id="cashlink" style="display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #00D632;border-radius:24px;background:rgba(0,214,50,0.07);text-decoration:none;transition:background 0.15s;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#00D632"/><path d="M15.5 8.5C15.5 8.5 14.5 7.5 12 7.5C9.5 7.5 8 9 8 10.5C8 12 9 12.8 11 13.3L13 13.8C14.5 14.2 15.5 15 15.5 16.5C15.5 18 14 19.5 11.5 19.5C9 19.5 7.5 18 7.5 18" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="6" x2="12" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="19.5" x2="12" y2="21.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span style="font-family:var(--font-d);font-size:14px;color:#00D632;letter-spacing:1px;">Donate &middot; &#36;rurich31</span>
-    </a>
-    <div style="font-size:12px;color:var(--text5);margin-top:8px;font-style:italic;">API costs ~$0.003 per turn &middot; Every bit helps</div>
-  </div>
-</div>
-
-<!-- ══ TITLE SCREEN ══ -->
-<div id="s-title" class="screen">
-  <div class="title-glyph">⟁</div>
-  <h1 class="title-h1">Stormlight Chronicles</h1>
-  <p class="title-h2" id="title-sub"><span data-tr>A Saga of the Shattered Plains</span></p>
-  <div class="title-line"></div>
-  <p class="title-quote">"You must find the most important words a man can say."<cite>— The Way of Kings</cite></p>
-  <div class="psz-wrap">
-    <span class="psz-label"><span data-tr>Party Size</span></span>
-    <div class="psz-row" id="psz-row"></div>
-    <div style="font-size:13px;color:var(--text5);margin-top:8px;font-style:italic;"><span data-tr>Unfilled slots become AI companions</span></div>
-  </div>
-  <p class="slots-label"><span data-tr>Radiant Company</span></p>
-  <div class="slots-grid" id="slots-grid"></div>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-    <button class="btn btn-gold" onclick="onEnter()"><span data-tr>⟁ Enter the Storm</span></button>
-    <button class="btn btn-sm btn-danger" onclick="onReset()"><span data-tr>Reset Campaign</span></button>
-  </div>
-  <div id="title-status" style="font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:22px;"></div>
-</div>
-
-<!-- ══ CREATE SCREEN ══ -->
-<div id="s-create" class="screen">
-  <div class="create-wrap">
     <h2 class="screen-title"><span data-tr>Forge Your Radiant</span></h2>
     <p class="screen-sub"><span data-tr>Speak your name. Choose your Order. The Stormfather is watching.</span></p>
     <div class="form-block">
@@ -1078,10 +496,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 <div id="s-game" class="screen">
   <div class="game-top">
     <span class="game-logo">⟁ Stormlight Chronicles</span>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="voice-btn" onclick="toggleVoice()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:14px;" title="Read story aloud">🔈</button>
       <button id="lang-toggle" onclick="toggleLang()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;cursor:pointer;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);white-space:nowrap;">🌐 EN</button>
       <span class="turn-pill" id="turn-pill">Loading...</span>
-      <button id="skip-top-btn" onclick="handleSkipTop()" style="display:none;background:transparent;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);transition:all 0.15s;" title="Skip current turn">⏭</button>
     </div>
   </div>
   <!-- Thinking bar — shows at top when GM is generating -->
@@ -1240,8 +658,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <span class="audio-label" id="audio-label">OFF</span>
   <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)"/>
   <div style="width:1px;height:16px;background:var(--border2);margin:0 2px;"></div>
-  <button id="voice-btn-bar" onclick="toggleVoice()" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 2px;" title="Read aloud (manual)">🔈</button>
-  <button id="autospeak-btn" onclick="toggleAutoSpeak()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:3px 10px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);transition:all 0.15s;" title="Toggle continuous read-aloud">AUTO</button>
+  <button id="voice-btn-bar" onclick="toggleVoice()" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 2px;" title="Read story aloud">🔈</button>
   <select id="voice-select" onchange="setKokoroVoice(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--font-d);letter-spacing:1px;">
     <option value="am_michael">♂ Michael</option>
     <option value="am_adam">♂ Adam</option>
@@ -1305,49 +722,6 @@ const ALL_LOCS=[...ROSHAR_P,...ROSHAR_O,...ROSHAR_S,...ROSHAR_L];
 const BASE_ACTS=[{num:1,tag:'Act I',start:0,end:59},{num:2,tag:'Act II',start:60,end:119},{num:3,tag:'Act III',start:120,end:179}];
 let ACTS=BASE_ACTS.map(a=>({...a,name:a.tag,location:'Roshar'}));
 const BLADE_TIERS=['Nascent','Bonded','Ancient','Living','Divine'];
-
-// ══ HERO ROLES ══
-const HERO_ROLES=[
-  {id:'soldier',name:'Alethi Soldier',icon:'⚔',desc:'Trained in the Kings army. Disciplined, lethal, reliable.',bonus:{str:2,end:1},ideal:'Strength before weakness.',color:'#c44a28'},
-  {id:'scholar',name:'Kharbranth Scholar',icon:'📜',desc:'Healer, historian, artificer. Knowledge is the sharpest weapon.',bonus:{int:2,wis:1},ideal:'Knowledge before ignorance.',color:'#5a9e8f'},
-  {id:'merchant',name:'Thaylen Merchant',icon:'💎',desc:'Resourceful, well-connected, never without a plan.',bonus:{cha:2,int:1},ideal:'Profit before principle.',color:'#BA7517'},
-  {id:'horneater',name:'Horneater',icon:'🏔',desc:'Peaks-born. Drinks Horneater white for breakfast. Immune to most things.',bonus:{end:3},ideal:'The Peaks remember.',color:'#888'},
-  {id:'herdazian',name:'Herdazian Fighter',icon:'🗡',desc:'Street-smart guerrilla. Underestimated, always dangerous.',bonus:{dex:2,str:1},ideal:'Survive. Then win.',color:'#7a6e5a'},
-  {id:'shin',name:'Shin Farmer',icon:'🌾',desc:'Deeply out of place. Confusingly wise. Everyone underestimates them.',bonus:{wis:2,cha:1},ideal:'The stone remembers.',color:'#8fa870'},
-  {id:'worldsinger',name:'Worldsinger',icon:'🎵',desc:'Storyteller, diplomat, keeper of memory. Words reshape reality.',bonus:{cha:3},ideal:'Every story matters.',color:'#9b7bb8'},
-  {id:'custom',name:'Custom Hero',icon:'✦',desc:'Write your own path. The world bends to those who refuse its labels.',bonus:{},ideal:'My own.',color:'#a09080'},
-];
-
-// ══ HERO WEAPONS ══
-const HERO_WEAPONS=[
-  {id:'sword',name:'Dueling Sword',type:'Blade',dmgBonus:{crit:3,hit:2,miss:0},desc:'Alethi noble training. Precise and lethal.',tiers:['Honed','Tempered','Master-forged','Named','Legendary']},
-  {id:'hammer',name:'War Hammer',type:'Blunt',dmgBonus:{crit:4,hit:2,miss:0},desc:'Breaks armor and morale equally.',tiers:['Weighted','Reinforced','Iron-bound','Legendary','Worldbreaker']},
-  {id:'spear',name:'Spear & Shield',type:'Polearm',dmgBonus:{crit:2,hit:2,miss:0},desc:'Disciplined, reliable. +1 defense each round.',tiers:['Sharpened','Balanced','Battle-tested','Named','Eternal Guard']},
-  {id:'bow',name:'Shortbow',type:'Ranged',dmgBonus:{crit:3,hit:1,miss:0},desc:'First strike advantage. Keeps distance.',tiers:['Strung tight','Balanced','Recurved','Hawkeye','Deadeye']},
-  {id:'knives',name:'Twin Knives',type:'Dual',dmgBonus:{crit:3,hit:2,miss:0},desc:'Unpredictable. Bonus on fumble recovery.',tiers:['Sharpened','Balanced','Paired','Shadow-swift','Ghost-edged']},
-  {id:'gauntlet',name:'Fabrial Gauntlet',type:'Artifabrian',dmgBonus:{crit:2,hit:2,miss:1},desc:'Scholar-built. Bonus to INT actions.',tiers:['Calibrated','Tuned','Refined','Masterwork','Transcendent']},
-  {id:'unarmed',name:'Bare Hands',type:'Unarmed',dmgBonus:{crit:2,hit:2,miss:0},desc:'Cannot be disarmed. +END bonus.',tiers:['Calloused','Hardened','Iron-fist','Horneater-trained','Unmovable']},
-  {id:'shardfork',name:'Shardfork',type:'Improvised',dmgBonus:{crit:5,hit:1,miss:0},desc:'Random chaos. Do not ask.',tiers:['Bent','Slightly less bent','Inexplicably sharp','Legendary','Unknowable']},
-];
-
-// Weapon name prefixes + suffixes for procedural naming
-const WEAPON_PREFIXES=['Iron','Ash','Silver','Copper','Bronze','Obsidian','Granite','Storm','Crest','Ember'];
-const WEAPON_SUFFIXES=['mark','fall','watch','hold','edge','strike','ward','crest','fang','point'];
-function genWeaponName(weaponId){
-  const pre=WEAPON_PREFIXES[Math.floor(Math.random()*WEAPON_PREFIXES.length)];
-  const suf=WEAPON_SUFFIXES[Math.floor(Math.random()*WEAPON_SUFFIXES.length)];
-  return pre+suf;
-}
-
-// State for the create screen
-let createStep=1; // 1=type, 2=class/role, 3=backstory, 4=weapon(hero only), 5=stats
-let isRadiant=true;
-let selRole=null;
-let selWeapon=null;
-let charOrigin='';
-let charMotivation='';
-let charBackstory='';
-let charAppearance='';
 
 // ══ OATH PROGRESSION ══
 const ORDER_OATHS={
@@ -1788,165 +1162,31 @@ function pickSlot(i){if(!gState||gState.players[i])return;mySlot=i;showScreen('c
 function setTitleStatus(m){const el=document.getElementById('title-status');if(el)el.textContent=m;}
 
 // ══ CHARACTER CREATION ══
-// ══ ENHANCED CREATOR ══
-function renderCreate(){
-  createStep=1;isRadiant=true;selRole=null;selWeapon=null;
-  charOrigin='';charMotivation='';charBackstory='';charAppearance='';
-  showCreateStep(1);
-  renderColors();renderClasses();renderRoles();renderWeapons();rollStats();
-  // Update submit button label based on type
-  updateCreateSubmitBtn();
-}
-
-function showCreateStep(step){
-  createStep=step;
-  ['s1','s2r','s2h','s3','s4'].forEach(id=>{
-    const el=document.getElementById('create-'+id);
-    if(el)el.style.display='none';
-  });
-  if(step===1)document.getElementById('create-s1').style.display='block';
-  else if(step===2&&isRadiant)document.getElementById('create-s2r').style.display='block';
-  else if(step===2&&!isRadiant)document.getElementById('create-s2h').style.display='block';
-  else if(step===3)document.getElementById('create-s3').style.display='block';
-  else if(step===4){
-    document.getElementById('create-s4').style.display='block';
-    document.getElementById('create-s4-weapon').style.display=isRadiant?'none':'block';
-    updateCreateSubmitBtn();
-  }
-  // Update step dots
-  [1,2,3,4].forEach(i=>{
-    const dot=document.getElementById('sdot-'+i);
-    if(dot)dot.className='step-dot'+(i<=step?' active':'');
-  });
-  if(lang==='th')setTimeout(applyThaiToPage,100);
-}
-
-function createNext(){
-  const err=document.getElementById('create-err');
-  if(err)err.style.display='none';
-  if(createStep===1){
-    // Validate type selected (isRadiant defaults true, fine)
-    showCreateStep(2);
-  } else if(createStep===2){
-    if(isRadiant&&!selClass){if(err){err.textContent='Choose your Order.';err.style.display='block';}return;}
-    if(!isRadiant&&!selRole){if(err){err.textContent='Choose your Role.';err.style.display='block';}return;}
-    showCreateStep(3);
-  } else if(createStep===3){
-    const name=document.getElementById('in-name').value.trim();
-    if(!name){if(err){err.textContent='Speak your name first.';err.style.display='block';}return;}
-    if(!selColor){if(err){err.textContent='Choose your color.';err.style.display='block';}return;}
-    charBackstory=document.getElementById('in-backstory').value.trim();
-    charAppearance=document.getElementById('in-appearance').value.trim();
-    showCreateStep(4);
-  }
-}
-
-function createBack(){
-  if(createStep>1)showCreateStep(createStep-1);
-}
-
-function updateCreateSubmitBtn(){
-  const btn=document.getElementById('create-submit-btn');
-  if(!btn)return;
-  btn.textContent=isRadiant?'Speak the First Oath →':'Enter the Storm →';
-}
-
-function pickCharType(radiant){
-  isRadiant=radiant;
-  document.getElementById('type-radiant').classList.toggle('sel',radiant);
-  document.getElementById('type-hero').classList.toggle('sel',!radiant);
-}
-
-function pickOrigin(btn,val){
-  document.querySelectorAll('.origin-btn').forEach(b=>{
-    if(b.closest('#origin-grid'))b.classList.remove('sel');
-  });
-  btn.classList.add('sel');
-  charOrigin=val;
-}
-
-function pickMotivation(btn,val){
-  document.querySelectorAll('.origin-btn').forEach(b=>{
-    if(b.closest('#motivation-grid'))b.classList.remove('sel');
-  });
-  btn.classList.add('sel');
-  charMotivation=val;
-}
-
+function renderCreate(){renderColors();renderClasses();rollStats();}
 function renderColors(){
   const taken=gState?gState.players.filter(Boolean).map(p=>p.color):[];
   document.getElementById('color-row').innerHTML=COLORS.map(c=>`<div class="cswatch${selColor===c.hex?' sel':''}" style="background:${c.hex};opacity:${taken.includes(c.hex)?0.2:1};" title="${c.name}" onclick="pickColor('${c.hex}',${taken.includes(c.hex)})"></div>`).join('');
 }
 function pickColor(h,t){if(t)return;selColor=h;renderColors();}
-
-function renderClasses(){
-  document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Spren: ${c.spren}</div><div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');
-}
+function renderClasses(){document.getElementById('class-grid').innerHTML=CLASSES.map(c=>`<div class="ccard${selClass&&selClass.id===c.id?' sel':''}" onclick="pickClass('${c.id}')"><div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.ideal}"</div><div class="ccard-desc">${c.desc}</div><div class="ccard-bonus">Spren: ${c.spren}</div><div class="ccard-bonus">Bonus: ${Object.entries(c.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')}</div></div>`).join('');}
 function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClasses();rollStats();}
-
-function renderRoles(){
-  const grid=document.getElementById('role-grid');
-  if(!grid)return;
-  grid.innerHTML=HERO_ROLES.map(r=>`<div class="ccard${selRole&&selRole.id===r.id?' sel':''}" onclick="pickRole('${r.id}')"><div class="ccard-name"><span style="margin-right:6px;">${r.icon}</span>${r.name}</div><div class="ccard-ideal">"${r.ideal}"</div><div class="ccard-desc">${r.desc}</div><div class="ccard-bonus">Bonus: ${Object.entries(r.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')||'Flexible'}</div></div>`).join('');
-}
-function pickRole(id){selRole=HERO_ROLES.find(r=>r.id===id);renderRoles();rollStats();}
-
-function renderWeapons(){
-  const grid=document.getElementById('weapon-grid');
-  if(!grid)return;
-  grid.innerHTML=HERO_WEAPONS.map(w=>`<div class="ccard${selWeapon&&selWeapon.id===w.id?' sel':''}" onclick="pickWeapon('${w.id}')"><div class="ccard-name">${w.name}</div><div class="ccard-ideal">${w.type}</div><div class="ccard-desc">${w.desc}</div><div class="ccard-bonus">DMG: Crit+${w.dmgBonus.crit} Hit+${w.dmgBonus.hit}</div></div>`).join('');
-}
-function pickWeapon(id){selWeapon=HERO_WEAPONS.find(w=>w.id===id);renderWeapons();}
-
-function rollStats(){
-  const bonus=isRadiant?(selClass?selClass.bonus:{}):(selRole?selRole.bonus:{});
-  const b={str:0,dex:0,int:0,wis:0,cha:0,end:0,...bonus};
-  rolledStats={};
-  STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));
-  renderStats(rolledStats);
-}
+function rollStats(){const b=selClass?selClass.bonus:{str:0,dex:0,int:0,wis:0,cha:0,end:0};rolledStats={};STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));renderStats(rolledStats);}
 function r4d6(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,b)=>a-b);return d.slice(1).reduce((a,v)=>a+v,0);}
 function modStr(v){const m=Math.floor((v-10)/2);return(m>=0?'+':'')+m;}
-function renderStats(s){
-  const flavors=['Blade Strength','Swiftness','Scholar Mind','Scout Eyes','Voice of Command','Endurance'];
-  document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox"><div class="sbox-name">${flavors[i]}</div><div class="sbox-val">${s[k]}</div><div class="sbox-mod">${modStr(s[k])}</div></div>`).join('');
-}
+function renderStats(s){document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox"><div class="sbox-name">${STAT_NAMES[i]}</div><div class="sbox-val">${s[k]}</div><div class="sbox-mod">${modStr(s[k])}</div></div>`).join('');}
 
 async function onCreateChar(){
   const name=document.getElementById('in-name').value.trim();
   const err=document.getElementById('create-err');
   if(!name){err.textContent='Speak your name first.';err.style.display='block';return;}
-  if(isRadiant&&!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
-  if(!isRadiant&&!selRole){err.textContent='Choose your Role.';err.style.display='block';return;}
-  if(!isRadiant&&!selWeapon){err.textContent='Choose your weapon.';err.style.display='block';return;}
+  if(!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
   if(!selColor){err.textContent='Choose your color.';err.style.display='block';return;}
   err.style.display='none';
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
   const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
-  charBackstory=document.getElementById('in-backstory').value.trim();
-  charAppearance=document.getElementById('in-appearance').value.trim();
-
-  if(isRadiant){
-    myChar={name,isRadiant:true,className:selClass.name,classId:selClass.id,
-      color:selColor,stats:rolledStats,hp,maxHp:hp,
-      abilities:selClass.abilities,spren:selClass.spren,
-      slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1,
-      origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
-  } else {
-    // Hero
-    const customWeaponName=document.getElementById('in-weapon-name').value.trim();
-    const weaponName=customWeaponName||genWeaponName(selWeapon.id)+' '+selWeapon.name;
-    myChar={name,isRadiant:false,className:selRole.name,classId:selRole.id,
-      roleId:selRole.id,roleName:selRole.name,
-      color:selColor,stats:rolledStats,hp,maxHp:hp,
-      abilities:[selWeapon.name],spren:null,
-      weapon:weaponName,weaponId:selWeapon.id,weaponLevel:1,
-      weaponData:selWeapon,
-      slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1,
-      origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
-  }
-  saveMyChar(myChar);
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1};
+  saveMyChar(myChar); // saves under charKey(mySlot)
   gState.players[mySlot]=myChar;
   await saveState(gState);
   showScreen('lobby');renderLobby();startLobbyPolling();
@@ -2070,7 +1310,7 @@ async function startCampaign(){
   const log=await loadLog(true);
   renderAll(log);
   // Small delay ensures DOM is painted and lastGM choices are available
-  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(autoSpeakStory,300);},150);
+  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(speakStory,300);},150);
 }
 // ══ WORLD MEMORY CONTEXT ══
 function getWorldMemoryContext(){
@@ -2122,7 +1362,7 @@ function openingPrompt(){
   const sz=gState.partySize||partySize;
   const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (NPC — acts via D4 dice, no AI decisions)':' (human player)'}`).join(', ');
   const a1=ACTS[0],a2=ACTS[1],a3=ACTS[2];
-  const gctx=getGenderContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
+  const gctx=getGenderContext();const wmctx=getWorldMemoryContext();
   return`You are the Game Master for a Cosmere DND-style RPG on Roshar (Way of Kings universe). 180-turn epic saga across 3 acts.
 
 ACTS: I (1-60): ${a1.location} | II (61-120): ${a2.location} | III (121-180): ${a3.location}
@@ -2362,78 +1602,6 @@ async function skipCombatTurn(playerName){
   if(allSubmitted)resolveRound();
 }
 
-// ══ SKIP BUTTON IN TOP BAR ══
-function handleSkipTop(){
-  if(!gState||!myChar)return;
-  const cur=gState.players&&gState.players[gState.turn];
-  if(!cur)return;
-  if(gState.combatMode){
-    const sz=gState.partySize||partySize;
-    if(isSelfTurn()||awayMode){
-      // It's our combat turn — skip it now
-      skipCombatTurn(myChar.name);
-      awayMode=false;
-    } else if(isHost()){
-      const notSubmitted=gState.players.slice(0,sz)
-        .filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name]))
-        .filter(p=>p.name!==myChar.name);
-      if(notSubmitted.length>0)skipCombatTurn(notSubmitted[0].name);
-    } else {
-      // Not our turn — arm away mode
-      awayMode=!awayMode;
-    }
-  } else {
-    if(isSelfTurn()){
-      // It's our turn right now — skip immediately
-      skipTurn(cur.name);
-      awayMode=false;
-    } else {
-      // Not our turn — toggle away mode (arms for when our turn comes)
-      awayMode=!awayMode;
-    }
-  }
-  renderSkipBtn();
-}
-
-function renderSkipBtn(){
-  const btn=document.getElementById('skip-top-btn');
-  if(!btn||!gState||!myChar)return;
-  const cur=gState.players&&gState.players[gState.turn];
-  if(!cur){btn.style.display='none';return;}
-  const mine=cur.name===myChar.name&&!cur.isNPC;
-
-  // Always show if there's something to do
-  btn.style.display='inline-flex';
-
-  if(awayMode){
-    // Away mode armed — show active state
-    btn.textContent='🟡 Away (armed)';
-    btn.style.borderColor='var(--amber)';
-    btn.style.color='var(--amber2)';
-    btn.style.background='rgba(191,161,90,0.1)';
-    btn.title='Away mode on — your next turn will auto-skip. Tap to cancel.';
-  } else if(mine){
-    // It's our turn right now
-    btn.textContent='⏭ Step away';
-    btn.style.borderColor='var(--border2)';
-    btn.style.color='var(--text4)';
-    btn.style.background='transparent';
-    btn.title='Skip your turn now';
-  } else if(!mine&&!cur.isNPC){
-    // Someone else's turn — offer to pre-arm
-    btn.textContent='⏭ Away next';
-    btn.style.borderColor='var(--border2)';
-    btn.style.color='var(--text4)';
-    btn.style.background='transparent';
-    btn.title='Auto-skip your next turn when it arrives';
-  } else if(isHost()&&cur.isNPC){
-    // NPC turn — host can skip anyone
-    btn.style.display='none';
-  } else {
-    btn.style.display='none';
-  }
-}
-
 // ══ RENDER PARTY STRIP ══
 function renderParty(){
   const s=document.getElementById('party-strip');if(!gState)return;
@@ -2452,7 +1620,6 @@ function renderParty(){
         ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} Oath ${p.oathStage||1}/5</div>`:''}
         ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
         ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade} T${p.bladeLevel||1}</div>`:''}
-      ${p.weapon&&!p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.weapon} T${p.weaponLevel||1}</div>`:''}
         ${p.shardplate?`<div class="ppip-tag" style="color:var(--gold);">⬛ Shardplate</div>`:''}
         ${(p.fragments||0)>0?`<div class="ppip-tag" style="color:var(--teal2);">✦ ${p.fragments} frags</div>`:''}
         <div class="hp-track"><div class="hp-fill" id="hp-fill-${p.name.replace(/\s/g,'_')}" style="width:${pct}%;background:${hpCol};"></div></div>
@@ -2537,16 +1704,7 @@ function setBottomFromState(log){
   const lastGM=(gState.lastGM)||[...log].reverse().find(e=>e.type==='gm');
   const choices=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:[];
 
-  if(mine){
-    // Auto-skip if away mode is armed
-    if(awayMode){
-      awayMode=false;
-      renderSkipBtn();
-      setTimeout(()=>skipTurn(myChar.name),200);
-      return;
-    }
-    setBottomReadGate(choices);
-  }
+  if(mine){setBottomReadGate(choices);}
   else if(npc){setBottomContinue('NPC turn — press Continue to advance');}
   else{setBottomWaiting(cur.name);}
 }
@@ -2605,9 +1763,18 @@ function setBottomWaiting(name){
   wait.style.display='block';
   const wm=document.getElementById('waiting-msg');
   wm.textContent=name?`Waiting for ${name}...`:'Waiting...';
-  // Remove inline skip — now handled by top bar button
+  // Add skip button for host (or self-skip)
   const existing=document.getElementById('skip-btn-wrap');
   if(existing)existing.remove();
+  if(name&&(isHost()||isSelfTurn())){
+    const div=document.createElement('div');
+    div.id='skip-btn-wrap';
+    div.style.cssText='margin-top:10px;';
+    const canSelfSkip=isSelfTurn();
+    const label=canSelfSkip?`⏭ Step away from my turn`:`⏭ Skip ${name}'s turn`;
+    div.innerHTML=`<button onclick="skipTurn('${name}')" style="background:transparent;border:1px solid var(--border2);border-radius:20px;padding:6px 16px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);transition:all 0.15s;" onmouseover="this.style.borderColor='var(--amber-dim)';this.style.color='var(--text3)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text4)'">${label}</button>`;
+    wait.appendChild(div);
+  }
 }
 
 function enableContinue(){
@@ -2698,7 +1865,7 @@ async function handleNPC(log){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
   // NPC chain stops here — user must press Continue to advance
   // setBottomFromState will show Continue button for next NPC turn
 }
@@ -2786,7 +1953,7 @@ async function onSubmitAction(){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,300);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,300);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
 }
 
 function getStat(a){
@@ -2861,7 +2028,7 @@ function turnPrompt(action,roll,sk,from){
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} Bond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
   const who=gState.players[from];const loc=act.location||act.name;
   const rd=roll>=18?'CRITICAL SUCCESS':roll>=14?'Strong success':roll>=10?'Partial success — complications':roll>=6?'Failure with consequences':'CRITICAL FAILURE — dramatic setback';
-  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
+  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();
   // Phase instruction — tells GM how close to combat we are
   const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
   const preCombatNow=gState.preCombatTriggered&&!gState.combatMode;
@@ -3023,19 +2190,6 @@ function getSprenMemoryContext(){
   });
   return lines.length?'\n\nSPREN MEMORIES (weave naturally into narration):\n'+lines.join('\\n'):'';
 }
-function getCharContext(){
-  // Compact backstory/identity context for the GM
-  if(!myChar)return'';
-  const parts=[];
-  if(myChar.origin)parts.push('Origin: '+myChar.origin);
-  if(myChar.motivation)parts.push('Driven by: '+myChar.motivation);
-  if(myChar.backstory&&myChar.backstory.trim())parts.push('Background: '+myChar.backstory.trim());
-  if(myChar.appearance&&myChar.appearance.trim())parts.push('Looks: '+myChar.appearance.trim());
-  if(!myChar.isRadiant&&myChar.roleName)parts.push('Role: '+myChar.roleName);
-  if(!myChar.isRadiant&&myChar.weapon)parts.push('Weapon: '+myChar.weapon);
-  return parts.length?'\n'+parts.join('. '):''
-}
-
 function getGenderContext(){
   if(!gState||!gState.players)return'';
   const sz=gState.partySize||partySize;
@@ -3070,7 +2224,6 @@ function renderPill(){
   const mine=myChar&&cur&&!cur.isNPC&&cur.name===myChar.name;
   pill.textContent=mine?'⟁ Your Turn':cur&&cur.isNPC?`${cur.name} acting...`:`Waiting for ${cur?cur.name:'...'}`;
   pill.className='turn-pill'+(mine?' yours':'');
-  renderSkipBtn();
 }
 
 // ══ CHARACTER SHEET ══
@@ -3275,7 +2428,7 @@ Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
   await saveState(gState);
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,400);},150);
 }
 
 // Show combat screen and initialize
@@ -3500,13 +2653,6 @@ function renderCombatActions(){
     html+=`<div class="combat-submitted">✓ ${p.name}: ready</div>`;
   });
 
-  // Auto-submit defend if away mode armed
-  if(iAmHuman&&!mySubmitted&&awayMode){
-    awayMode=false;
-    renderSkipBtn();
-    setTimeout(()=>skipCombatTurn(myChar.name),200);
-    return;
-  }
   if(iAmHuman&&!mySubmitted){
     const choices=buildCombatChoices(myChar,gState);
     html+=`<div class="combat-player-label">⟁ Your Action — ${myChar.name}</div>`;
@@ -3809,7 +2955,7 @@ async function exitCombat(won){
   await callGM(combatAftermathPrompt(won));
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
   }catch(e){
     console.error('exitCombat failed:',e);
     showScreen('game');showGameScreen();
@@ -3820,7 +2966,7 @@ function combatAftermathPrompt(won){
   const sz=gState.partySize||partySize;
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
   const loc=getAct(gState.totalMoves||0).location||'the field';
-  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
+  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();
   return`Cosmere RPG GM. Post-combat scene. Location: ${loc}.
 Party: ${party}
 Combat result: ${won?'VICTORY — enemies defeated':'DEFEAT — party was downed but survived'}${gctx}${mctx}
@@ -3858,8 +3004,6 @@ function speakFromElement(text){
 // Fallback: Web Speech API if Kokoro fails
 
 let voiceActive=false,voiceEnabled=true,currentUtterance=null;
-let autoSpeak=false; // continuous TTS — off by default, user toggles on
-let awayMode=false;  // pre-armed step-away — auto-skips when your turn arrives
 let kokoroTTS=null,kokoroLoading=false,kokoroReady=false,kokoroBlobURL=null;
 const KOKORO_VOICE='am_michael'; // Deep US male — best for dramatic narration
 // Alternatives: 'bf_emma' (British female), 'am_adam' (US male), 'af_heart' (US female)
@@ -3960,11 +3104,6 @@ function speakWithWebSpeech(text){
   else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;go();};}
 }
 
-// Auto-speak only fires if the continuous TTS toggle is ON
-function autoSpeakStory(){
-  if(autoSpeak)speakStory();
-}
-
 async function speakStory(){
   if(!voiceEnabled||isMobile())return;
   const el=document.getElementById('story-text');
@@ -4015,38 +3154,15 @@ async function toggleVoice(){
     loadKokoro().then(()=>{
       // Restart with Kokoro quality if still on same beat
       if(voiceActive)stopSpeaking();
-      setTimeout(autoSpeakStory,200);
+      setTimeout(speakStory,200);
     }).catch(()=>{});
-  }
-}
-
-function toggleAutoSpeak(){
-  autoSpeak=!autoSpeak;
-  localStorage.setItem('sc_autospeak', autoSpeak?'1':'0');
-  updateAutoSpeakBtn();
-  if(!autoSpeak)stopSpeaking(); // stop if turning off
-}
-
-function updateAutoSpeakBtn(){
-  const btn=document.getElementById('autospeak-btn');
-  if(!btn)return;
-  if(autoSpeak){
-    btn.textContent='AUTO ON';
-    btn.style.color='var(--amber2)';
-    btn.style.borderColor='var(--amber-dim)';
-    btn.style.background='rgba(191,161,90,0.1)';
-  } else {
-    btn.textContent='AUTO';
-    btn.style.color='var(--text4)';
-    btn.style.borderColor='var(--border2)';
-    btn.style.background='var(--bg3)';
   }
 }
 
 function updateVoiceBtn(){
   const label=voiceActive?'🔊':kokoroLoading?'⏳':'🔈';
   const title=voiceActive?'Stop reading':kokoroReady?'Read story (Kokoro Neural)':'Read story aloud';
-  ['voice-btn-bar'].forEach(id=>{
+  ['voice-btn','voice-btn-bar','voice-btn-combat'].forEach(id=>{
     const b=document.getElementById(id);
     if(b){b.textContent=label;b.title=title;}
   });
@@ -4066,7 +3182,7 @@ function setKokoroVoice(voiceVal){
   };
   window._webSpeechPreference=(webSpeechMap[voiceVal]||'Daniel,Aaron,Alex').split(',');
   // If currently speaking, restart with new voice
-  if(voiceActive){stopSpeaking();setTimeout(autoSpeakStory,100);}
+  if(voiceActive){stopSpeaking();setTimeout(speakStory,100);}
 }
 
 // Load saved voice preference
