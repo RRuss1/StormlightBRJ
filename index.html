@@ -1539,52 +1539,72 @@ function renderStats(s){
 async function onCreateChar(){
   const err=document.getElementById('create-err');
   try{
-  const name=document.getElementById('in-name').value.trim();
-  if(!name){err.textContent='Speak your name first.';err.style.display='block';return;}
-  if(isRadiant&&!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
-  if(!isRadiant&&!selRole){err.textContent='Choose your Role.';err.style.display='block';return;}
-  if(!isRadiant&&!selWeapon){err.textContent='Choose your weapon.';err.style.display='block';return;}
-  if(!selColor){err.textContent='Choose your color.';err.style.display='block';return;}
-  err.style.display='none';
-  if(!rolledStats)rollStats();
-  if(!rolledStats||!rolledStats.end)rollStats();
-  const hp=10+(rolledStats.end||10);
-  const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
-  charBackstory=document.getElementById('in-backstory').value.trim();
-  charAppearance=document.getElementById('in-appearance').value.trim();
+    // ── Gather all form values safely ──
+    const nameEl=document.getElementById('in-name');
+    const name=(nameEl?nameEl.value:'').trim();
+    const genderEl=document.querySelector('input[name="gender"]:checked');
+    const gender=genderEl?genderEl.value:'he/him';
+    const backstoryEl=document.getElementById('in-backstory');
+    const appearEl=document.getElementById('in-appearance');
+    charBackstory=backstoryEl?backstoryEl.value.trim():charBackstory||'';
+    charAppearance=appearEl?appearEl.value.trim():charAppearance||'';
 
-  if(isRadiant){
-    myChar={name,isRadiant:true,className:selClass.name,classId:selClass.id,
-      color:selColor,stats:rolledStats,hp,maxHp:hp,
-      abilities:selClass.abilities,spren:selClass.spren,
-      slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1,
-      origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
-  } else {
-    const customWeaponName=document.getElementById('in-weapon-name').value.trim();
-    const weaponName=customWeaponName||genWeaponName(selWeapon.id)+' '+selWeapon.name;
-    myChar={name,isRadiant:false,className:selRole.name,classId:selRole.id,
-      roleId:selRole.id,roleName:selRole.name,
-      color:selColor,stats:rolledStats,hp,maxHp:hp,
-      abilities:[selWeapon.name],spren:null,
-      weapon:weaponName,weaponId:selWeapon.id,weaponLevel:1,
-      weaponData:selWeapon,
-      slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1,
-      origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
-  }
-  saveMyChar(myChar);
-  if(mySlot===null||mySlot===undefined){
-    if(!gState.players)gState.players=new Array(partySize).fill(null);
-    mySlot=gState.players.findIndex(p=>!p||p.isPlaceholder);
-    if(mySlot===-1)mySlot=0;
-    myChar.slot=mySlot;
-  }
-  if(!gState.players)gState.players=new Array(partySize).fill(null);
-  gState.players[mySlot]=myChar;
-  await saveState(gState);
-  showScreen('lobby');renderLobby();startLobbyPolling();
+    // ── Validate ──
+    if(!name){err.textContent='Enter your name first.';err.style.display='block';return;}
+    if(isRadiant&&!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
+    if(!isRadiant&&!selRole){err.textContent='Choose your Role.';err.style.display='block';return;}
+    if(!isRadiant&&!selWeapon){err.textContent='Choose your weapon.';err.style.display='block';return;}
+    if(!selColor){err.textContent='Choose a color.';err.style.display='block';return;}
+    err.style.display='none';
+
+    // ── Stats — always roll fresh if missing or incomplete ──
+    if(!rolledStats||!rolledStats.str||!rolledStats.end)rollStats();
+    const stats=rolledStats||{str:12,dex:12,int:12,wis:12,cha:12,end:12};
+    const hp=10+(stats.end||10);
+
+    // ── Build character ──
+    const base={name,color:selColor,stats,hp,maxHp:hp,slot:mySlot,
+      isNPC:false,campaignId,gender,fragments:0,oathStage:1,
+      origin:charOrigin||'',motivation:charMotivation||'',
+      backstory:charBackstory,appearance:charAppearance};
+
+    if(isRadiant){
+      myChar={...base,isRadiant:true,
+        className:selClass.name,classId:selClass.id,
+        abilities:selClass.abilities,spren:selClass.spren};
+    } else {
+      const wnEl=document.getElementById('in-weapon-name');
+      const customName=wnEl?wnEl.value.trim():'';
+      const weaponName=customName||(genWeaponName(selWeapon.id)+' '+selWeapon.name);
+      myChar={...base,isRadiant:false,
+        className:selRole.name,classId:selRole.id,
+        roleId:selRole.id,roleName:selRole.name,
+        abilities:[selWeapon.name],spren:null,
+        weapon:weaponName,weaponId:selWeapon.id,weaponLevel:1,
+        weaponData:selWeapon};
+    }
+
+    // ── Resolve slot ──
+    if(mySlot===null||mySlot===undefined){
+      if(!gState||!gState.players)await reserveSlot(0);
+      else{
+        const idx=gState.players.findIndex(p=>!p||p.isPlaceholder);
+        mySlot=idx>=0?idx:0;
+      }
+      myChar.slot=mySlot;
+    }
+
+    // ── Save ──
+    if(!gState)throw new Error('No campaign state loaded. Try refreshing.');
+    if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
+    gState.players[mySlot]=myChar;
+    saveMyChar(myChar);
+    await saveState(gState);
+    showScreen('lobby');renderLobby();startLobbyPolling();
+
   }catch(e){
     console.error('onCreateChar failed:',e);
-    if(err){err.textContent='Something went wrong: '+e.message;err.style.display='block';}
+    if(err){err.textContent='Error: '+e.message;err.style.display='block';}
   }
 }
 
