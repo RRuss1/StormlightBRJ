@@ -821,12 +821,13 @@ const COMBAT_BEATS_MIN=3, COMBAT_BEATS_MAX=8;
 // Heal amounts by bond stage (0-4) and class
 function getHealAmount(player, stageOverride){
   const stage=stageOverride!=null?stageOverride:getSprenStage(gState&&gState.totalMoves||0);
-  const base=(stage+1)*2; // 2,4,6,8,10
-  if(player.classId==='edgedancer')return Math.round(base*1.7); // 3,7,10,14,17
-  if(player.classId==='bondsmith')return null; // party heal handled separately
+  const base=(stage+2)*3; // 9,12,15,18,21 — meaningful healing
+  if(player.classId==='edgedancer')return Math.round(base*1.8); // 16,22,27,32,38
+  if(player.classId==='bondsmith')return null;
+  if(player.shardplate)return Math.round(base*1.2); // Shardplate wearers channel more
   return base;
 }
-function getBondsmitnPartyHeal(stage){return Math.max(1,Math.floor(stage*0.7+1));} // 1,1,2,2,3
+function getBondsmitnPartyHeal(stage){return Math.max(2,Math.floor(stage*1.5+2));} // 2,3,5,7,9
 function getReviveCost(stage){return Math.max(0,3-stage);} // 3,2,1,0,0 fragments
 function getReviveHP(stage){return Math.max(1,stage*2);} // 0,2,4,6,8 → capped at 1 min
 
@@ -1953,7 +1954,17 @@ async function onSubmitAction(){
   setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(speakStory,300);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
 }
 
-function getStat(a){a=a.toLowerCase();if(/attack|fight|strike|slash|charge/.test(a))return'str';if(/run|dodge|leap|fly|sneak/.test(a))return'dex';if(/magic|soulcast|illusion|lash|stormlight/.test(a))return'int';if(/search|detect|sense|notice|examine/.test(a))return'wis';if(/persuade|talk|convince|negotiate|threaten/.test(a))return'cha';return'end';}
+function getStat(a){
+  a=a.toLowerCase();
+  if(/attack|fight|strike|slash|charge|hit|smash|stab|cut|kill|destroy/.test(a))return'str';
+  if(/run|dodge|leap|fly|sneak|dash|tumble|escape|evade|sprint|jump/.test(a))return'dex';
+  if(/magic|soulcast|illusion|lash|stormlight|surge|transform|summon|cast|conjure|transmute/.test(a))return'int';
+  if(/search|detect|sense|notice|examine|investigate|study|read|perceive|watch|scout/.test(a))return'wis';
+  if(/persuade|talk|convince|negotiate|threaten|bluff|charm|intimidate|deceive|lie/.test(a))return'cha';
+  if(/heal|regrow|mend|restore|tend|bandage|revive|cure/.test(a))return'wis';
+  if(/fart|trip|stumble|fall|bump|accident/.test(a))return'end'; // comic relief still gets a roll
+  return'end';
+}
 
 // ══ GM CALL ══
 async function callGM(prompt){
@@ -2077,13 +2088,16 @@ function rollInitiative(st){
 }
 function renderEnemies(){
   const p=document.getElementById('enemy-panel');const el=document.getElementById('enemy-list');if(!p||!el||!gState)return;
+  // Only show in game screen if old combat system active (legacy) — new combat uses s-combat screen
+  if(gState.combatMode){p.style.display='none';return;}
   const living=(gState.enemies||[]).filter(e=>e.hp>0);
   p.style.display=living.length?'block':'none';
   el.innerHTML=living.map(e=>{const pct=Math.round((e.hp/e.maxHp)*100);const col=pct>60?'#c44a28':pct>30?'#BA7517':'#888';return`<div class="enemy-card"><div class="enemy-name">${e.name}</div><div class="enemy-hp">${e.hp}/${e.maxHp} HP · ${e.type}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width 0.4s;"></div></div></div>`;}).join('');
 }
 function renderInitiativeOrder(){
   const p=document.getElementById('initiative-panel');if(!p||!gState)return;
-  if(!gState.combatActive||!(gState.combatOrder||[]).length){p.style.display='none';return;}
+  // Hide in exploration — only show if old legacy combat is active
+  if(gState.combatMode||!gState.combatActive||!(gState.combatOrder||[]).length){p.style.display='none';return;}
   p.style.display='block';
   document.getElementById('init-round-label').textContent=`⚔ Round ${gState.combatRound||1} — Initiative`;
   const cur=gState.players&&gState.players[gState.turn];
@@ -2639,8 +2653,9 @@ function renderCombatActions(){
       const tag=m?m[1]:'';
       const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':'var(--coral2)';
       const tagBadge=tag?'<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>':'';
-      const safeDisplay=display.replace(/`/g,"'").replace(/"/g,'&quot;');
-      return'<button class="achoice" onclick="selectCombatAction(this,`'+safeDisplay+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
+      // Pass FULL original choice (with [HEAL]/[ATTACK]/[DEFEND] tag) so resolveRound can detect type
+      const safeOrig=ch.replace(/`/g,"'").replace(/"/g,'&quot;');
+      return'<button class="achoice" onclick="selectCombatAction(this,`'+safeOrig+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
     }).join('');
     html+=`<div class="action-choices" style="margin-bottom:12px;">${choiceHTML}</div>`;
     html+=`<div class="custom-row"><input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action..." maxlength="200"/></div>`;
@@ -2678,7 +2693,15 @@ function selectCombatAction(btn,txt){
 
 async function submitCombatAction(){
   const custom=document.getElementById('combat-custom-in');
-  const action=custom&&custom.value.trim()||combatSelectedAction;
+  let action=custom&&custom.value.trim()||combatSelectedAction;
+  if(!action||!myChar)return;
+  // If custom text with no tag, auto-detect tag from keywords
+  if(custom&&custom.value.trim()&&!/\[(HEAL|ATTACK|DEFEND)\]/.test(action)){
+    const lower=action.toLowerCase();
+    if(/heal|mend|regrow|restore|revive|tend|bandage/.test(lower))action='[HEAL] '+action;
+    else if(/defend|block|shield|protect|brace|guard|dodge/.test(lower))action='[DEFEND] '+action;
+    else action='[ATTACK] '+action;
+  }
   if(!action||!myChar)return;
   if(!gState.pendingActions)gState.pendingActions={};
   gState.pendingActions[myChar.name]=action;
@@ -2906,6 +2929,9 @@ async function exitCombat(won){
   gState.players.slice(0,sz).filter(p=>p&&p.downed).forEach(p=>{p.downed=false;p.hp=1;});
   gState.combatMode=false;
   gState.combatPhase=null;
+  gState.enemies=[];   // clear legacy enemy array
+  gState.combatActive=false;
+  gState.combatOrder=[];
   gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
   gState.beatsSinceLastCombat=0;
   gState.preCombatTriggered=false;
