@@ -1660,17 +1660,17 @@ function renderCampaigns(camps){
     const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
     return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')">
       <button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>
-      <div class="camp-num">${cam.id.replace('Campaign','Campaign ')}</div>
-      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id.replace('Campaign','Campaign ')}</div>
+      <div class="camp-num">${cam.id.startsWith('Campaign_')?'Campaign':cam.id.replace('Campaign','Campaign ')}</div>
+      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id}</div>
       <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+moves+'/180':'Awaiting Radiants'}</div>
       <div class="camp-meta">${players}</div>
       <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
     </div>`;
-  }).join('')+`<div class="camp-card new-camp" onclick="promptNewCampaign(${next})"><div class="camp-new-icon">+</div><div class="camp-new-txt">New Campaign ${next}</div></div>`;
+  }).join('')+`<div class="camp-card new-camp" onclick="promptNewCampaign()"><div class="camp-new-icon">+</div><div class="camp-new-txt">New Campaign</div></div>`;
   if(lang==='th')setTimeout(applyThaiToPage,100);
 }
 function promptNewCampaign(num){
-  pendingCampNum=num;
+  pendingCampNum=num||null; // num no longer used for ID
   const m=document.getElementById('new-camp-modal');const inp=document.getElementById('camp-name-input');
   if(m)m.style.display='block';if(inp){inp.value='';setTimeout(()=>inp.focus(),50);}
   document.getElementById('new-camp-err').style.display='none';
@@ -1683,7 +1683,10 @@ async function confirmNewCampaign(){
   await launchNewCampaign(pendingCampNum||1,name);
 }
 async function launchNewCampaign(num,name){
-  campaignId='Campaign'+num;
+  // Generate unique ID: slug of name + random 4-char suffix
+  const slug=name.replace(/[^a-zA-Z0-9]/g,'').substring(0,16)||'Campaign';
+  const suffix=Math.random().toString(36).substring(2,6);
+  campaignId='Campaign_'+slug+'_'+suffix;
   document.getElementById('new-camp-modal').style.display='none';
   document.getElementById('camp-status').textContent='Creating "'+name+'"...';
   try{
