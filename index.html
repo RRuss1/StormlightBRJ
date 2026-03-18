@@ -1128,7 +1128,7 @@ async function onCreateChar(){
   if(!rolledStats)rollStats();
   const hp=10+rolledStats.end;
   const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
-  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender,fragments:0};
+  myChar={name,className:selClass.name,classId:selClass.id,color:selColor,stats:rolledStats,hp,maxHp:hp,abilities:selClass.abilities,spren:selClass.spren,slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1};
   saveMyChar(myChar); // saves under charKey(mySlot)
   gState.players[mySlot]=myChar;
   await saveState(gState);
@@ -2718,8 +2718,7 @@ Write 2 sentences: the moment of defeat — what happens as the last party membe
     gState.combatLog=gState.combatLog||[];
     gState.combatLog.push({round:gState.combatRound,text,type});
     await saveState(gState);
-    speakStory();
-    // For voice, read from combat narrative el
+    // Combat voice — only speakFromElement, not both
     setTimeout(()=>{
       const voiceEl=document.getElementById('combat-narrative-text');
       if(voiceEl&&voiceEnabled)speakFromElement(voiceEl.textContent);
@@ -2839,9 +2838,8 @@ async function loadKokoro(){
 
 // Preload on desktop silently when game screen appears
 function preloadKokoroDesktop(){
-  if(!isMobile()&&!kokoroReady&&!kokoroLoading){
-    setTimeout(()=>loadKokoro(),2000); // 2s delay so game renders first
-  }
+  // Kokoro is opt-in only — load only when user explicitly taps 🔈
+  // Too heavy (1GB+ RAM) to preload silently
 }
 
 async function speakWithKokoro(text){
@@ -2898,19 +2896,24 @@ async function speakStory(){
   if(!voiceEnabled||isMobile())return;
   const el=document.getElementById('story-text');
   if(!el)return;
-  const text=(el.innerText||'').replace(/Option \d+/g,'').replace(/THE CHRONICLE/gi,'').replace(/[\n]{2,}/g,' ').trim();
+  // Only first 120 words — enough for dramatic opening, won't lag
+  const fullText=(el.innerText||'').replace(/Option \d+/g,'').replace(/THE CHRONICLE/gi,'').replace(/\n+/g,' ').trim();
+  const words=fullText.split(' ');
+  const text=words.slice(0,120).join(' ')+(words.length>120?' ...':'');
   if(text.length<10)return;
-  // Kokoro path
+  // Kokoro only if already loaded (user opted in) — never trigger load from auto-speak
   if(kokoroReady){const ok=await speakWithKokoro(text);if(ok)return;}
-  // Web Speech fallback
+  // Web Speech is the default
   speakWithWebSpeech(text);
 }
 
 async function speakFromElement(text){
   if(!voiceEnabled||!text||isMobile())return;
   stopSpeaking();
-  if(kokoroReady){const ok=await speakWithKokoro(text);if(ok)return;}
-  speakWithWebSpeech(text);
+  // Truncate combat narration to 3 sentences max
+  const sentences=text.split(/[.!?]+/).filter(s=>s.trim().length>5).slice(0,3).join('. ')+'.';
+  if(kokoroReady){const ok=await speakWithKokoro(sentences);if(ok)return;}
+  speakWithWebSpeech(sentences);
 }
 
 function stopSpeaking(){
@@ -2927,11 +2930,16 @@ async function toggleVoice(){
   if(isMobile())return;
   if(voiceActive){stopSpeaking();return;}
   voiceEnabled=true;
-  // Try Kokoro first, falls back to Web Speech automatically in speakStory
-  if(!kokoroReady&&!kokoroLoading){
-    loadKokoro().catch(()=>{}); // non-blocking attempt
-  }
+  // Web Speech speaks immediately — Kokoro loads in background for next beat
   speakStory();
+  // Start loading Kokoro now so it's ready for the next beat (non-blocking)
+  if(!kokoroReady&&!kokoroLoading){
+    loadKokoro().then(()=>{
+      // Restart with Kokoro quality if still on same beat
+      if(voiceActive)stopSpeaking();
+      setTimeout(speakStory,200);
+    }).catch(()=>{});
+  }
 }
 
 function updateVoiceBtn(){
