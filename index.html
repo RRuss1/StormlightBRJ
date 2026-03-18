@@ -448,7 +448,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <div style="font-size:13px;color:var(--text5);margin-top:8px;font-style:italic;"><span data-tr>Unfilled slots become AI companions</span></div>
   </div>
   <p class="slots-label"><span data-tr>Radiant Company</span></p>
-  <div class="slots-grid" id="slots-grid"></div>
+  
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
     <button class="btn btn-gold" onclick="onEnter()"><span data-tr>⟁ Enter the Storm</span></button>
     <button class="btn btn-sm btn-danger" onclick="onReset()"><span data-tr>Reset Campaign</span></button>
@@ -1046,7 +1046,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <div style="font-size:13px;color:var(--text5);margin-top:8px;font-style:italic;"><span data-tr>Unfilled slots become AI companions</span></div>
   </div>
   <p class="slots-label"><span data-tr>Radiant Company</span></p>
-  <div class="slots-grid" id="slots-grid"></div>
+  
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
     <button class="btn btn-gold" onclick="onEnter()"><span data-tr>⟁ Enter the Storm</span></button>
     <button class="btn btn-sm btn-danger" onclick="onReset()"><span data-tr>Reset Campaign</span></button>
@@ -1728,7 +1728,7 @@ async function launchNewCampaign(num,name){
     myChar=null;clearMyChar();
     await saveState(gState);
     document.getElementById('title-sub').textContent=name;
-    renderPSZ();renderSlots(gState);
+    renderPSZ();
     showScreen('title');
     document.getElementById('camp-status').textContent='';
   }catch(e){document.getElementById('camp-status').textContent='Error: '+e.message;}
@@ -1773,7 +1773,7 @@ function pickSize(n){
   if(gState&&gState.phase!=='pregame')return;
   partySize=n;
   if(gState&&gState.phase==='pregame'){gState.players=Array.from({length:n},(_,i)=>gState.players[i]||null);gState.partySize=n;saveState(gState).catch(()=>{});}
-  renderPSZ();renderSlots(gState||{players:new Array(n).fill(null),partySize:n});
+  renderPSZ();
 }
 
 // ══ NPC GENERATION ══
@@ -3383,7 +3383,7 @@ async function onReset(){
     await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:gState&&gState.campaignName||campaignId});
     const t=await tok();
     await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
-    gState=null;myChar=null;renderPSZ();renderSlots({players:new Array(partySize).fill(null),partySize});showScreen('title');
+    gState=null;myChar=null;renderPSZ();showScreen('title');
   }catch(e){alert('Reset failed: '+e.message);}
 }
 
