@@ -26,7 +26,6 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:va
 body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90,0.12) 0%,transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%,rgba(112,82,43,0.07) 0%,transparent 60%);}
 .screen{display:none;min-height:100vh;}
 .screen.active{display:flex;flex-direction:column;}
-
 /* ── TITLE ── */
 #s-title{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
 #s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
@@ -37,7 +36,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .title-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.75rem;}
 .title-quote{font-style:italic;color:var(--gold-mid);font-size:17px;max-width:480px;margin:0 auto 2.5rem;line-height:1.9;}
 .title-quote cite{display:block;font-size:12px;letter-spacing:2px;color:var(--text4);margin-top:7px;font-style:normal;}
-
 /* ── PARTY SIZE ── */
 .psz-wrap{margin-bottom:1.75rem;}
 .psz-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
@@ -46,7 +44,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .psz:hover{border-color:var(--border3);color:var(--text);}
 .psz.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.09);}
 .psz.locked{opacity:0.4;cursor:default;}
-
 /* ── SLOTS ── */
 .slots-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
 .slots-grid{display:grid;gap:10px;max-width:620px;width:100%;margin:0 auto 2rem;}
@@ -65,7 +62,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .slot-tag.npc{background:rgba(26,107,82,0.15);color:var(--teal2);border-color:rgba(26,107,82,0.25);}
 .slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-d);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
 .slot-npc-btn:hover{background:rgba(26,107,82,0.22);}
-
 /* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--r);background:transparent;color:var(--text);font-family:var(--font-b);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
 .btn:hover{background:var(--bg4);border-color:var(--amber-dim);}
@@ -75,7 +71,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .btn-sm{padding:9px 20px;font-size:15px;}
 .btn-danger{border-color:var(--coral);color:var(--coral2);}
 .btn-danger:hover{background:rgba(158,56,32,0.12);}
-
 /* ── CAMPAIGN SCREEN ── */
 #s-campaign{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
 #s-campaign::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
@@ -95,10 +90,8 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .camp-del:hover{color:var(--coral2);}
 .camp-new-icon{font-size:28px;color:var(--text4);margin-bottom:6px;}
 .camp-new-txt{font-size:14px;color:var(--text4);font-style:italic;}
-
 /* ── CAMPAIGN NAME MODAL ── */
 #new-camp-modal{display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--r2);padding:1.5rem;max-width:420px;width:100%;text-align:left;}
-
 /* ── CREATE SCREEN ── */
 #s-create{padding:2.5rem;align-items:center;}
 .create-wrap{max-width:620px;width:100%;}
@@ -126,11 +119,9 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .sbox-name{font-family:var(--font-d);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
 .sbox-val{font-size:26px;font-weight:600;color:var(--amber2);line-height:1.2;}
 .sbox-mod{font-size:13px;color:var(--text3);}
-
 /* ── LOBBY SCREEN ── */
 #s-lobby{padding:0;align-items:center;justify-content:center;}
 .lobby-wrap{max-width:680px;width:100%;padding:2.5rem;}
-
 /* ── GAME SCREEN ── */
 #s-game{padding:0;flex-direction:column;}
 .game-top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
@@ -202,13 +193,11 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .dice-result-dmg{color:var(--coral2);}
 .dice-result-heal{color:var(--teal2);}
 .combat-init-strip{padding:8px 20px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-
 @media(max-width:900px){
   .combat-body{grid-template-columns:1fr;}
   .combat-party-col,.combat-enemy-col{flex-direction:row;flex-wrap:wrap;border:none;border-bottom:1px solid var(--border);padding:8px;}
   .char-combat-card{min-width:140px;flex:1;}
 }
-
 @media(max-width:1100px){
   .game-layout{grid-template-columns:1fr;padding:12px;}
   .side-panel{position:static;display:flex;flex-direction:row;gap:0;}
@@ -220,12 +209,10 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   .side-panel{display:block;}
   .side-panel-body{max-height:150px;}
 }
-
 /* ── PROGRESS ── */
 .prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
 .prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
-
 /* ── ENEMY / INITIATIVE PANELS ── */
 .combat-panel{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);}
 .combat-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;}
@@ -237,7 +224,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .init-pill{padding:4px 10px;border-radius:20px;font-family:var(--font-d);font-size:10px;letter-spacing:1px;transition:all 0.3s;}
 .init-pill.init-active{animation:initpulse 2s ease-in-out infinite;}
 @keyframes initpulse{0%,100%{box-shadow:0 0 0 2px rgba(191,161,90,0.9),0 0 12px rgba(191,161,90,0.4);}50%{box-shadow:0 0 0 3px rgba(191,161,90,0.7),0 0 20px rgba(191,161,90,0.6);}}
-
 /* ── CHRONICLE CARD ── */
 .chronicle-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;max-width:840px;width:100%;margin:0 auto;}
 .story-reveal{animation:stormReveal 0.4s ease-out;}
@@ -245,25 +231,20 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .chronicle-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
-
 /* Story text zone */
 .story-text{padding:20px;font-size:22px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text);line-height:1.9;min-height:80px;}
-
 /* Event badges */
 .event-badge{display:inline-block;font-family:var(--font-d);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
 .badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
 .badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
 .badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
 .gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;}
-
 /* NPC / player log entries */
 .entry-player{font-size:16px;font-family:'Times New Roman',Times,serif;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
 .entry-pname{font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
 .entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 20px;}
-
 /* ── BOTTOM ZONE (unified) ── */
 .bottom-zone{border-top:1px solid var(--border);}
-
 /* Loading state */
 #bottom-loading{display:none;padding:2.5rem;text-align:center;}
 .loading-text{font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
@@ -284,7 +265,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 @keyframes starGlow{0%,100%{opacity:0.5;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}
 @keyframes emberFlicker{0%,100%{opacity:0.3;transform:scale(0.8) translateY(0);}33%{opacity:1;transform:scale(1.1) translateY(-2px);}66%{opacity:0.6;transform:scale(0.9) translateY(-1px);}}
 @keyframes cardSelPulse{0%,100%{box-shadow:0 0 0 1px var(--amber),0 0 12px rgba(191,161,90,0.15);}50%{box-shadow:0 0 0 2px rgba(217,191,140,0.8),0 0 28px rgba(191,161,90,0.35);}}
-
 @keyframes flowRibbon{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
 @keyframes riseSmoke{0%{transform:translateY(0) scaleX(1);opacity:0.7}50%{transform:translateY(-6px) scaleX(1.2);opacity:0.4}100%{transform:translateY(-12px) scaleX(0.8);opacity:0}}
 @keyframes firePulse{0%,100%{transform:scaleY(1) scaleX(1);opacity:1}50%{transform:scaleY(1.15) scaleX(0.9);opacity:0.85}}
@@ -298,10 +278,8 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 @keyframes heroZoom{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.12);opacity:1}}
 @keyframes heroPulse{0%,100%{filter:drop-shadow(0 0 2px currentColor)}50%{filter:drop-shadow(0 0 8px currentColor)}}
 @keyframes waveFlow{0%{d:path('M4 16 Q8 12 12 16 Q16 20 20 16 Q22 14 24 16')}50%{d:path('M4 16 Q8 20 12 16 Q16 12 20 16 Q22 18 24 16')}100%{d:path('M4 16 Q8 12 12 16 Q16 20 20 16 Q22 14 24 16')}}
-
 @keyframes ribbonFlow{0%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}33%{d:path('M4 20 Q10 16 14 10 Q16 7 20 10');}66%{d:path('M4 20 Q6 12 10 10 Q15 8 20 12');}100%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}}
 @keyframes parallaxDrift{0%,100%{background-position:50% 50%;}50%{background-position:52% 48%;}}
-
 /* Human turn — choices + act button */
 #bottom-human{display:none;padding:18px 20px;}
 .dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-d);letter-spacing:1px;padding:4px 0;min-height:20px;margin-bottom:8px;}
@@ -317,7 +295,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .btn-act{display:inline-flex;align-items:center;padding:13px 36px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-d);font-size:16px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
 .btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
 .err{font-size:14px;color:var(--coral2);font-style:italic;}
-
 /* Continue state */
 #bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 @media(max-width:640px){
@@ -332,13 +309,9 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .btn-continue{display:inline-flex;align-items:center;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-d);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
 .btn-continue:hover{background:rgba(191,161,90,0.18);}
 .btn-continue:disabled{opacity:0.28;cursor:not-allowed;border-color:var(--border2);color:var(--text4);}
-
 /* Waiting state */
 #bottom-waiting{display:none;padding:16px 20px;text-align:center;}
 .waiting-msg{font-family:var(--font-d);font-size:13px;letter-spacing:1px;color:var(--text5);}
-
-
-
 /* ── CHARACTER SHEET ── */
 .sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
 .sheet-toggle:hover{color:var(--text3);}
@@ -349,7 +322,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .sheet-val{font-weight:600;color:var(--text);}
 .abils{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
 .abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-
 /* ── AUDIO BAR ── */
 .audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;opacity:0.15;transition:opacity 0.25s ease;}
 .audio-bar:hover{opacity:1;}
@@ -359,7 +331,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .audio-btn:hover{color:var(--amber2);}
 .audio-label{font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);}
 .vol-slider{width:60px;accent-color:var(--amber);}
-
 /* ── PRINT ── */
 #print-header{display:none;}
 @media print{
@@ -372,7 +343,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   .story-text{font-size:12pt;color:#111!important;}
   #print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #111;}
 }
-
 /* ── MOBILE ── */
 @media(max-width:640px){
   .class-grid,.action-choices{grid-template-columns:1fr;}
@@ -391,7 +361,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   .title-glyph{font-size:60px;}
   .story-text{font-size:16px;}
 }
-
 .type-card{background:var(--bg3);border:2px solid var(--border2);border-radius:12px;padding:28px 20px;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;text-align:center;user-select:none;}
 .type-card:hover{border-color:var(--border3);background:var(--bg4);box-shadow:0 0 12px rgba(191,161,90,0.1);}
 .type-card.sel{border-color:var(--amber)!important;background:rgba(191,161,90,0.08)!important;box-shadow:0 0 0 1px var(--amber),0 0 24px rgba(191,161,90,0.25)!important;animation:cardSelPulse 2.5s ease-in-out infinite;}
@@ -603,7 +572,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     </div>
   </div>
 
-
 <!-- s-lobbytml>
 <html lang="en">
 <head>
@@ -613,391 +581,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,8 92,88 8,88' fill='none' stroke='%23BFA15A' stroke-width='7'/><polygon points='50,28 76,72 24,72' fill='none' stroke='%23BFA15A' stroke-width='4'/></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
-<style>
-/* ── RESET & ROOT ── */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#1a1510;--bg2:#211c14;--bg3:#2a2318;--bg4:#33291e;
-  --border:#3d3426;--border2:#51463A;--border3:#70522B;
-  --gold:#BFA15A;--gold-mid:#D9BF8C;--gold-bright:#E8DCC4;
-  --gold-light:#EFE5D1;--gold-deep:#9C7B3C;--gold-dim:#70522B;
-  --amber:#BFA15A;--amber2:#D9BF8C;--amber3:#E8DCC4;--amber-dim:#70522B;
-  --teal:#1a6b52;--teal2:#25956e;--teal-dim:#0f3d2e;
-  --coral:#9e3820;--coral2:#c44a28;
-  --text:#F6F1E6;--text2:#EFE5D1;--text3:#D9BF8C;--text4:#9C7B3C;--text5:#70522B;
-  --font-d:'Cinzel',serif;--font-b:'Crimson Pro',serif;
-  --r:9px;--r2:14px;--r3:19px;
-}
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:19px;line-height:1.75;}
-body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90,0.12) 0%,transparent 65%),radial-gradient(ellipse 40% 30% at 80% 80%,rgba(112,82,43,0.07) 0%,transparent 60%);}
-.screen{display:none;min-height:100vh;}
-.screen.active{display:flex;flex-direction:column;}
 
-/* ── TITLE ── */
-#s-title{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
-#s-title::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.title-glyph{font-size:86px;color:var(--amber);letter-spacing:14px;font-family:var(--font-d);text-shadow:0 0 40px rgba(191,161,90,0.45);margin-bottom:0.5rem;animation:glowpulse 3s ease-in-out infinite;}
-@keyframes glowpulse{0%,100%{text-shadow:0 0 40px rgba(191,161,90,0.45);}50%{text-shadow:0 0 80px rgba(217,191,140,0.65),0 0 120px rgba(191,161,90,0.25);}}
-.title-h1{font-family:var(--font-d);font-size:clamp(28px,5vw,50px);font-weight:700;letter-spacing:6px;margin-bottom:5px;}
-.title-h2{font-family:var(--font-d);font-size:14px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2rem;}
-.title-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:0 auto 1.75rem;}
-.title-quote{font-style:italic;color:var(--gold-mid);font-size:17px;max-width:480px;margin:0 auto 2.5rem;line-height:1.9;}
-.title-quote cite{display:block;font-size:12px;letter-spacing:2px;color:var(--text4);margin-top:7px;font-style:normal;}
-
-/* ── PARTY SIZE ── */
-.psz-wrap{margin-bottom:1.75rem;}
-.psz-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:10px;display:block;}
-.psz-row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}
-.psz{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 20px;cursor:pointer;font-family:var(--font-d);font-size:14px;color:var(--text3);transition:all 0.15s;}
-.psz:hover{border-color:var(--border3);color:var(--text);}
-.psz.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.09);}
-.psz.locked{opacity:0.4;cursor:default;}
-
-/* ── SLOTS ── */
-.slots-label{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;}
-.slots-grid{display:grid;gap:10px;max-width:620px;width:100%;margin:0 auto 2rem;}
-.slot{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,background 0.2s;text-align:left;}
-.slot:hover{border-color:var(--border3);}
-.slot.filled{border-color:var(--gold-dim);cursor:default;}
-.slot.npc-slot{border-color:var(--teal-dim);cursor:default;}
-.slot-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:7px;}
-.slot-pip{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
-.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.slot-pname{font-family:var(--font-d);font-size:13px;font-weight:600;color:var(--text);}
-.slot-class{font-size:12px;color:var(--text3);font-style:italic;}
-.slot-empty-txt{font-size:13px;color:var(--text4);font-style:italic;}
-.slot-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(26,107,82,0.22);color:var(--teal2);border:1px solid rgba(26,107,82,0.32);letter-spacing:1px;margin-top:6px;}
-.slot-tag.turn{background:rgba(191,161,90,0.15);color:var(--amber2);border-color:rgba(191,161,90,0.25);}
-.slot-tag.npc{background:rgba(26,107,82,0.15);color:var(--teal2);border-color:rgba(26,107,82,0.25);}
-.slot-npc-btn{display:inline-block;margin-top:8px;padding:5px 14px;border:1px solid var(--teal);border-radius:20px;background:rgba(26,107,82,0.1);color:var(--teal2);font-size:12px;font-family:var(--font-d);letter-spacing:1px;cursor:pointer;transition:all 0.15s;}
-.slot-npc-btn:hover{background:rgba(26,107,82,0.22);}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 32px;border:1px solid var(--border3);border-radius:var(--r);background:transparent;color:var(--text);font-family:var(--font-b);font-size:17px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
-.btn:hover{background:var(--bg4);border-color:var(--amber-dim);}
-.btn-gold{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.05);}
-.btn-gold:hover{background:rgba(191,161,90,0.13);border-color:var(--amber3);}
-.btn-teal{border-color:var(--teal);color:var(--teal2);}
-.btn-sm{padding:9px 20px;font-size:15px;}
-.btn-danger{border-color:var(--coral);color:var(--coral2);}
-.btn-danger:hover{background:rgba(158,56,32,0.12);}
-
-/* ── CAMPAIGN SCREEN ── */
-#s-campaign{align-items:center;justify-content:center;padding:2.5rem;text-align:center;position:relative;overflow:hidden;}
-#s-campaign::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px),repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(191,161,90,0.018) 48px,rgba(191,161,90,0.018) 49px);pointer-events:none;}
-.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;max-width:700px;width:100%;margin:0 auto 1.5rem;}
-.camp-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:18px 16px;cursor:pointer;text-align:left;transition:border-color 0.2s,background 0.2s;position:relative;}
-.camp-card:hover{border-color:var(--gold);background:var(--bg4);}
-.camp-card.active-camp{border-color:var(--amber);}
-.camp-card.new-camp{border-style:dashed;border-color:var(--border2);text-align:center;}
-.camp-card.new-camp:hover{border-color:var(--amber);border-style:dashed;}
-.camp-num{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin-bottom:6px;}
-.camp-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
-.camp-meta{font-size:12px;color:var(--text4);font-style:italic;}
-.camp-phase{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:6px;font-family:var(--font-d);letter-spacing:1px;}
-.phase-pregame{background:rgba(191,161,90,0.12);color:var(--amber2);border:1px solid rgba(191,161,90,0.2);}
-.phase-playing{background:rgba(26,107,82,0.15);color:var(--teal2);border:1px solid rgba(26,107,82,0.25);}
-.camp-del{position:absolute;top:8px;right:10px;font-size:11px;color:var(--text5);cursor:pointer;border:none;background:transparent;font-family:var(--font-d);letter-spacing:1px;}
-.camp-del:hover{color:var(--coral2);}
-.camp-new-icon{font-size:28px;color:var(--text4);margin-bottom:6px;}
-.camp-new-txt{font-size:14px;color:var(--text4);font-style:italic;}
-
-/* ── CAMPAIGN NAME MODAL ── */
-#new-camp-modal{display:none;margin-top:1.5rem;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--r2);padding:1.5rem;max-width:420px;width:100%;text-align:left;}
-
-/* ── CREATE SCREEN ── */
-#s-create{padding:2.5rem;align-items:center;}
-.create-wrap{max-width:620px;width:100%;}
-.screen-title{font-family:var(--font-d);font-size:26px;font-weight:600;color:var(--amber2);letter-spacing:2px;margin-bottom:5px;}
-.screen-sub{font-size:16px;color:var(--text3);font-style:italic;margin-bottom:2rem;}
-.form-block{margin-bottom:1.75rem;}
-.form-lbl{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;display:block;}
-.form-in{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:17px;outline:none;transition:border-color 0.2s;}
-.form-in:focus{border-color:var(--amber);}
-.color-row{display:flex;gap:12px;flex-wrap:wrap;}
-.cswatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s,transform 0.15s;}
-.cswatch:hover{transform:scale(1.1);}
-.cswatch.sel{border-color:var(--text);}
-.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(min-width:520px){.class-grid{grid-template-columns:1fr 1fr 1fr;}}
-.ccard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
-.ccard:hover:not(.sel){border-color:var(--border3);background:var(--bg4);box-shadow:0 0 8px rgba(191,161,90,0.06);}
-.ccard.sel{border-color:var(--amber)!important;background:rgba(191,161,90,0.1)!important;box-shadow:0 0 0 1px var(--amber),0 0 16px rgba(191,161,90,0.2);animation:cardSelPulse 2.5s ease-in-out infinite;}
-.ccard-name{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;}
-.ccard-ideal{font-size:13px;color:var(--amber2);font-style:italic;margin-bottom:5px;}
-.ccard-desc{font-size:13px;color:var(--text3);line-height:1.5;}
-.ccard-bonus{font-size:12px;color:var(--text4);margin-top:5px;}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
-.sbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;}
-.sbox-name{font-family:var(--font-d);font-size:10px;letter-spacing:1.5px;color:var(--text4);text-transform:uppercase;}
-.sbox-val{font-size:26px;font-weight:600;color:var(--amber2);line-height:1.2;}
-.sbox-mod{font-size:13px;color:var(--text3);}
-
-/* ── LOBBY SCREEN ── */
-#s-lobby{padding:0;align-items:center;justify-content:center;}
-.lobby-wrap{max-width:680px;width:100%;padding:2.5rem;}
-
-/* ── GAME SCREEN ── */
-#s-game{padding:0;flex-direction:column;}
-.game-top{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
-.game-logo{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;}
-.turn-pill{font-family:var(--font-d);font-size:12px;letter-spacing:1px;padding:6px 16px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);}
-.turn-pill.yours{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.12);animation:pillpulse 2s ease-in-out infinite;}
-@keyframes pillpulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0.35);}50%{box-shadow:0 0 0 7px rgba(191,161,90,0);}}
-.party-strip{display:flex;gap:6px;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;align-items:stretch;}
-.ppip-pair{display:flex;gap:4px;align-items:stretch;flex:1;min-width:0;}
-.spren-card{width:54px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-.spren-card svg{width:44px;height:44px;}
-.ppip{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
-.ppip.active{border-color:var(--amber);}
-.ppip.npc{border-color:var(--teal-dim);}
-.ppip-top{display:flex;align-items:center;gap:8px;}
-.ppip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.ppip-name{font-family:var(--font-d);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ppip-info{font-size:12px;color:var(--gold-mid);}
-.ppip-tag{font-size:9px;letter-spacing:1px;font-family:var(--font-d);}
-.hp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.hp-fill{height:100%;border-radius:2px;transition:width 0.4s;}
-.game-body{flex:1;display:flex;flex-direction:column;gap:0;width:100%;overflow:visible;}
-.game-body-top{padding:16px 20px 0;max-width:840px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
-.game-layout{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;align-items:stretch;padding:16px 20px 20px;width:100%;box-sizing:border-box;}
-.side-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px;min-height:300px;display:flex;flex-direction:column;}
-.side-panel-body{flex:1;overflow-y:auto;}
-.side-panel-body{padding:10px 14px;max-height:calc(100vh - 160px);font-size:12px;}
-.side-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.side-panel-body::-webkit-scrollbar{width:3px;}
-.side-panel-body::-webkit-scrollbar-thumb{background:var(--border2);}
-/* ══ COMBAT SCREEN ══ */
-#s-combat{padding:0;flex-direction:column;background:var(--bg);}
-.combat-top{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--coral);background:rgba(158,56,32,0.08);}
-.combat-title{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--coral2);text-transform:uppercase;}
-.combat-round-pill{font-family:var(--font-d);font-size:11px;letter-spacing:1px;padding:5px 14px;border-radius:20px;border:1px solid var(--coral);color:var(--coral2);}
-.combat-body{flex:1;display:grid;grid-template-columns:240px 1fr 240px;gap:0;height:calc(100vh - 52px);}
-.combat-party-col,.combat-enemy-col{display:flex;flex-direction:column;gap:10px;padding:16px 12px;overflow-y:auto;border-right:1px solid var(--border);}
-.combat-enemy-col{border-right:none;border-left:1px solid var(--border);}
-.combat-center{display:flex;flex-direction:column;overflow:hidden;}
-.char-combat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;transition:border-color 0.2s;}
-.char-combat-card.active-turn{border-color:var(--amber);box-shadow:0 0 12px rgba(191,161,90,0.25);}
-.char-combat-card.downed{opacity:0.45;border-color:var(--coral);background:rgba(158,56,32,0.05);}
-.char-combat-card.enemy-card{border-color:rgba(196,74,40,0.3);}
-.char-combat-card.enemy-card.active-turn{border-color:var(--coral2);box-shadow:0 0 12px rgba(196,74,40,0.3);}
-.ccard-name-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.ccard-hp-big{font-size:18px;font-weight:600;color:var(--text);}
-.ccard-hp-label{font-size:11px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;}
-.ccard-status{font-size:11px;letter-spacing:1px;font-family:var(--font-d);}
-.combat-narrative{padding:20px;border-bottom:1px solid var(--border);background:var(--bg2);font-family:'Times New Roman',Times,serif;font-size:18px;line-height:1.85;color:var(--text);min-height:120px;flex-shrink:0;}
-.combat-narrative .gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;display:block;margin-bottom:8px;}
-.combat-actions{flex:1;overflow-y:auto;padding:16px 20px;}
-.combat-waiting{text-align:center;padding:24px;font-family:var(--font-d);font-size:12px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.combat-player-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--amber2);text-transform:uppercase;margin-bottom:10px;}
-.combat-submitted{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(26,107,82,0.12);border:1px solid rgba(26,107,82,0.25);border-radius:var(--r);font-size:13px;color:var(--teal2);margin-bottom:8px;}
-.resolve-btn{width:100%;padding:14px;border:1px solid var(--coral);border-radius:var(--r);background:rgba(158,56,32,0.1);color:var(--coral2);font-family:var(--font-d);font-size:14px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;margin-top:12px;}
-.resolve-btn:hover{background:rgba(158,56,32,0.2);}
-.resolve-btn:disabled{opacity:0.3;cursor:not-allowed;}
-.combat-dice-ticker{padding:10px 20px;border-top:1px solid var(--border);background:var(--bg3);max-height:140px;overflow-y:auto;font-size:12px;font-family:var(--font-d);letter-spacing:0.5px;}
-.combat-dice-ticker::-webkit-scrollbar{width:3px;}
-.combat-dice-ticker::-webkit-scrollbar-thumb{background:var(--border2);}
-.dice-round-header{font-size:10px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;margin:6px 0 4px;padding-top:6px;border-top:1px solid var(--border);}
-.dice-round-header:first-child{border-top:none;margin-top:0;padding-top:0;}
-.dice-row{display:flex;align-items:center;gap:6px;padding:2px 0;line-height:1.4;}
-.dice-name{min-width:70px;font-weight:600;}
-.dice-roll{color:var(--text3);}
-.dice-result-crit{color:var(--gold);}
-.dice-result-hit{color:var(--teal2);}
-.dice-result-miss{color:var(--text5);}
-.dice-result-dmg{color:var(--coral2);}
-.dice-result-heal{color:var(--teal2);}
-.combat-init-strip{padding:8px 20px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-
-@media(max-width:900px){
-  .combat-body{grid-template-columns:1fr;}
-  .combat-party-col,.combat-enemy-col{flex-direction:row;flex-wrap:wrap;border:none;border-bottom:1px solid var(--border);padding:8px;}
-  .char-combat-card{min-width:140px;flex:1;}
-}
-
-@media(max-width:1100px){
-  .game-layout{grid-template-columns:1fr;padding:12px;}
-  .side-panel{position:static;display:flex;flex-direction:row;gap:0;}
-  .side-panel-hdr{writing-mode:initial;}
-  .side-panel-body{max-height:200px;}
-}
-@media(max-width:640px){
-  .game-layout{grid-template-columns:1fr;}
-  .side-panel{display:block;}
-  .side-panel-body{max-height:150px;}
-}
-
-/* ── PROGRESS ── */
-.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;margin-bottom:6px;}
-.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-mid));border-radius:2px;transition:width 0.5s;}
-
-/* ── ENEMY / INITIATIVE PANELS ── */
-.combat-panel{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg3);}
-.combat-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--coral2);text-transform:uppercase;margin-bottom:8px;}
-.enemy-list{display:flex;gap:10px;flex-wrap:wrap;}
-.enemy-card{background:var(--bg2);border:1px solid rgba(196,74,40,0.3);border-radius:var(--r);padding:7px 12px;min-width:120px;}
-.enemy-name{font-family:var(--font-d);font-size:11px;color:var(--coral2);}
-.enemy-hp{font-size:12px;color:var(--text3);}
-.init-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.init-pill{padding:4px 10px;border-radius:20px;font-family:var(--font-d);font-size:10px;letter-spacing:1px;transition:all 0.3s;}
-.init-pill.init-active{animation:initpulse 2s ease-in-out infinite;}
-@keyframes initpulse{0%,100%{box-shadow:0 0 0 2px rgba(191,161,90,0.9),0 0 12px rgba(191,161,90,0.4);}50%{box-shadow:0 0 0 3px rgba(191,161,90,0.7),0 0 20px rgba(191,161,90,0.6);}}
-
-/* ── CHRONICLE CARD ── */
-.chronicle-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;max-width:840px;width:100%;margin:0 auto;}
-.story-reveal{animation:stormReveal 0.4s ease-out;}
-.glyph-flare{animation:glyphFlare 0.6s ease-in-out;}
-.chronicle-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
-.chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
-
-/* Story text zone */
-.story-text{padding:20px;font-size:22px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text);line-height:1.9;min-height:80px;}
-
-/* Event badges */
-.event-badge{display:inline-block;font-family:var(--font-d);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
-.badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
-.badge-discovery{background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-.badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
-.gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;}
-
-/* NPC / player log entries */
-.entry-player{font-size:16px;font-family:'Times New Roman',Times,serif;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
-.entry-pname{font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
-.entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 20px;}
-
-/* ── BOTTOM ZONE (unified) ── */
-.bottom-zone{border-top:1px solid var(--border);}
-
-/* Loading state */
-#bottom-loading{display:none;padding:2.5rem;text-align:center;}
-.loading-text{font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
-.pulse-row{display:flex;justify-content:center;gap:8px;}
-.pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pulsedot 1.2s ease-in-out infinite;}
-@keyframes pulsedot{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
-@keyframes hpDrain{0%{width:var(--hp-from);}100%{width:var(--hp-to);}}
-@keyframes dmgFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
-@keyframes healFloat{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-28px);}}
-@keyframes cardShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
-@keyframes cardHealShimmer{0%{box-shadow:0 0 0 0 rgba(26,107,82,0);}40%{box-shadow:0 0 0 4px rgba(26,107,82,0.5),0 0 16px rgba(26,107,82,0.25);}100%{box-shadow:0 0 0 0 rgba(26,107,82,0);}}
-@keyframes activePulse{0%,100%{box-shadow:0 0 0 0 rgba(191,161,90,0);}50%{box-shadow:0 0 0 4px rgba(191,161,90,0.35),0 0 18px rgba(191,161,90,0.15);}}
-@keyframes stormReveal{0%{opacity:0;transform:translateY(6px);}100%{opacity:1;transform:translateY(0);}}
-@keyframes glyphFlare{0%,100%{color:var(--amber);text-shadow:none;}50%{color:#fff9e6;text-shadow:0 0 24px rgba(255,249,200,0.8),0 0 48px rgba(191,161,90,0.6);}}
-@keyframes sprenFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
-@keyframes patternSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-@keyframes vinePulse{0%,100%{d:path('M8 20 Q12 12 16 8 Q18 5 20 8');}50%{d:path('M8 20 Q10 10 14 6 Q16 3 18 6');}}
-@keyframes starGlow{0%,100%{opacity:0.5;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}
-@keyframes emberFlicker{0%,100%{opacity:0.3;transform:scale(0.8) translateY(0);}33%{opacity:1;transform:scale(1.1) translateY(-2px);}66%{opacity:0.6;transform:scale(0.9) translateY(-1px);}}
-@keyframes cardSelPulse{0%,100%{box-shadow:0 0 0 1px var(--amber),0 0 12px rgba(191,161,90,0.15);}50%{box-shadow:0 0 0 2px rgba(217,191,140,0.8),0 0 28px rgba(191,161,90,0.35);}}
-
-@keyframes flowRibbon{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
-@keyframes riseSmoke{0%{transform:translateY(0) scaleX(1);opacity:0.7}50%{transform:translateY(-6px) scaleX(1.2);opacity:0.4}100%{transform:translateY(-12px) scaleX(0.8);opacity:0}}
-@keyframes firePulse{0%,100%{transform:scaleY(1) scaleX(1);opacity:1}50%{transform:scaleY(1.15) scaleX(0.9);opacity:0.85}}
-@keyframes vineGrow{0%,100%{stroke-dashoffset:0}50%{stroke-dashoffset:-8}}
-@keyframes orbDrift{0%{transform:translate(0,0)}25%{transform:translate(2px,-2px)}50%{transform:translate(0,-3px)}75%{transform:translate(-2px,-1px)}100%{transform:translate(0,0)}}
-@keyframes sparkFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-14px);opacity:0}}
-@keyframes spinSlow{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-@keyframes spinSlowRev{0%{transform:rotate(0deg)}100%{transform:rotate(-360deg)}}
-@keyframes linkPulse{0%,100%{stroke-opacity:0.4;stroke-width:1}50%{stroke-opacity:1;stroke-width:2}}
-@keyframes starRay{0%,100%{opacity:0.4;transform:scale(0.9)}50%{opacity:1;transform:scale(1.1)}}
-@keyframes heroZoom{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.12);opacity:1}}
-@keyframes heroPulse{0%,100%{filter:drop-shadow(0 0 2px currentColor)}50%{filter:drop-shadow(0 0 8px currentColor)}}
-@keyframes waveFlow{0%{d:path('M4 16 Q8 12 12 16 Q16 20 20 16 Q22 14 24 16')}50%{d:path('M4 16 Q8 20 12 16 Q16 12 20 16 Q22 18 24 16')}100%{d:path('M4 16 Q8 12 12 16 Q16 20 20 16 Q22 14 24 16')}}
-
-@keyframes ribbonFlow{0%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}33%{d:path('M4 20 Q10 16 14 10 Q16 7 20 10');}66%{d:path('M4 20 Q6 12 10 10 Q15 8 20 12');}100%{d:path('M4 20 Q8 14 12 12 Q16 10 20 14');}}
-@keyframes parallaxDrift{0%,100%{background-position:50% 50%;}50%{background-position:52% 48%;}}
-
-/* Human turn — choices + act button */
-#bottom-human{display:none;padding:18px 20px;}
-.dice-flash{font-size:13px;color:var(--gold);font-family:var(--font-d);letter-spacing:1px;padding:4px 0;min-height:20px;margin-bottom:8px;}
-.action-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.achoice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;cursor:pointer;text-align:left;color:var(--text);font-family:'Times New Roman',Times,serif;font-size:18px;line-height:1.6;transition:border-color 0.15s,background 0.15s;}
-.achoice:hover{border-color:var(--border3);background:var(--bg4);}
-.achoice.sel{border-color:var(--gold-mid);background:rgba(191,161,90,0.12);color:var(--gold-bright);}
-.achoice-num{font-family:var(--font-d);font-size:10px;color:var(--amber-dim);display:block;margin-bottom:4px;letter-spacing:1px;}
-.custom-row{display:flex;gap:10px;margin-bottom:14px;}
-.custom-in{flex:1;padding:12px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-b);font-size:16px;outline:none;transition:border-color 0.2s;}
-.custom-in:focus{border-color:var(--amber);}
-.act-row{display:flex;justify-content:flex-end;align-items:center;gap:12px;}
-.btn-act{display:inline-flex;align-items:center;padding:13px 36px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.10);color:var(--amber2);font-family:var(--font-d);font-size:16px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-act:hover{background:rgba(191,161,90,0.22);border-color:var(--amber3);}
-.err{font-size:14px;color:var(--coral2);font-style:italic;}
-
-/* Continue state */
-#bottom-continue{display:none;padding:14px 20px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-@media(max-width:640px){
-  #bottom-human{display:block!important;}
-  #bottom-continue.active{position:sticky;bottom:0;background:var(--bg2);border-top:2px solid var(--amber-dim);z-index:20;padding:14px 16px;display:flex!important;justify-content:space-between;align-items:center;gap:10px;}
-  #bottom-continue .continue-hint{font-size:11px;}
-  #bottom-continue .btn-continue{padding:12px 24px;font-size:14px;min-width:130px;text-align:center;justify-content:center;}
-  #bottom-human .act-row{position:sticky;bottom:0;background:var(--bg2);padding:12px 16px;margin:0 -18px -18px;border-top:2px solid var(--amber-dim);}
-  .btn-act{width:100%;justify-content:center;padding:14px;}
-}
-.continue-hint{font-family:var(--font-d);font-size:12px;letter-spacing:1px;color:var(--text5);font-style:italic;}
-.btn-continue{display:inline-flex;align-items:center;padding:12px 28px;border:1px solid var(--amber);border-radius:var(--r);background:rgba(191,161,90,0.08);color:var(--amber2);font-family:var(--font-d);font-size:15px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
-.btn-continue:hover{background:rgba(191,161,90,0.18);}
-.btn-continue:disabled{opacity:0.28;cursor:not-allowed;border-color:var(--border2);color:var(--text4);}
-
-/* Waiting state */
-#bottom-waiting{display:none;padding:16px 20px;text-align:center;}
-.waiting-msg{font-family:var(--font-d);font-size:13px;letter-spacing:1px;color:var(--text5);}
-
-
-
-/* ── CHARACTER SHEET ── */
-.sheet-toggle{font-size:13px;color:var(--text4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;padding:0;}
-.sheet-toggle:hover{color:var(--text3);}
-.sheet-panel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;margin-top:10px;}
-.sheet-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:16px;}
-.sheet-row:last-child{border-bottom:none;}
-.sheet-lbl{color:var(--gold-mid);}
-.sheet-val{font-weight:600;color:var(--text);}
-.abils{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
-.abil{font-size:12px;padding:3px 11px;border-radius:20px;background:rgba(26,107,82,0.18);color:var(--teal2);border:1px solid rgba(26,107,82,0.27);}
-
-/* ── AUDIO BAR ── */
-.audio-bar{position:fixed;bottom:16px;right:16px;z-index:100;display:none;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;opacity:0.15;transition:opacity 0.25s ease;}
-.audio-bar:hover{opacity:1;}
-.audio-bar.audio-active{opacity:0.85;}
-@media(max-width:640px){.audio-bar{display:none!important;}.desktop-only{display:none!important;}}
-.audio-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:0;}
-.audio-btn:hover{color:var(--amber2);}
-.audio-label{font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);}
-.vol-slider{width:60px;accent-color:var(--amber);}
-
-/* ── PRINT ── */
-#print-header{display:none;}
-@media print{
-  body{background:#fff!important;color:#111!important;font-size:12pt;}
-  .party-strip,.bottom-zone,.sheet-toggle,.sheet-panel,#enemy-panel,#initiative-panel,.prog-wrap,.turn-pill,.audio-bar,#export-btn,#export-btn-wrap,#thinking-bar{display:none!important;}
-  .game-top{border-bottom:1px solid #ccc;padding:10px 0;margin-bottom:16px;}
-  .game-logo{font-size:16pt;font-weight:bold;}
-  #lang-toggle{display:none!important;}
-  .chronicle-card{border:none;}
-  .story-text{font-size:12pt;color:#111!important;}
-  #print-header{display:block!important;text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #111;}
-}
-
-/* ── MOBILE ── */
-@media(max-width:640px){
-  .class-grid,.action-choices{grid-template-columns:1fr;}
-  .slots-grid{grid-template-columns:1fr!important;}
-  .party-strip{flex-direction:column;}
-  .ppip{min-width:unset;width:100%;}
-  .game-body{padding:12px;}
-  html,body{font-size:16px;}
-  .story-text{font-size:18px;}
-  .achoice{font-size:16px;}
-  .title-h1{font-size:26px;letter-spacing:2px;}
-  .btn{padding:11px 20px;font-size:15px;}
-  .camp-grid{grid-template-columns:1fr;}
-}
-@media(max-width:400px){
-  .title-glyph{font-size:60px;}
-  .story-text{font-size:16px;}
-}
-</style>
 </head>
 <body>
 
@@ -1294,9 +878,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════
 const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
 const PROXY_URL='https://stormlight-proxy.goretusk55.workers.dev';
 const SA={
@@ -1371,7 +952,6 @@ const HERO_WEAPONS=[
   {id:'shardfork',name:'Shardfork',type:'Improvised',dmgBonus:{crit:5,hit:1,miss:0},desc:'Random chaos. Do not ask.',tiers:['Bent','Slightly less bent','Inexplicably sharp','Legendary','Unknowable']},
 ];
 
-// Weapon name prefixes + suffixes for procedural naming
 const WEAPON_PREFIXES=['Iron','Ash','Silver','Copper','Bronze','Obsidian','Granite','Storm','Crest','Ember'];
 const WEAPON_SUFFIXES=['mark','fall','watch','hold','edge','strike','ward','crest','fang','point'];
 function genWeaponName(weaponId){
@@ -1380,7 +960,6 @@ function genWeaponName(weaponId){
   return pre+suf;
 }
 
-// State for the create screen
 let createStep=1; // 1=type, 2=class/role, 3=backstory, 4=weapon(hero only), 5=stats
 let isRadiant=true;
 let selRole=null;
@@ -1404,7 +983,6 @@ const ORDER_OATHS={
   skybreaker:['I will follow the law.','I will protect the law.','I will be the law.','The law is absolute.','Justice is mine to deliver.'],
 };
 
-// Oath bonuses unlocked at each stage
 const OATH_BONUSES={
   1:{desc:'First Oath spoken',combat:0,heal:0},
   2:{desc:'Shardblade manifests',combat:1,heal:0},
@@ -1417,12 +995,10 @@ async function checkOathMoment(gmText, player){
   if(!player||!gmText)return;
   const oathStage=(player.oathStage||1);
   if(oathStage>=5)return;
-  // Check if the story moment seems oath-worthy using pattern matching
   const oathKeywords=['sacrific','protect','truth','remember','justice','freedom','unity','law','knowledge'];
   const lower=gmText.toLowerCase();
   const isOathworthy=oathKeywords.some(k=>lower.includes(k))&&gmText.length>100;
   if(!isOathworthy)return;
-  // Random chance + scaling with story progress
   const chance=0.08+(gState.totalMoves||0)*0.001;
   if(Math.random()>chance)return;
   await progressOath(player);
@@ -1436,15 +1012,12 @@ async function progressOath(player){
   const oath=oaths[newStage-1]||'I will hold to what matters.';
   const bonus=OATH_BONUSES[newStage];
   player.oathStage=newStage;
-  // Apply mechanical effects
   if(newStage===4&&!player.shardplate)player.shardplate='Nascent Plate';
   if(newStage===5)player.shardplate='Full Shardplate';
-  // Update in gState
   const idx=gState.players.findIndex(p=>p&&p.name===player.name);
   if(idx>=0)gState.players[idx]=player;
   if(myChar&&myChar.name===player.name){myChar=player;saveMyChar(player);}
   await saveState(gState);
-  // GM narrates the oath moment
   const oathPrompt=`Cosmere RPG GM. OATH MOMENT for ${player.name} the ${player.className}.
 Oath ${newStage} of 5: "${oath}"
 ${getGenderContext()}
@@ -1485,7 +1058,6 @@ Return ONLY the single sentence, nothing else.`;
 // ══ COMBAT SYSTEM CONSTANTS ══
 const COMBAT_BEATS_MIN=3, COMBAT_BEATS_MAX=8;
 
-// Heal amounts by bond stage (0-4) and class
 function getHealAmount(player, stageOverride){
   const stage=stageOverride!=null?stageOverride:getSprenStage(gState&&gState.totalMoves||0);
   const base=(stage+2)*3; // 9,12,15,18,21 — meaningful healing
@@ -1498,14 +1070,12 @@ function getBondsmitnPartyHeal(stage){return Math.max(2,Math.floor(stage*1.5+2))
 function getReviveCost(stage){return Math.max(0,3-stage);} // 3,2,1,0,0 fragments
 function getReviveHP(stage){return Math.max(1,stage*2);} // 0,2,4,6,8 → capped at 1 min
 
-// Enemy HP scaling: base × act multiplier × blade factor
 function calcEnemyHP(baseHP, actNum, avgBladeTier){
   const actMult=[1.0,1.5,2.0][actNum-1]||1.0;
   const bladeFactor=1+(avgBladeTier*0.15);
   return Math.round(baseHP*actMult*bladeFactor);
 }
 
-// Roll dice for enemy attack on a player
 function enemyAttackRoll(enemy, target){
   const roll=Math.ceil(Math.random()*20)+Math.floor(enemy.attackBonus||2);
   const defense=Math.floor(((target.stats&&target.stats.end||10)-10)/2)+(target.shardplate?3:0);
@@ -1514,12 +1084,9 @@ function enemyAttackRoll(enemy, target){
   return{roll,hit,dmg,defense};
 }
 
-// Build combat choices for a player — always 4 options
 function buildCombatChoices(player, combatState){
-  // Return GM-generated choices if available, otherwise fallback
   const cached=gState.combatChoicesCache&&gState.combatChoicesCache[player.name];
   if(cached&&cached.length>=4)return cached;
-  // Fallback: generate contextual choices locally until GM responds
   const stage=getSprenStage(gState.totalMoves||0);
   const cls=CLASSES.find(c=>c.id===player.classId)||CLASSES[0];
   const sz=gState.partySize||partySize;
@@ -1546,7 +1113,6 @@ function buildCombatChoices(player, combatState){
   return choices;
 }
 
-// Generate fresh GM combat choices for a player — called after each narration
 async function generateCombatChoices(player){
   if(!player||!gState)return;
   const stage=getSprenStage(gState.totalMoves||0);
@@ -1595,7 +1161,6 @@ Return ONLY a numbered list:
     if(parsed.length>=3){
       if(!gState.combatChoicesCache)gState.combatChoicesCache={};
       gState.combatChoicesCache[player.name]=parsed;
-      // Re-render if this is the current player
       if(myChar&&myChar.name===player.name)renderCombatActions();
     }
   }catch(e){/* silent — fallback choices still show */}
@@ -1606,7 +1171,6 @@ const BLADE_NAMES={windrunner:'Silverwind Blade',lightweaver:'Illusory Edge',edg
 let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
 let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
 let campaignId=null,pendingCampNum=null;
-// Bottom zone state: 'loading' | 'human' | 'continue' | 'waiting' | ''
 let bottomState='';
 let lastGMTs=''; // timestamp of last rendered GM entry — detects new ones
 
@@ -1724,7 +1288,6 @@ async function confirmNewCampaign(){
   await launchNewCampaign(pendingCampNum||1,name);
 }
 async function launchNewCampaign(num,name){
-  // Generate unique ID: slug of name + random 4-char suffix
   const slug=name.replace(/[^a-zA-Z0-9]/g,'').substring(0,16)||'Campaign';
   const suffix=Math.random().toString(36).substring(2,6);
   campaignId='Campaign_'+slug+'_'+suffix;
@@ -1754,10 +1317,8 @@ async function selectCampaign(id){
     renderPSZ();
     const sub=document.getElementById('title-sub');
     if(sub&&gState&&gState.campaignName)sub.textContent=gState.campaignName;
-    // Show party size only if pregame, hide if game underway
     const pszSection=document.getElementById('psz-wrap-section');
     if(pszSection)pszSection.style.display=(gState&&gState.phase==='playing')?'none':'block';
-    // Update button label
     const enterBtn=document.getElementById('enter-btn');
     if(enterBtn)enterBtn.querySelector('span').textContent=
       (gState&&gState.phase==='playing')?'⟁ Rejoin the Storm':'⟁ Create Character';
@@ -1791,7 +1352,6 @@ function genNPC(slot){
   const avail=NPC_ALL.filter(n=>!used.includes(n));
   const isFemale=Math.random()<0.5;
   const pool=isFemale?NPC_F.filter(n=>!used.includes(n)):NPC_M.filter(n=>!used.includes(n));
-  // Never use Radiant-N fallback — always pick from the full pool if preferred pool is exhausted
   const finalPool=pool.length?pool:(avail.length?avail:NPC_ALL);
   const name=finalPool[Math.floor(Math.random()*finalPool.length)];
   const color=NPC_COLORS[Math.floor(Math.random()*NPC_COLORS.length)];
@@ -1802,21 +1362,6 @@ function genNPC(slot){
 }
 
 // ══ SLOT RENDERING ══
-function renderSlots(st){
-  const sz=st&&st.partySize?st.partySize:partySize;
-  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
-  const grid=document.getElementById('slots-grid');
-  if(!grid)return;
-  grid.style.gridTemplateColumns=cols;
-  grid.innerHTML=Array.from({length:sz},(_,i)=>{
-    const p=st&&st.players?st.players[i]:null;
-    const isMe=myChar&&myChar.slot===i;
-    const isTurn=st&&st.turn===i&&st.phase==='playing';
-    if(!p)return`<div class="slot" onclick="pickSlot(${i})"><div class="slot-num">Slot ${i+1}</div><div class="slot-empty-txt">Empty — click to join</div></div>`;
-    if(p.isNPC)return`<div class="slot npc-slot"><div class="slot-num">Slot ${i+1} · AI</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div><span class="slot-tag npc">NPC</span></div>`;
-    return`<div class="slot filled"><div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div><div class="slot-pip"><div class="slot-dot" style="background:${p.color};"></div><div class="slot-pname">${p.name}</div></div><div class="slot-class">${p.className}</div>${isTurn?'<span class="slot-tag turn">⟁ Their Turn</span>':'<span class="slot-tag">Ready</span>'}</div>`;
-  }).join('');
-}
 
 // ══ ENTER / JOIN ══
 async function onEnter(){
@@ -1827,15 +1372,11 @@ async function onEnter(){
     gState=await loadState();
     if(gState){partySize=gState.partySize||partySize;if(gState.locationSeed)buildActs(gState.locationSeed);}
     myChar=loadMyChar();
-    // Already have a character — go to right screen
     if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
     if(myChar&&gState&&gState.phase==='pregame'){showScreen('lobby');renderLobby();startLobbyPolling();return;}
-    // Game in progress — late joiner: go to create to claim an NPC slot
     if(gState&&gState.phase==='playing'){
-      setTitleStatus('Game in progress — you can claim an NPC slot.');
-      showScreen('create');renderCreate();startCreatePolling();return;
+      showScreen('lobby');renderLobby();startLobbyPolling();return;
     }
-    // Pregame — find next open slot and go create
     const empty=findOpenSlot();
     if(empty===-1){setTitleStatus('All slots filled.');return;}
     await reserveSlot(empty);
@@ -1844,15 +1385,13 @@ async function onEnter(){
 function pickSlot(i){if(!gState||gState.players[i])return;reserveSlot(i);}
 
 function findOpenSlot(){
-  if(!gState||!gState.players)return 0;
-  // Find first slot that is empty or is my own placeholder
+  if(!gState||!gState.players)return -1;
   const idx=gState.players.findIndex(p=>!p||(p.isPlaceholder&&p.campaignId===campaignId));
   return idx===-1?-1:idx;
 }
 
 async function reserveSlot(i){
   mySlot=i;
-  // Write placeholder immediately to block concurrent joiners
   const placeholder={name:'...',className:'Joining...',classId:'pending',
     color:'#555',hp:0,maxHp:0,slot:i,isNPC:false,campaignId,isPlaceholder:true};
   gState.players[i]=placeholder;
@@ -1870,7 +1409,6 @@ function renderCreate(){
   showCreateStep(1);
   renderColors();renderClasses();renderRoles();renderWeapons();
   updateCreateSubmitBtn();
-  // Set initial selection immediately + after render
   pickCharType(true);
   setTimeout(()=>pickCharType(true),80);
 }
@@ -1889,11 +1427,9 @@ function showCreateStep(step){
     document.getElementById('create-s4').style.display='block';
     document.getElementById('create-s4-weapon').style.display=isRadiant?'none':'block';
     updateCreateSubmitBtn();
-    // Now stats-grid is visible — render stats
     rollStats();
     if(!isRadiant)renderWeapons();
   }
-  // Update step dots
   [1,2,3,4].forEach(i=>{
     const dot=document.getElementById('sdot-'+i);
     if(dot)dot.className='step-dot'+(i<=step?' active':'');
@@ -1905,7 +1441,6 @@ function createNext(){
   const err=document.getElementById('create-err');
   if(err)err.style.display='none';
   if(createStep===1){
-    // Validate type selected (isRadiant defaults true, fine)
     showCreateStep(2);
   } else if(createStep===2){
     if(isRadiant&&!selClass){if(err){err.textContent='Choose your Order.';err.style.display='block';}return;}
@@ -1985,7 +1520,6 @@ function rollStats(){
   const b={str:0,dex:0,int:0,wis:0,cha:0,end:0,...bonus};
   rolledStats={};
   STAT_KEYS.forEach(k=>rolledStats[k]=Math.min(20,r4d6()+(b[k]||0)));
-  // Only render if stats-grid is in the DOM and visible
   const el=document.getElementById('stats-grid');
   if(el)renderStats(rolledStats);
 }
@@ -1993,12 +1527,19 @@ function r4d6(){const d=[0,0,0,0].map(()=>Math.ceil(Math.random()*6));d.sort((a,
 function modStr(v){const m=Math.floor((v-10)/2);return(m>=0?'+':'')+m;}
 function renderStats(s){
   const flavors=['Blade Strength','Swiftness','Scholar Mind','Scout Eyes','Voice of Command','Endurance'];
-  document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox"><div class="sbox-name">${flavors[i]}</div><div class="sbox-val">${s[k]}</div><div class="sbox-mod">${modStr(s[k])}</div></div>`).join('');
+  const abbrevs=['STR','DEX','INT','WIS','CHA','END'];
+  document.getElementById('stats-grid').innerHTML=STAT_KEYS.map((k,i)=>`<div class="sbox">
+    <div class="sbox-name">${flavors[i]}</div>
+    <div style="font-family:var(--font-d);font-size:9px;letter-spacing:2px;color:var(--text5);margin-bottom:4px;">${abbrevs[i]}</div>
+    <div class="sbox-val">${s[k]}</div>
+    <div class="sbox-mod">${modStr(s[k])}</div>
+  </div>`).join('');
 }
 
 async function onCreateChar(){
-  const name=document.getElementById('in-name').value.trim();
   const err=document.getElementById('create-err');
+  try{
+  const name=document.getElementById('in-name').value.trim();
   if(!name){err.textContent='Speak your name first.';err.style.display='block';return;}
   if(isRadiant&&!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
   if(!isRadiant&&!selRole){err.textContent='Choose your Role.';err.style.display='block';return;}
@@ -2006,7 +1547,8 @@ async function onCreateChar(){
   if(!selColor){err.textContent='Choose your color.';err.style.display='block';return;}
   err.style.display='none';
   if(!rolledStats)rollStats();
-  const hp=10+rolledStats.end;
+  if(!rolledStats||!rolledStats.end)rollStats();
+  const hp=10+(rolledStats.end||10);
   const gender=(document.querySelector('input[name="gender"]:checked')||{value:'he/him'}).value;
   charBackstory=document.getElementById('in-backstory').value.trim();
   charAppearance=document.getElementById('in-appearance').value.trim();
@@ -2018,7 +1560,6 @@ async function onCreateChar(){
       slot:mySlot,isNPC:false,campaignId,gender,fragments:0,oathStage:1,
       origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
   } else {
-    // Hero
     const customWeaponName=document.getElementById('in-weapon-name').value.trim();
     const weaponName=customWeaponName||genWeaponName(selWeapon.id)+' '+selWeapon.name;
     myChar={name,isRadiant:false,className:selRole.name,classId:selRole.id,
@@ -2031,9 +1572,20 @@ async function onCreateChar(){
       origin:charOrigin,motivation:charMotivation,backstory:charBackstory,appearance:charAppearance};
   }
   saveMyChar(myChar);
+  if(mySlot===null||mySlot===undefined){
+    if(!gState.players)gState.players=new Array(partySize).fill(null);
+    mySlot=gState.players.findIndex(p=>!p||p.isPlaceholder);
+    if(mySlot===-1)mySlot=0;
+    myChar.slot=mySlot;
+  }
+  if(!gState.players)gState.players=new Array(partySize).fill(null);
   gState.players[mySlot]=myChar;
   await saveState(gState);
   showScreen('lobby');renderLobby();startLobbyPolling();
+  }catch(e){
+    console.error('onCreateChar failed:',e);
+    if(err){err.textContent='Something went wrong: '+e.message;err.style.display='block';}
+  }
 }
 
 // ══ LOBBY ══
@@ -2053,7 +1605,6 @@ async function assignNPC(slot){
 async function removeNPC(slot){if(!gState)return;gState.players[slot]=null;await saveState(gState);renderLobby();}
 async function removeSlot(slot){
   if(!gState)return;
-  // Shrink party size by 1, remove the last slot
   const sz=gState.partySize||partySize;
   if(sz<=2){alert('Party must have at least 2 slots.');return;}
   gState.partySize=sz-1;
@@ -2067,16 +1618,13 @@ let lobbyTimer=null;
 function startLobbyPolling(){
   if(lobbyTimer)clearInterval(lobbyTimer);
   lobbyTimer=setInterval(async()=>{
-    // Only poll if lobby screen is active
     if(!document.getElementById('s-lobby').classList.contains('active')){
       stopLobbyPolling();return;
     }
     try{
       const fresh=await loadState();
       if(!fresh)return;
-      // If game has started, jump in
       if(fresh.phase==='playing'){stopLobbyPolling();gState=fresh;showGameScreen();return;}
-      // Update gState and re-render if slots changed
       const prevJSON=JSON.stringify(gState&&gState.players);
       gState=fresh;
       if(JSON.stringify(gState.players)!==prevJSON){
@@ -2101,7 +1649,6 @@ function startCreatePolling(){
     try{
       const fresh=await loadState();
       if(!fresh)return;
-      // Update taken colors so picker is accurate
       const prevColors=JSON.stringify(gState.players.map(p=>p&&p.color));
       gState=fresh;
       if(JSON.stringify(gState.players.map(p=>p&&p.color))!==prevColors){
@@ -2115,7 +1662,6 @@ function stopCreatePolling(){
 }
 
 function claimSlot(i){
-  // Player on new device claims an existing filled slot as their own
   if(!gState||!gState.players[i])return;
   const p=gState.players[i];
   if(p.isNPC){alert('That slot belongs to an NPC.');return;}
@@ -2142,7 +1688,6 @@ function renderLobby(){
     const p=gState.players[i];
     const isMe=myChar&&myChar.slot===i;
     const amHost=isHost();
-    // Empty slot
     if(!p){
       return`<div class="slot" style="text-align:center;">
         <div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div>
@@ -2153,14 +1698,12 @@ function renderLobby(){
         </div>`:''}
       </div>`;
     }
-    // Placeholder — someone is mid-creation
     if(p.isPlaceholder){
       return`<div class="slot" style="text-align:center;">
         <div class="slot-num" style="margin-bottom:8px;">Slot ${i+1}</div>
         <div style="color:var(--amber2);font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:6px;">✦ Creating character...</div>
       </div>`;
     }
-    // NPC slot
     if(p.isNPC){
       const canClaim=!myChar&&isPlaying; // late joiner can claim
       return`<div class="slot npc-slot">
@@ -2174,7 +1717,6 @@ function renderLobby(){
         </div>
       </div>`;
     }
-    // Human slot
     const unclaimed=!isMe&&!p.isNPC&&!myChar&&!isPlaying;
     return`<div class="slot filled">
       <div class="slot-num">Slot ${i+1}${isMe?' · You':''}</div>
@@ -2197,11 +1739,9 @@ function renderLobby(){
   }
   actions.innerHTML+=`<button class="btn btn-sm" onclick="showScreen('campaign')">← Campaigns</button>`;
 }
-// Late joiner claims an NPC slot and goes to create screen to make a character
 async function lateJoinClaim(slot){
   if(!gState)return;
   mySlot=slot;
-  // Remove the NPC from this slot and replace with placeholder
   const placeholder={name:'...',className:'Joining...',classId:'pending',
     color:'#555',hp:0,maxHp:0,slot,isNPC:false,campaignId,isPlaceholder:true};
   gState.players[slot]=placeholder;
@@ -2229,7 +1769,6 @@ async function startCampaign(){
   gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
   gState.beatsSinceLastCombat=0;
   gState.preCombatTriggered=false;
-  // World Memory — persistent state across all GM calls
   gState.worldMemory={
     factions:{},        // { 'Alethi':'neutral', 'Parshendi':'hostile' }
     secrets:[],         // ['The tower has a mind of its own']
@@ -2247,7 +1786,6 @@ async function startCampaign(){
   await callGM(openingPrompt());
   const log=await loadLog(true);
   renderAll(log);
-  // Small delay ensures DOM is painted and lastGM choices are available
   setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(autoSpeakStory,300);},150);
 }
 // ══ WORLD MEMORY CONTEXT ══
@@ -2266,10 +1804,8 @@ function getWorldMemoryContext(){
   return'\n\nWORLD STATE: '+parts.join(' | ');
 }
 
-// Update world memory from GM response (called after each GM call)
 async function updateWorldMemory(gmText, action, turn){
   if(!gState||!gState.worldMemory)return;
-  // Use Haiku to extract world state updates from the GM response
   try{
     const prompt=`From this RPG story beat, extract world state changes as JSON. Return ONLY valid JSON, nothing else.
 Story: "${gmText.substring(0,600)}"
@@ -2339,7 +1875,6 @@ async function refreshGame(){
   gState=await loadState();
   if(!gState)return;
   if(gState.locationSeed)buildActs(gState.locationSeed);
-  // Initialize combat tracking for existing campaigns
   if(gState.phase==='playing'){
     if(gState.beatsUntilCombat==null)gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
     if(gState.beatsSinceLastCombat==null)gState.beatsSinceLastCombat=0;
@@ -2351,26 +1886,19 @@ async function refreshGame(){
   if(gState&&!gState.lastGM){const lg=[...log].reverse().find(e=>e.type==='gm');if(lg)gState.lastGM={text:lg.text,choices:lg.choices,ts:lg.ts};}
   const prevLastGMTs=lastGMTs;
   renderAll(log);
-  // Determine if we need to update the bottom zone
   const cur=gState.players[gState.turn];
   const nowMine=cur&&myChar&&!cur.isNPC&&cur.name===myChar.name;
   const nowNPC=cur&&cur.isNPC;
   const storyChanged=lastGMTs!==prevLastGMTs;
-  // Force bottom update in these cases:
-  // 1. Bottom zone is blank (fresh load / returning player)
-  // 2. Was waiting and now it's our turn — the key multiplayer transition
-  // 3. Was waiting and now it's an NPC turn
   const wasWaiting=bottomState==='waiting';
   if(bottomState===''||storyChanged||(wasWaiting&&(nowMine||nowNPC))){
     setBottomFromState(log);
   }
-  // Enter combat screen if combatMode is true and we're on game screen
   const onGame=document.getElementById('s-game').classList.contains('active');
   const onCombat=document.getElementById('s-combat').classList.contains('active');
   if(gState&&gState.combatMode&&!onCombat){
     enterCombat();return;
   }
-  // Also update turn pill even if bottom zone didn't change
   renderPill();
 }
 
@@ -2388,7 +1916,6 @@ function addActionLog(name, action, roll, hpMsg, total){
   const words=action.trim().replace(/\[.*?\]/g,'').trim().split(/\s+/);
   const verb=words[0]||'Acts';
   const noun=words.slice(1,4).join(' ')||(action.substring(0,20));
-  // Use total if provided (roll+bonus), otherwise raw roll
   const displayRoll=total||roll;
   const success=displayRoll>=18?'CRIT!':displayRoll>=14?'SUCCESS':displayRoll>=10?'PARTIAL':displayRoll>=6?'FAILED':'FUMBLE';
   const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -2422,7 +1949,6 @@ function renderActionLog(){
   }).join('');
 }
 
-// TLDR summary — generated after each GM response
 async function generateTLDR(storyText){
   if(!storyText||storyText.trim().length<50)return;
   const el=document.getElementById('tldr-text');if(!el)return;
@@ -2446,7 +1972,6 @@ async function generateTLDR(storyText){
 
 // ══ SPREN SVG COMPANIONS ══
 function getSprenSVG(classId, bond, isHero, roleName){
-  // Hero role icons — zoom+pulse animation
   if(isHero){
     const roleIcons={
       soldier:`<svg class="spren-svg" viewBox="0 0 44 44" style="color:#c44a28;animation:heroZoom 3s ease-in-out infinite,heroPulse 3s ease-in-out infinite;"><text x="22" y="30" text-anchor="middle" font-size="22" fill="currentColor">⚔</text></svg>`,
@@ -2466,34 +1991,24 @@ function getSprenSVG(classId, bond, isHero, roleName){
   const col=bond.color||'#aaa';
 
   const svgs={
-    // SYL — flowing water ribbon, silver-blue, two offset streams
     windrunner:`<svg class="spren-svg" viewBox="0 0 44 44"><path d="M6 32 C10 26 14 20 18 16 C22 12 28 10 36 12" stroke="${col}" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="38 4" style="animation:flowRibbon 1.8s linear infinite;"/><path d="M4 36 C9 29 14 24 20 20 C26 15 32 14 38 16" stroke="${col}" stroke-width="1" fill="none" stroke-linecap="round" stroke-dasharray="42 6" opacity="0.45" style="animation:flowRibbon 2.4s linear infinite 0.6s;"/><path d="M8 28 C12 24 16 20 20 18" stroke="${col}" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.25" stroke-dasharray="18 4" style="animation:flowRibbon 1.4s linear infinite 0.3s;"/></svg>`,
 
-    // PATTERN — tessellating geometry, gold-purple, counter-rotating layers
     lightweaver:`<svg class="spren-svg" viewBox="0 0 44 44"><g style="transform-origin:22px 22px;animation:spinSlow 8s linear infinite;"><polygon points="22,6 26,16 38,16 28,23 32,34 22,27 12,34 16,23 6,16 18,16" stroke="${col}" stroke-width="1.2" fill="none" opacity="0.8"/></g><g style="transform-origin:22px 22px;animation:spinSlowRev 5s linear infinite;"><polygon points="22,11 25,18 33,18 27,22 29,30 22,26 15,30 17,22 11,18 19,18" stroke="${col}" stroke-width="0.8" fill="${col}" fill-opacity="0.08"/></g><circle cx="22" cy="22" r="2.5" fill="${col}" opacity="0.7" style="animation:orbDrift 3s ease-in-out infinite;"/></svg>`,
 
-    // WYNDLE — growing vine, cultivationspren green
     edgedancer:`<svg class="spren-svg" viewBox="0 0 44 44"><path d="M22 38 Q18 30 20 22 Q21 16 22 10" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-dasharray="30 4" style="animation:vineGrow 2.2s ease-in-out infinite;"/><path d="M22 28 Q16 24 14 20" stroke="${col}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7" style="animation:vineGrow 2.2s ease-in-out infinite 0.4s;"/><path d="M22 22 Q28 18 30 14" stroke="${col}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7" style="animation:vineGrow 2.2s ease-in-out infinite 0.8s;"/><circle cx="22" cy="10" r="2" fill="${col}" opacity="0.9"/><circle cx="14" cy="20" r="1.5" fill="${col}" opacity="0.6"/><circle cx="30" cy="14" r="1.5" fill="${col}" opacity="0.6"/></svg>`,
 
-    // ROKSEL — stone crystal, slow pulse, no organic movement
     stoneward:`<svg class="spren-svg" viewBox="0 0 44 44"><polygon points="22,6 30,14 34,24 28,34 16,34 10,24 14,14" stroke="${col}" stroke-width="1.5" fill="${col}" fill-opacity="0.08" style="animation:starRay 3s ease-in-out infinite;"/><polygon points="22,12 27,18 29,24 25,30 19,30 15,24 17,18" stroke="${col}" stroke-width="1" fill="${col}" fill-opacity="0.12" style="animation:starRay 3s ease-in-out infinite 0.5s;"/><circle cx="22" cy="22" r="3" fill="${col}" opacity="0.5" style="animation:orbDrift 4s ease-in-out infinite;"/></svg>`,
 
-    // IVORY — inkspren, dark portal with orbiting dot
     elsecaller:`<svg class="spren-svg" viewBox="0 0 44 44"><circle cx="22" cy="22" r="12" stroke="${col}" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4 2" style="animation:spinSlow 6s linear infinite;"/><circle cx="22" cy="22" r="7" stroke="${col}" stroke-width="1.5" fill="none" opacity="0.6" style="animation:spinSlowRev 4s linear infinite;"/><circle cx="22" cy="22" r="2" fill="${col}" opacity="0.9"/><circle cx="32" cy="22" r="2" fill="${col}" opacity="0.8" style="transform-origin:22px 22px;animation:spinSlow 3s linear infinite;"/></svg>`,
 
-    // GLYS — mistspren star, truthwatcher pale green, rays pulse
     truthwatcher:`<svg class="spren-svg" viewBox="0 0 44 44"><g style="transform-origin:22px 22px;animation:starRay 2s ease-in-out infinite;"><line x1="22" y1="6" x2="22" y2="38" stroke="${col}" stroke-width="0.8" opacity="0.3"/><line x1="6" y1="22" x2="38" y2="22" stroke="${col}" stroke-width="0.8" opacity="0.3"/><line x1="10" y1="10" x2="34" y2="34" stroke="${col}" stroke-width="0.6" opacity="0.2"/><line x1="34" y1="10" x2="10" y2="34" stroke="${col}" stroke-width="0.6" opacity="0.2"/></g><polygon points="22,8 24.5,16 33,16 26.5,21 29,29 22,24 15,29 17.5,21 11,16 19.5,16" stroke="${col}" stroke-width="1.3" fill="${col}" fill-opacity="0.1" style="animation:starRay 2s ease-in-out infinite 0.3s;"/></svg>`,
 
-    // LUNU'ANAKI — lightspren, freedom/motion arcs orbiting fast
     willshaper:`<svg class="spren-svg" viewBox="0 0 44 44"><ellipse cx="22" cy="22" rx="14" ry="6" stroke="${col}" stroke-width="1.2" fill="none" opacity="0.5" style="transform-origin:22px 22px;animation:spinSlow 3s linear infinite;"/><ellipse cx="22" cy="22" rx="10" ry="14" stroke="${col}" stroke-width="1" fill="none" opacity="0.4" style="transform-origin:22px 22px;animation:spinSlowRev 4s linear infinite;"/><circle cx="22" cy="22" r="2.5" fill="${col}" opacity="0.8" style="animation:orbDrift 2s ease-in-out infinite;"/></svg>`,
 
-    // SPARK — ashspren embers, fire burning upward, orange-red
     dustbringer:`<svg class="spren-svg" viewBox="0 0 44 44"><ellipse cx="22" cy="30" rx="6" ry="4" fill="#ff4400" fill-opacity="0.5" style="animation:firePulse 0.8s ease-in-out infinite;"/><path d="M16 30 Q18 22 22 14 Q26 22 28 30" fill="${col}" fill-opacity="0.7" stroke="none" style="animation:firePulse 0.9s ease-in-out infinite;"/><path d="M18 30 Q20 24 22 18 Q24 24 26 30" fill="#ffaa22" fill-opacity="0.6" stroke="none" style="animation:firePulse 0.7s ease-in-out infinite 0.1s;"/><circle cx="14" cy="20" r="1.2" fill="${col}" style="animation:sparkFloat 1.5s ease-out infinite;"/><circle cx="30" cy="24" r="1" fill="#ffcc44" style="animation:sparkFloat 1.8s ease-out infinite 0.4s;"/><circle cx="20" cy="16" r="0.8" fill="#ff8800" style="animation:sparkFloat 1.2s ease-out infinite 0.7s;"/></svg>`,
 
-    // THE SIBLING — godspren, two rings with pulsing link
     bondsmith:`<svg class="spren-svg" viewBox="0 0 44 44"><circle cx="14" cy="22" r="8" stroke="${col}" stroke-width="1.5" fill="none" style="animation:linkPulse 2s ease-in-out infinite;"/><circle cx="30" cy="22" r="8" stroke="${col}" stroke-width="1.5" fill="none" style="animation:linkPulse 2s ease-in-out infinite 0.5s;"/><line x1="19" y1="22" x2="25" y2="22" stroke="${col}" stroke-width="2" style="animation:linkPulse 2s ease-in-out infinite 0.25s;"/><circle cx="14" cy="22" r="3" fill="${col}" fill-opacity="0.3" style="animation:orbDrift 3s ease-in-out infinite;"/><circle cx="30" cy="22" r="3" fill="${col}" fill-opacity="0.3" style="animation:orbDrift 3s ease-in-out infinite 1s;"/></svg>`,
 
-    // HIGHSPREN — law, sharp geometric star, cold silver
     skybreaker:`<svg class="spren-svg" viewBox="0 0 44 44"><g style="transform-origin:22px 22px;animation:spinSlow 10s linear infinite;"><polygon points="22,4 24.5,14 35,14 27,20 30,30 22,24 14,30 17,20 9,14 19.5,14" fill="${col}" fill-opacity="0.12"/><polygon points="22,4 24.5,14 35,14 27,20 30,30 22,24 14,30 17,20 9,14 19.5,14" stroke="${col}" stroke-width="1.3" fill="none"/></g><circle cx="22" cy="22" r="3" fill="${col}" opacity="0.6" style="animation:starRay 2.5s ease-in-out infinite;"/></svg>`,
   };
   return svgs[classId]||'';
@@ -2504,7 +2019,6 @@ function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
   const card=document.getElementById('ppip-'+playerName.replace(/\s/g,'_'));
   const fill=document.getElementById('hp-fill-'+playerName.replace(/\s/g,'_'));
   if(!card)return;
-  // Float number
   const float=document.createElement('div');
   float.className=isHeal?'heal-float':'dmg-float';
   float.textContent=(isHeal?'+':'-')+Math.abs(delta)+'HP';
@@ -2512,7 +2026,6 @@ function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
   card.style.position='relative';
   card.appendChild(float);
   setTimeout(()=>float.remove(),1100);
-  // Card animation
   card.classList.remove('took-damage','received-heal');
   void card.offsetWidth; // force reflow
   card.classList.add(isHeal?'received-heal':'took-damage');
@@ -2521,7 +2034,6 @@ function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
 
 // ══ SKIP TURN SYSTEM ══
 function isHost(){
-  // Host = the human player occupying slot 0
   if(!gState||!myChar)return false;
   const sz=gState.partySize||partySize;
   const slot0=gState.players[0];
@@ -2529,7 +2041,6 @@ function isHost(){
 }
 
 function isSelfTurn(){
-  // True if it's currently MY turn in exploration
   if(!gState||!myChar)return false;
   const cur=gState.players[gState.turn];
   return cur&&cur.name===myChar.name&&!cur.isNPC;
@@ -2540,14 +2051,11 @@ async function skipTurn(playerName){
   const sz=gState.partySize||partySize;
   const idx=gState.players.findIndex(p=>p&&p.name===playerName);
   if(idx<0)return;
-  // Log the skip
   await addLog({type:'system',who:'',
     text:`⏭ ${playerName}'s turn was skipped by ${myChar?myChar.name:'the host'}.`,
     choices:[]});
-  // Advance the turn
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
-  // Increment beat counter (exploration)
   if(!gState.combatMode){
     gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
     const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
@@ -2562,12 +2070,10 @@ async function skipTurn(playerName){
 
 async function skipCombatTurn(playerName){
   if(!gState)return;
-  // Auto-assign a defensive action for the skipped player
   if(!gState.pendingActions)gState.pendingActions={};
   gState.pendingActions[playerName]='[DEFEND] Hold position and brace — buying time for the others';
   await saveState(gState);
   renderCombatActions();
-  // Check if all humans now submitted
   const sz=gState.partySize||partySize;
   const allSubmitted=gState.players.slice(0,sz)
     .filter(p=>p&&!p.isNPC&&!p.downed)
@@ -2583,7 +2089,6 @@ function handleSkipTop(){
   if(gState.combatMode){
     const sz=gState.partySize||partySize;
     if(isSelfTurn()||awayMode){
-      // It's our combat turn — skip it now
       skipCombatTurn(myChar.name);
       awayMode=false;
     } else if(isHost()){
@@ -2592,16 +2097,13 @@ function handleSkipTop(){
         .filter(p=>p.name!==myChar.name);
       if(notSubmitted.length>0)skipCombatTurn(notSubmitted[0].name);
     } else {
-      // Not our turn — arm away mode
       awayMode=!awayMode;
     }
   } else {
     if(isSelfTurn()){
-      // It's our turn right now — skip immediately
       skipTurn(cur.name);
       awayMode=false;
     } else {
-      // Not our turn — toggle away mode (arms for when our turn comes)
       awayMode=!awayMode;
     }
   }
@@ -2615,32 +2117,27 @@ function renderSkipBtn(){
   if(!cur){btn.style.display='none';return;}
   const mine=cur.name===myChar.name&&!cur.isNPC;
 
-  // Always show if there's something to do
   btn.style.display='inline-flex';
 
   if(awayMode){
-    // Away mode armed — show active state
     btn.textContent='🟡 Away (armed)';
     btn.style.borderColor='var(--amber)';
     btn.style.color='var(--amber2)';
     btn.style.background='rgba(191,161,90,0.1)';
     btn.title='Away mode on — your next turn will auto-skip. Tap to cancel.';
   } else if(mine){
-    // It's our turn right now
     btn.textContent='⏭ Step away';
     btn.style.borderColor='var(--border2)';
     btn.style.color='var(--text4)';
     btn.style.background='transparent';
     btn.title='Skip your turn now';
   } else if(!mine&&!cur.isNPC){
-    // Someone else's turn — offer to pre-arm
     btn.textContent='⏭ Away next';
     btn.style.borderColor='var(--border2)';
     btn.style.color='var(--text4)';
     btn.style.background='transparent';
     btn.title='Auto-skip your next turn when it arrives';
   } else if(isHost()&&cur.isNPC){
-    // NPC turn — host can skip anyone
     btn.style.display='none';
   } else {
     btn.style.display='none';
@@ -2681,21 +2178,17 @@ function renderParty(){
 // ══ RENDER STORY TEXT ══
 function renderStory(log){
   const el=document.getElementById('story-text');if(!el)return;
-  // Build display log — inject lastGM if sheet cache is stale
   let dlog=[...log];
   if(gState&&gState.lastGM&&!dlog.some(e=>e.type==='gm')){
     dlog=[...dlog,{type:'gm',who:'',text:gState.lastGM.text,choices:gState.lastGM.choices,ts:gState.lastGM.ts||'mem'}];
   }
   if(!dlog.length){el.innerHTML='<div style="text-align:center;color:var(--text4);font-style:italic;padding:2rem 0;"><span data-tr>Waiting for all Radiants to join...</span></div>';return;}
 
-  // Find latest GM entry for display
   const latestGM=[...dlog].reverse().find(e=>e.type==='gm');
   const isNew=latestGM&&(latestGM.ts||'new')!==lastGMTs;
-  // Don't re-render if nothing new — prevents flicker on 15s poll
   const hasContent=el.innerHTML&&el.innerHTML.trim().length>50;
   if(!isNew&&hasContent)return;
 
-  // Build full log HTML
   el.innerHTML=dlog.map(e=>{
     if(e.type==='gm'){
       const raw=e.text
@@ -2718,12 +2211,9 @@ function renderStory(log){
     return'';
   }).join('');
 
-  // Detect new GM entry — update bottom state
   if(isNew&&latestGM){
     lastGMTs=latestGM.ts||'new';
     el.scrollTop=0;
-    // Only set bottom state if we're in loading/blank — never interrupt a read in progress
-    // Safe to gate: blank, loading, or waiting (turn just changed)
     const safeToGate=bottomState===''||bottomState==='loading'||bottomState==='waiting';
     if(safeToGate)setTimeout(()=>setBottomFromState(dlog),80);
   }
@@ -2736,7 +2226,6 @@ function setBottomLoading(){
   document.getElementById('bottom-human').style.display='none';
   const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   document.getElementById('bottom-waiting').style.display='none';
-  // Show thinking bar at top of screen
   const tb=document.getElementById('thinking-bar');
   if(tb)tb.style.display='block';
 }
@@ -2751,7 +2240,6 @@ function setBottomFromState(log){
   const choices=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:[];
 
   if(mine){
-    // Auto-skip if away mode is armed
     if(awayMode){
       awayMode=false;
       renderSkipBtn();
@@ -2767,10 +2255,8 @@ function setBottomFromState(log){
 function setBottomReadGate(choices){
   bottomState='human-gated';
   const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='none';
-  // Story reveal animation
   const storyEl=document.getElementById('story-text');
   if(storyEl){storyEl.classList.remove('story-reveal');void storyEl.offsetWidth;storyEl.classList.add('story-reveal');}
-  // Glyph flare on chronicle title
   const glyph=document.querySelector('.chronicle-title');
   if(glyph){glyph.classList.remove('glyph-flare');void glyph.offsetWidth;glyph.classList.add('glyph-flare');setTimeout(()=>glyph.classList.remove('glyph-flare'),700);}
   document.getElementById('bottom-loading').style.display='none';
@@ -2782,9 +2268,7 @@ function setBottomReadGate(choices){
   const hint=document.getElementById('continue-hint');
   btn.disabled=true;
   hint.textContent='Scroll down to read →';
-  // Store choices for after Continue
   btn._pendingChoices=choices;
-  // Enable after scroll or 4s
   setTimeout(enableContinue,4000);
   checkScrollEnable();
 }
@@ -2818,7 +2302,6 @@ function setBottomWaiting(name){
   wait.style.display='block';
   const wm=document.getElementById('waiting-msg');
   wm.textContent=name?`Waiting for ${name}...`:'Waiting...';
-  // Remove inline skip — now handled by top bar button
   const existing=document.getElementById('skip-btn-wrap');
   if(existing)existing.remove();
 }
@@ -2848,20 +2331,17 @@ function onContinue(){
   const npc=cur&&cur.isNPC;
 
   if(mine){
-    // Reveal choices for human
     bottomState='human';
     const h=document.getElementById('bottom-human');
     const ch=document.getElementById('action-choices');
     if(choices&&choices.length){
       const cleanChoices=choices.map(ch=>ch.replace(/\*\*/g,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim());
       ch.innerHTML=cleanChoices.map((display,i)=>`<button class="achoice" onclick="selAct(this,\`${display.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${display}</button>`).join('');
-      // Translate choices if Thai mode active
       if(lang==='th'){
         Promise.all(cleanChoices.map(d=>translateToThai(d))).then(translated=>{
           ch.querySelectorAll('.achoice').forEach((btn,i)=>{
             const orig=btn.getAttribute('onclick');
             btn.querySelector('span').nextSibling?btn.childNodes[btn.childNodes.length-1].textContent=translated[i]:btn.appendChild(document.createTextNode(translated[i]));
-            // Keep English in onclick for game logic, show Thai in button text
             const span=btn.querySelector('.achoice-num');
             btn.innerHTML='';btn.appendChild(span);btn.appendChild(document.createTextNode(translated[i]));
             btn.setAttribute('onclick',orig);
@@ -2872,7 +2352,6 @@ function onContinue(){
     h.style.display='block';
     setTimeout(()=>h.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
   } else if(npc&&!isLoading){
-    // Trigger NPC silently
     loadLog(false).then(log=>handleNPC(log));
   }
 }
@@ -2883,7 +2362,6 @@ async function handleNPC(log){
   const cur=gState.players[gState.turn];
   if(!cur||!cur.isNPC)return;
   isLoading=true;
-  // D4 pick — silent, no display
   const lastGM=[...log].reverse().find(e=>e.type==='gm');
   const opts=lastGM&&lastGM.choices&&lastGM.choices.length?lastGM.choices:['Takes a defensive stance','Scouts the area','Searches for allies','Draws weapon and advances'];
   const d4=Math.floor(Math.random()*Math.min(4,opts.length));
@@ -2894,7 +2372,6 @@ async function handleNPC(log){
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
-  // Track exploration beats and trigger pre-combat / combat
   if(!gState.combatMode){
     gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
     const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
@@ -2912,8 +2389,6 @@ async function handleNPC(log){
   const freshLog=await loadLog(true);
   renderAll(freshLog);
   setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
-  // NPC chain stops here — user must press Continue to advance
-  // setBottomFromState will show Continue button for next NPC turn
 }
 
 function npcPrompt(action,npc,from){
@@ -2957,31 +2432,24 @@ async function onSubmitAction(){
   if(isLoading)return;
   isLoading=true;
   stopSpeaking(); // stop voice when player acts
-  // Show loading immediately
   setBottomLoading();
   window.scrollTo({top:0,behavior:'smooth'});
-  // Roll dice
   const roll=Math.ceil(Math.random()*20);
   const sk=getStat(action);
   const sv=(myChar.stats&&myChar.stats[sk])||10;
   const bonus=Math.floor((sv-10)/2)+(myChar.bladeLevel||0);
   const total=Math.min(20,Math.max(1,roll+bonus));
   document.getElementById('dice-flash').textContent=`d20: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
-  // Apply HP/damage
   const dmgMsg=applyRollDamage(total,myChar,gState);
   if(dmgMsg)document.getElementById('dice-flash').textContent+=` ${dmgMsg}`;
-  // Record spren memory
   recordSprenMemory(action,total,gState.totalMoves||0);
-  // Add to action log
   addActionLog(myChar.name, action, roll, dmgMsg, total);
-  // Log action
   await addLog({type:'player',who:myChar.name,text:action,choices:[]});
   const from=gState.turn;
   const sz=gState.partySize||partySize;
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
-  // Track exploration beats and trigger pre-combat / combat
   if(!gState.combatMode){
     gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
     const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
@@ -2994,7 +2462,6 @@ async function onSubmitAction(){
   await saveState(gState);
   selActionText='';document.getElementById('custom-in').value='';
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
-  // GM response
   await callGM(turnPrompt(action,total,sk,from));
   isLoading=false;
   const freshLog=await loadLog(true);
@@ -3016,17 +2483,14 @@ function getStat(a){
 
 // ══ GM CALL ══
 async function callGM(prompt){
-  // Show thinking bar for ALL players
   const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='block';
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     if(data.error)throw new Error(JSON.stringify(data.error));
     const raw=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
-    // Robust choice extraction — handle all GM formatting variations
     let choices=[];
     let scene=raw;
-    // Try to split on [CHOICES] tag first
     const choicesTagIdx=raw.search(/\[CHOICES\]/i);
     if(choicesTagIdx>=0){
       scene=raw.slice(0,choicesTagIdx).trim();
@@ -3035,17 +2499,14 @@ async function callGM(prompt){
         .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
         .filter(ch=>ch.length>5);
     }
-    // Fallback: find numbered lines anywhere in the response
     if(!choices.length){
       choices=(raw.match(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm)||[])
         .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
         .filter(ch=>ch.length>5);
-      // Remove the choice lines from scene text
       if(choices.length){
         scene=raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm,'').replace(/\n{3,}/g,'\n\n').trim();
       }
     }
-    // Last resort: split on newlines after OPTIONS: or CHOICES: label
     if(!choices.length){
       const optMatch=raw.match(/(OPTIONS|CHOICES|ACTIONS)[:\s]*([\s\S]+)$/i);
       if(optMatch){
@@ -3056,9 +2517,7 @@ async function callGM(prompt){
     if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};spawnEnemies(scene);await saveState(gState);}
     await addLog({type:'gm',who:'',text:scene,choices});
     const tb2=document.getElementById('thinking-bar');if(tb2)tb2.style.display='none';
-    // Update world memory async (non-blocking)
     updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
-    // Check for oath moment for current player
     if(gState&&myChar)checkOathMoment(scene,myChar).catch(()=>{});
   }catch(e){
     console.error('callGM error:',e.message);
@@ -3075,7 +2534,6 @@ function turnPrompt(action,roll,sk,from){
   const who=gState.players[from];const loc=act.location||act.name;
   const rd=roll>=18?'CRITICAL SUCCESS':roll>=14?'Strong success':roll>=10?'Partial success — complications':roll>=6?'Failure with consequences':'CRITICAL FAILURE — dramatic setback';
   const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
-  // Phase instruction — tells GM how close to combat we are
   const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
   const preCombatNow=gState.preCombatTriggered&&!gState.combatMode;
   const phaseInstr=gState.combatMode?'':preCombatNow?
@@ -3083,7 +2541,6 @@ function turnPrompt(action,roll,sk,from){
     beatsLeft<=1?
     '\n\nPHASE: FINAL EXPLORATION BEAT. Hint strongly that danger is imminent — something is very wrong. Maximum tension. Last beat before combat.':
     '\n\nPHASE: EXPLORATION ('+beatsLeft+' beats before conflict). Focus on discovery and world-building. Do NOT start combat yet.';
-  // Generate act consequence at transition points
   if(m===59)generateActConsequence(1).catch(()=>{});
   if(m===119)generateActConsequence(2).catch(()=>{});
   const actHint=m===59?`\n\nACT TRANSITION: Close out ${loc}, foreshadow ${ACTS[1].location}.`:m===119?`\n\nACT TRANSITION: Final Act II turn. Foreshadow climax in ${ACTS[2].location}.`:'';
@@ -3110,33 +2567,9 @@ First person "I do X" or "${next?next.name:'player'} does X". One sentence each.
 }
 
 // ══ COMBAT SYSTEMS ══
-function spawnEnemies(sceneText){
-  if(!sceneText.includes('[COMBAT]'))return;
-  if(!gState)return;
-  const existing=gState.enemies||[];
-  if(existing.some(e=>e.hp>0))return;
-  const sz=gState.partySize||partySize;
-  const lvl=Math.floor((gState.totalMoves||0)/20)+1;
-  const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
-  let pool=[];
-  if(loc.includes('shadesmar')||loc.includes('nexus'))pool=[{name:'Voidspren',type:'Spirit',hp:8+lvl,maxHp:8+lvl},{name:'Gloomform',type:'Unmade Fragment',hp:12+lvl*2,maxHp:12+lvl*2}];
-  else if(loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar'))pool=[{name:'Parshendi Scout',type:'Warrior',hp:10+lvl,maxHp:10+lvl},{name:'Parshendi Shardbearer',type:'Elite',hp:18+lvl*2,maxHp:18+lvl*2}];
-  else if(loc.includes('braize')||loc.includes('damnation'))pool=[{name:'Fused',type:'Ancient',hp:20+lvl*2,maxHp:20+lvl*2},{name:'Regal',type:'Parsh Void',hp:12+lvl,maxHp:12+lvl}];
-  else pool=[{name:'Void Creature',type:'Unknown',hp:10+lvl,maxHp:10+lvl},{name:'Darkform',type:'Soldier',hp:14+lvl,maxHp:14+lvl}];
-  gState.enemies=pool.slice(0,Math.min(sz,2)).map(e=>({...e,id:Math.random()}));
-  rollInitiative(gState);
-}
-function rollInitiative(st){
-  const sz=st.partySize||partySize;
-  const combatants=[];
-  st.players.slice(0,sz).filter(Boolean).forEach(p=>{const dex=p.stats&&p.stats.dex||10;combatants.push({name:p.name,type:'player',initiative:Math.ceil(Math.random()*20)+Math.floor((dex-10)/2),isNPC:p.isNPC});});
-  (st.enemies||[]).filter(e=>e.hp>0).forEach(e=>{combatants.push({name:e.name,type:'enemy',initiative:Math.ceil(Math.random()*20)+2});});
-  combatants.sort((a,b)=>b.initiative-a.initiative);
-  st.combatOrder=combatants;st.combatRound=1;st.combatActive=true;
-}
+
 function renderEnemies(){
   const p=document.getElementById('enemy-panel');const el=document.getElementById('enemy-list');if(!p||!el||!gState)return;
-  // Only show in game screen if old combat system active (legacy) — new combat uses s-combat screen
   if(gState.combatMode){p.style.display='none';return;}
   const living=(gState.enemies||[]).filter(e=>e.hp>0);
   p.style.display=living.length?'block':'none';
@@ -3144,7 +2577,6 @@ function renderEnemies(){
 }
 function renderInitiativeOrder(){
   const p=document.getElementById('initiative-panel');if(!p||!gState)return;
-  // Hide in exploration — only show if old legacy combat is active
   if(gState.combatMode||!gState.combatActive||!(gState.combatOrder||[]).length){p.style.display='none';return;}
   p.style.display='block';
   document.getElementById('init-round-label').textContent=`⚔ Round ${gState.combatRound||1} — Initiative`;
@@ -3153,7 +2585,6 @@ function renderInitiativeOrder(){
     const isEnemy=co.type==='enemy';
     const isCur=cur&&co.name===cur.name;
     const dead=(gState.enemies||[]).find(e=>e.name===co.name&&e.hp<=0);
-    // CSS handles the glow animation via .init-active class
   return`<div class="init-pill${isCur&&!dead?' init-active':''}" style="border:1px solid ${dead?'var(--border)':isCur&&!isEnemy?'var(--amber)':isCur&&isEnemy?'var(--coral2)':isEnemy?'rgba(196,74,40,0.4)':'rgba(191,161,90,0.3)'};background:${isCur?isEnemy?'rgba(196,74,40,0.18)':'rgba(191,161,90,0.18)':'var(--bg3)'};color:${dead?'var(--text5)':isCur?isEnemy?'#ff8060':'var(--gold-bright)':isEnemy?'var(--coral2)':'var(--amber2)'};text-decoration:${dead?'line-through':'none'};transform:${isCur&&!dead?'scale(1.1)':'scale(1)'};font-weight:${isCur&&!dead?'600':'400'};transition:all 0.3s;">${isCur?'⟁ ':''}${co.initiative} ${co.name}</div>`;
   }).join('');
 }
@@ -3176,7 +2607,6 @@ function applyRollDamage(roll,actor,st){
     const d=Math.floor(Math.random()*4)+2;actor.hp=Math.max(0,actor.hp-d);msg=`💀 -${d} HP${actor.hp===0?' DOWNED!':''}`;
   }
   if(actor.classId==='edgedancer'&&roll>=10&&roll<18&&actor.hp<actor.maxHp){actor.hp=Math.min(actor.maxHp,actor.hp+1);msg+=' ✦ Regrowth +1';}
-  // Clean up dead enemies
   if(st.enemies)st.enemies=st.enemies.filter(e=>e.hp>0);
   if(st.enemies&&!st.enemies.length){st.combatActive=false;st.combatOrder=[];st.combatRound=0;}
   const idx=st.players.findIndex(p=>p&&p.name===actor.name);
@@ -3237,7 +2667,6 @@ function getSprenMemoryContext(){
   return lines.length?'\n\nSPREN MEMORIES (weave naturally into narration):\n'+lines.join('\\n'):'';
 }
 function getCharContext(){
-  // Compact backstory/identity context for the GM
   if(!myChar)return'';
   const parts=[];
   if(myChar.origin)parts.push('Origin: '+myChar.origin);
@@ -3276,7 +2705,6 @@ function renderProgress(){
 // ══ TURN PILL ══
 function renderPill(){
   const pill=document.getElementById('turn-pill');if(!gState||!pill)return;
-  // Don't update pill while GM is deliberating
   const tb=document.getElementById('thinking-bar');
   if(tb&&tb.style.display==='block'){return;} // keep showing previous turn during deliberation
   const cur=gState.players[gState.turn];
@@ -3316,7 +2744,6 @@ function renderSheet(){
     <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>`;
 }
 
-// Share Moment removed
 // ══ PDF EXPORT ══
 function exportToPDF(){
   const h=document.getElementById('print-campaign-name');const d=document.getElementById('print-date');
@@ -3333,14 +2760,12 @@ function startPolling(){
     if(document.getElementById('s-game').classList.contains('active')&&!isLoading){
       await refreshGame();
     } else if(document.getElementById('s-combat').classList.contains('active')&&!isLoading){
-      // Poll combat state for multiplayer sync
       const fresh=await loadState();
       if(fresh&&JSON.stringify(fresh.pendingActions)!==JSON.stringify(gState&&gState.pendingActions)){
         gState=fresh;renderCombatScreen();renderCombatActions();
       }
     }
   },8000);
-  // Window scroll listener for Continue button detection
   if(!window._stormScroll){
     window.addEventListener('scroll',()=>{if(bottomState==='human-gated'||bottomState==='continue')checkScrollEnable();},{passive:true});
     window._stormScroll=true;
@@ -3353,7 +2778,6 @@ function saveMyChar(ch){
   if(ch&&ch.slot!=null)localStorage.setItem(charKey(ch.slot),JSON.stringify(ch));
 }
 function loadMyChar(){
-  // Scan all slot keys for this campaign and find one that's still valid in gState
   if(!campaignId||!gState)return null;
   const sz=gState.partySize||partySize;
   for(let i=0;i<sz;i++){
@@ -3361,19 +2785,16 @@ function loadMyChar(){
       const raw=localStorage.getItem(charKey(i));
       if(!raw)continue;
       const ch=JSON.parse(raw);
-      // Verify this slot still belongs to this character in gState
       const slotPlayer=gState.players&&gState.players[i];
       if(slotPlayer&&slotPlayer.name===ch.name&&!slotPlayer.isNPC){
         return ch;
       }
-      // Slot was reassigned or cleared — remove stale key
       localStorage.removeItem(charKey(i));
     }catch(e){localStorage.removeItem(charKey(i));}
   }
   return null;
 }
 function clearMyChar(){
-  // Clear all slot keys for this campaign on this device
   if(!campaignId)return;
   const sz=(gState&&gState.partySize)||partySize;
   for(let i=0;i<sz;i++)localStorage.removeItem(charKey(i));
@@ -3392,7 +2813,6 @@ async function onReset(){
 }
 
 // ══════════════════════════════════════
-// COMBAT ENGINE
 // ══════════════════════════════════════
 
 // ══ ENVIRONMENTAL HAZARDS ══
@@ -3447,7 +2867,6 @@ function shouldSpawnBoss(gState){
   const actNum=getAct(gState.totalMoves||0).num||1;
   const bossKey=`bossDefeated_act${actNum}`;
   if(gState[bossKey])return false;
-  // Boss spawns on 2nd combat of each act
   const actCombats=gState[`actCombats_${actNum}`]||0;
   return actCombats===1; // 0-indexed: second combat
 }
@@ -3459,7 +2878,6 @@ async function checkHighstorm(){
   gState.highstorm=true;
   const sz=gState.partySize||partySize;
   await saveState(gState);
-  // GM writes the highstorm scene
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name} the ${p.className}`:'?').join(', ');
   const loc=getAct(gState.totalMoves||0).location||'Roshar';
   const prompt=`Cosmere RPG GM. A HIGHSTORM has struck ${loc}!
@@ -3477,7 +2895,6 @@ Write a vivid 3-sentence highstorm scene: the wall of wind and lightning hitting
 Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
   setBottomLoading();
   await callGM(prompt);
-  // After highstorm: full Stormlight recharge
   gState.players.slice(0,sz).filter(Boolean).forEach(p=>{
     const healed=p.maxHp-p.hp;
     if(healed>0)animateHPChange(p.name,Math.round((p.hp/p.maxHp)*100),100,healed,true);
@@ -3491,16 +2908,13 @@ Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
   setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);},150);
 }
 
-// Show combat screen and initialize
 async function enterCombat(){
   if(!gState)return;
   try{
   const sz=gState.partySize||partySize;
   const actNum=getAct(gState.totalMoves||0).num||1;
   const avgBlade=gState.players.slice(0,sz).filter(Boolean).reduce((a,p)=>a+(p.bladeLevel||0),0)/sz;
-  // Spawn enemies scaled to act + party
   const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
-  // Large pool per region — pick randomly each combat for variety
   const ENEMY_POOLS={
     shadesmar:[ {name:'Voidspren',type:'Spirit',baseHP:8,dmg:3,attackBonus:2},{name:'Gloomform',type:'Unmade Fragment',baseHP:14,dmg:5,attackBonus:4},{name:'Midnight Essence',type:'Unmade Shard',baseHP:11,dmg:4,attackBonus:3},{name:'Cognitive Shadow',type:'Remnant',baseHP:9,dmg:3,attackBonus:3},{name:'Spren Construct',type:'Splinter',baseHP:7,dmg:4,attackBonus:4} ],
     plains:[ {name:'Parshendi Warrior',type:'Warrior',baseHP:10,dmg:4,attackBonus:3},{name:'Parshendi Shardbearer',type:'Elite',baseHP:18,dmg:7,attackBonus:5},{name:'Parshendi Scout',type:'Scout',baseHP:8,dmg:3,attackBonus:3},{name:'Stormform Parshendi',type:'Voidbringer',baseHP:14,dmg:6,attackBonus:4},{name:'Warform Soldier',type:'Heavy',baseHP:16,dmg:5,attackBonus:4} ],
@@ -3517,7 +2931,6 @@ async function enterCombat(){
   else if(loc.includes('urithiru')||loc.includes('kharbranth')||loc.includes('thaylen'))poolKey='urithiru';
   else if(loc.includes('hearthstone')||loc.includes('reshi')||loc.includes('purelake')||loc.includes('bavland'))poolKey='hearthstone';
   else if(loc.includes('sea')||loc.includes('aimian')||loc.includes('aimia'))poolKey='sea';
-  // Shuffle pool and pick 2 different enemies
   const fullPool=ENEMY_POOLS[poolKey];
   const shuffled=[...fullPool].sort(()=>Math.random()-0.5);
   const pool=shuffled.slice(0,2);
@@ -3534,13 +2947,10 @@ async function enterCombat(){
   gState.pendingActions={};
   gState.combatLog=[];
   gState.diceLog=[];
-  // Set environmental hazard
   const combatLoc=getAct(gState.totalMoves||0).location||'';
   gState.combatHazard=getHazardForLocation(combatLoc);
-  // Track act combats for boss spawning
   const combatActNum=getAct(gState.totalMoves||0).num||1;
   gState[`actCombats_${combatActNum}`]=(gState[`actCombats_${combatActNum}`]||0)+1;
-  // Check boss spawn
   if(shouldSpawnBoss(gState)){
     const boss=BOSS_TEMPLATES[combatActNum-1]||BOSS_TEMPLATES[0];
     const phase=boss.phases[0];
@@ -3563,7 +2973,6 @@ async function enterCombat(){
   await callCombatGM('opening');
   }catch(e){
     console.error('enterCombat failed:',e);
-    // Recover — reset combat state and return to game
     if(gState){gState.combatMode=false;gState.combatPhase=null;await saveState(gState);}
     showScreen('game');showGameScreen();
   }
@@ -3572,14 +2981,10 @@ async function enterCombat(){
 function renderCombatScreen(){
   if(!gState)return;
   const sz=gState.partySize||partySize;
-  // Round label
   const rl=document.getElementById('combat-round-label');
   if(rl)rl.textContent=`Round ${gState.combatRound||1}`;
-  // Party column
   renderCombatParty();
-  // Enemy column
   renderCombatEnemies();
-  // Initiative strip
   renderCombatInitiative();
 }
 
@@ -3591,7 +2996,6 @@ function renderCombatParty(){
     const pct=Math.round((p.hp/p.maxHp)*100);
     const hpCol=pct>60?'var(--teal2)':pct>30?'#BA7517':'var(--coral2)';
     const bond=SPREN_BONDS[p.classId];
-    // In simultaneous combat, highlight MY character card (not turn-based)
     const isMyChar=myChar&&p.name===myChar.name;
     const notYetSubmitted=!(gState.pendingActions&&gState.pendingActions[p.name]);
     const isActive=gState.combatPhase==='choosing'&&isMyChar&&notYetSubmitted;
@@ -3651,7 +3055,6 @@ function renderDiceTicker(){
     el.innerHTML='<div style="color:var(--text5);font-size:11px;font-style:italic;">Dice results will appear here each round...</div>';
     return;
   }
-  // Show last 3 rounds, newest first
   const recent=[...log].reverse().slice(0,3);
   el.innerHTML=recent.map(round=>{
     const entries=round.entries||[];
@@ -3668,7 +3071,6 @@ function renderDiceTicker(){
       </div>`;
     }).join('');
   }).join('');
-  // Scroll to top to show latest
   el.scrollTop=0;
 }
 
@@ -3701,19 +3103,15 @@ function renderCombatActions(){
     return;
   }
 
-  // phase === 'choosing' — SIMULTANEOUS: every human picks independently
-  // myChar is always the human player on this device — check them directly
   const myPlayer=gState.players.find(p=>p&&myChar&&p.name===myChar.name);
   const iAmHuman=myPlayer&&!myPlayer.isNPC&&!myPlayer.downed;
   const mySubmitted=!!(gState.pendingActions&&gState.pendingActions[myChar.name]);
 
   let html='';
-  // Show who has submitted so far
   gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed&&gState.pendingActions&&gState.pendingActions[p.name]).forEach(p=>{
     html+=`<div class="combat-submitted">✓ ${p.name}: ready</div>`;
   });
 
-  // Auto-submit defend if away mode armed
   if(iAmHuman&&!mySubmitted&&awayMode){
     awayMode=false;
     renderSkipBtn();
@@ -3729,7 +3127,6 @@ function renderCombatActions(){
       const tag=m?m[1]:'';
       const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':'var(--coral2)';
       const tagBadge=tag?'<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>':'';
-      // Pass FULL original choice (with [HEAL]/[ATTACK]/[DEFEND] tag) so resolveRound can detect type
       const safeOrig=ch.replace(/`/g,"'").replace(/"/g,'&quot;');
       return'<button class="achoice" onclick="selectCombatAction(this,`'+safeOrig+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
     }).join('');
@@ -3742,7 +3139,6 @@ function renderCombatActions(){
   } else if(!iAmHuman){
     html+=`<div class="combat-waiting">Spectating — NPCs acting...</div>`;
   }
-  // Host skip button for combat — show for players who haven't submitted
   if(isHost()||isSelfTurn()){
     const notSubmitted=gState.players.slice(0,sz)
       .filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name]))
@@ -3752,12 +3148,10 @@ function renderCombatActions(){
     });
   }
 
-  // Resolve button — show when ALL humans have submitted
   if(allSubmitted){
     html+=`<button class="resolve-btn" onclick="resolveRound()">⚔ Resolve Round →</button>`;
   }
   el.innerHTML=html;
-  // Translate action choices and labels if Thai active
   if(lang==='th')setTimeout(applyThaiToPage,100);
 }
 
@@ -3773,7 +3167,6 @@ async function submitCombatAction(){
   const custom=document.getElementById('combat-custom-in');
   let action=custom&&custom.value.trim()||combatSelectedAction;
   if(!action||!myChar)return;
-  // If custom text with no tag, auto-detect tag from keywords
   if(custom&&custom.value.trim()&&!/\[(HEAL|ATTACK|DEFEND)\]/.test(action)){
     const lower=action.toLowerCase();
     if(/heal|mend|regrow|restore|revive|tend|bandage/.test(lower))action='[HEAL] '+action;
@@ -3786,7 +3179,6 @@ async function submitCombatAction(){
   combatSelectedAction='';
   await saveState(gState);
   renderCombatActions();
-  // Auto NPC actions
   const sz=gState.partySize||partySize;
   gState.players.slice(0,sz).filter(p=>p&&p.isNPC&&!p.downed).forEach(p=>{
     if(!gState.pendingActions[p.name]){
@@ -3803,13 +3195,10 @@ async function resolveRound(){
   try{
   gState.combatPhase='resolving';
   renderCombatActions();
-  // Build round summary for GM
   const sz=gState.partySize||partySize;
   const actions=Object.entries(gState.pendingActions||{}).map(([name,action])=>`${name}: ${action}`).join(' | ');
-  // Build dice log for this round
   const roundDice={round:gState.combatRound,entries:[]};
 
-  // Log player actions with dice rolls
   const sz2=gState.partySize||partySize;
   Object.entries(gState.pendingActions||{}).forEach(([name,action])=>{
     const p=gState.players.find(x=>x&&x.name===name);
@@ -3825,7 +3214,6 @@ async function resolveRound(){
       const roll=Math.ceil(Math.random()*20);
       const total=Math.min(20,Math.max(1,roll+bonus));
       const result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
-      // Apply damage to player for misses/fumbles
       const db=(CLASSES.find(cl=>cl.id===p.classId)||CLASSES[0]).dmgBonus||{crit:2,hit:1};
       const liveEn=(gState.combatEnemies||[]).filter(e=>!e.downed);
       const target=liveEn[Math.floor(Math.random()*liveEn.length)];
@@ -3849,7 +3237,6 @@ async function resolveRound(){
     }
   });
 
-  // Enemy attacks — auto-resolve
   const enemyAttackResults=[];
   const livingEnemies=(gState.combatEnemies||[]).filter(e=>!e.downed);
   const livingParty=gState.players.slice(0,sz).filter(p=>p&&!p.downed);
@@ -3870,15 +3257,12 @@ async function resolveRound(){
     if(myChar&&myChar.name===target.name){myChar=target;saveMyChar(target);}
   });
 
-  // Apply environmental hazard
   if(gState.combatHazard){
     const hazMsgs=applyHazardEffect(gState.combatHazard,gState);
     hazMsgs.forEach(m=>roundDice.entries.push({name:'⚠ Hazard',roll:'-',bonus:null,total:null,result:'ENV',detail:m,isEnemy:false}));
-    // Show hazard in banner
     const hb=document.getElementById('combat-hazard-banner');
     if(hb){hb.style.display='block';hb.textContent='⚠ '+gState.combatHazard.name+': '+gState.combatHazard.effect;}
   }
-  // Boss phase check
   if(gState.isBossFight&&gState.combatEnemies&&gState.combatEnemies[0]){
     const boss=gState.combatEnemies[0];
     const phases=boss.phases||[];
@@ -3893,19 +3277,15 @@ async function resolveRound(){
       }
     }
   }
-  // Save dice log (keep last 10 rounds)
   if(!gState.diceLog)gState.diceLog=[];
   gState.diceLog.push(roundDice);
   if(gState.diceLog.length>10)gState.diceLog.shift();
   renderDiceTicker();
-  // Healing already processed above in player action loop
   await saveState(gState);
-  // Check win/loss
   const allEnemiesDead=(gState.combatEnemies||[]).every(e=>e.downed||e.hp<=0);
   const allPartyDowned=gState.players.slice(0,sz).filter(Boolean).every(p=>p.downed);
   if(allEnemiesDead){gState.combatPhase='victory';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('victory');return;}
   if(allPartyDowned){gState.combatPhase='defeat';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('defeat');return;}
-  // Call GM for round narrative
   await callCombatGM('round',playerOutcomes.join(' | '),enemyAttackResults);
   gState.pendingActions={};
   gState.combatRound=(gState.combatRound||1)+1;
@@ -3915,7 +3295,6 @@ async function resolveRound(){
   renderCombatActions();
   }catch(e){
     console.error('resolveRound failed:',e);
-    // Try to recover — reset to choosing so players can try again
     if(gState){gState.combatPhase='choosing';gState.pendingActions={};await saveState(gState).catch(()=>{});}
     renderCombatScreen();renderCombatActions();
   }
@@ -3964,12 +3343,10 @@ Write 2 sentences: the moment of defeat — what happens as the last party membe
     const data=await res.json();
     const text=data.content&&data.content[0]?data.content[0].text.replace(/\*\*([^*]+)\*\*/g,'$1').trim():'The battle rages on.';
     if(el){el.textContent=text;el.parentElement.style.opacity='1';}
-    // Translate combat narrative to Thai if active
     if(lang==='th'&&el){
       translateToThai(text).then(thai=>{
         if(thai&&thai!==text){
           el.textContent=thai;
-          // Re-read the translated version
           setTimeout(()=>{if(voiceEnabled&&!voiceActive)speakFromElement(thai);},300);
         }
       }).catch(()=>{});
@@ -3977,21 +3354,17 @@ Write 2 sentences: the moment of defeat — what happens as the last party membe
     gState.combatLog=gState.combatLog||[];
     gState.combatLog.push({round:gState.combatRound,text,type});
     await saveState(gState);
-    // Combat voice — only speakFromElement, not both
     setTimeout(()=>{
       const voiceEl=document.getElementById('combat-narrative-text');
       if(voiceEl&&voiceEnabled)speakFromElement(voiceEl.textContent);
     },200);
   }catch(e){if(el){el.textContent='The battle continues...';el.parentElement.style.opacity='1';}}
-  // Transition to choosing phase after opening or round narration
   if(type==='opening'||type==='round'){
     gState.combatPhase='choosing';
-    // Clear old choices cache so fresh ones generate
     gState.combatChoicesCache={};
     await saveState(gState);
     renderCombatScreen();
     renderCombatActions();
-    // Generate fresh GM choices for each human player (async, non-blocking)
     const sz2=gState.partySize||partySize;
     gState.players.slice(0,sz2).filter(p=>p&&!p.isNPC&&!p.downed).forEach(p=>{
       generateCombatChoices(p).catch(()=>{});
@@ -3999,7 +3372,6 @@ Write 2 sentences: the moment of defeat — what happens as the last party membe
   }
 }
 
-// Exit combat back to exploration
 async function exitCombat(won){
   if(!gState)return;
   try{
@@ -4018,7 +3390,6 @@ async function exitCombat(won){
   showScreen('game');
   showGameScreen();
   setBottomLoading();
-  // GM writes verbose aftermath
   await callGM(combatAftermathPrompt(won));
   const freshLog=await loadLog(true);
   renderAll(freshLog);
@@ -4044,7 +3415,6 @@ Write a VERBOSE aftermath scene (4-6 sentences): the immediate aftermath of comb
 One sentence each. Tag: [DISCOVERY] or [DECISION].${getGenderContext()}`;
 }
 
-// Speak from a text string directly (for combat narrative)
 function speakFromElement(text){
   if(!voiceEnabled||!window.speechSynthesis||!text)return;
   stopSpeaking();
@@ -4165,7 +3535,6 @@ function updateAutoSpeakBtn(){
 
 function setVoice(voiceVal){
   localStorage.setItem('sc_voice',voiceVal);
-  // Map dropdown value directly to Web Speech preference order
   const voiceMap={
     'male_deep':'Daniel,Aaron,Fred,Alex,Arthur',
     'male_warm':'Alex,Aaron,Daniel,Fred',
@@ -4177,8 +3546,7 @@ function setVoice(voiceVal){
   window._webSpeechPreference=(voiceMap[voiceVal]||'Daniel,Aaron,Alex').split(',');
   if(voiceActive){stopSpeaking();setTimeout(speakStory,100);}
 }
-// Keep old name as alias so any stale references don't crash
-function setKokoroVoice(v){setVoice(v);}
+
 
 function loadVoicePreference(){
   const saved=localStorage.getItem('sc_voice');
@@ -4255,7 +3623,6 @@ function stopAudio(){
   document.getElementById('audio-label').textContent='OFF';
 }
 function toggleAudio(){
-  // Audio requires user gesture — this IS the user gesture
   if(!audioOn)startAudio();else stopAudio();
 }
 function setVolume(v){if(masterGain)masterGain.gain.value=v/100*0.6;}
@@ -4271,13 +3638,8 @@ function setStormIntensity(type){
 
 // ══ BOOT ══
 // ══════════════════════════════════════
-// LANGUAGE / THAI TRANSLATION SYSTEM
 // ══════════════════════════════════════
 // ══════════════════════════════════════
-// LANGUAGE SYSTEM — whole-page translation
-// Claude writes everything in English.
-// If Thai is active, we translate the rendered
-// story text via API just before showing it.
 // ══════════════════════════════════════
 let lang=localStorage.getItem('sc_lang')||'en';
 
@@ -4300,7 +3662,6 @@ function applyLang(){
   if(lang==='th')setTimeout(applyThaiToPage,200);
 }
 
-// Batch translate array of strings in one API call
 async function batchTranslate(strings){
   if(!strings.length)return[];
   const uncached=strings.filter(s=>!thaiCache[s]);
@@ -4325,29 +3686,22 @@ async function batchTranslate(strings){
 let thaiCache={};
 let uiTranslating=false;
 
-// Translate all [data-tr] elements on the page
 async function applyThaiToPage(){
   if(uiTranslating||lang!=='th')return;
   uiTranslating=true;
 
-  // Collect ALL visible text nodes in the document
-  // Skip: script, style, input values, already-Thai text, very short strings
   const textNodes=[];
   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{
     acceptNode(node){
       const parent=node.parentElement;
       if(!parent)return NodeFilter.FILTER_REJECT;
       const tag=parent.tagName;
-      // Skip non-visible or non-translatable nodes
       if(['SCRIPT','STYLE','INPUT','TEXTAREA','SELECT','OPTION'].includes(tag))return NodeFilter.FILTER_REJECT;
-      // Skip if hidden
       const style=window.getComputedStyle(parent);
       if(style.display==='none'||style.visibility==='hidden')return NodeFilter.FILTER_SKIP;
       const text=node.textContent.trim();
       if(!text||text.length<2)return NodeFilter.FILTER_REJECT;
-      // Skip if already Thai
       if(/[฀-๿]/.test(text))return NodeFilter.FILTER_REJECT;
-      // Skip pure numbers, symbols, URLs, IDs
       if(/^[\d\s\.\-\+\%\/\:\→\←\⟁\✦\⚔\⬛\☠\•\|]+$/.test(text))return NodeFilter.FILTER_REJECT;
       if(text.startsWith('http')||text.startsWith('Campaign')||text.startsWith('@'))return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
@@ -4356,20 +3710,17 @@ async function applyThaiToPage(){
   let node;
   while((node=walker.nextNode()))textNodes.push(node);
 
-  // Deduplicate by text content, batch translate unique strings
   const unique=[...new Set(textNodes.map(n=>n.textContent.trim()))].filter(t=>t.length>1);
   if(unique.length){
     const translated=await batchTranslate(unique);
     const map={};
     unique.forEach((t,i)=>{if(translated[i]&&translated[i]!==t)map[t]=translated[i];});
-    // Apply translations back to text nodes
     textNodes.forEach(n=>{
       const orig=n.textContent.trim();
       if(map[orig])n.textContent=n.textContent.replace(orig,map[orig]);
     });
   }
 
-  // Also handle data-tr tagged elements (static HTML)
   const tagged=Array.from(document.querySelectorAll('[data-tr]'));
   tagged.forEach(el=>{if(!el.getAttribute('data-tr-orig'))el.setAttribute('data-tr-orig',el.textContent.trim());});
   const taggedTexts=tagged.map(el=>el.getAttribute('data-tr-orig')||el.textContent.trim()).filter(t=>t&&t.length>1&&!/[฀-๿]/.test(t));
@@ -4384,7 +3735,6 @@ async function applyThaiToPage(){
   });
 }
 
-// Translate choice tiles after reveal
 async function maybeTranslateChoices(){
   if(lang!=='th')return;
   const btns=document.querySelectorAll('.achoice');
@@ -4404,14 +3754,12 @@ async function maybeTranslateChoices(){
   });
 }
 
-// getLangInstruction — appended to GM prompts when Thai active
 function getLangInstruction(){
   if(lang!=='th')return'';
   const names=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
   return'\n\nสำคัญมาก: เขียนทั้งหมดเป็นภาษาไทย รวมถึงเนื้อเรื่อง ตัวเลือก และทุกอย่าง แต่ให้คงชื่อตัวละคร ('+names+') ไว้เหมือนเดิม';
 }
 
-// Translate a block of English text to Thai via Claude API
 async function translateToThai(text){
   if(!text||!text.trim())return text;
   try{
@@ -4434,17 +3782,13 @@ ${text}`}]
   }
 }
 
-// Called after story text is rendered — translates it in place if Thai active
 async function maybeTranslateStory(){
   if(lang!=='th')return;
   const el=document.getElementById('story-text');
   if(!el||!el.innerText||el.innerText.trim().length<10)return;
-  // Don't re-translate if already in Thai (contains Thai chars)
   if(/[฀-๿]/.test(el.innerText))return;
-  // Show loading state on story while translating
   el.style.opacity='0.5';
   const translated=await translateToThai(el.innerText);
-  // Re-render with translated text preserving structure
   const paras=translated.split('\n').filter(l=>l.trim());
   el.innerHTML=paras.map(l=>'<p style="margin-bottom:1rem;">'+l+'</p>').join('');
   el.style.opacity='1';
