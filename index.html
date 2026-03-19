@@ -1247,7 +1247,21 @@ async function listCampaigns(){
 }
 
 // ══ SCREEN ROUTER ══
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+id).classList.add('active');if(lang==='th')setTimeout(applyThaiToPage,100);}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const target=document.getElementById('s-'+id);
+  if(!target){
+    console.error('showScreen: no element with id s-'+id);
+    alert('showScreen ERROR: s-'+id+' not found');
+    return;
+  }
+  target.classList.add('active');
+  // Debug overlay
+  let dbg=document.getElementById('__dbg');
+  if(!dbg){dbg=document.createElement('div');dbg.id='__dbg';dbg.style.cssText='position:fixed;bottom:4px;left:4px;background:rgba(0,0,0,0.85);color:#0f0;font-size:10px;font-family:monospace;padding:4px 8px;z-index:99999;border-radius:4px;pointer-events:none;';document.body.appendChild(dbg);}
+  dbg.textContent='screen:'+id+' phase:'+(gState&&gState.phase||'?')+' myChar:'+(myChar&&myChar.name||'none')+' slot:'+(mySlot!=null?mySlot:'null');
+  if(lang==='th')setTimeout(applyThaiToPage,100);
+}
 
 // ══ CAMPAIGN PICKER ══
 async function initCampaignPicker(){
