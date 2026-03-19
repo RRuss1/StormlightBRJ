@@ -1620,18 +1620,23 @@ function claimSlot(i){
 }
 
 function renderLobby(){
+  console.log('renderLobby START gState=',!!gState,'myChar=',!!myChar,'mySlot=',mySlot);
   try{
   if(!gState){console.error('renderLobby: gState is null');return;}
   if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
   const sz=gState.partySize||partySize;
+  console.log('renderLobby sz=',sz,'players=',gState.players.length,'phase=',gState.phase);
   const humans=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
   const npcs=gState.players.slice(0,sz).filter(p=>p&&p.isNPC).length;
   const empty=gState.players.slice(0,sz).filter(p=>!p).length;
+  console.log('renderLobby humans=',humans,'npcs=',npcs,'empty=',empty);
   const titleEl=document.getElementById('lobby-title');
   const subEl=document.getElementById('lobby-sub');
+  console.log('renderLobby titleEl=',!!titleEl,'subEl=',!!subEl);
   if(titleEl)titleEl.textContent=gState.campaignName||campaignId||'Campaign';
   if(subEl)subEl.textContent=`${humans} player${humans!==1?'s':''} · ${npcs} AI companion${npcs!==1?'s':''} · ${empty} slot${empty!==1?'s':''} open`;
   const grid=document.getElementById('lobby-slots');
+  console.log('renderLobby grid=',!!grid);
   if(!grid){console.error('renderLobby: lobby-slots not found');return;}
   const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
   grid.style.gridTemplateColumns=cols;
