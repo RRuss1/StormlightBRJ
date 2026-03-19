@@ -232,7 +232,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .chronicle-title{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);text-transform:uppercase;}
 .chronicle-act{font-size:11px;color:var(--amber-dim);font-style:italic;}
 /* Story text zone */
-.story-text{padding:20px;font-size:22px;font-family:'Times New Roman',Times,serif;font-style:normal;color:var(--text);line-height:1.9;min-height:80px;}
+.story-text{padding:20px;font-size:22px;font-family:var(--font-b);font-style:italic;color:var(--text);color:var(--text);line-height:1.9;min-height:80px;}
 /* Event badges */
 .event-badge{display:inline-block;font-family:var(--font-d);font-size:10px;letter-spacing:2px;padding:3px 11px;border-radius:20px;margin-bottom:9px;text-transform:uppercase;}
 .badge-combat{background:rgba(158,56,32,0.22);color:var(--coral2);border:1px solid rgba(158,56,32,0.32);}
@@ -240,7 +240,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
 .badge-decision{background:rgba(191,161,90,0.13);color:var(--amber2);border:1px solid rgba(191,161,90,0.22);}
 .gm-label{font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:8px;}
 /* NPC / player log entries */
-.entry-player{font-size:16px;font-family:'Times New Roman',Times,serif;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
+.entry-player{font-size:16px;font-family:var(--font-b);font-style:italic;color:var(--text2);padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2);margin:8px 20px;}
 .entry-pname{font-family:var(--font-d);font-size:11px;letter-spacing:1px;margin-bottom:3px;}
 .entry-system{text-align:center;font-size:14px;color:var(--text4);font-style:italic;padding:5px 20px;}
 /* ── BOTTOM ZONE (unified) ── */
@@ -3246,6 +3246,7 @@ async function resolveRound(){
   const allPartyDowned=gState.players.slice(0,sz).filter(Boolean).every(p=>p.downed);
   if(allEnemiesDead){gState.combatPhase='victory';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('victory');return;}
   if(allPartyDowned){gState.combatPhase='defeat';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('defeat');return;}
+  const playerOutcomes=roundDice.entries.filter(e=>!e.isEnemy).map(e=>`${e.name}: ${e.result}${e.detail?' ('+e.detail+')':''}`);
   await callCombatGM('round',playerOutcomes.join(' | '),enemyAttackResults);
   gState.pendingActions={};
   gState.combatRound=(gState.combatRound||1)+1;
