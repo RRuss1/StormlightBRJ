@@ -1392,10 +1392,20 @@ function findOpenSlot(){
 
 async function reserveSlot(i){
   mySlot=i;
+  // Reload state if null before writing placeholder
+  if(!gState){
+    try{gState=await loadState();}catch(e){}
+  }
+  if(!gState){
+    gState={players:new Array(partySize).fill(null),partySize,turn:0,
+      totalMoves:0,phase:'pregame',campaignId,campaignName:campaignId};
+  }
+  if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
+  while(gState.players.length<=i)gState.players.push(null);
   const placeholder={name:'...',className:'Joining...',classId:'pending',
     color:'#555',hp:0,maxHp:0,slot:i,isNPC:false,campaignId,isPlaceholder:true};
   gState.players[i]=placeholder;
-  await saveState(gState);
+  try{await saveState(gState);}catch(e){console.warn('reserveSlot save failed:',e);}
   showScreen('create');renderCreate();
   startCreatePolling();
 }
@@ -1595,12 +1605,23 @@ async function onCreateChar(){
     }
 
     // ── Save ──
-    if(!gState)throw new Error('No campaign state loaded. Try refreshing.');
+    // Always reload fresh state before writing — prevents stale/null gState crash
+    const freshState=await loadState();
+    if(freshState)gState=freshState;
+    if(!gState){
+      // gState truly gone — rebuild minimal state from what we know
+      gState={players:new Array(partySize).fill(null),partySize,turn:0,
+        totalMoves:0,phase:'pregame',campaignId,campaignName:campaignId};
+    }
     if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
+    // Ensure slot exists in array
+    while(gState.players.length<=mySlot)gState.players.push(null);
     gState.players[mySlot]=myChar;
     saveMyChar(myChar);
     await saveState(gState);
-    showScreen('lobby');renderLobby();startLobbyPolling();
+    showScreen('lobby');
+    renderLobby();
+    startLobbyPolling();
 
   }catch(e){
     console.error('onCreateChar failed:',e);
@@ -1692,6 +1713,8 @@ function claimSlot(i){
 }
 
 function renderLobby(){
+  if(!gState){console.error('renderLobby: gState is null');return;}
+  if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
   const sz=gState.partySize||partySize;
   const humans=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).length;
   const npcs=gState.players.slice(0,sz).filter(p=>p&&p.isNPC).length;
