@@ -694,6 +694,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <div style="font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--text4);text-transform:uppercase;margin-bottom:14px;text-align:center;"><span data-tr>Your Party</span></div>
     <div class="slots-grid" id="lobby-slots" style="margin-bottom:2rem;"></div>
     <div id="lobby-status" style="font-size:13px;color:var(--text4);text-align:center;min-height:20px;"></div>
+    <div id="lobby-err" class="err-msg" style="display:none;text-align:center;margin-top:8px;"></div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" id="lobby-actions"></div>
     <div id="lobby-status" style="text-align:center;font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:20px;"></div>
   </div>
@@ -1605,27 +1606,29 @@ async function onCreateChar(){
     }
 
     // ── Save ──
-    // Always reload fresh state before writing — prevents stale/null gState crash
-    const freshState=await loadState();
-    if(freshState)gState=freshState;
+    saveMyChar(myChar); // save locally first
+    // Rebuild gState if needed
     if(!gState){
-      // gState truly gone — rebuild minimal state from what we know
       gState={players:new Array(partySize).fill(null),partySize,turn:0,
         totalMoves:0,phase:'pregame',campaignId,campaignName:campaignId};
     }
     if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
-    // Ensure slot exists in array
     while(gState.players.length<=mySlot)gState.players.push(null);
     gState.players[mySlot]=myChar;
-    saveMyChar(myChar);
-    await saveState(gState);
+    await saveState(gState); // write to sheet
+    // Show lobby — keep create screen visible until lobby renders successfully
     showScreen('lobby');
     renderLobby();
     startLobbyPolling();
 
   }catch(e){
     console.error('onCreateChar failed:',e);
-    if(err){err.textContent='Error: '+e.message;err.style.display='block';}
+    // Show error visibly regardless of which screen is active
+    const visibleErr=document.querySelector('.screen.active .err-msg')
+      ||document.getElementById('create-err');
+    if(visibleErr){visibleErr.textContent='Error: '+e.message;visibleErr.style.display='block';}
+    // Also show as alert so it's never silently swallowed
+    if(!visibleErr)alert('Character creation failed: '+e.message);
   }
 }
 
@@ -1713,6 +1716,7 @@ function claimSlot(i){
 }
 
 function renderLobby(){
+  try{
   if(!gState){console.error('renderLobby: gState is null');return;}
   if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
   const sz=gState.partySize||partySize;
@@ -1781,6 +1785,11 @@ function renderLobby(){
     actions.innerHTML+=`<div style="font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--text4);padding:10px 0;">WAITING FOR HOST TO START...</div>`;
   }
   actions.innerHTML+=`<button class="btn btn-sm" onclick="showScreen('campaign')">← Campaigns</button>`;
+  }catch(e){
+    console.error('renderLobby crashed:',e);
+    const el=document.getElementById('lobby-err');
+    if(el){el.textContent='Lobby error: '+e.message;el.style.display='block';}
+  }
 }
 async function lateJoinClaim(slot){
   if(!gState)return;
