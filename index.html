@@ -584,7 +584,6 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
     <div id="lobby-status" style="font-size:13px;color:var(--text4);text-align:center;min-height:20px;"></div>
     <div id="lobby-err" class="err-msg" style="display:none;text-align:center;margin-top:8px;"></div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" id="lobby-actions"></div>
-    <div id="lobby-status" style="text-align:center;font-size:14px;color:var(--text4);margin-top:14px;font-style:italic;min-height:20px;"></div>
   </div>
 </div>
 
@@ -1633,6 +1632,7 @@ function renderLobby(){
   if(titleEl)titleEl.textContent=gState.campaignName||campaignId||'Campaign';
   if(subEl)subEl.textContent=`${humans} player${humans!==1?'s':''} · ${npcs} AI companion${npcs!==1?'s':''} · ${empty} slot${empty!==1?'s':''} open`;
   const grid=document.getElementById('lobby-slots');
+  if(!grid){console.error('renderLobby: lobby-slots not found');return;}
   const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
   grid.style.gridTemplateColumns=cols;
   const isPlaying=gState.phase==='playing';
@@ -1680,6 +1680,7 @@ function renderLobby(){
   }).join('');
   if(lang==='th')setTimeout(applyThaiToPage,200);
   const actions=document.getElementById('lobby-actions');
+  if(!actions){console.error('renderLobby: lobby-actions not found');return;}
   const allFilled=gState.players.slice(0,sz).every(p=>!!p);
   const hasHuman=gState.players.slice(0,sz).some(p=>p&&!p.isNPC);
   actions.innerHTML='';
