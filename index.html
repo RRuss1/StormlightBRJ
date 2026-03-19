@@ -3166,6 +3166,11 @@ async function resolveRound(){
     if(action.includes('[HEAL]')){
       const stage=getSprenStage(gState.totalMoves||0);
       const amt=getHealAmount(p,stage);
+      // Actually apply the heal
+      p.hp=Math.min(p.maxHp||p.hp,p.hp+(amt||0));
+      const pi=gState.players.findIndex(x=>x&&x.name===name);
+      if(pi>=0)gState.players[pi]=p;
+      if(myChar&&myChar.name===name){myChar=p;saveMyChar(p);}
       roundDice.entries.push({name,roll:'-',bonus:null,total:null,result:'HEAL',detail:`+${amt||'?'} HP`,isEnemy:false});
     } else {
       const sk=getStat(action);
