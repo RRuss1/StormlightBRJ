@@ -792,6 +792,84 @@ select option{background:var(--bg3);color:var(--text);}
 <script>
 const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
 const PROXY_URL='https://stormlight-proxy.goretusk55.workers.dev';
+
+// ══ WEBSOCKET SESSION ══
+let ws=null,wsConnected=false;
+const WS_URL='wss://stormlight-proxy.rruss7997.workers.dev/session';
+
+function connectSession(){
+  if(!campaignId||!myChar)return;
+  if(ws&&ws.readyState===WebSocket.OPEN)return;
+  const url=`${WS_URL}?campaign=${encodeURIComponent(campaignId)}&player=${myChar.slot}&name=${encodeURIComponent(myChar.name)}`;
+  ws=new WebSocket(url);
+  ws.onopen=()=>{wsConnected=true;console.log('⟁ WS connected');stopLobbyPolling();};
+  ws.onmessage=(event)=>{try{handleSessionMessage(JSON.parse(event.data));}catch{}};
+  ws.onclose=()=>{wsConnected=false;setTimeout(connectSession,3000);};
+  ws.onerror=()=>{wsConnected=false;};
+}
+
+function handleSessionMessage(msg){
+  switch(msg.type){
+    case 'state_sync':
+      if(!msg.gState)return;
+      const prevPlayers=JSON.stringify(gState&&gState.players);
+      gState=msg.gState;
+      if(JSON.stringify(gState.players)!==prevPlayers){
+        const isOnCombat=document.getElementById('s-combat').classList.contains('active');
+        if(isOnCombat){renderCombatScreen();renderCombatActions();}
+        else{renderAll();setBottomFromState();}
+      }
+      break;
+    case 'slot_assigned':
+      // Server tells this client which slot they were assigned
+      if(msg.slot!=null&&mySlot===null){
+        mySlot=msg.slot;
+        if(myChar)myChar.slot=mySlot;
+        showToast('⟁ Slot '+(mySlot+1)+' assigned');
+      }
+      break;
+    case 'action_received':showActionBadge(msg.playerName);break;
+    case 'typing':showTypingIndicator(msg.playerName);break;
+    case 'player_connected':showToast('⟁ '+msg.playerName+' joined');break;
+    case 'player_disconnected':showToast(msg.playerName+' disconnected');break;
+    case 'pong':break;
+  }
+}
+
+async function saveAndBroadcast(state){
+  await saveState(state);
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'state_update',gState:state}));
+}
+
+function broadcastTyping(){
+  if(ws&&ws.readyState===WebSocket.OPEN&&myChar)ws.send(JSON.stringify({type:'typing',playerName:myChar.name}));
+}
+
+setInterval(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'ping'}));},30000);
+
+function showActionBadge(playerName){
+  const id='ppip-'+playerName.replace(/\s/g,'_');
+  const ppip=document.getElementById(id);if(!ppip)return;
+  const existing=ppip.querySelector('.action-badge');if(existing)existing.remove();
+  const badge=document.createElement('div');badge.className='action-badge';
+  badge.style.cssText='position:absolute;top:4px;right:4px;font-size:9px;color:var(--teal2);font-family:var(--font-d);letter-spacing:1px;';
+  badge.textContent='✓ READY';ppip.appendChild(badge);
+}
+
+function showTypingIndicator(playerName){
+  const el=document.getElementById('waiting-msg');if(!el)return;
+  el.textContent=playerName+' is deciding...';
+  setTimeout(()=>{if(gState)setBottomFromState();},3000);
+}
+
+function showToast(message){
+  const existing=document.querySelector('.sc-toast');if(existing)existing.remove();
+  const toast=document.createElement('div');
+  toast.className='sc-toast';
+  toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:8px 20px;font-family:var(--font-d);font-size:11px;letter-spacing:1px;color:var(--text3);z-index:9999;pointer-events:none;animation:stormReveal 0.3s ease-out;';
+  toast.textContent=message;document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),3000);
+}
 const SA={
   client_email:'stormlightbrj@stormlight-rpg.iam.gserviceaccount.com',
   private_key:`-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClSJ0lSZVQAxUD\n44VpcHcNd2X71dz9syJ4FS3U1XOwHr4Dz4FiHThqEnm+cvjaBNaqcu4CgMOlEXt5\nsOYVy8JLvcICyhxEfh/jubSMGPUESOhGlV1T5Shmbtz2bNh7moqAeeFBiYLU5V9t\nVWO8GcMKU1KOinCrspkXq9jVCo8qLbuLC9ux6kJgZi2K2agkXaxUxKrQauZfn1YI\nBiM7SGOvdhzRlDswRhLP3xhoh0rOGXSzWzfo2/MphDfxUS9L4M6FBW3FVhHlvGNO\nDFY+gWIVD/uHlbsA1CXtjw7KdUzHtP+/QUCIyL6j6tdIsa8o9gMmW4V5m1EDg4jv\nHbwz+b+9AgMBAAECggEAGBs/pD0XtGxGp+MKxcab7pBgBPt7uFrkp5v7K8QYE/Nf\n5mFg7wTxAfOA4yiUqAO1pXWOxjmuj0g9+JE29a3awD5EajC9L7Yvg4DF1vsa3U2e\n5xCI5KATJOF9g8l7R4fSNIvSMUNTnCZ6JRGjsr8VJc/iRhzl8vzg/EVZojTgjZeS\n78GVpXHS408RuX19rsV3LEe/zeuz9SeVLc9jegbpjJk/XAb7Ipkkz6WMhvdahcya\nqheGY/SsoLhaHlensZdwDqij/DOgPMiDbbsVIUWKwegg+BnvcaLlehkn5Gl1Is6P\nSccIXiHBGB8i0g8DLA70xS6+TuEhA7fLzL1ZLlutJwKBgQDT6jZFGa2N88wNczOR\neTis8m3twI6LTSZQSdXX0nm7dd15qBaC/Ru5CuEhess+Vpv96nVmDAPyT+XBuWjl\nk6Q8810S7n/U5tk39MIBvouU+nOR/7KlIG5CxNbAILIRkVJ9W9RyYYkOIUaJ6eCM\nzsBfyei7bQtjgG46HIQSorXcnwKBgQDHqv9pYpe6ulpGbgsNwZ/ZpB5b9SiRhlGy\nZhlxA6O5C0gM0ymC3EoCi3C5Adnzm8pRNCgGxZu2u4QcuDpm5+tR8ddrz2Nsbgce\nfJbdWUFCi90U7qrQd8pAY46zdQFWqEkJY8BPHqloOlKymlGQL289BY1pR+MTpBWT\nQ6UdLoWqIwKBgQDQCbQxbh31p4uBAMF1ZP4Auxa0Oz80/g5I79NhRx1+rR06G4vO\nGFEo/cc6KORyVHBbe9q4zb7qGQnDfxO9nY200G1k8oLILcC9sCjtsXQyUxU2FUH5\n3bahEcCJaQ+nM3U53/bWO25jUsN/DP0G/snYv80cgtaVXjXYErqN2PKUnQKBgF8y\nCeAm34xpeM0HfkGqxRmxA8B4HEV1stHJl+un/pEk7c8fhjUb7jVUYgPy/AUHi+g3\nY7YG1PzEXnKK611QyYMiOMDv+ckilEZWxF74RQMDR/7I46vM0SLt1IV/DYpRZbES\nXAfc6IwG8pKwvJ5v3ytK0GcXnQ4qNxclMz28hoHdAoGAIDDnRLlZVgBdk6oijZI+\nb7jokuI9quDtomUCCHZyB+3mMq6hf9zOfKt+GsZz0Q512ezC4vbq0j5GCVT8uMRM\nYsOgyVkloyM8TeZNLE9LNVkX8MRL9gVstaBdMkqaq/Lkvn5wCuRBO69ZD5vrZPvF\n2uxw+l3wHWPcAIiPAXybsCM=\n-----END PRIVATE KEY-----\n`
@@ -973,7 +1051,7 @@ async function progressOath(player){
   const idx=gState.players.findIndex(p=>p&&p.name===player.name);
   if(idx>=0)gState.players[idx]=player;
   if(myChar&&myChar.name===player.name){myChar=player;saveMyChar(player);}
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   const oathPrompt=`Cosmere RPG GM. OATH MOMENT for ${player.name} the ${player.className}.
 Oath ${newStage} of 5: "${oath}"
 ${getGenderContext()}
@@ -1350,22 +1428,55 @@ async function onEnter(){
     myChar=loadMyChar();
     if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
     if(myChar&&gState&&gState.phase==='pregame'){showScreen('lobby');renderLobby();startLobbyPolling();return;}
-    // No character yet — fall through to create regardless of phase
-    const empty=findOpenSlot();
-    if(empty===-1){setTitleStatus('All slots filled.');return;}
-    await reserveSlot(empty);
+    // No character — claim the next open slot (first-done = slot 1, etc.)
+    setTitleStatus('Reserving your slot...');
+    const slotIdx=await claimNextSlot();
+    if(slotIdx===-1){setTitleStatus('All slots are filled or being claimed.');return;}
+    setTitleStatus('');
+    showScreen('create');renderCreate();
+    startCreatePolling();
   }catch(e){setTitleStatus('Could not connect: '+e.message);}
 }
 function pickSlot(i){if(!gState||gState.players[i])return;reserveSlot(i);}
 
 function findOpenSlot(){
+  // Returns the first truly empty slot (null, not placeholder)
   if(!gState||!gState.players)return -1;
-  const idx=gState.players.findIndex(p=>!p||(p.isPlaceholder&&p.campaignId===campaignId));
-  return idx===-1?-1:idx;
+  return gState.players.findIndex(p=>!p);
+}
+
+async function claimNextSlot(){
+  // Atomically claim the next open slot via a fresh state read.
+  // First-done gets slot 0, second gets slot 1, etc.
+  // Re-reads state immediately before writing to minimize race window.
+  try{
+    const fresh=await loadState();
+    if(fresh){gState=fresh;partySize=fresh.partySize||partySize;}
+    if(!gState){gState={players:new Array(partySize).fill(null),partySize,turn:0,
+      totalMoves:0,phase:'pregame',campaignId,campaignName:campaignId};}
+    if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
+    // Find first null slot — skip placeholders (another player is in-progress there)
+    const idx=gState.players.findIndex(p=>!p);
+    if(idx===-1)return -1; // all slots taken
+    mySlot=idx;
+    const placeholder={name:'...',className:'Joining...',classId:'pending',
+      color:'#555',hp:0,maxHp:0,slot:idx,isNPC:false,campaignId,isPlaceholder:true};
+    gState.players[idx]=placeholder;
+    await saveState(gState);
+    // Notify session of slot claim
+    if(ws&&ws.readyState===WebSocket.OPEN){
+      ws.send(JSON.stringify({type:'slot_claim',slot:idx,campaignId}));
+    }
+    return idx;
+  }catch(e){
+    console.warn('claimNextSlot failed:',e);
+    return 0; // fallback
+  }
 }
 
 async function reserveSlotOnly(i){
-  // Reserve a slot with placeholder — does NOT navigate to create screen
+  // Legacy: called with explicit slot (NPC claim, late joiner).
+  // For first-time join use claimNextSlot() instead.
   mySlot=i;
   if(!gState){try{gState=await loadState();}catch(e){}}
   if(!gState){gState={players:new Array(partySize).fill(null),partySize,turn:0,
@@ -1570,15 +1681,13 @@ async function onCreateChar(){
         focus:3,maxFocus:5};
     }
 
-    // ── Resolve slot ──
+    // ── Resolve slot — mySlot was already assigned by claimNextSlot() in onEnter ──
+    // If for any reason it's still null (edge case), claim now
     if(mySlot===null||mySlot===undefined){
-      if(!gState||!gState.players)await reserveSlotOnly(0);
-      else{
-        const idx=gState.players.findIndex(p=>!p||p.isPlaceholder);
-        mySlot=idx>=0?idx:0;
-      }
-      myChar.slot=mySlot;
+      const idx=await claimNextSlot();
+      mySlot=idx>=0?idx:0;
     }
+    myChar.slot=mySlot;
 
     // ── Save ──
     saveMyChar(myChar); // save locally first
@@ -1590,7 +1699,7 @@ async function onCreateChar(){
     if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
     while(gState.players.length<=mySlot)gState.players.push(null);
     gState.players[mySlot]=myChar;
-    await saveState(gState); // write to sheet
+    await saveAndBroadcast(gState); // write + broadcast slot fill
     // Show lobby — keep create screen visible until lobby renders successfully
     showScreen('lobby');
     renderLobby();
@@ -1616,7 +1725,7 @@ async function assignNPC(slot){
   if(st)st.textContent='Summoning companion...';
   const npc=genNPC(slot);
   gState.players[slot]=npc;
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   isLoading=false;
   renderLobby();
   if(st)st.textContent='';
@@ -2005,6 +2114,7 @@ async function showGameScreen(){
   const ab=document.getElementById('audio-bar');
   if(ab)ab.style.display='flex';
   startPolling();
+  connectSession(); // upgrade to WS when available
   await refreshGame();
   setTimeout(initParallax,500);
 }
@@ -2201,7 +2311,7 @@ async function skipTurn(playerName){
     if(beatsLeft<=0&&gState.preCombatTriggered){gState.combatMode=true;}
     else if(beatsLeft<=0&&!gState.preCombatTriggered){gState.preCombatTriggered=true;}
   }
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   const freshLog=await loadLog(true);
   renderAll(freshLog);
   setBottomFromState(freshLog);
@@ -2211,7 +2321,7 @@ async function skipCombatTurn(playerName){
   if(!gState)return;
   if(!gState.pendingActions)gState.pendingActions={};
   gState.pendingActions[playerName]='[DEFEND] Hold position and brace — buying time for the others';
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   renderCombatActions();
   const sz=gState.partySize||partySize;
   const allSubmitted=gState.players.slice(0,sz)
@@ -2532,7 +2642,7 @@ async function handleNPC(log){
     }
   }
   addActionLog(cur.name, pick, Math.ceil(Math.random()*4), ''); // D4 roll logged
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   setBottomLoading();
   await callGM(npcPrompt(pick,cur,from));
   isLoading=false;
@@ -2838,7 +2948,7 @@ async function callGM(prompt){
           .filter(ch=>ch.length>5);
         if(choices.length){scene=raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm,'').replace(/\n{3,}/g,'\n\n').trim();}
       }
-      if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveState(gState);}
+      if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
       await addLog({type:'gm',who:'',text:scene,choices});
       if(tb)tb.style.display='none';
       updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
@@ -2875,7 +2985,7 @@ async function callGM(prompt){
         choices=optMatch[2].split('\n').map(l=>l.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').trim()).filter(l=>l.length>5).slice(0,4);
       }
     }
-    if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveState(gState);}
+    if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
     await addLog({type:'gm',who:'',text:scene,choices});
     const tb2=document.getElementById('thinking-bar');if(tb2)tb2.style.display='none';
     updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
@@ -3199,6 +3309,9 @@ function exportToPDF(){
 function startPolling(){
   if(pollTimer)clearInterval(pollTimer);
   pollTimer=setInterval(async()=>{
+    // When WS is connected, WS handles real-time sync.
+    // Poll only as a fallback — back off to 30s when WS is live.
+    if(wsConnected)return;
     if(document.getElementById('s-game').classList.contains('active')&&!isLoading){
       await refreshGame();
     } else if(document.getElementById('s-combat').classList.contains('active')&&!isLoading){
@@ -3207,7 +3320,7 @@ function startPolling(){
         gState=fresh;renderCombatScreen();renderCombatActions();
       }
     }
-  },8000);
+  },wsConnected?30000:8000);
   if(!window._stormScroll){
     window.addEventListener('scroll',()=>{if(bottomState==='human-gated'||bottomState==='continue')checkScrollEnable();},{passive:true});
     window._stormScroll=true;
@@ -3675,7 +3788,7 @@ async function submitCombatAction(){
   if(!gState.pendingActions)gState.pendingActions={};
   gState.pendingActions[myChar.name]=action;
   combatSelectedAction='';
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   renderCombatActions();
   const sz=gState.partySize||partySize;
   gState.players.slice(0,sz).filter(p=>p&&p.isNPC&&!p.downed).forEach(p=>{
@@ -3684,7 +3797,7 @@ async function submitCombatAction(){
       gState.pendingActions[p.name]=choices[Math.floor(Math.random()*choices.length)];
     }
   });
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   renderCombatActions();
 }
 
@@ -3940,8 +4053,8 @@ async function resolveRound(){
   // ══ VICTORY / DEFEAT CHECK ══
   const allEnemiesDead=(gState.combatEnemies||[]).every(e=>e.downed||e.hp<=0);
   const allPartyDowned=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).every(p=>p.downed);
-  if(allEnemiesDead){gState.combatPhase='victory';await saveState(gState);renderCombatScreen();renderCombatActions();return;}
-  if(allPartyDowned){gState.combatPhase='defeat';await saveState(gState);renderCombatScreen();renderCombatActions();return;}
+  if(allEnemiesDead){gState.combatPhase='victory';await saveAndBroadcast(gState);renderCombatScreen();renderCombatActions();return;}
+  if(allPartyDowned){gState.combatPhase='defeat';await saveAndBroadcast(gState);renderCombatScreen();renderCombatActions();return;}
 
   // ══ CALL GM TO NARRATE THE ROUND ══
   gState.combatRound=(gState.combatRound||1)+1;
@@ -3955,7 +4068,7 @@ async function resolveRound(){
     console.error('resolveRound failed:',e);
     gState.combatPhase='choosing';
     gState.pendingActions={};
-    await saveState(gState).catch(()=>{});
+    await saveAndBroadcast(gState).catch(()=>{});
     renderCombatScreen();renderCombatActions();
   }
 }
@@ -4039,12 +4152,12 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
     }
     gState.combatLog=gState.combatLog||[];
     gState.combatLog.push({round,text,type});
-    await saveState(gState);
+    await saveAndBroadcast(gState);
   }catch(e){if(el){el.textContent='The battle continues...';el.parentElement.style.opacity='1';}}
   if(type==='opening'||type==='round'){
     gState.combatPhase='choosing';
     gState.combatChoicesCache={};
-    await saveState(gState);
+    await saveAndBroadcast(gState);
     renderCombatScreen();
     renderCombatActions();
     const sz2=gState.partySize||partySize;
@@ -4068,7 +4181,7 @@ async function exitCombat(won){
   gState.beatsSinceLastCombat=0;
   gState.preCombatTriggered=false;
   gState.pendingActions={};
-  await saveState(gState);
+  await saveAndBroadcast(gState);
   showScreen('game');
   showGameScreen();
   setBottomLoading();
