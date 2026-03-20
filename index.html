@@ -755,15 +755,7 @@ body{background-image:radial-gradient(ellipse 70% 40% at 50% -5%,rgba(191,161,90
   <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)"/>
   <div style="width:1px;height:16px;background:var(--border2);margin:0 2px;"></div>
   <button id="voice-btn-bar" onclick="toggleVoice()" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 2px;" title="Read aloud (manual)">🔈</button>
-  <button id="autospeak-btn" onclick="toggleAutoSpeak()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:3px 10px;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);transition:all 0.15s;" title="Toggle continuous read-aloud">AUTO</button>
-  <select id="voice-select" onchange="setVoice(this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--font-d);letter-spacing:1px;">
-    <option value="male_deep">♂ Deep</option>
-    <option value="male_warm">♂ Warm</option>
-    <option value="male_gravelly">♂ Gravelly</option>
-    <option value="female_british">♀ British</option>
-    <option value="female_warm">♀ Warm</option>
-    <option value="female_clear">♀ Clear</option>
-  </select>
+
 </div>
 
 <script>
@@ -1746,7 +1738,7 @@ async function startCampaign(){
   await callGM(openingPrompt());
   const log=await loadLog(true);
   renderAll(log);
-  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();setTimeout(autoSpeakStory,300);},150);
+  setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();},150);
 }
 // ══ WORLD MEMORY CONTEXT ══
 function getWorldMemoryContext(){
@@ -1762,6 +1754,39 @@ function getWorldMemoryContext(){
   if(actCons)parts.push('This act: '+actCons);
   if(!parts.length)return'';
   return'\n\nWORLD STATE: '+parts.join(' | ');
+}
+
+function getRecentBeats(){
+  // Returns the last 3 GM story beats as short-term narrative memory
+  // This is what happened JUST NOW — the GM must treat it as immediate
+  if(!gState||!gState.actionLog)return'';
+  const recent=gState.actionLog.slice(-6); // last 6 entries = ~3 full turns
+  const beats=[];
+  recent.forEach(entry=>{
+    if(entry.type==='player')beats.push(`${entry.who} acted: "${entry.text}"`);
+    if(entry.type==='gm'&&entry.text)beats.push(`→ ${entry.text.substring(0,120)}${entry.text.length>120?'...':''}`);
+  });
+  if(!beats.length)return'';
+  return'\n\nIMMEDIATE HISTORY (these events just happened — treat as seconds ago, not ancient history):\n'+beats.join('\n');
+}
+
+function getCombatThread(){
+  // What the GM discovered in exploration that should bleed into combat
+  // Gives combat its reason-for-being and narrative continuity
+  if(!gState)return'';
+  const parts=[];
+  // Last GM beat before combat = the discovery that triggered the fight
+  const log=gState.actionLog||[];
+  const preCombatBeats=log.slice(-8).filter(e=>e.type==='gm').slice(-3);
+  if(preCombatBeats.length){
+    parts.push('What led here: '+preCombatBeats.map(e=>e.text.substring(0,100)).join(' → '));
+  }
+  // Any secrets discovered during exploration
+  const wm=gState.worldMemory;
+  if(wm&&(wm.secrets||[]).length){
+    parts.push('Discoveries: '+wm.secrets.slice(-2).join(' | '));
+  }
+  return parts.length?'\n\nNARRATIVE THREAD (this combat grew from these discoveries — reference them):\n'+parts.join('\n'):'';
 }
 
 async function updateWorldMemory(gmText, action, turn){
@@ -1822,6 +1847,7 @@ One sentence each. Mark: [COMBAT], [DISCOVERY], or [DECISION]. Under 250 words.$
 
 // ══ GAME SCREEN ══
 async function showGameScreen(){
+  stormIntensify(false);
   showScreen('game');
   const ab=document.getElementById('audio-bar');
   if(ab)ab.style.display='flex';
@@ -2358,7 +2384,7 @@ async function handleNPC(log){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
 }
 
 function npcPrompt(action,npc,from){
@@ -2446,7 +2472,7 @@ async function onSubmitAction(){
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,300);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
 }
 
 function getActionBucket(a){
@@ -2515,40 +2541,92 @@ async function callGM(prompt){
 function turnPrompt(action,roll,sk,from){
   const m=gState.totalMoves||0;const act=getAct(m);
   const sz=gState.partySize||partySize;const next=gState.players[gState.turn];
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} HP:${p.hp}/${p.maxHp} Bond:${getSprenStage(m)+1}/5)`:'?').join(' | ');
+  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} ${p.hp}/${p.maxHp}HP${p.oathStage>1?' Oath '+p.oathStage:''})`:'?').join(' | ');
   const who=gState.players[from];const loc=act.location||act.name;
-  const rd=roll>=18?'CRITICAL SUCCESS':roll>=14?'Strong success':roll>=10?'Partial success — complications':roll>=6?'Failure with consequences':'CRITICAL FAILURE — dramatic setback';
-  const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
+  const rollDesc=roll>=18?'CRITICAL SUCCESS — something unexpected and wonderful happens':roll>=14?'Strong success — clean, clear outcome':roll>=10?'Partial success — they get what they want but something is now complicated or wrong':roll>=6?'Failure — what they wanted did not happen, and the world responds':'CRITICAL FAILURE — something goes badly wrong, raise the stakes hard and immediately';
+  const gctx=getGenderContext();
+  const mctx=getSprenMemoryContext();
+  const wmctx=getWorldMemoryContext();
+  const cctx=getCharContext();
+  const recentBeats=getRecentBeats();
   const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
   const preCombatNow=gState.preCombatTriggered&&!gState.combatMode;
-  const phaseInstr=gState.combatMode?'':preCombatNow?
-    '\n\nPHASE: PRE-COMBAT. The enemy must NOW fully reveal itself and confront the party. End at the moment of confrontation. Choices should reflect combat readiness.':
-    beatsLeft<=1?
-    '\n\nPHASE: FINAL EXPLORATION BEAT. Hint strongly that danger is imminent — something is very wrong. Maximum tension. Last beat before combat.':
-    '\n\nPHASE: EXPLORATION ('+beatsLeft+' beats before conflict). Focus on discovery and world-building. Do NOT start combat yet.';
+  const totalBeats=gState.beatsUntilCombat||5;
+  const beatNum=totalBeats-Math.max(0,beatsLeft)+1;
+
+  // Phase guidance — specific narrative instructions per beat position
+  let phaseInstr='';
+  if(!gState.combatMode){
+    if(preCombatNow){
+      phaseInstr=`
+
+PHASE — THE CONFRONTATION (this is the pre-combat payoff beat):
+The threat that has been building must physically manifest RIGHT NOW and face the party. Do not approach — arrive. End at the exact moment before weapons clash. One image, maximum dread, no resolution. Short sharp sentences here.`;
+    } else if(beatsLeft<=1){
+      phaseInstr=`
+
+PHASE — FINAL BEAT BEFORE COMBAT (${beatNum}/${totalBeats}):
+The wrongness is undeniable. Something from the immediate history above has escalated beyond ignoring. Build pure dread — not action yet, but the absolute certainty that violence is seconds away. The party can feel it in their bodies. End on a held breath.`;
+    } else if(beatsLeft<=2){
+      phaseInstr=`
+
+PHASE — RISING TENSION (${beatNum}/${totalBeats}):
+The world is tightening. Echo something specific from the immediate history — a detail that felt minor before but now reads as warning. The threat is not subtle anymore. Show the environment responding to it.`;
+    } else if(beatNum>Math.floor(totalBeats/2)){
+      phaseInstr=`
+
+PHASE — DEEPENING (${beatNum}/${totalBeats}):
+Past the threshold. Every discovery should add texture to a threat without naming it. Something specific about ${loc} is wrong in a way the characters can sense but not yet explain. Plant something that will pay off later.`;
+    } else {
+      phaseInstr=`
+
+PHASE — DISCOVERY (${beatNum}/${totalBeats}):
+Fresh ground. Build ${loc} with sensory specificity — what makes this place unlike anywhere else on Roshar. Introduce details that will matter. No hints at combat yet. Let the world feel vast.`;
+    }
+  }
+
   if(m===59)generateActConsequence(1).catch(()=>{});
   if(m===119)generateActConsequence(2).catch(()=>{});
-  const actHint=m===59?`\n\nACT TRANSITION: Close out ${loc}, foreshadow ${ACTS[1].location}.`:m===119?`\n\nACT TRANSITION: Final Act II turn. Foreshadow climax in ${ACTS[2].location}.`:'';
-  return`Cosmere RPG GM. Turn ${m}/180. ${act.tag} — ${loc}.
-Party: ${party}${gctx}${mctx}
-${who.name} (${who.className}) acted: "${action}" — d20 vs ${sk.toUpperCase()}: ${roll} (${rd})${actHint}
+  const actHint=m===59?`\n\nACT TRANSITION: Close out ${loc} emotionally. One sensory detail foreshadowing ${ACTS[1]?ACTS[1].location:'what comes next'}.`:m===119?`\n\nACT TRANSITION: Final Act II beat. The weight of everything before should be felt. One image of ${ACTS[2]?ACTS[2].location:'the final act'}.`:'';
 
-CONSEQUENCE (2-3 vivid sentences, NO MORE):
-- DO NOT restate or summarize what ${who.name} just did — the player already knows their action
-- Start with what HAPPENS as a result — the world's reaction, not the action itself
-- Make the ${rd} feel real and CHANGE something in the scene permanently
-- Use ${loc} specifically: its sounds, smells, textures, light — sensory detail only found here
-- VARY your sentence structure each turn — no two beats should open the same way
-- Never start with the character's name followed by a verb describing their action${actHint?'\n- Hint at the upcoming transition':''}
+  const beatLen=preCombatNow||roll<=5||roll>=18?'3 sentences':'2-3 sentences';
 
-[CHOICES]
-IT IS NOW ${next?next.name.toUpperCase()+"'S TURN":'THE NEXT PLAYER\'S TURN'} — write 4 options FOR ${next?next.name:'them'} (${next?next.className:'?'}) ONLY.
-CRITICAL RULE: ${next?next.name:'The player'} is the ONLY actor in every option. Never write an option where ${gState.players.slice(0,sz).filter(p=>p&&(!next||p.name!==next.name)&&!p.isNPC).map(p=>p.name).join(' or ')||'another player'} acts.
-1. (${next?next.className:'class'}-specific surge action in ${loc})
-2. (different approach — physical or tactical)
-3. (investigative or discovery angle)
-4. (bold or high-risk option)
-First person "I do X" or "${next?next.name:'player'} does X". One sentence each. No ** markers. Tag on its own final line: [COMBAT], [DISCOVERY], or [DECISION].${phaseInstr}${getLangInstruction()}`;
+return`You are the GM of a Cosmere RPG — an expert fantasy author writing cinematic, character-driven narrative. Your prose should read like Brandon Sanderson crossed with Joe Abercrombie: epic but grounded, mythic but specific.
+
+Turn ${m}/180. Location: ${loc}. ${act.tag}.
+Party: ${party}${gctx}
+${wmctx}${recentBeats}${mctx}${cctx}
+
+CURRENT ACTION:
+${who.name} (${who.className}) — "${action}"
+Roll: d20 vs ${sk.toUpperCase()} = ${roll} → ${rollDesc}
+
+WRITE THE CONSEQUENCE (${beatLen}) following ALL of these craft rules:
+
+WHAT TO DO:
+• Begin with what the WORLD does — not what ${who.name} does. The action already happened.
+• The roll outcome must be FELT as story — ${roll>=18?'give them something they did not expect, and make it good in a way that costs something or opens something new':roll>=14?'clean outcome, the world yields, but leave one detail unresolved':roll>=10?'they get part of what they wanted — show what slipped through or changed':roll>=6?'the world pushes back — show the specific thing that went wrong':'something breaks. Show it immediately. Do not soften it.'}
+• CONTINUITY: The immediate history above happened SECONDS ago — those people, objects, and threats are still present. Reference them. Do not reset the scene.
+• SENSORY SPECIFICITY: Use ${loc} concretely — a smell, a sound, a texture that could only exist here
+• SENTENCE VARIATION: Mix long atmospheric sentences with short punchy ones. Never open with "${who.name}", "As ${who.name}", or a gerund phrase.
+• EMOTION THROUGH ACTION: Show fear, exhaustion, desperation through what characters DO — never state it directly
+• INJURIES PERSIST: If someone was hurt recently, they are still hurt
+
+WHAT NOT TO DO:
+• Never summarize the action that was just taken
+• Never write "suddenly" or "quickly" or "immediately"
+• Never use game terminology (HP, rolls, stats, turns)
+• Never explain what is about to happen — show what IS happening
+• Never repeat a sentence opening structure used in the last 3 beats${actHint}${phaseInstr}
+
+[CHOICES FOR ${next?next.name.toUpperCase():'NEXT PLAYER'}]
+Write 4 choices for ${next?next.name:'the next player'} (${next?next.className:'?'}). ${next?next.name:'They'} is the ONLY actor — never include ${gState.players.slice(0,sz).filter(p=>p&&(!next||p.name!==next.name)&&!p.isNPC).map(p=>p.name).join(' or ')||'anyone else'} acting.
+Each: one vivid first-person sentence. No ** markers. Four distinct approaches:
+1. ${next?next.className:'Class'}-specific ability — what only ${next?next.name:'they'} can do
+2. Physical or tactical — body, terrain, environment
+3. Investigate or discover — what this moment reveals
+4. Escalate — bold, high-risk, changes the stakes
+${getLangInstruction()}`;
 }
 
 // ══ COMBAT SYSTEMS ══
@@ -2913,7 +2991,7 @@ Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
   await saveState(gState);
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();},150);
 }
 
 async function enterCombat(){
@@ -2922,7 +3000,8 @@ async function enterCombat(){
   // ── If combat already in progress, just restore the screen — don't re-roll enemies ──
   const existingEnemies=gState.combatEnemies&&gState.combatEnemies.filter(e=>!e.downed&&e.hp>0);
   if(existingEnemies&&existingEnemies.length>0&&gState.combatPhase&&gState.combatPhase!=='idle'){
-    showScreen('combat');
+    stormIntensify(true);
+  showScreen('combat');
     renderCombatScreen();
     renderCombatActions();
     return;
@@ -3479,57 +3558,79 @@ async function callCombatGM(type, playerActions, enemyResults){
   const loc=getAct(gState.totalMoves||0).location||'the battlefield';
   const gctx=getGenderContext();
   const mctx=getSprenMemoryContext();
+  const round=gState.combatRound||1;
+  const roundContext=round===1?'opening chaos — everyone finding their footing, no pattern yet':round<=3?'the shape of the fight is forming — who is dangerous, who is scared':round<=5?'exhaustion and desperation bleeding in — mistakes happening':'final moments — this ends soon, someone or something will break';
+
   let prompt='';
   if(type==='opening'){
-    prompt=`Cosmere RPG Combat GM. Round 1. Location: ${loc}.
-Party: ${party}
-Enemies: ${enemies}${gctx}${mctx}
+    const thread=getCombatThread();
+    prompt=`You are a combat GM — an expert at cinematic, visceral action writing. Write in the style of a blend of high fantasy (epic tone), cinematic action (clear visual movement), and character-focused drama.
 
-Write EXACTLY 3 vivid sentences describing the combat opening — the enemies closing in, the environment, the immediate threat. Present tense, visceral, specific to ${loc}. End at the moment before weapons clash.`;
+Location: ${loc}. Round 1.
+Party: ${party}
+Enemies: ${enemies}${gctx}${mctx}${thread}
+
+Write EXACTLY 3 sentences opening this combat. Craft rules:
+• Sentence 1: The threat arrives — not approaches, ARRIVES. Use a detail from NARRATIVE THREAD above if present — connect this fight to what was discovered
+• Sentence 2: ${loc} becomes part of the danger. Specific environmental detail. Tactile and present.
+• Sentence 3: The moment before first contact. One image. Held breath. End here.
+
+STYLE RULES — apply all:
+• Fast, visceral, clear — easy to visualize who is where doing what
+• Short sharp sentences during action. Longer atmospheric ones for environment.
+• Environmental interaction — terrain, objects, the specific chaos of this place
+• Show fear, rage, desperation through physical action — never state it
+• No "suddenly". No "quickly". No game terminology.
+• Do NOT summarize how the party got here`;
+
   } else if(type==='round'){
-    prompt=`Cosmere RPG Combat GM. Round ${gState.combatRound}. Location: ${loc}.
+    prompt=`You are a combat GM narrating round ${round} of a fight in ${loc}.
 Party: ${party}
 Enemies: ${enemies}
-What actually happened this round:
-PLAYER OUTCOMES: ${playerActions}
-ENEMY ATTACKS: ${(enemyResults||[]).join(' | ')}${gctx}
+WHAT ACTUALLY HAPPENED — reference all of this:
+Player outcomes: ${playerActions}
+Enemy attacks: ${(enemyResults||[]).join(' | ')}${gctx}
 
-Write EXACTLY 3 vivid sentences narrating this round. You MUST reference the actual outcomes above — if someone healed, describe the Stormlight surging. If an enemy was hit, describe the blow landing. If someone fumbled, show the consequence. Weave it all into one coherent combat moment. Present tense, visceral, specific to ${loc}.`;
+Round context: ${roundContext}
+
+Write EXACTLY 3 sentences. Craft rules:
+• Every named outcome above must appear — heals as Stormlight surging through flesh, hits as the blow landing and its physical consequence, fumbles as the cost showing on a body
+• Weave all outcomes into ONE coherent moment — not a list, a scene unfolding
+• Momentum: show who currently has the advantage, then end on something that could flip it
+• Sentence variety: mix one long atmospheric sentence with short punchy ones
+• Injuries persist and accumulate — a character hit last round is still hurt
+• No game terminology. No "suddenly". Present tense.
+• End on uncertainty — the outcome is not yet decided`;
+
   } else if(type==='victory'){
-    prompt=`Cosmere RPG Combat GM. Location: ${loc}.
-Party: ${party}
-All enemies defeated.${gctx}${mctx}
+    prompt=`Combat GM. ${loc}. All enemies defeated.
+Party: ${party}${gctx}${mctx}
 
-Write 2 sentences: the moment of victory, and the immediate aftermath — what the party sees/feels/hears as the combat ends.`;
+Write 2 sentences: the exact moment the last threat falls, and the immediate aftermath — what the survivors feel in their bodies, what the silence sounds like, what changed. No triumphalism. Victory in real fights feels like relief and exhaustion, not glory.`;
+
   } else if(type==='defeat'){
-    prompt=`Cosmere RPG Combat GM. Location: ${loc}.
-All party members downed.${gctx}
+    prompt=`Combat GM. ${loc}. All party members downed.
+${gctx}
 
-Write 2 sentences: the moment of defeat — what happens as the last party member falls. Leave them downed but alive — enemies do not deliver a killing blow.`;
+Write 2 sentences: the moment the last party member falls, and what the enemy does next. Leave everyone downed but breathing — enemies do not deliver killing blows. End on stillness and consequence, not despair.`;
   }
+
   const el=document.getElementById('combat-narrative-text');
   if(el){el.textContent='...';el.parentElement.style.opacity='0.5';}
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content&&data.content[0]?data.content[0].text.replace(/\*\*([^*]+)\*\*/g,'$1').trim():'The battle rages on.';
     if(el){el.textContent=text;el.parentElement.style.opacity='1';}
     if(lang==='th'&&el){
       translateToThai(text).then(thai=>{
-        if(thai&&thai!==text){
-          el.textContent=thai;
-          setTimeout(()=>{if(voiceEnabled&&!voiceActive)speakFromElement(thai);},300);
-        }
+        if(thai&&thai!==text)el.textContent=thai;
       }).catch(()=>{});
     }
     gState.combatLog=gState.combatLog||[];
-    gState.combatLog.push({round:gState.combatRound,text,type});
+    gState.combatLog.push({round,text,type});
     await saveState(gState);
-    setTimeout(()=>{
-      const voiceEl=document.getElementById('combat-narrative-text');
-      if(voiceEl&&voiceEnabled)speakFromElement(voiceEl.textContent);
-    },200);
   }catch(e){if(el){el.textContent='The battle continues...';el.parentElement.style.opacity='1';}}
   if(type==='opening'||type==='round'){
     gState.combatPhase='choosing';
@@ -3565,7 +3666,7 @@ async function exitCombat(won){
   await callGM(combatAftermathPrompt(won));
   const freshLog=await loadLog(true);
   renderAll(freshLog);
-  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();setTimeout(autoSpeakStory,400);if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
+  setTimeout(()=>{setBottomFromState(freshLog);maybeTranslateStory();if(gState&&gState.lastGM&&gState.lastGM.text)generateTLDR(gState.lastGM.text);},150);
   }catch(e){
     console.error('exitCombat failed:',e);
     showScreen('game');showGameScreen();
@@ -3608,10 +3709,10 @@ function speakFromElement(text){
 
 // ══ VOICE OVER — Web Speech API ══
 let voiceActive=false,voiceEnabled=true,currentUtterance=null;
-let autoSpeak=false;
+const autoSpeak=false; // TTS is on-demand only — use 🔈 button
 let awayMode=false;
 
-function autoSpeakStory(){if(autoSpeak)speakStory();}
+function autoSpeakStory(){}
 
 async function speakStory(){
   if(!voiceEnabled||isMobile())return;
@@ -3686,13 +3787,7 @@ function updateVoiceBtn(){
   });
 }
 
-function toggleAutoSpeak(){
-  autoSpeak=!autoSpeak;
-  localStorage.setItem('sc_autospeak',autoSpeak?'1':'0');
-  updateAutoSpeakBtn();
-  if(!autoSpeak)stopSpeaking();
-}
-
+function toggleAutoSpeak(){}
 function updateAutoSpeakBtn(){
   const btn=document.getElementById('autospeak-btn');
   if(!btn)return;
@@ -3720,17 +3815,7 @@ function setVoice(voiceVal){
 }
 
 
-function loadVoicePreference(){
-  const saved=localStorage.getItem('sc_voice');
-  if(saved){
-    const sel=document.getElementById('voice-select');
-    if(sel)sel.value=saved;
-    setVoice(saved);
-  }
-  autoSpeak=localStorage.getItem('sc_autospeak')==='1';
-  updateAutoSpeakBtn();
-}
-
+function loadVoicePreference(){}
 function isMobile(){return/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);}
 
 // ══ AUDIO ENGINE ══
@@ -3740,47 +3825,131 @@ function initAudio(){
   try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.3;masterGain.connect(audioCtx.destination);}
   catch(e){console.warn('Web Audio not supported');}
 }
-function mkWind(freq,gain,speed){
-  if(!audioCtx)return null;
-  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*3,audioCtx.sampleRate);
-  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
-  const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
-  const filt=audioCtx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=0.8;
-  const g=audioCtx.createGain();g.gain.value=gain;
-  const lfo=audioCtx.createOscillator();lfo.frequency.value=speed;
-  const lg=audioCtx.createGain();lg.gain.value=gain*0.4;
-  lfo.connect(lg);lg.connect(g.gain);lfo.start();src.start();
-  src.connect(filt);filt.connect(g);g.connect(masterGain);
-  return{src,filt,g,lfo};
+// ── NOISE BUFFER (shared) ──
+let _noiseBuf=null;
+function noiseBuffer(secs=4){
+  if(_noiseBuf)return _noiseBuf;
+  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*secs,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+  _noiseBuf=buf;return buf;
 }
+
+// ── WIND LAYER — bandpass noise with sweep LFO and slow pan ──
+function mkWind(freq,gain,gustSpeed,pan=0){
+  if(!audioCtx)return null;
+  const src=audioCtx.createBufferSource();src.buffer=noiseBuffer();src.loop=true;
+  // Bandpass shapes the wind character
+  const filt=audioCtx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=1.2;
+  // Gust LFO sweeps filter frequency — wind breathes
+  const gustLFO=audioCtx.createOscillator();gustLFO.frequency.value=gustSpeed;
+  const gustDepth=audioCtx.createGain();gustDepth.gain.value=freq*0.6;
+  gustLFO.connect(gustDepth);gustDepth.connect(filt.frequency);
+  // Amplitude LFO for volume swell
+  const g=audioCtx.createGain();g.gain.value=gain;
+  const ampLFO=audioCtx.createOscillator();ampLFO.frequency.value=gustSpeed*0.7;
+  const ampDepth=audioCtx.createGain();ampDepth.gain.value=gain*0.35;
+  ampLFO.connect(ampDepth);ampDepth.connect(g.gain);
+  // Stereo panning — spreads wind across field
+  const panner=audioCtx.createStereoPanner();panner.pan.value=pan;
+  // Slow pan sweep for movement
+  const panLFO=audioCtx.createOscillator();panLFO.frequency.value=0.03;
+  const panDepth=audioCtx.createGain();panDepth.gain.value=0.4;
+  panLFO.connect(panDepth);panDepth.connect(panner.pan);
+  src.connect(filt);filt.connect(g);g.connect(panner);panner.connect(masterGain);
+  gustLFO.start();ampLFO.start();panLFO.start();src.start();
+  return{src,filt,g,gustLFO,ampLFO,panLFO,panner};
+}
+
+// ── RAIN — highpass noise layer, steady with light flutter ──
+function mkRain(gain=0.06){
+  if(!audioCtx)return null;
+  const src=audioCtx.createBufferSource();src.buffer=noiseBuffer();src.loop=true;
+  const hp=audioCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=3500;hp.Q.value=0.5;
+  const lp=audioCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=8000;
+  const g=audioCtx.createGain();g.gain.value=gain;
+  // Flutter — tiny fast variation for raindrop texture
+  const flutter=audioCtx.createOscillator();flutter.frequency.value=14;
+  const fd=audioCtx.createGain();fd.gain.value=gain*0.08;
+  flutter.connect(fd);fd.connect(g.gain);flutter.start();
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(masterGain);src.start();
+  return{src,hp,lp,g,flutter};
+}
+
+// ── THUNDER — sawtooth rumble with lightning crackle preceding it ──
 function mkThunder(){
   if(!audioCtx)return null;
-  const osc=audioCtx.createOscillator();osc.type='sawtooth';osc.frequency.value=55;
-  const filt=audioCtx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=120;
+  const osc=audioCtx.createOscillator();osc.type='sawtooth';osc.frequency.value=48;
+  const osc2=audioCtx.createOscillator();osc2.type='sine';osc2.frequency.value=32;
+  const filt=audioCtx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=110;
   const g=audioCtx.createGain();g.gain.value=0;
-  osc.connect(filt);filt.connect(g);g.connect(masterGain);osc.start();
-  function rumble(){const now=audioCtx.currentTime;g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(0.15,now+0.1);g.gain.exponentialRampToValueAtTime(0.001,now+2.5);setTimeout(rumble,8000+Math.random()*12000);}
-  setTimeout(rumble,3000+Math.random()*5000);
-  return{osc,filt,g};
+  // Mix both oscillators for richer rumble
+  const mix=audioCtx.createGain();mix.gain.value=0.6;
+  osc.connect(filt);osc2.connect(mix);mix.connect(filt);filt.connect(g);g.connect(masterGain);
+  osc.start();osc2.start();
+  function strike(){
+    const now=audioCtx.currentTime;
+    // Lightning crackle — brief burst of shaped noise before thunder
+    const crack=audioCtx.createBufferSource();
+    const crackBuf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.15,audioCtx.sampleRate);
+    const cd=crackBuf.getChannelData(0);
+    for(let i=0;i<cd.length;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-(i/cd.length),3);
+    crack.buffer=crackBuf;
+    const crackFilt=audioCtx.createBiquadFilter();crackFilt.type='highpass';crackFilt.frequency.value=2000;
+    const crackG=audioCtx.createGain();crackG.gain.value=0.25;
+    crack.connect(crackFilt);crackFilt.connect(crackG);crackG.connect(masterGain);
+    crack.start(now);
+    // Thunder rolls in 0.2s after crackle
+    g.gain.setValueAtTime(0,now+0.2);
+    g.gain.linearRampToValueAtTime(0.18,now+0.35);
+    g.gain.setValueAtTime(0.18,now+0.6);
+    g.gain.exponentialRampToValueAtTime(0.001,now+3.5);
+    const next=9000+Math.random()*16000;
+    setTimeout(strike,next);
+  }
+  setTimeout(strike,4000+Math.random()*6000);
+  return{osc,osc2,filt,g,mix};
 }
+
+// ── STORMLIGHT HUM — beating sinewave pair, ethereal ──
 function mkHum(){
   if(!audioCtx)return null;
   const o1=audioCtx.createOscillator();o1.type='sine';o1.frequency.value=220;
-  const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.value=221.5;
-  const g=audioCtx.createGain();g.gain.value=0.02;
-  const lfo=audioCtx.createOscillator();lfo.frequency.value=0.3;
-  const lg=audioCtx.createGain();lg.gain.value=0.015;
-  lfo.connect(lg);lg.connect(g.gain);lfo.start();o1.start();o2.start();
-  o1.connect(g);o2.connect(g);g.connect(masterGain);
-  return{o1,o2,g,lfo};
+  const o2=audioCtx.createOscillator();o2.type='sine';o2.frequency.value=220.8;
+  const o3=audioCtx.createOscillator();o3.type='sine';o3.frequency.value=440.3;
+  const g=audioCtx.createGain();g.gain.value=0.018;
+  const g3=audioCtx.createGain();g3.gain.value=0.007;
+  // Slow swell
+  const swell=audioCtx.createOscillator();swell.frequency.value=0.18;
+  const sd=audioCtx.createGain();sd.gain.value=0.012;
+  swell.connect(sd);sd.connect(g.gain);swell.start();
+  o1.start();o2.start();o3.start();
+  o1.connect(g);o2.connect(g);o3.connect(g3);g.connect(masterGain);g3.connect(masterGain);
+  return{o1,o2,o3,g,g3,swell};
 }
+
+// ── COMBAT INTENSIFIER — ramps up storm when combat starts ──
+function stormIntensify(intense=true){
+  if(!audioCtx||!audioOn)return;
+  const now=audioCtx.currentTime;
+  const ramp=intense?1.8:1.0;
+  const time=intense?2.5:4.0;
+  if(audioNodes.w1)audioNodes.w1.g.gain.linearRampToValueAtTime(0.12*ramp,now+time);
+  if(audioNodes.w2)audioNodes.w2.g.gain.linearRampToValueAtTime(0.08*ramp,now+time);
+  if(audioNodes.w3)audioNodes.w3.g.gain.linearRampToValueAtTime(0.15*ramp,now+time);
+  if(audioNodes.rain)audioNodes.rain.g.gain.linearRampToValueAtTime(0.06*ramp,now+time);
+}
+
 function startAudio(){
   initAudio();
   if(!audioCtx)return;
   if(audioCtx.state==='suspended')audioCtx.resume();
-  audioNodes.w1=mkWind(400,0.12,0.08);
-  audioNodes.w2=mkWind(800,0.08,0.13);
-  audioNodes.w3=mkWind(200,0.15,0.05);
+  _noiseBuf=null; // reset shared buffer
+  audioNodes.w1=mkWind(380,0.11,0.07,-0.3);   // low howl, left
+  audioNodes.w2=mkWind(780,0.07,0.12, 0.3);   // mid whistle, right
+  audioNodes.w3=mkWind(180,0.14,0.04, 0.0);   // deep rumble, center
+  audioNodes.w4=mkWind(1200,0.04,0.18,-0.6);  // high shriek, far left
+  audioNodes.rain=mkRain(0.055);
   audioNodes.thunder=mkThunder();
   audioNodes.hum=mkHum();
   audioOn=true;
@@ -3789,8 +3958,16 @@ function startAudio(){
 }
 function stopAudio(){
   if(!audioCtx)return;
-  Object.values(audioNodes).forEach(n=>{try{if(n.src)n.src.stop();if(n.osc)n.osc.stop();if(n.o1)n.o1.stop();if(n.o2)n.o2.stop();if(n.lfo)n.lfo.stop();}catch(e){}});
-  audioNodes={};audioOn=false;
+  const nodes=Object.values(audioNodes);
+  nodes.forEach(n=>{
+    if(!n)return;
+    try{
+      ['src','osc','osc2','o1','o2','o3','gustLFO','ampLFO','panLFO','swell','flutter'].forEach(k=>{
+        if(n[k])n[k].stop();
+      });
+    }catch(e){}
+  });
+  audioNodes={};audioOn=false;_noiseBuf=null;
   document.getElementById('audio-toggle').textContent='🔇';
   document.getElementById('audio-label').textContent='OFF';
 }

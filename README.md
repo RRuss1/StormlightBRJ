@@ -1,269 +1,167 @@
 # ⟁ Stormlight Chronicles
 
-A browser-based multiplayer RPG set in Brandon Sanderson's **Way of Kings** universe — built for friends spread across cities to play together on their lunch breaks, one turn at a time.
+**Play now:** https://rruss1.github.io/StormlightBRJ/
 
-**Live:** [rruss1.github.io/StormlightBRJ](https://rruss1.github.io/StormlightBRJ/)
+A browser-based multiplayer RPG set in Brandon Sanderson's Stormlight Archive. You and your friends become Knights Radiant — or Heroes of Roshar — as an AI Game Master narrates your journey across 180 turns of epic saga.
 
----
-
-## What It Is
-
-Stormlight Chronicles is a shared narrative RPG powered by an AI Game Master (Claude Sonnet). Players each claim a slot, build a Knight Radiant character, and take turns making choices that shape a 180-turn epic saga across three acts — each set in a different, randomly selected location on Roshar.
-
-The game lives at a single shareable URL. Each player opens it on their own device whenever they have a free moment. The story pauses between turns and waits. A **Continue →** button appears at the bottom of every GM scene — you have to read before you can act. When you come back, the full Chronicle is there waiting.
-
-A full 180-turn saga takes roughly 2–3 months of daily lunch breaks and costs less than a dollar in API fees.
+No download. No account. Just open the link and play.
 
 ---
 
-## Features
+## How It Works
 
-### AI Game Master
-- **Claude Sonnet** narrates every consequence, generates location-specific story beats, and presents 4 choices each turn tailored to your character class, current scene, and party situation
-- **Dramatic storytelling rules** enforced in every prompt — no repeated weapon draws, varied sentence structure, escalating stakes, location-specific sensory detail
-- **Persistent World Memory** — tracks faction relationships, discovered secrets, met NPCs, and key choices across all 180 turns. Injected as a compact summary into every GM prompt so the story remembers that you saved that merchant in turn 12
-- **Branching Act Consequences** — at act transitions, Haiku analyzes your choices and generates a consequence that flavors the next act's location
-- **Phase-aware prompts** — the GM knows how many beats until combat and builds tension accordingly. Final pre-combat beat always reveals the enemy threat
+Stormlight Chronicles is an **async turn-based RPG**. That means:
 
-### Characters — All 10 Knight Radiant Orders
-**Windrunner · Lightweaver · Edgedancer · Stoneward · Elsecaller · Truthwatcher · Willshaper · Dustbringer · Bondsmith · Skybreaker**
+- Open the game whenever you have a few minutes
+- Take your turn — describe your action or pick from the GM's suggestions
+- Close the tab and go live your life
+- The story waits until everyone has acted, then the GM narrates what happens next
 
-- Full character sheets with stat rolls (4d6 drop lowest), class bonuses, unique surges and abilities
-- He/Him and She/Her pronoun selection — consistent throughout all GM narration
-- Custom character color shown throughout the UI
-
-### Oath Progression System
-- Each Radiant order has 5 distinct canonical Oaths
-- The GM detects story moments that match your order's ideal and triggers oath progression
-- **Oath 2:** Shardblade manifests · **Oath 3:** Surges strengthen · **Oath 4:** Shardplate begins forming · **Oath 5:** Full Radiant
-- Oath level shown in party strip: *Syl Oath 2/5*
-
-### Spren Bond & Companions
-- **Named spren per order** — Syl, Pattern, Wyndle, Roksel, Ivory, Glys, Lunu'anaki, Spark, the Sibling, Highspren
-- **5 evolution stages** — from distant whisper to living Shardblade
-- **Spren memories** — your spren records critical moments and the GM weaves them into future narration
-- **Animated SVG spren companions** — each character card has a paired companion card with a unique CSS-animated spren. Syl is a flowing silver ribbon, Pattern is a spinning tessellation, Wyndle a swaying vine, Spark flickering embers
-
-### Combat System
-- **3–8 exploration beats** before each combat (randomized) — the GM builds tension naturally toward each conflict
-- **Simultaneous round resolution** — all human players pick at the same time, then the round resolves at once
-- **Dynamic GM-generated combat choices** — Haiku generates 4 fresh, situationally specific options each round referencing class abilities, current enemies, location, and round number
-- **Enemy scaling** — HP scales by act (×1.0 / ×1.5 / ×2.0) and average party blade tier
-- **Environmental hazards** — Shattered Plains plateaus collapse, Shadesmar drains fragments, Braize disrupts actions, Urithiru's wards grant defense
-- **Boss encounters** — once per act, a named boss with 3 HP phases spawns. Guaranteed equipment drop on defeat
-- **Healing in combat** — 4th choice becomes heal when party is injured. Scales with oath stage. Edgedancer ×1.7, Bondsmith heals party
-- **Downed mechanic** — 0HP players are downed for the fight, revived at 1HP after combat ends
-- **Dice ticker** — shows last 3 rounds of rolls: gold for CRIT, teal for HIT/HEAL, grey for MISS, coral for damage taken
-
-### Highstorm Events
-- **8% chance per exploration beat** — a Highstorm strikes the current location
-- Survive through class-specific choices for full HP restore + 2 bonus fragments for all
-
-### Shardblade & Equipment
-- **Shardblade crafting** — 3 Stormlight Fragments → class-specific named blade
-- **5 upgrade tiers** (Nascent → Bonded → Ancient → Living → Divine) — 5 fragments each, +1 combat per tier
-- **Shardplate drops** — critical victories can yield Shardplate, shown on all character cards
-
-### Multiplayer
-- **Party size 2–5** — configurable at campaign creation
-- **Per-slot localStorage** — each device claims its slot; returning players auto-rejoin on any device
-- **Lobby live polling** (5s) — slots update in real time; game auto-starts when host begins
-- **NPC auto-fill** — empty slots become AI companions who D4-roll choices (zero AI tokens)
-- **Combat polling** (8s) — pending actions sync across devices
-- **⏭ Skip Turn** — host can skip any player's turn (Joe got a phone call — game doesn't freeze). Any player can also self-skip. Skipped exploration turns advance the beat; skipped combat turns auto-assign a defend action. A system note appears in the Chronicle
-
-### Visual Design
-- **Animated HP bars** — damage floats up as a number, bar drains smoothly, card shakes on damage, green shimmer on heal
-- **Active player card** pulses gold during their turn
-- **Turn transition animation** — ⟁ glyph flares gold, story text fades in on each new beat
-- **Story card parallax** — subtle depth shift on the chronicle card as you scroll (desktop)
-- **3-column game layout** — Action Log (left) | Chronicle (center) | TLDR Summary (right)
-- **Action Log** — every player and NPC action with d20 roll, stat bonus, total, result badge, timestamp
-- **TLDR Summary** — Haiku generates a 2-sentence summary after each GM beat
-
-### Voice & Audio
-- **Procedural storm synthesis** — Web Audio API generates wind, thunder, and Stormlight hum. Intensity shifts with scene type
-- **Neural TTS voice** — Kokoro ONNX (82M parameter model) speaks the full story aloud when 🔈 is tapped. Falls back to Web Speech API
-- **Voice selector** — ♂ Michael · ♂ Adam · ♂ Echo · ♀ Emma (British) · ♀ Heart · ♀ Nova
-- Voice is stripped from mobile — no data usage
-
-### Thai Language Support
-- Toggle `🌐 EN / 🌐 ไทย` on any screen
-- All UI labels, story text, and choice tiles translate via Haiku in one batch call
-- GM always writes in English (best quality), Haiku translates before display
-- Translations cached per session
+The AI Game Master remembers everything — who you've met, what you've discovered, what choices your party made three turns ago. It writes like a novelist: specific sensory details, consequences that persist, danger that erupts when it makes dramatic sense rather than on a schedule.
 
 ---
 
-## How to Play
+## Getting Started
 
-1. Open the link — you land on the **Campaign Picker**
-2. Click **+ New Campaign**, give it a name, press Enter
-3. Choose **party size** (2–5) then click **Enter the Storm**
-4. Build your **Knight Radiant** — pick your Order, choose a color, roll stats
-5. Land in the **Lobby** — assign NPCs to empty slots or wait for friends to join
-6. Click **Begin the Saga →**
-7. The AI GM opens the story. Read it. Scroll down. Click **Continue →**
-8. On your turn: pick from 4 choices (or type your own action) then click **Act →**
-9. Check back at your next lunch break
+### 1. Create a Campaign
+From the campaign screen, click **+ New Campaign**, name it, and share the URL with your friends. Everyone uses the same link.
+
+### 2. Choose Your Party Size
+Select 2–5 players. Empty slots become AI companions — fully voiced NPCs who fight alongside you and react to the story.
+
+### 3. Create Your Character
+
+**Knight Radiant** — You've bonded a spren and spoken the First Ideal. Choose your Order:
+
+| Order | Surges | Strength |
+|-------|--------|----------|
+| Windrunner | Gravitation + Adhesion | Fly, protect, lash enemies to surfaces |
+| Edgedancer | Abrasion + Progression | Speed, grace, powerful healing |
+| Lightweaver | Illumination + Transformation | Illusions, deception, reality-bending |
+| Stoneward | Cohesion + Tension | Immovable, reliable, stone-hard defense |
+| Elsecaller | Transformation + Transportation | Knowledge made power, Shadesmar access |
+| Truthwatcher | Progression + Illumination | See what others miss, perceive hidden truth |
+| Willshaper | Division + Adhesion | Freedom, chaos, unpredictable surges |
+| Dustbringer | Division + Abrasion | Controlled destruction, precise devastation |
+| Bondsmith | Tension + Adhesion | Unite allies, connect disparate forces |
+| Skybreaker | Gravitation + Division | Law, precision, devastating judgment |
+
+**Hero of Roshar** — No spren bond. Just skill, grit, and a weapon you've mastered through 5 upgrade tiers. Roles: Alethi Soldier, Kharbranth Scholar, Thaylen Merchant, Horneater, Herdazian Fighter, Shin Farmer, Worldsinger, or Custom.
+
+### 4. Build Your Character
+The GM reads your backstory, motivation, appearance, and weapon history and weaves them into every scene. The more you write, the more personal the story becomes.
+
+### 5. Enter the Storm
+Once all slots are filled (or assigned to AI companions), the host clicks **Begin the Saga**.
 
 ---
 
-## All 10 Radiant Orders
+## The Story
 
-| Order | Ideal | Surges | Spren |
-|---|---|---|---|
-| Windrunner | I will protect those who cannot protect themselves | Gravitation + Pressure | Honorspren (Syl) |
-| Lightweaver | I am who I needed when I was young | Illumination + Transformation | Cryptic (Pattern) |
-| Edgedancer | I will remember those who have been forgotten | Abrasion + Progression | Cultivationspren (Wyndle) |
-| Stoneward | I will be there when I am needed | Tension + Cohesion | Peakspren (Roksel) |
-| Elsecaller | I will reach my potential so I may help others | Transportation + Transformation | Inkspren (Ivory) |
-| Truthwatcher | I will seek truth, even when it is painful | Progression + Illumination | Mistspren (Glys) |
-| Willshaper | I will seek freedom for those in bondage | Transportation + Cohesion | Lightspren (Lunu'anaki) |
-| Dustbringer | I will seek self-mastery above all else | Division + Abrasion | Ashspren (Spark) |
-| Bondsmith | I will unite instead of divide | Tension + Adhesion | Godspren (the Sibling) |
-| Skybreaker | I will follow the law | Gravitation + Division | Highspren |
+### How Exploration Works
+Each turn you choose an action — from 4 AI-generated options or your own description. A d20 rolls. Your stats shape the outcome. The GM narrates the consequence.
+
+The GM is not a neutral narrator. It has opinions about your character. It remembers what happened two turns ago and treats it as immediate. It builds tension organically — danger doesn't arrive on a schedule, it arrives when the story demands it. Some exploration sequences are long stretches of discovery with no violence. Others escalate fast.
+
+### Combat Triggers
+Combat doesn't start on a timer. The GM watches what you discover and builds toward confrontation naturally. An ambush grows from something you found. A misunderstanding escalates. A creature claims territory. When the GM narrates the moment of confrontation, the fight begins.
+
+### Between Fights
+Every story turn, all living party members absorb ambient Stormlight and recover +d4 HP. Radiants and Heroes alike. The world breathes.
 
 ---
 
-## Spren Bond Evolution
+## Combat
 
-| Turns | Stage | Bonus |
-|---|---|---|
-| 0–19 | 1 — First Oath | Base class abilities |
-| 20–49 | 2 — Shardblade Manifests | +1 combat rolls |
-| 50–89 | 3 — Surges Strengthen | +1 combat, +1 heal |
-| 90–139 | 4 — Shardplate Forming | +2 combat, +2 heal, partial armor |
-| 140–180 | 5 — Full Radiant | +3 combat, +3 heal, full Shardplate |
+When combat starts, everyone acts simultaneously. No waiting for your turn in the initiative order — you and your allies all submit actions, then everything resolves in a structured order.
+
+### Phase Order (every round)
+1. **Offense** — all attacks and surges resolve simultaneously
+2. **Defense** — guard stances apply their protection to the *next* incoming hit
+3. **Healing** — Stormlight mending and revives happen after all damage
+4. **End of turn** — environmental hazards tick, effects wear off
+
+### Rolling
+Every action is a d20 + your relevant stat:
+
+| Roll | Result | What it means |
+|------|--------|---------------|
+| 18–20 | **CRIT** | Something unexpected and good happens — maximum effect |
+| 14–17 | **HIT** | Clean success |
+| 10–13 | **PARTIAL** | You get part of what you wanted, but something complicates it |
+| 6–9 | **MISS** | The world resists |
+| 1–5 | **FUMBLE** | Something goes wrong immediately |
+
+### Action Types
+You can always describe your own action, or use these keywords to guide how it's resolved:
+- `attack` — offensive strike (STR or DEX)
+- `defend` — guard stance, reduces damage next hit (END)
+- `heal` — Stormlight recovery (WIS) — **not guaranteed**, fumbles can backlash
+- `revive` — bring back a downed ally (WIS)
+- `surge` — Surgebinding ability (INT)
+- `skill` — social or perception action (CHA or WIS)
+
+### Healing
+Heals roll like everything else. A critical heal restores 150% of the base amount. A fumble causes Stormlight backlash — a negative. Plan accordingly.
+
+### Reviving
+If a party member is downed (0 HP), use a revive action. A partial success brings them back at half HP. A crit brings them back at full revive HP. A miss means they stay down.
+
+### Combat Persistence
+If you have to close the game mid-combat, the enemies wait for you. Same HP, same round, same pending actions when you return.
+
+---
+
+## Oath Progression
+
+Knight Radiants grow stronger as they speak their Oaths. There are 5 per order, each with canonical text from the books. The GM watches your actions and recognizes when they match your order's ideals.
+
+- **Oath 2–3**: Growing bond, increasing power
+- **Oath 4**: Shardplate begins to form
+- **Oath 5**: Full Radiant — Shardblade fully manifested, peak power
+
+---
+
+## Sound
+
+Click **🌩** in the audio bar to start the storm. The sound design is fully procedural — no audio files, everything synthesized in real time:
+
+- **Four wind layers** — spatially separated left to right, each breathing at a different rate
+- **Rain** — textured highpass noise behind the wind
+- **Thunder** — preceded by a lightning crackle, rumbles every 9–25 seconds
+- **Stormlight hum** — a subtle, beating ethereal tone underneath everything
+- **Combat intensification** — the storm ramps up when you enter combat, fades back when you return
+
+The **🔈** button reads the current chronicle text aloud on demand using your device's speech synthesis.
+
+---
+
+## Tips
+
+**For new players:** Pick Edgedancer or Windrunner for your first Radiant — their abilities are intuitive and they have strong healing options. For Heroes, Alethi Soldier is the most straightforward.
+
+**For storytelling:** The more you write in your backstory and appearance fields, the more the GM personalizes the narrative. Give your weapon a name. Write about your past. It shows up.
+
+**For async play:** Enable **Step Away** before closing the tab. Your combat turn auto-resolves with a defend action so your party isn't waiting.
+
+**For combat:** Defend when you're at low HP and your healer is ready. Defense applies *next round*, so plan a turn ahead. The GM narrates accordingly.
+
+**For hosts:** Fill empty slots with AI companions before starting — they fight competently and add to the story. You can always replace them if a late player joins.
 
 ---
 
 ## Locations
 
-34 locations seeded randomly per campaign — a completely different 3-location arc every run:
-
-| Category | Locations |
-|---|---|
-| Physical Roshar | Urithiru, Shattered Plains, Kholinar, Kharbranth, Thaylen City, Azimir, Purelake, Hearthstone, Rathalas, Reshi Isles, Aimia, Frostlands, Bavland, Herdaz, Jah Keved, Alethkar, Tukar, Triax, Liafor, Emul, Marat |
-| Other Worlds | Braize (Damnation), Ashyn, Aimian Sea, Godforge |
-| Shadesmar | Sea of Regret, Sea of Souls, Sea of Lost Lights, Nexus of Imagination, Nexus of Truth, Nexus of Transition, Honor's Perpendicularity, Cultivation's Perpendicularity |
-| Story Sites | The Honor Chasm, Feverstone Keep, Stormseat (Narak) |
+Your saga unfolds across 34 locations including Hearthstone, the Shattered Plains, Urithiru, Kharbranth, Kholinar, Thaylenah, the Purelake, the Reshi Isles, Braize, Shinovar, the Horneater Peaks, Shadesmar, Aimia, and more — randomized each campaign with a different path through all three acts.
 
 ---
 
-## Tech Stack
+## Credits
 
-| Layer | Technology |
-|---|---|
-| Frontend | Single-file HTML/CSS/JS, no framework, ~3,300 lines |
-| Hosting | GitHub Pages |
-| Shared state | Google Sheets API v4 |
-| GM narration | Claude Sonnet 4 (claude-sonnet-4-20250514) |
-| Summaries, translation, choices | Claude Haiku 4.5 (claude-haiku-4-5-20251001) |
-| API proxy | Cloudflare Worker |
-| Auth | Google Service Account JWT via Web Crypto API |
-| Audio | Web Audio API — procedural synthesis, no files |
-| Voice | Kokoro ONNX + Web Speech API fallback |
-| Fonts | Cinzel + Crimson Pro via Google Fonts |
+Built with the Anthropic Claude API. Set in Brandon Sanderson's Cosmere. Made for people who love the Stormlight Archive and can't coordinate a weekly game night.
+
+*Life before death. Strength before weakness. Journey before destination.*
 
 ---
 
-## Setup (Self-Hosting)
-
-### 1. Google Sheets
-- Create a new Google Sheet
-- Enable **Google Sheets API** in Google Cloud Console
-- Create a **Service Account** and download the JSON key
-- Share the Sheet with the service account email (Editor access)
-- Copy the Sheet ID from the URL
-
-### 2. Cloudflare Worker
-Create a free Cloudflare account, make a Worker, add your Anthropic API key as a secret called `ANTHROPIC_KEY`, then paste:
-
-```javascript
-export default {
-  async fetch(request, env) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        }
-      });
-    }
-    const body = await request.json();
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': env.ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
-  }
-};
-```
-
-### 3. Update index.html
-Replace these constants near the top of the script:
-
-```javascript
-const SHEET_ID = 'your-sheet-id-here';
-const PROXY_URL = 'https://your-worker.workers.dev';
-const SA = {
-  client_email: 'your-service-account@project.iam.gserviceaccount.com',
-  private_key: `-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n`
-};
-```
-
-### 4. Deploy to GitHub Pages
-Upload `index.html` to a public GitHub repo → Settings → Pages → Deploy from branch → main → / (root).
-
----
-
-## API Costs
-
-| Item | Cost |
-|---|---|
-| Google Sheets API | Free |
-| Cloudflare Worker | Free (100k requests/day) |
-| GitHub Pages | Free |
-| Claude Sonnet per GM turn | ~$0.003 |
-| Claude Haiku (TLDR + translation + combat choices) | ~$0.0002 per beat |
-| Full 180-turn campaign | ~$0.54 total |
-
-New Anthropic accounts get $5 free credit — enough for roughly 9 full campaigns.
-
----
-
-## Contributing
-
-This started as a lunch-break idea and grew into something genuinely deep. If you've played it, forked it, or have ideas — open an issue. The Cosmere is a big universe and we've barely scratched the surface.
-
----
-
-## Support
-
-If you enjoy the game, help keep the Stormfather awake:
-
-**Venmo: [@goretusker](https://venmo.com/u/goretusker)**  
-**Cash App: [$rurich31](https://cash.app/$rurich31)**
-
-API costs run ~$0.003 per turn. Every campaign costs less than a dollar.
-
----
-
-## License
-
-MIT — fork it, mod it, run your own campaign. Just don't sell it.
-
----
-
-*"The most important step a man can take. It's not the first one, is it? It's the next one."*  
-*— The Way of Kings, Brandon Sanderson*
+Questions or issues: github.com/rruss1/StormlightBRJ
