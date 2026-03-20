@@ -1039,7 +1039,7 @@ Return ONLY a numbered list:
 
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
         messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const raw=data.content&&data.content[0]?data.content[0].text:'';
@@ -2121,7 +2121,7 @@ function renderParty(){
         <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
         ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} Oath ${p.oathStage||1}/5</div>`:''}
         ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
-        ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.shardblade} T${p.bladeLevel||1}</div>`:''}
+        ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);" title="${p.bladeDesc||p.shardblade}">⚔ ${p.bladeName||p.shardblade} T${p.bladeLevel||1}</div>`:''}
       ${p.weapon&&!p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);">⚔ ${p.weapon} T${p.weaponLevel||1}</div>`:''}
         ${p.shardplate?`<div class="ppip-tag" style="color:var(--gold);">⬛ Shardplate</div>`:''}
         ${(p.fragments||0)>0?`<div class="ppip-tag" style="color:var(--teal2);">✦ ${p.fragments} frags</div>`:''}
@@ -2332,6 +2332,16 @@ async function handleNPC(log){
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
+  // ── Passive Stormlight regen (story mode only) ──
+  if(!gState.combatMode){
+    gState.players.slice(0,sz).forEach((p,idx)=>{
+      if(!p||p.isPlaceholder||p.downed)return;
+      const regen=Math.ceil(Math.random()*4); // d4
+      p.hp=Math.min(p.maxHp||p.hp,p.hp+regen);
+      gState.players[idx]=p;
+      if(myChar&&myChar.name===p.name){myChar=p;saveMyChar(p);}
+    });
+  }
   if(!gState.combatMode){
     gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
     const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
@@ -2410,6 +2420,16 @@ async function onSubmitAction(){
   gState.turn=(gState.turn+1)%sz;
   gState.totalMoves=(gState.totalMoves||0)+1;
   if(gState.combatActive&&gState.turn===0)gState.combatRound=(gState.combatRound||1)+1;
+  // ── Passive Stormlight regen (story mode only) ──
+  if(!gState.combatMode){
+    gState.players.slice(0,sz).forEach((p,idx)=>{
+      if(!p||p.isPlaceholder||p.downed)return;
+      const regen=Math.ceil(Math.random()*4); // d4
+      p.hp=Math.min(p.maxHp||p.hp,p.hp+regen);
+      gState.players[idx]=p;
+      if(myChar&&myChar.name===p.name){myChar=p;saveMyChar(p);}
+    });
+  }
   if(!gState.combatMode){
     gState.beatsSinceLastCombat=(gState.beatsSinceLastCombat||0)+1;
     const beatsLeft=(gState.beatsUntilCombat||5)-gState.beatsSinceLastCombat;
@@ -2639,7 +2659,30 @@ function getCharContext(){
   if(myChar.backstory&&myChar.backstory.trim())parts.push('Background: '+myChar.backstory.trim());
   if(myChar.appearance&&myChar.appearance.trim())parts.push('Looks: '+myChar.appearance.trim());
   if(!myChar.isRadiant&&myChar.roleName)parts.push('Role: '+myChar.roleName);
-  if(!myChar.isRadiant&&myChar.weapon)parts.push('Weapon: '+myChar.weapon);
+  if(!myChar.isRadiant&&myChar.weapon){
+    const wd=myChar.weaponData;
+    const tier=myChar.weaponLevel||1;
+    const tierDesc=wd&&wd.tiers&&wd.tiers[tier-1]?wd.tiers[tier-1].desc:'';
+    const weaponCtx=`${myChar.weapon} (Tier ${tier}${tierDesc?': '+tierDesc:''})`;
+    parts.push('Weapon: '+weaponCtx);
+    if(wd&&wd.style)parts.push('Fighting style: '+wd.style);
+  }
+  if(myChar.isRadiant&&myChar.shardblade){
+    const bname=myChar.bladeName||myChar.shardblade;
+    const bdesc=myChar.bladeDesc?` — ${myChar.bladeDesc}`:'';
+    const blevel=myChar.bladeLevel||1;
+    const bpow=blevel>=5?'fully manifested Shardblade, cuts through stone and steel effortlessly':
+                blevel>=4?'Shardblade nearly fully formed, leaves glowing cuts':
+                blevel>=3?'Shardblade solidifying, reliable in battle':
+                blevel>=2?'Shardblade flickering but usable':'nascent Shardblade, unstable but deadly';
+    parts.push(`Shardblade: ${bname}${bdesc} — Tier ${blevel}/5 (${bpow})`);
+  }
+  if(myChar.isRadiant&&myChar.className){
+    const cl=CLASSES.find(c=>c.id===myChar.classId);
+    if(cl&&cl.abilities&&cl.abilities.length){
+      parts.push('Surgebinding abilities: '+cl.abilities.join(', '));
+    }
+  }
   return parts.length?'\n'+parts.join('. '):''
 }
 
@@ -2876,6 +2919,14 @@ Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
 async function enterCombat(){
   if(!gState)return;
   try{
+  // ── If combat already in progress, just restore the screen — don't re-roll enemies ──
+  const existingEnemies=gState.combatEnemies&&gState.combatEnemies.filter(e=>!e.downed&&e.hp>0);
+  if(existingEnemies&&existingEnemies.length>0&&gState.combatPhase&&gState.combatPhase!=='idle'){
+    showScreen('combat');
+    renderCombatScreen();
+    renderCombatActions();
+    return;
+  }
   const sz=gState.partySize||partySize;
   const actNum=getAct(gState.totalMoves||0).num||1;
   const avgBlade=gState.players.slice(0,sz).filter(Boolean).reduce((a,p)=>a+(p.bladeLevel||0),0)/sz;
@@ -3084,19 +3135,32 @@ function renderCombatActions(){
     return;
   }
   if(iAmHuman&&!mySubmitted){
-    const choices=buildCombatChoices(myChar,gState);
+    const cached=gState.combatChoicesCache&&gState.combatChoicesCache[myChar.name];
+    const choices=cached&&cached.length>=4?cached:null;
     html+=`<div class="combat-player-label">⟁ Your Action — ${myChar.name}</div>`;
-    const choiceHTML=choices.map((ch,i)=>{
-      const display=ch.replace(/\[ATTACK\]|\[DEFEND\]|\[HEAL\]/g,'').trim();
-      const m=ch.match(/\[(ATTACK|DEFEND|HEAL)\]/);
-      const tag=m?m[1]:'';
-      const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':'var(--coral2)';
-      const tagBadge=tag?'<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>':'';
-      const safeOrig=ch.replace(/`/g,"'").replace(/"/g,'&quot;');
-      return'<button class="achoice" onclick="selectCombatAction(this,`'+safeOrig+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
-    }).join('');
-    html+=`<div class="action-choices" style="margin-bottom:12px;">${choiceHTML}</div>`;
-    html+=`<div class="custom-row"><input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action..." maxlength="200"/></div>`;
+    if(!choices){
+      // Show loading skeleton — AI choices loading
+      const skeletonStyle='opacity:0.35;pointer-events:none;cursor:default;';
+      const skels=['ATTACK','HEAL','DEFEND','ATTACK'];
+      const skelHTML=skels.map((tag,i)=>{
+        const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':'var(--coral2)';
+        const tagBadge='<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>';
+        return'<button class="achoice" style="'+skeletonStyle+'"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span><span style="display:inline-block;width:85%;height:14px;background:var(--border2);border-radius:4px;vertical-align:middle;animation:starGlow 1.5s ease-in-out infinite;"></span></button>';
+      }).join('');
+      html+=`<div class="action-choices" style="margin-bottom:12px;">${skelHTML}</div>`;
+    } else {
+      const choiceHTML=choices.map((ch,i)=>{
+        const display=ch.replace(/\[ATTACK\]|\[DEFEND\]|\[HEAL\]|\[SURGE\]|\[SKILL\]/g,'').trim();
+        const m=ch.match(/\[(ATTACK|DEFEND|HEAL|SURGE|SKILL)\]/);
+        const tag=m?m[1]:'';
+        const tagCol=tag==='HEAL'?'var(--teal2)':tag==='DEFEND'?'var(--amber2)':tag==='SURGE'?'var(--amber)':tag==='SKILL'?'var(--text3)':'var(--coral2)';
+        const tagBadge=tag?'<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:'+tagCol+'22;color:'+tagCol+';">'+tag+'</span>':'';
+        const safeOrig=ch.replace(/`/g,"'").replace(/"/g,'&quot;');
+        return'<button class="achoice" onclick="selectCombatAction(this,`'+safeOrig+'`)"><span class="achoice-num">Option '+(i+1)+' '+tagBadge+'</span>'+display+'</button>';
+      }).join('');
+      html+=`<div class="action-choices" style="margin-bottom:12px;">${choiceHTML}</div>`;
+    }
+    html+=`<div class="custom-row"><input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action... (or type ATTACK, HEAL, REVIVE, DEFEND, SURGE, SKILL)" maxlength="200"/></div>`;
     html+=`<div class="act-row" style="margin-top:10px;"><button class="btn-act" onclick="submitCombatAction()">⚔ Act →</button></div>`;
   } else if(iAmHuman&&mySubmitted){
     const stillWaiting=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed&&(!gState.pendingActions||!gState.pendingActions[p.name])).map(p=>p.name);
@@ -3132,10 +3196,21 @@ async function submitCombatAction(){
   const custom=document.getElementById('combat-custom-in');
   let action=custom&&custom.value.trim()||combatSelectedAction;
   if(!action||!myChar)return;
-  if(custom&&custom.value.trim()&&!/\[(HEAL|ATTACK|DEFEND)\]/.test(action)){
+  if(custom&&custom.value.trim()&&!/\[(HEAL|ATTACK|DEFEND|SURGE|SKILL|REVIVE)\]/.test(action)){
     const lower=action.toLowerCase();
-    if(/heal|mend|regrow|restore|revive|tend|bandage/.test(lower))action='[HEAL] '+action;
-    else if(/defend|block|shield|protect|brace|guard|dodge/.test(lower))action='[DEFEND] '+action;
+    // Explicit keyword shortcuts (case insensitive)
+    if(/^heal\b/.test(lower))action='[HEAL] '+action.replace(/^heal\s*/i,'');
+    else if(/^revive\b/.test(lower))action='[HEAL] revive — '+action.replace(/^revive\s*/i,'');
+    else if(/^defend\b/.test(lower))action='[DEFEND] '+action.replace(/^defend\s*/i,'');
+    else if(/^surge\b/.test(lower))action='[SURGE] '+action.replace(/^surge\s*/i,'');
+    else if(/^skill\b/.test(lower))action='[SKILL] '+action.replace(/^skill\s*/i,'');
+    else if(/^attack\b/.test(lower))action='[ATTACK] '+action.replace(/^attack\s*/i,'');
+    // Fallback keyword detection from action text
+    else if(/heal|mend|regrow|restore|tend|bandage|cure|knit/.test(lower))action='[HEAL] '+action;
+    else if(/revive|stabilize|pull.*back|rouse/.test(lower))action='[HEAL] '+action;
+    else if(/defend|block|shield|protect|brace|guard|parry|stance/.test(lower))action='[DEFEND] '+action;
+    else if(/soulcast|lash|illusion|surge|transmute|conjure|lightweave/.test(lower))action='[SURGE] '+action;
+    else if(/search|scout|perceive|persuade|negotiate|bluff|charm/.test(lower))action='[SKILL] '+action;
     else action='[ATTACK] '+action;
   }
   if(!action||!myChar)return;
@@ -3161,85 +3236,83 @@ async function resolveRound(){
   gState.combatPhase='resolving';
   renderCombatActions();
   const sz=gState.partySize||partySize;
-  const actions=Object.entries(gState.pendingActions||{}).map(([name,action])=>`${name}: ${action}`).join(' | ');
+  const stage=getSprenStage(gState.totalMoves||0);
   const roundDice={round:gState.combatRound,entries:[]};
 
-  const sz2=gState.partySize||partySize;
+  // ── Build action list: map each pending action to a structured object ──
+  const allActions=[];
+
+  // Player actions
   Object.entries(gState.pendingActions||{}).forEach(([name,action])=>{
     const p=gState.players.find(x=>x&&x.name===name);
-    if(!p)return;
+    if(!p||p.downed)return;
     const {bucket,stat}=getActionBucket(action);
-    const sv=(p.stats&&p.stats[stat])||10;
-    const bonus=Math.floor((sv-10)/2)+(p.bladeLevel||0);
-    const roll=Math.ceil(Math.random()*20);
-    const total=Math.min(20,Math.max(1,roll+bonus));
-    const result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
-    const stage=getSprenStage(gState.totalMoves||0);
-    let detail='';
-    const pi=gState.players.findIndex(x=>x&&x.name===name);
+    // Map bucket to phase
+    const phase=bucket==='defend'?'DEFENSE':
+                bucket==='heal'||bucket==='revive'?'HEAL':
+                bucket==='surge'?'OFFENSE': // surges resolve with attacks
+                'OFFENSE';
+    allActions.push({actor:name,action,bucket,stat,phase,isEnemy:false,player:p});
+  });
 
-    if(bucket==='revive'){
-      // Revive a downed ally — WIS roll, costs fragments on success
-      const downedAlly=gState.players.find(x=>x&&x.downed&&x.name!==name);
-      if(!downedAlly){
-        detail='no downed ally found';
-        roundDice.entries.push({name,roll,bonus,total,result:'MISS',detail,isEnemy:false});
-      } else if(total>=10){
-        // Success — revive with HP based on roll quality
-        const revHP=total>=18?getReviveHP(stage)*2:total>=14?getReviveHP(stage):Math.max(1,Math.floor(getReviveHP(stage)/2));
-        downedAlly.hp=revHP;
-        downedAlly.downed=false;
-        const ai=gState.players.findIndex(x=>x&&x.name===downedAlly.name);
-        if(ai>=0)gState.players[ai]=downedAlly;
-        if(myChar&&myChar.name===downedAlly.name){myChar=downedAlly;saveMyChar(downedAlly);}
-        detail=`${downedAlly.name} revived +${revHP}HP`;
-        roundDice.entries.push({name,roll,bonus,total,result:total>=18?'CRIT':total>=14?'HIT':'PARTIAL',detail,isEnemy:false});
-      } else {
-        detail=`failed to revive ${downedAlly.name}`;
-        roundDice.entries.push({name,roll,bonus,total,result,detail,isEnemy:false});
-      }
-
-    } else if(bucket==='heal'){
-      // Self heal — WIS roll determines amount
-      const baseAmt=getHealAmount(p,stage)||6;
-      let healAmt=0;
-      if(total>=18)healAmt=Math.round(baseAmt*1.5);       // CRIT — bonus heal
-      else if(total>=14)healAmt=baseAmt;                  // HIT — full
-      else if(total>=10)healAmt=Math.round(baseAmt*0.6);  // PARTIAL — reduced
-      else if(total>=6){healAmt=0;detail='heal fizzled';}  // MISS — nothing
-      else{                                                 // FUMBLE — drain
-        healAmt=-Math.floor(baseAmt*0.3);
-        detail='Stormlight backlash';
-      }
-      if(healAmt>0){
-        p.hp=Math.min(p.maxHp||p.hp,p.hp+healAmt);
-        detail=`+${healAmt}HP`;
-      } else if(healAmt<0){
-        p.hp=Math.max(1,p.hp+healAmt);
-        detail=`${healAmt}HP (backlash)`;
-      }
-      if(pi>=0)gState.players[pi]=p;
-      if(myChar&&myChar.name===name){myChar=p;saveMyChar(p);}
-      roundDice.entries.push({name,roll,bonus,total,result:total>=18?'CRIT':total>=14?'HEAL':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE',detail,isEnemy:false});
-
-    } else if(bucket==='defend'){
-      // Defend — END roll, grants damage reduction next incoming attack
-      if(total>=14){
-        p.defending=true;
-        if(pi>=0)gState.players[pi]=p;
-        detail=total>=18?'perfect stance (+4 DR)':'defensive stance (+2 DR)';
-      } else if(total>=10){
-        detail='partial block';
-      } else {
-        detail='stance broken';
-      }
-      roundDice.entries.push({name,roll,bonus,total,result,detail,isEnemy:false});
-
+  // Enemy actions — AI decides targets now, locked before resolution
+  const livingEnemies=(gState.combatEnemies||[]).filter(e=>!e.downed);
+  const livingParty=gState.players.slice(0,sz).filter(p=>p&&!p.downed&&!p.isNPC);
+  const livingAll=gState.players.slice(0,sz).filter(p=>p&&!p.downed);
+  livingEnemies.forEach(enemy=>{
+    // Enemy AI: target lowest HP player, or defend if low HP
+    const hpPct=enemy.hp/(enemy.maxHp||enemy.hp);
+    if(hpPct<0.3&&Math.random()<0.4){
+      allActions.push({actor:enemy.name,action:'defend',bucket:'defend',phase:'DEFENSE',isEnemy:true,enemy});
     } else {
-      // ATTACK or SURGE or SKILL — standard roll vs enemies
+      const woundedTarget=livingAll.slice().sort((a,b)=>a.hp-b.hp)[0];
+      const target=Math.random()<0.6&&woundedTarget?woundedTarget:livingAll[Math.floor(Math.random()*livingAll.length)];
+      allActions.push({actor:enemy.name,action:'attack',bucket:'attack',phase:'OFFENSE',isEnemy:true,enemy,targetPlayer:target});
+    }
+  });
+
+  const enemyAttackResults=[];
+
+  // ══ PHASE 1: BUFFS / DEBUFFS (status effects, pre-damage) ══
+  // Currently no buff system — placeholder for future expansion
+  // gState.statusEffects could be processed here
+
+  // ══ PHASE 2: OFFENSE (attacks, surges) ══
+  allActions.filter(a=>a.phase==='OFFENSE').forEach(a=>{
+    if(a.isEnemy){
+      const enemy=a.enemy;
+      const target=a.targetPlayer;
+      if(!target||target.downed)return; // target validation
+      const result=enemyAttackRoll(enemy,target);
+      // Apply defending DR
+      let dmg=result.dmg;
+      if(target.defending){dmg=Math.max(1,dmg-2);target.defending=false;}
+      if(result.hit){
+        target.hp=Math.max(0,target.hp-dmg);
+        if(target.hp===0)target.downed=true;
+        const ti=gState.players.findIndex(p=>p&&p.name===target.name);
+        if(ti>=0)gState.players[ti]=target;
+        if(myChar&&myChar.name===target.name){myChar=target;saveMyChar(target);}
+      }
+      enemyAttackResults.push(`${enemy.name} attacked ${target.name}: ${result.hit?`hit for ${dmg} damage (${target.hp}/${target.maxHp}HP${target.downed?' — DOWNED!':''})`:'missed'}`);
+      roundDice.entries.push({name:enemy.name,roll:result.roll,bonus:null,total:null,
+        result:result.hit?'HIT':'MISS',
+        detail:result.hit?`${target.name} -${dmg}HP${target.downed?' ☠':''}`:'no effect',
+        isEnemy:true});
+    } else {
+      // Player attack or surge
+      const p=a.player;
+      if(!p||p.downed)return; // actor validation
+      const pi=gState.players.findIndex(x=>x&&x.name===a.actor);
+      const sv=(p.stats&&p.stats[a.stat])||10;
+      const bonus=Math.floor((sv-10)/2)+(p.bladeLevel||0);
+      const roll=Math.ceil(Math.random()*20);
+      const total=Math.min(20,Math.max(1,roll+bonus));
+      const result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
       const db=(CLASSES.find(cl=>cl.id===p.classId)||CLASSES[0]).dmgBonus||{crit:3,hit:2};
       const liveEn=(gState.combatEnemies||[]).filter(e=>!e.downed);
       const target=liveEn[Math.floor(Math.random()*liveEn.length)];
+      let detail='';
       if(target&&total>=10){
         const dmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;
         target.hp=Math.max(0,target.hp-dmg);
@@ -3252,41 +3325,106 @@ async function resolveRound(){
         p.hp=Math.max(0,p.hp-self_dmg);
         if(p.hp===0)p.downed=true;
         if(pi>=0)gState.players[pi]=p;
-        if(myChar&&myChar.name===name){myChar=p;saveMyChar(p);}
+        if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
         detail=`self -${self_dmg}HP${p.downed?' DOWNED':''}`;
       } else {
         detail='no effect';
       }
-      roundDice.entries.push({name,roll,bonus,total,result,detail,isEnemy:false});
+      roundDice.entries.push({name:a.actor,roll,bonus,total,result,detail,isEnemy:false});
     }
   });
 
-  const enemyAttackResults=[];
-  const livingEnemies=(gState.combatEnemies||[]).filter(e=>!e.downed);
-  const livingParty=gState.players.slice(0,sz).filter(p=>p&&!p.downed);
-  livingEnemies.forEach(enemy=>{
-    const target=livingParty[Math.floor(Math.random()*livingParty.length)];
-    if(!target)return;
-    const result=enemyAttackRoll(enemy,target);
-    if(result.hit){
-      target.hp=Math.max(0,target.hp-result.dmg);
-      if(target.hp===0)target.downed=true;
+  // ══ PHASE 3: DEFENSE (guard stances — applied for NEXT incoming attack) ══
+  allActions.filter(a=>a.phase==='DEFENSE'&&!a.isEnemy).forEach(a=>{
+    const p=a.player;
+    if(!p||p.downed)return;
+    const pi=gState.players.findIndex(x=>x&&x.name===a.actor);
+    const sv=(p.stats&&p.stats[a.stat])||10;
+    const bonus=Math.floor((sv-10)/2);
+    const roll=Math.ceil(Math.random()*20);
+    const total=Math.min(20,Math.max(1,roll+bonus));
+    const result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
+    let detail='';
+    if(total>=14){
+      p.defending=true;
+      if(pi>=0)gState.players[pi]=p;
+      detail=total>=18?'perfect stance (+4 DR next hit)':'defensive stance (+2 DR next hit)';
+    } else if(total>=10){
+      detail='partial block';
+    } else {
+      detail='stance broken';
     }
-    enemyAttackResults.push(`${enemy.name} attacked ${target.name}: ${result.hit?`hit for ${result.dmg} damage (${target.hp}/${target.maxHp} HP${target.downed?' — DOWNED!':''})`:'missed'}`);
-    roundDice.entries.push({name:enemy.name,roll:result.roll,bonus:null,total:null,
-      result:result.hit?'HIT':'MISS',
-      detail:result.hit?`${target.name} -${result.dmg}HP`:'no effect',isEnemy:true});
-    const idx=gState.players.findIndex(p=>p&&p.name===target.name);
-    if(idx>=0)gState.players[idx]=target;
-    if(myChar&&myChar.name===target.name){myChar=target;saveMyChar(target);}
+    roundDice.entries.push({name:a.actor,roll,bonus,total,result,detail,isEnemy:false});
   });
 
+  // ══ PHASE 4: HEALING & RECOVERY ══
+  allActions.filter(a=>a.phase==='HEAL').forEach(a=>{
+    const p=a.player;
+    if(!p||p.downed)return; // healer must be alive
+    const pi=gState.players.findIndex(x=>x&&x.name===a.actor);
+    const sv=(p.stats&&p.stats[a.stat])||10;
+    const bonus=Math.floor((sv-10)/2);
+    const roll=Math.ceil(Math.random()*20);
+    const total=Math.min(20,Math.max(1,roll+bonus));
+    let detail='';
+
+    if(a.bucket==='revive'){
+      const downedAlly=gState.players.find(x=>x&&x.downed&&x.name!==a.actor);
+      if(!downedAlly){
+        detail='no downed ally';
+        roundDice.entries.push({name:a.actor,roll,bonus,total,result:'MISS',detail,isEnemy:false});
+        return;
+      }
+      if(total>=10){
+        const revHP=total>=18?getReviveHP(stage)*2:total>=14?getReviveHP(stage):Math.max(1,Math.floor(getReviveHP(stage)/2));
+        downedAlly.hp=revHP;
+        downedAlly.downed=false;
+        const ai=gState.players.findIndex(x=>x&&x.name===downedAlly.name);
+        if(ai>=0)gState.players[ai]=downedAlly;
+        if(myChar&&myChar.name===downedAlly.name){myChar=downedAlly;saveMyChar(downedAlly);}
+        detail=`${downedAlly.name} revived +${revHP}HP`;
+        roundDice.entries.push({name:a.actor,roll,bonus,total,result:total>=18?'CRIT':total>=14?'HIT':'PARTIAL',detail,isEnemy:false});
+      } else {
+        detail=`failed to revive ${downedAlly.name}`;
+        roundDice.entries.push({name:a.actor,roll,bonus,total,result:total>=6?'MISS':'FUMBLE',detail,isEnemy:false});
+      }
+    } else {
+      // Self or ally heal
+      const baseAmt=getHealAmount(p,stage)||6;
+      let healAmt=0;
+      if(total>=18)healAmt=Math.round(baseAmt*1.5);
+      else if(total>=14)healAmt=baseAmt;
+      else if(total>=10)healAmt=Math.round(baseAmt*0.6);
+      else if(total>=6){healAmt=0;detail='heal fizzled';}
+      else{healAmt=-Math.floor(baseAmt*0.3);detail='Stormlight backlash';}
+      if(healAmt>0){
+        p.hp=Math.min(p.maxHp||p.hp,p.hp+healAmt);
+        detail=`+${healAmt}HP`;
+      } else if(healAmt<0){
+        p.hp=Math.max(1,p.hp+healAmt);
+        detail=`${healAmt}HP (backlash)`;
+      }
+      if(pi>=0)gState.players[pi]=p;
+      if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
+      roundDice.entries.push({name:a.actor,roll,bonus,total,
+        result:total>=18?'CRIT':total>=14?'HEAL':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE',
+        detail,isEnemy:false});
+    }
+  });
+
+  // ══ PHASE 5: END-OF-TURN EFFECTS ══
+  // Environmental hazard ticks
   if(gState.combatHazard){
     const hazMsgs=applyHazardEffect(gState.combatHazard,gState);
-    hazMsgs.forEach(m=>roundDice.entries.push({name:'⚠ Hazard',roll:'-',bonus:null,total:null,result:'ENV',detail:m,isEnemy:false}));
+    hazMsgs.forEach(m=>roundDice.entries.push({name:'⚠ Hazard',roll:'-',bonus:null,total:null,
+      result:'EFFECT',detail:m,isEnemy:false}));
     const hb=document.getElementById('combat-hazard-banner');
-    if(hb){hb.style.display='block';hb.textContent='⚠ '+gState.combatHazard.name+': '+gState.combatHazard.effect;}
+    if(hb){hb.style.display='block';hb.textContent='⚠ '+gState.combatHazard.name;}
   }
+  // Status duration reduction placeholder (future: burn, poison ticks here)
+
+  // ══ CLEANUP ══
+  // Boss phase transitions
   if(gState.isBossFight&&gState.combatEnemies&&gState.combatEnemies[0]){
     const boss=gState.combatEnemies[0];
     const phases=boss.phases||[];
@@ -3296,31 +3434,40 @@ async function resolveRound(){
       if(boss.hp<=phaseThreshold&&boss.hp>0){
         boss.currentPhase=nextPhase;
         const ph=phases[nextPhase];
-        boss.dmg=ph.dmg;boss.attackBonus=ph.atk;
-        roundDice.entries.push({name:'⚡ BOSS',roll:'-',bonus:null,total:null,result:'PHASE',detail:`Phase ${nextPhase+1}: ${ph.desc}`,isEnemy:true});
+        boss.name=ph.name||boss.name;
+        boss.attackBonus=(boss.attackBonus||2)+1;
+        roundDice.entries.push({name:'⚡ Boss Phase',roll:'-',bonus:null,total:null,
+          result:'EFFECT',detail:`${boss.name} enters phase ${nextPhase+1}!`,isEnemy:false});
+        gState.combatEnemies[0]=boss;
       }
     }
   }
+
+  // Push dice log
   if(!gState.diceLog)gState.diceLog=[];
   gState.diceLog.push(roundDice);
   if(gState.diceLog.length>10)gState.diceLog.shift();
   renderDiceTicker();
-  await saveState(gState);
+
+  // ══ VICTORY / DEFEAT CHECK ══
   const allEnemiesDead=(gState.combatEnemies||[]).every(e=>e.downed||e.hp<=0);
-  const allPartyDowned=gState.players.slice(0,sz).filter(Boolean).every(p=>p.downed);
-  if(allEnemiesDead){gState.combatPhase='victory';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('victory');return;}
-  if(allPartyDowned){gState.combatPhase='defeat';await saveState(gState);renderCombatScreen();renderCombatActions();await callCombatGM('defeat');return;}
+  const allPartyDowned=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).every(p=>p.downed);
+  if(allEnemiesDead){gState.combatPhase='victory';await saveState(gState);renderCombatScreen();renderCombatActions();return;}
+  if(allPartyDowned){gState.combatPhase='defeat';await saveState(gState);renderCombatScreen();renderCombatActions();return;}
+
+  // ══ CALL GM TO NARRATE THE ROUND ══
+  gState.combatRound=(gState.combatRound||1)+1;
+  gState.combatPhase='narrative';
+  gState.pendingActions={};
+  gState.combatChoicesCache={};
   const playerOutcomes=roundDice.entries.filter(e=>!e.isEnemy).map(e=>`${e.name}: ${e.result}${e.detail?' ('+e.detail+')':''}`);
   await callCombatGM('round',playerOutcomes.join(' | '),enemyAttackResults);
-  gState.pendingActions={};
-  gState.combatRound=(gState.combatRound||1)+1;
-  gState.combatPhase='choosing';
-  await saveState(gState);
-  renderCombatScreen();
-  renderCombatActions();
+
   }catch(e){
     console.error('resolveRound failed:',e);
-    if(gState){gState.combatPhase='choosing';gState.pendingActions={};await saveState(gState).catch(()=>{});}
+    gState.combatPhase='choosing';
+    gState.pendingActions={};
+    await saveState(gState).catch(()=>{});
     renderCombatScreen();renderCombatActions();
   }
 }
