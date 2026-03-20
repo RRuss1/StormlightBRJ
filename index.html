@@ -388,7 +388,11 @@ select option{background:var(--bg3);color:var(--text);}
 .origin-btn:hover{border-color:var(--border3);color:var(--text2);}
 .origin-btn.sel{border-color:var(--amber);color:var(--amber2);background:rgba(191,161,90,0.1);box-shadow:0 0 0 1px var(--amber),0 0 10px rgba(191,161,90,0.15);}
 .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background 0.2s;}
-.step-dot.active{background:var(--amber);}</style>
+.step-dot.active{background:var(--amber);}
+.cursor-blink{animation:cursorPulse 0.8s step-end infinite;opacity:1;}
+@keyframes cursorPulse{0%,100%{opacity:1}50%{opacity:0}}
+.plot-opportunity{color:var(--teal2);font-size:10px;letter-spacing:1px;padding:1px 6px;border:1px solid var(--teal);border-radius:8px;font-family:var(--font-d);}
+.plot-complication{color:var(--coral2);font-size:10px;letter-spacing:1px;padding:1px 6px;border:1px solid var(--coral);border-radius:8px;font-family:var(--font-d);}</style>
 </head>
 <body>
 
@@ -700,6 +704,7 @@ select option{background:var(--bg3);color:var(--text);}
           <div class="action-choices" id="action-choices"></div>
           <div class="custom-row">
             <input class="custom-in" id="custom-in" placeholder="Or describe your own action..." maxlength="220" autocomplete="off"/>
+            <button id="voice-input-btn" onclick="startVoiceInput('custom-in')" title="Speak your action" style="background:none;border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;cursor:pointer;font-size:16px;color:var(--text4);transition:all 0.2s;flex-shrink:0;" onmouseenter="this.style.borderColor='var(--amber)';this.style.color='var(--amber2)'" onmouseleave="this.style.borderColor='var(--border2)';this.style.color='var(--text4)'">🎙</button>
           </div>
           <div class="act-row">
             <div class="err" id="action-err" style="display:none;"></div>
@@ -720,9 +725,15 @@ select option{background:var(--bg3);color:var(--text);}
 
     <!-- RIGHT: TLDR Summary -->
     <div class="side-panel">
-      <div class="side-panel-hdr">📖 Summary</div>
-      <div class="side-panel-body">
+      <div class="side-panel-hdr" style="display:flex;gap:0;padding:0;">
+        <button id="tab-summary" onclick="switchRightTab('summary')" style="flex:1;padding:10px 8px;background:var(--bg3);border:none;border-bottom:2px solid var(--amber);cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--amber2);">📖 SUMMARY</button>
+        <button id="tab-world" onclick="switchRightTab('world')" style="flex:1;padding:10px 8px;background:var(--bg2);border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text4);">🌍 WORLD</button>
+      </div>
+      <div id="tab-summary-body" class="side-panel-body">
         <div id="tldr-text" style="color:var(--text3);font-size:13px;line-height:1.7;font-style:italic;">The saga unfolds...</div>
+      </div>
+      <div id="tab-world-body" class="side-panel-body" style="display:none;">
+        <div id="consequence-board"></div>
       </div>
     </div>
 
@@ -892,17 +903,61 @@ const OATH_BONUSES={
   5:{desc:'Full Radiant',combat:3,heal:3,ability:'Full power — Shardplate complete'},
 };
 
+const ORDER_IDEALS={
+  windrunner:{words:['protect','shield','guard','defend','save','sacrifice','stand'],ideal:'I will protect those who cannot protect themselves'},
+  edgedancer:{words:['remember','forgotten','heal','tend','notice','acknowledge','care'],ideal:'I will remember those who have been forgotten'},
+  lightweaver:{words:['truth','lie','illusion','art','create','deceive','reveal'],ideal:'I am who I needed when I was young'},
+  stoneward:{words:['reliable','present','there','stand','endure','hold','refuse'],ideal:'I will be there when I am needed'},
+  elsecaller:{words:['potential','learn','grow','knowledge','seek','study','reach'],ideal:'I will reach my potential so I may help others'},
+  truthwatcher:{words:['truth','see','perceive','observe','find','uncover','witness'],ideal:'I will seek truth even when it is painful'},
+  willshaper:{words:['freedom','chain','bound','free','choice','will','refuse'],ideal:'I will seek freedom for those in bondage'},
+  dustbringer:{words:['master','control','discipline','self','restrain','overcome'],ideal:'I will seek self-mastery above all else'},
+  bondsmith:{words:['unite','connect','bridge','together','bond','join','repair'],ideal:'I will unite instead of divide'},
+  skybreaker:{words:['law','justice','right','wrong','judgement','sentence','execute'],ideal:'I will put the law before all else'},
+};
 async function checkOathMoment(gmText, player){
-  if(!player||!gmText)return;
+  if(!player||!gmText||!gState)return;
   const oathStage=(player.oathStage||1);
-  if(oathStage>=5)return;
-  const oathKeywords=['sacrific','protect','truth','remember','justice','freedom','unity','law','knowledge'];
-  const lower=gmText.toLowerCase();
-  const isOathworthy=oathKeywords.some(k=>lower.includes(k))&&gmText.length>100;
-  if(!isOathworthy)return;
-  const chance=0.08+(gState.totalMoves||0)*0.001;
-  if(Math.random()>chance)return;
+  if(oathStage>=5||!player.isRadiant)return;
+  const ideal=ORDER_IDEALS[player.classId];if(!ideal)return;
+  const recentActions=(gState.actionLog||[]).slice(0,6).filter(e=>e.name===player.name).map(e=>e.verb+' '+(e.noun||''));
+  const allText=(recentActions.join(' ')+' '+gmText).toLowerCase();
+  const matchCount=ideal.words.filter(w=>allText.includes(w)).length;
+  if(matchCount<2)return;
+  const prob=0.04+(matchCount*0.03)+(oathStage*0.01)+Math.min(0.05,(gState.totalMoves||0)*0.0005);
+  if(Math.random()>prob)return;
   await progressOath(player);
+}
+
+// ══ THE HOID SYSTEM ══
+// ~2% chance per turn that Wit appears — cryptic, never directly helpful
+// Increases slightly at dramatic moments
+const HOID_LINES=[
+  "A man nearby catches your eye — disheveled coat, knowing smile. He tips an invisible hat and walks into a crowd that wasn't there a moment ago.",
+  "Someone has left a note tucked under a stone. It reads: 'You are asking the wrong questions. The right ones are more dangerous.' No signature.",
+  "A gleeman passes through — except gleemen are rare this far from civilization. He plays one chord that somehow says everything about your situation, and leaves before you can ask.",
+  "You find a single white flower pressed into a crack in the stone. It shouldn't be able to grow here. Someone left it intentionally.",
+  "A voice at the edge of hearing, not directed at you, but clearly meant for you: 'The most important things are always happening just out of sight.' Then silence.",
+  "A beggar holds a cup but asks for nothing. When your eyes meet, he says exactly one word — a word relevant to your situation — then looks away and is gone.",
+  "Someone has written in the dust: SURVIVE. Just that. The finger-strokes are too precise to be accidental.",
+  "A child hands you something — a rock, a feather, an object that means nothing — and says 'he said you'd need this eventually,' then runs before you can ask who.",
+  "The fire pops and for a fraction of a second the smoke forms the shape of a face you almost recognize. Then it's just smoke.",
+  "You catch a fragment of a story someone is telling nearby: '...and the hero never realized the clue was in what they didn't see...' They stop when they notice you listening.",
+];
+
+async function maybeSpawnHoid(gmText, turn){
+  if(!gState||turn<5)return;
+  // Base chance 2%, rises at dramatic moments and multiples of 10
+  let chance=0.02;
+  if(turn%10===0)chance=0.08;
+  if(gState.preCombatTriggered&&!gState.combatMode)chance=0.12;
+  if(Math.random()>chance)return;
+  // Don't repeat too soon
+  if(gState.lastHoidTurn&&turn-gState.lastHoidTurn<15)return;
+  gState.lastHoidTurn=turn;
+  const line=HOID_LINES[Math.floor(Math.random()*HOID_LINES.length)];
+  await addLog({type:'system',who:'⟁ Wit',text:line,choices:[]});
+  await saveState(gState);
 }
 
 async function progressOath(player){
@@ -1500,7 +1555,8 @@ async function onCreateChar(){
     if(isRadiant){
       myChar={...base,isRadiant:true,
         className:selClass.name,classId:selClass.id,
-        abilities:selClass.abilities,spren:selClass.spren};
+        abilities:selClass.abilities,spren:selClass.spren,
+        focus:3,maxFocus:5};
     } else {
       const wnEl=document.getElementById('in-weapon-name');
       const customName=wnEl?wnEl.value.trim():'';
@@ -1510,7 +1566,8 @@ async function onCreateChar(){
         roleId:selRole.id,roleName:selRole.name,
         abilities:[selWeapon.name],spren:null,
         weapon:weaponName,weaponId:selWeapon.id,weaponLevel:1,
-        weaponData:selWeapon};
+        weaponData:selWeapon,
+        focus:3,maxFocus:5};
     }
 
     // ── Resolve slot ──
@@ -1761,6 +1818,82 @@ async function startCampaign(){
   setTimeout(()=>{setBottomFromState(log);maybeTranslateStory();},150);
 }
 // ══ WORLD MEMORY CONTEXT ══
+function switchRightTab(tab){
+  const tabs=['summary','world'];
+  tabs.forEach(t=>{
+    const btn=document.getElementById('tab-'+t);
+    const body=document.getElementById('tab-'+t+'-body');
+    const isActive=t===tab;
+    if(btn){btn.style.background=isActive?'var(--bg3)':'var(--bg2)';btn.style.borderBottomColor=isActive?'var(--amber)':'transparent';btn.style.color=isActive?'var(--amber2)':'var(--text4)';}
+    if(body)body.style.display=isActive?'block':'none';
+  });
+  if(tab==='world')renderConsequenceBoard();
+}
+
+function renderConsequenceBoard(){
+  const el=document.getElementById('consequence-board');
+  if(!el||!gState)return;
+  const wm=gState.worldMemory;
+  if(!wm){el.innerHTML='<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No discoveries yet.</div>';return;}
+  let html='';
+
+  // Focus status
+  if(myChar){
+    const focus=myChar.focus!=null?myChar.focus:3;
+    const maxFocus=myChar.maxFocus||5;
+    const focusDots=Array.from({length:maxFocus},(_,i)=>`<span style="color:${i<focus?'var(--amber2)':'var(--border2)'};">◈</span>`).join('');
+    html+=`<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+      <div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);margin-bottom:4px;">YOUR FOCUS</div>
+      <div style="font-size:16px;letter-spacing:3px;">${focusDots}</div>
+      ${myChar.nextRollAdvantage?`<div style="font-size:10px;color:${myChar.nextRollAdvantage==='advantage'?'var(--teal2)':'var(--coral2)'};">▲ ${myChar.nextRollAdvantage.toUpperCase()} on next roll</div>`:''}
+    </div>`;
+  }
+
+  // Factions
+  const factions=Object.entries(wm.factions||{});
+  if(factions.length){
+    html+=`<div style="margin-bottom:10px;"><div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);margin-bottom:6px;">FACTIONS</div>`;
+    factions.forEach(([name,rel])=>{
+      const col=rel==='hostile'?'var(--coral2)':rel==='ally'?'var(--teal2)':'var(--text3)';
+      const icon=rel==='hostile'?'⚔':rel==='ally'?'✦':'◦';
+      html+=`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;"><span style="color:var(--text2);">${name}</span><span style="color:${col};">${icon} ${rel}</span></div>`;
+    });
+    html+='</div>';
+  }
+
+  // Secrets
+  if((wm.secrets||[]).length){
+    html+=`<div style="margin-bottom:10px;"><div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);margin-bottom:6px;">DISCOVERIES</div>`;
+    wm.secrets.slice(-5).reverse().forEach(s=>{
+      html+=`<div style="font-size:12px;color:var(--text3);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.5;">◈ ${s}</div>`;
+    });
+    html+='</div>';
+  }
+
+  // Met NPCs
+  if((wm.metNPCs||[]).length){
+    html+=`<div style="margin-bottom:10px;"><div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);margin-bottom:6px;">KNOWN FACES</div>`;
+    wm.metNPCs.slice(-6).forEach(n=>{
+      html+=`<div style="font-size:12px;padding:3px 0;"><span style="color:var(--amber2);font-family:var(--font-d);">${n.name}</span><span style="color:var(--text4);"> — ${n.context}</span></div>`;
+    });
+    html+='</div>';
+  }
+
+  // Recent choices
+  if((wm.choices||[]).length){
+    html+=`<div style="margin-bottom:10px;"><div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);margin-bottom:6px;">CHOICES MADE</div>`;
+    wm.choices.slice(-4).reverse().forEach(ch=>{
+      html+=`<div style="font-size:11px;color:var(--text4);padding:3px 0;font-style:italic;">Turn ${ch.turn}: ${ch.summary}</div>`;
+    });
+    html+='</div>';
+  }
+
+  if(!html){
+    html='<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">Explore to uncover the world...</div>';
+  }
+  el.innerHTML=html;
+}
+
 function getWorldMemoryContext(){
   const wm=gState&&gState.worldMemory;
   if(!wm)return'';
@@ -2164,7 +2297,8 @@ function renderParty(){
     return`<div class="ppip-pair">
       <div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}" id="ppip-${p.name.replace(/\s/g,'_')}">
         <div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div>
-        <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP</div>
+        <div class="ppip-info">${p.className} · ${p.hp}/${p.maxHp} HP${(p.focus!=null)?' · ◈ '+(p.focus||0)+'/'+(p.maxFocus||5)+' Focus':''}</div>
+        ${p.nextRollAdvantage?`<div class="ppip-tag" style="color:${p.nextRollAdvantage==='advantage'?'var(--teal2)':'var(--coral2)'};">${p.nextRollAdvantage==='advantage'?'▲ ADVANTAGE':'▼ DISADVANTAGE'}</div>`:''}
         ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} Oath ${p.oathStage||1}/5</div>`:''}
         ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
         ${p.shardblade?`<div class="ppip-tag" style="color:var(--amber2);" title="${p.bladeDesc||p.shardblade}">⚔ ${p.bladeName||p.shardblade} T${p.bladeLevel||1}</div>`:''}
@@ -2450,12 +2584,61 @@ async function onSubmitAction(){
   stopSpeaking(); // stop voice when player acts
   setBottomLoading();
   window.scrollTo({top:0,behavior:'smooth'});
-  const roll=Math.ceil(Math.random()*20);
+  // Advantage/Disadvantage: roll twice, take best/worst
+  const myPlayerData=gState.players.find(p=>p&&p.name===myChar.name);
+  const advState=myPlayerData&&myPlayerData.nextRollAdvantage;
+  let roll=Math.ceil(Math.random()*20);
+  if(advState){
+    const roll2=Math.ceil(Math.random()*20);
+    roll=advState==='advantage'?Math.max(roll,roll2):Math.min(roll,roll2);
+    // Clear after use
+    const pi=gState.players.findIndex(p=>p&&p.name===myChar.name);
+    if(pi>=0)delete gState.players[pi].nextRollAdvantage;
+  }
   const sk=getStat(action);
+  const {bucket}=getActionBucket(action);
   const sv=(myChar.stats&&myChar.stats[sk])||10;
   const bonus=Math.floor((sv-10)/2)+(myChar.bladeLevel||0);
-  const total=Math.min(20,Math.max(1,roll+bonus));
-  document.getElementById('dice-flash').textContent=`d20: ${roll} + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
+  const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
+
+  // ── Plot Die (Official Cosmere RPG) ──
+  let plotResult=null;
+  let plotBonus=0;
+  const raisedStakes=shouldRaisePricing(roll, roll, bucket, beatsLeft);
+  if(raisedStakes){
+    plotResult=rollPlotDie();
+    plotBonus=plotResult.bonus;
+  }
+  // Natural 20 = Opportunity (no bonus), Natural 1 = Complication (no bonus)
+  let naturalEffect=null;
+  if(roll===20&&!plotResult)naturalEffect={type:'opportunity',symbol:'NAT 20',bonus:0};
+  if(roll===1&&!plotResult)naturalEffect={type:'complication',symbol:'NAT 1',bonus:0};
+  const plotOrNatural=plotResult||naturalEffect;
+
+  const total=Math.min(20,Math.max(1,roll+bonus+plotBonus));
+
+  // Build dice flash text
+  let diceText=advState?`d20:${roll}(${advState==='advantage'?'ADV':'DIS'})`:  `d20:${roll}`;
+  if(plotResult)diceText+=` 🎲${plotResult.symbol}`;
+  if(plotBonus>0)diceText+=`+${plotBonus}`;
+  diceText+=` + ${sk.toUpperCase()}(${bonus>=0?'+':''}${bonus}) = ${total}`;
+  if(naturalEffect)diceText+=` [${naturalEffect.symbol}]`;
+  document.getElementById('dice-flash').textContent=diceText;
+
+  // Store plot effect for GM prompt injection
+  if(plotOrNatural){
+    gState.lastPlotEffect={
+      type:plotOrNatural.type,
+      actor:myChar.name,
+      bucket,
+      effect:plotOrNatural.type==='opportunity'
+        ?getOpportunityEffect(bucket,myChar.name)
+        :getComplicationEffect(bucket,myChar.name)
+    };
+  } else {
+    gState.lastPlotEffect=null;
+  }
+
   const dmgMsg=applyRollDamage(total,myChar,gState);
   if(dmgMsg)document.getElementById('dice-flash').textContent+=` ${dmgMsg}`;
   recordSprenMemory(action,total,gState.totalMoves||0);
@@ -2512,11 +2695,158 @@ function getActionBucket(a){
 }
 function getStat(a){return getActionBucket(a).stat;}
 
+// ══ PLOT DIE (Official Cosmere RPG) ══
+// d6: 1=Complication+4, 2=Complication+2, 3-4=blank, 5-6=Opportunity
+function rollPlotDie(){
+  const face=Math.ceil(Math.random()*6);
+  if(face===1)return{type:'complication',bonus:4,symbol:'C+4'};
+  if(face===2)return{type:'complication',bonus:2,symbol:'C+2'};
+  if(face<=4)return{type:'blank',bonus:0,symbol:'—'};
+  return{type:'opportunity',bonus:0,symbol:'O'};
+}
+
+// Should a roll use the plot die?
+// Official: GM decides for tests that directly contribute to mission,
+// play to character's purpose, or have high dramatic import
+function shouldRaisePricing(total, roll, bucket, beatsLeft){
+  if(roll===20||roll===1)return false; // natural 20/1 handle their own effects
+  const preCombat=gState.preCombatTriggered&&!gState.combatMode;
+  const isHighStakes=preCombat||(beatsLeft!=null&&beatsLeft<=2);
+  const isCharacterMoment=bucket==='heal'||bucket==='revive'||bucket==='surge';
+  // 30% chance on high-stakes beats, 15% on character-specific surges
+  if(isHighStakes)return Math.random()<0.30;
+  if(isCharacterMoment)return Math.random()<0.15;
+  return false;
+}
+
+// Get Opportunity effect text for GM prompt injection
+function applyFocusChange(actorName, delta){
+  if(!gState)return;
+  const sz=gState.partySize||partySize;
+  const idx=gState.players.findIndex(p=>p&&p.name===actorName);
+  if(idx<0)return;
+  const p=gState.players[idx];
+  p.focus=Math.min(p.maxFocus||5,Math.max(0,(p.focus||3)+delta));
+  gState.players[idx]=p;
+  if(myChar&&myChar.name===actorName){myChar.focus=p.focus;saveMyChar(myChar);}
+}
+
+function applyAdvantageEffect(targetName, isAdvantage){
+  if(!gState)return;
+  const idx=gState.players.findIndex(p=>p&&p.name===targetName);
+  if(idx<0)return;
+  gState.players[idx].nextRollAdvantage=isAdvantage?'advantage':'disadvantage';
+}
+
+function getOpportunityEffect(bucket, actor){
+  const roll=Math.random();
+  if(roll<0.25){
+    applyFocusChange(actor,1);
+    return`${actor} steadies — recovers 1 Focus (${(gState.players.find(p=>p&&p.name===actor)||{focus:3}).focus||3} total)`;
+  }
+  if(roll<0.50){
+    const allies=gState.players.filter(p=>p&&p.name!==actor&&!p.isNPC&&!p.downed);
+    if(allies.length){
+      const ally=allies[Math.floor(Math.random()*allies.length)];
+      applyAdvantageEffect(ally.name,true);
+      return`${ally.name} gains advantage on their next test — ${actor}'s action opened an opportunity`;
+    }
+  }
+  if(roll<0.70){
+    if(bucket==='attack')return`The blow lands with exceptional force — treat as a critical hit for narrative purposes`;
+    if(bucket==='heal')return`The Stormlight surges beyond expectation — the healing is amplified`;
+    if(bucket==='surge')return`The surge manifests with unexpected range or power — it affects more than intended`;
+  }
+  return`A positive narrative shift — something in the environment or situation moves in the party's favor`;
+}
+
+function getComplicationEffect(bucket, actor){
+  const roll=Math.random();
+  if(roll<0.30){
+    applyFocusChange(actor,-1);
+    return`${actor} falters — loses 1 Focus (${Math.max(0,((gState.players.find(p=>p&&p.name===actor)||{focus:3}).focus||3)-1)} remaining)`;
+  }
+  if(roll<0.55){
+    const allies=gState.players.filter(p=>p&&p.name!==actor&&!p.isNPC&&!p.downed);
+    if(allies.length){
+      const ally=allies[Math.floor(Math.random()*allies.length)];
+      applyAdvantageEffect(ally.name,false);
+      return`${ally.name}'s next test is complicated — ${actor}'s action had unforeseen repercussions`;
+    }
+  }
+  if(roll<0.75){
+    if(bucket==='attack')return`The attack leaves ${actor} exposed — enemies gain a momentary opening`;
+    if(bucket==='heal')return`The Stormlight falters mid-surge — the healing is reduced or misdirected`;
+    if(bucket==='surge')return`The surge is partially uncontrolled — a secondary unintended effect occurs`;
+  }
+  return`A narrative complication arises — the situation becomes more complex or a new obstacle appears`;
+}
+
 // ══ GM CALL ══
 async function callGM(prompt){
   const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='block';
+  // Show typewriter placeholder in story text
+  const storyEl=document.getElementById('story-text');
+  let streamedText='';
+  let streamEntry=null;
   try{
-    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',max_tokens:1000,stream:true,
+      messages:[{role:'user',content:prompt}]
+    })});
+    // Stream the response token by token
+    if(res.body&&res.headers.get('content-type')&&res.headers.get('content-type').includes('text/event-stream')){
+      const reader=res.body.getReader();const decoder=new TextDecoder();
+      if(tb)tb.style.display='none';
+      while(true){
+        const{done,value}=await reader.read();if(done)break;
+        const chunk=decoder.decode(value);
+        const lines=chunk.split('\n');
+        for(const line of lines){
+          if(!line.startsWith('data: '))continue;
+          const data=line.slice(6);if(data==='[DONE]')continue;
+          try{
+            const parsed=JSON.parse(data);
+            const delta=parsed.delta&&parsed.delta.type==='text_delta'?parsed.delta.text:'';
+            if(delta){
+              streamedText+=delta;
+              // Update story display in real time
+              if(storyEl){
+                const displayText=streamedText.split(/\[CHOICES/i)[0].trim();
+                storyEl.innerHTML=`<div class="entry-gm"><div class="gm-label">THE CHRONICLE</div><p class="story-para">${displayText}<span class="cursor-blink">|</span></p></div>`;
+              }
+            }
+          }catch(e){}
+        }
+      }
+      const raw=streamedText||'The winds carry no answer tonight.';
+      // Remove cursor and parse normally
+      if(storyEl){const cur=storyEl.querySelector('.cursor-blink');if(cur)cur.remove();}
+      // Fall through to normal processing with raw text
+      let choices=[];let scene=raw;
+      const choicesTagIdx=raw.search(/\[CHOICES/i);
+      if(choicesTagIdx>=0){
+        scene=raw.slice(0,choicesTagIdx).trim();
+        const choiceBlock=raw.slice(choicesTagIdx);
+        choices=(choiceBlock.match(/^\*{0,2}\d+[.)]\s*\*{0,2}.+$/gm)||[])
+          .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
+          .filter(ch=>ch.length>5);
+      }
+      if(!choices.length){
+        choices=(raw.match(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm)||[])
+          .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
+          .filter(ch=>ch.length>5);
+        if(choices.length){scene=raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm,'').replace(/\n{3,}/g,'\n\n').trim();}
+      }
+      if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveState(gState);}
+      await addLog({type:'gm',who:'',text:scene,choices});
+      if(tb)tb.style.display='none';
+      updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
+      if(gState&&myChar)checkOathMoment(scene,myChar).catch(()=>{});
+      maybeSpawnHoid(scene,gState&&gState.totalMoves||0).catch(()=>{});
+      return;
+    }
+    // Non-streaming fallback
     const data=await res.json();
     if(data.error)throw new Error(JSON.stringify(data.error));
     const raw=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
@@ -2611,7 +2941,13 @@ Fresh ground. Build ${loc} with sensory specificity — what makes this place un
 
   const beatLen=preCombatNow||roll<=5||roll>=18?'3 sentences':'2-3 sentences';
 
-return`You are the GM of a Cosmere RPG — an expert fantasy author writing cinematic, character-driven narrative. Your prose should read like Brandon Sanderson crossed with Joe Abercrombie: epic but grounded, mythic but specific.
+// Plot effect injection for GM
+  const pe=gState.lastPlotEffect;
+  const plotInstr=pe?`
+
+PLOT DIE — ${pe.type.toUpperCase()}: ${pe.effect}. Weave this naturally into the consequence — do not label it as an Opportunity or Complication, just let it shape the narrative.`:'';
+
+  return`You are the GM of a Cosmere RPG — an expert fantasy author writing cinematic, character-driven narrative. Your prose should read like Brandon Sanderson crossed with Joe Abercrombie: epic but grounded, mythic but specific.
 
 Turn ${m}/180. Location: ${loc}. ${act.tag}.
 Party: ${party}${gctx}
@@ -2619,7 +2955,7 @@ ${wmctx}${recentBeats}${mctx}${cctx}
 
 CURRENT ACTION:
 ${who.name} (${who.className}) — "${action}"
-Roll: d20 vs ${sk.toUpperCase()} = ${roll} → ${rollDesc}
+Roll: d20 vs ${sk.toUpperCase()} = ${roll} → ${rollDesc}${plotInstr}
 
 WRITE THE CONSEQUENCE (${beatLen}) following ALL of these craft rules:
 
@@ -3259,8 +3595,9 @@ function renderCombatActions(){
       }).join('');
       html+=`<div class="action-choices" style="margin-bottom:12px;">${choiceHTML}</div>`;
     }
-    html+=`<div class="custom-row" style="position:relative;">
-  <input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action..." maxlength="200" oninput="broadcastTyping&&broadcastTyping()"/>
+    html+=`<div class="custom-row" style="position:relative;display:flex;gap:6px;align-items:flex-start;">
+  <input class="custom-in" id="combat-custom-in" placeholder="Or describe your own action..." maxlength="200" oninput="broadcastTyping&&broadcastTyping()" style="flex:1;"/>
+  <button onclick="startVoiceInput('combat-custom-in')" title="Speak your action" style="background:none;border:1px solid var(--border2);border-radius:var(--r);padding:12px;cursor:pointer;font-size:14px;color:var(--text4);flex-shrink:0;">🎙</button>
   <div class="action-tooltip" id="action-tooltip">
     <div style="font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--amber2);margin-bottom:6px;">KEYWORDS</div>
     <div class="tooltip-grid">
@@ -3290,8 +3627,16 @@ function renderCombatActions(){
     });
   }
 
-  if(allSubmitted){
+  // Resolve button: only show to host (slot 0 human) once ALL humans submitted
+  // In solo play, the single human IS the host — always shows for them
+  const humanPlayers=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.downed);
+  const isSoloHuman=humanPlayers.length===1;
+  const showResolve=allSubmitted&&(isHost()||isSoloHuman);
+  if(showResolve){
     html+=`<button class="resolve-btn" onclick="resolveRound()">⚔ Resolve Round →</button>`;
+  } else if(allSubmitted&&!isHost()&&!isSoloHuman){
+    // Non-host sees a waiting message instead
+    html+=`<div style="text-align:center;padding:14px;font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:var(--teal2);">✓ READY — waiting for host to resolve</div>`;
   }
   el.innerHTML=html;
   if(lang==='th')setTimeout(applyThaiToPage,100);
@@ -3430,9 +3775,13 @@ async function resolveRound(){
         const dmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;
         target.hp=Math.max(0,target.hp-dmg);
         if(target.hp<=0)target.downed=true;
+        if(total>=18){
+          if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=`${target.name} -${dmg}HP ☄ BURNING`;}
+          else if(p.classId==='elsecaller'){target.poisoned=2;detail=`${target.name} -${dmg}HP ☠ POISONED`;}
+          else{detail=`${target.name} -${dmg}HP CRIT${target.downed?' ☠':''}`;}
+        } else { detail=`${target.name} -${dmg}HP${target.downed?' ☠':''}`; }
         const ei=gState.combatEnemies.findIndex(e=>e.name===target.name);
         if(ei>=0)gState.combatEnemies[ei]=target;
-        detail=`${target.name} -${dmg}HP${target.downed?' ☠':''}`;
       } else if(total<6){
         const self_dmg=Math.floor(Math.random()*4)+2;
         p.hp=Math.max(0,p.hp-self_dmg);
@@ -3526,6 +3875,32 @@ async function resolveRound(){
   });
 
   // ══ PHASE 5: END-OF-TURN EFFECTS ══
+  // Status effect ticks
+  const sz_st=gState.partySize||partySize;
+  gState.players.slice(0,sz_st).forEach((p,idx)=>{
+    if(!p||p.downed)return;
+    if(p.poisoned>0){
+      const tick=Math.ceil(Math.random()*3)+1;
+      p.hp=Math.max(0,p.hp-tick);if(p.hp===0)p.downed=true;p.poisoned--;
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`poison -${tick}HP${p.poisoned>0?' ('+p.poisoned+' left)':' cleared'}`,isEnemy:false,phase:'END'});
+    }
+    if(p.burning>0){
+      const tick=Math.ceil(Math.random()*2)+1;
+      p.hp=Math.max(0,p.hp-tick);if(p.hp===0)p.downed=true;p.burning--;
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`burn -${tick}HP${p.burning>0?' ('+p.burning+' left)':' out'}`,isEnemy:false,phase:'END'});
+    }
+    if(p.voidCorrupted>0){
+      applyFocusChange(p.name,-1);p.voidCorrupted--;
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`Voidlight corruption -1 Focus${p.voidCorrupted>0?' ('+p.voidCorrupted+' left)':' cleansed'}`,isEnemy:false,phase:'END'});
+    }
+    gState.players[idx]=p;
+    if(myChar&&myChar.name===p.name){myChar=p;saveMyChar(p);}
+  });
+  (gState.combatEnemies||[]).forEach((e,idx)=>{
+    if(!e||e.downed)return;
+    if(e.burning>0){const tick=Math.ceil(Math.random()*2)+1;e.hp=Math.max(0,e.hp-tick);if(e.hp<=0)e.downed=true;e.burning--;roundDice.entries.push({name:e.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`burning -${tick}HP${e.downed?' ☠':''}`,isEnemy:true,phase:'END'});gState.combatEnemies[idx]=e;}
+    if(e.poisoned>0){const tick=Math.ceil(Math.random()*3)+1;e.hp=Math.max(0,e.hp-tick);if(e.hp<=0)e.downed=true;e.poisoned--;roundDice.entries.push({name:e.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`poisoned -${tick}HP${e.downed?' ☠':''}`,isEnemy:true,phase:'END'});gState.combatEnemies[idx]=e;}
+  });
   // Environmental hazard ticks
   if(gState.combatHazard){
     const hazMsgs=applyHazardEffect(gState.combatHazard,gState);
@@ -4007,6 +4382,49 @@ function stopAudio(){
 }
 function toggleAudio(){
   if(!audioOn)startAudio();else stopAudio();
+}
+
+// ══ VOICE INPUT ══
+let voiceInputActive=false;
+function startVoiceInput(targetId){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    showToast('Voice input not supported in this browser');return;
+  }
+  const btn=document.getElementById('voice-input-btn');
+  if(voiceInputActive){
+    if(window._voiceRecog)window._voiceRecog.stop();
+    voiceInputActive=false;
+    if(btn){btn.textContent='🎙';btn.style.color='var(--text4)';btn.style.borderColor='var(--border2)';}
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const recog=new SR();
+  window._voiceRecog=recog;
+  recog.lang='en-US';
+  recog.interimResults=true;
+  recog.maxAlternatives=1;
+  voiceInputActive=true;
+  if(btn){btn.textContent='🔴';btn.style.color='var(--coral2)';btn.style.borderColor='var(--coral)';}
+  showToast('Listening... speak your action');
+  recog.onresult=(event)=>{
+    const transcript=event.results[0][0].transcript;
+    const el=document.getElementById(targetId);
+    if(el)el.value=transcript;
+    if(event.results[0].isFinal){
+      voiceInputActive=false;
+      if(btn){btn.textContent='🎙';btn.style.color='var(--text4)';btn.style.borderColor='var(--border2)';}
+    }
+  };
+  recog.onerror=()=>{
+    voiceInputActive=false;
+    if(btn){btn.textContent='🎙';btn.style.color='var(--text4)';}
+    showToast('Voice input stopped');
+  };
+  recog.onend=()=>{
+    voiceInputActive=false;
+    if(btn){btn.textContent='🎙';btn.style.color='var(--text4)';btn.style.borderColor='var(--border2)';}
+  };
+  recog.start();
 }
 function setVolume(v){if(masterGain)masterGain.gain.value=v/100*0.6;}
 function setStormIntensity(type){
