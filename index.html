@@ -391,6 +391,15 @@ select option{background:var(--bg3);color:var(--text);}
 .step-dot.active{background:var(--amber);}
 .cursor-blink{animation:cursorPulse 0.8s step-end infinite;opacity:1;}
 @keyframes cursorPulse{0%,100%{opacity:1}50%{opacity:0}}
+.gm-cursor{display:inline-block;will-change:opacity;animation:cursorPulse 0.8s ease-in-out infinite;}
+@keyframes thinkPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+.thinking-active{animation:thinkPulse 1.2s ease-in-out infinite!important;}
+#story-text{transition:opacity 0.1s ease;}
+.ppip{transition:background 0.2s ease;}
+.gm-cursor{will-change:opacity;}
+#party-strip{will-change:contents;}
+#story-text{will-change:contents;}
+#dice-flash{will-change:contents;}
 .plot-opportunity{color:var(--teal2);font-size:10px;letter-spacing:1px;padding:1px 6px;border:1px solid var(--teal);border-radius:8px;font-family:var(--font-d);}
 .plot-complication{color:var(--coral2);font-size:10px;letter-spacing:1px;padding:1px 6px;border:1px solid var(--coral);border-radius:8px;font-family:var(--font-d);}</style>
 </head>
@@ -579,15 +588,26 @@ select option{background:var(--bg3);color:var(--text);}
         </div>
       </div>
       <div class="form-block">
-        <label class="form-lbl" data-tr>What drives you?</label>
+        <label class="form-lbl">Your Purpose <span style="color:var(--text5);font-size:11px;">(Chapter 8 — your core drive)</span></label>
         <div style="display:flex;flex-wrap:wrap;gap:8px;" id="motivation-grid">
-          <button class="origin-btn" onclick="pickMotivation(this,'Vengeance')">Vengeance</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Protection')">Protection</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Knowledge')">Knowledge</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Redemption')">Redemption</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Glory')">Glory</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Survival')">Survival</button>
-          <button class="origin-btn" onclick="pickMotivation(this,'Freedom')">Freedom</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Save Others')">Save Others</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Seek Truth')">Seek Truth</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Seek Justice')">Seek Justice</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Find Connection')">Find Connection</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Preserve Life')">Preserve Life</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Push Your Limits')">Push Your Limits</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Seek Freedom')">Seek Freedom</button>
+          <button class="origin-btn" onclick="pickMotivation(this,'Atone')">Atone</button>
+        </div>
+        <div class="form-block" style="margin-top:8px;">
+          <label class="form-lbl">Your Obstacle <span style="color:var(--text5);font-size:11px;">(what persistently gets in your way)</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;" id="obstacle-grid">
+            <button class="origin-btn" onclick="pickObstacle(this,'Deep Regret')">Deep Regret</button>
+            <button class="origin-btn" onclick="pickObstacle(this,'Specific Fear')">Specific Fear</button>
+            <button class="origin-btn" onclick="pickObstacle(this,'Spite')">Spite</button>
+            <button class="origin-btn" onclick="pickObstacle(this,'Self-Doubt')">Self-Doubt</button>
+            <button class="origin-btn" onclick="pickObstacle(this,'Mistrust of Others')">Mistrust</button>
+          </div>
         </div>
       </div>
       <div class="form-block">
@@ -749,6 +769,7 @@ select option{background:var(--bg3);color:var(--text);}
           <div class="act-row">
             <div class="err" id="action-err" style="display:none;"></div>
             <button class="btn-act" onclick="onSubmitAction()"><span data-tr>Act →</span></button>
+            <button class="btn-act" onclick="doRestAction()" title="Short rest — roll recovery die (Ch.9)" style="background:var(--bg3);border-color:var(--teal2);color:var(--teal2);font-size:13px;padding:12px 14px;" data-tr>⏸ Rest</button>
           </div>
         </div>
         <!-- Continue (NPC turn or post-read gate) -->
@@ -829,8 +850,7 @@ select option{background:var(--bg3);color:var(--text);}
 
 </div>
 
-<script>
-const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
+<script>const SHEET_ID='1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
 const PROXY_URL='https://stormlight-proxy.goretusk55.workers.dev';
 
 // ══ WEBSOCKET SESSION ══
@@ -852,12 +872,17 @@ function handleSessionMessage(msg){
   switch(msg.type){
     case 'state_sync':
       if(!msg.gState)return;
-      const prevPlayers=JSON.stringify(gState&&gState.players);
+      const prevPlayersStr=JSON.stringify(gState&&gState.players);
+      const prevPhase=gState&&gState.phase;
       gState=msg.gState;
-      if(JSON.stringify(gState.players)!==prevPlayers){
+      invalidateLogCache(); // State synced — invalidate log cache
+      const playersChanged=JSON.stringify(gState.players)!==prevPlayersStr;
+      const phaseChanged=gState.phase!==prevPhase;
+      if(playersChanged||phaseChanged){
         const isOnCombat=document.getElementById('s-combat').classList.contains('active');
         if(isOnCombat){renderCombatScreen();renderCombatActions();}
-        else{renderAll();setBottomFromState();}
+        else if(phaseChanged){renderAll();setBottomFromState();}
+        else{renderPartyStrip();setBottomFromState();} // fast path: only HP/focus changed
       }
       break;
     case 'slot_assigned':
@@ -917,18 +942,126 @@ const SA={
 
 // ══ GAME DATA ══
 const CLASSES=[
-  {id:'windrunner',name:'Windrunner',ideal:'I will protect those who cannot protect themselves',desc:'Gravitation & pressure. Flies where others crawl, shields those who fall.',bonus:{str:2,spd:2,int:0,wil:0,awa:0,pre:0},spren:'Honorspren',abilities:['Lashing','Full Lashing','Reverse Lashing','Windspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
-  {id:'lightweaver',name:'Lightweaver',ideal:'I am who I needed when I was young',desc:'Illumination & transformation. Reality bends to your will.',bonus:{str:0,spd:1,int:2,wil:0,awa:2,pre:0},spren:'Cryptic (Pattern)',abilities:['Soulcast','Major Illusion','Memory Weave','Lightweaving'],dmgBonus:{crit:2,hit:1,miss:0}},
-  {id:'edgedancer',name:'Edgedancer',ideal:'I will remember those who have been forgotten',desc:'Abrasion & progression. Grace personified — heals allies, never stops moving.',bonus:{str:0,spd:2,int:0,wil:2,awa:1,pre:0},spren:'Cultivationspren (Wyndle)',abilities:['Friction Control','Regrowth','Fleet Step','Wyndle Bond'],dmgBonus:{crit:2,hit:1,miss:1}},
-  {id:'stoneward',name:'Stoneward',ideal:'I will be there when I am needed',desc:'Tension & cohesion. Last to fall, first to hold the line.',bonus:{str:2,spd:0,int:0,wil:1,awa:0,pre:2},spren:'Peakspren',abilities:['Stone Shaping','Cohesion Wall','Unyielding Stance','Peakspren Bond'],dmgBonus:{crit:2,hit:2,miss:1}},
-  {id:'elsecaller',name:'Elsecaller',ideal:'I will reach my potential so I may help others reach theirs',desc:'Transportation & transformation. Steps between the Physical and Cognitive Realms.',bonus:{str:0,spd:0,int:2,wil:2,awa:0,pre:1},spren:'Inkspren',abilities:['Shadesmar Step','Soulcast Expert','Cognitive Insight','Realm Walking'],dmgBonus:{crit:3,hit:1,miss:0}},
-  {id:'truthwatcher',name:'Truthwatcher',ideal:'I will seek truth, even when it is painful',desc:'Progression & illumination. Sees what others miss, heals what others cannot.',bonus:{str:0,spd:0,int:2,wil:3,awa:0,pre:0},spren:'Mistspren',abilities:['Truthsight','Progression Heal','Voidspren Detection','Mistspren Bond'],dmgBonus:{crit:2,hit:1,miss:1}},
-  {id:'willshaper',name:'Willshaper',ideal:'I will seek freedom for those in bondage',desc:'Transportation & cohesion. Unpredictable, dangerous, deeply free.',bonus:{str:1,spd:2,int:0,wil:0,awa:2,pre:0},spren:'Lightspren (Reachers)',abilities:['Transport Surge','Cohesion Strike','Freedom Step','Reacher Bond'],dmgBonus:{crit:3,hit:1,miss:0}},
-  {id:'dustbringer',name:'Dustbringer',ideal:'I will seek self-mastery above all else',desc:'Division & abrasion. Controlled destruction — burns away what must not remain.',bonus:{str:2,spd:1,int:0,wil:0,awa:0,pre:2},spren:'Ashspren',abilities:['Division Burn','Abrasion Surge','Self-Mastery','Ashspren Bond'],dmgBonus:{crit:4,hit:2,miss:0}},
-  {id:'bondsmith',name:'Bondsmith',ideal:'I will unite instead of divide',desc:'Tension & adhesion. The rarest Order — only three Bondsmiths can exist. You do not find the Sibling. The Sibling finds you.',bonus:{str:0,spd:0,int:1,wil:2,awa:2,pre:0},spren:'The Sibling (Ancient Godspren of Urithiru)',abilities:['Adhesion Field','Spiritual Connection','Perpendicularity Pull','Bondsmith Aura'],dmgBonus:{crit:1,hit:0,miss:2}},
-  {id:'skybreaker',name:'Skybreaker',ideal:'I will follow the law',desc:'Gravitation & division. Absolute in justice, terrifying in execution.',bonus:{str:1,spd:2,int:0,wil:0,awa:0,pre:2},spren:'Highspren',abilities:['Division Strike','Gravitation Law','Judgment Lashing','Highspren Bond'],dmgBonus:{crit:3,hit:2,miss:0}},
+  // ══ OFFICIAL RADIANT ORDERS (Chapter 5) ══
+  // Ordered by: surges, philosophy, spren, ideals
+  {id:'windrunner',name:'Windrunner',
+   philosophy:'I will protect.',
+   surges:['adhesion','gravitation'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I will protect those who cannot protect themselves.',
+   ideal3:'I will protect even those I hate so long as it is right.',
+   ideal4:'(Personal — forgive yourself for past failures)',
+   spren:'Honorspren',sprenDesc:'Glowing white-blue humanoids; warlike culture, love of honor. Deeply reluctant to bond post-Recreance.',
+   sprenAssist:'Leadership, predicting highstorms, keeping time',
+   desc:'Adhesion & Gravitation. Flies where others crawl — protects those who cannot protect themselves.',
+   bonus:{str:2,spd:2,int:0,wil:0,awa:0,pre:0},
+   abilities:['Basic Lashing (fly/hurl)','Full Lashing (bind objects)','Reverse Lashing','Enhance (STR+1 SPD+1)','Regenerate'],
+   dmgBonus:{crit:3,hit:2,miss:0},color:'#5090c8'},
+  {id:'skybreaker',name:'Skybreaker',
+   philosophy:'I will seek justice.',
+   surges:['division','gravitation'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I swear to seek justice, to let it guide me, until I find a more perfect Ideal.',
+   ideal3:'I swear to follow… (a singular authority, code, or person).',
+   ideal4:'(Ideal of Crusade — pledge a personal quest to root out systemic injustice)',
+   spren:'Highspren',sprenDesc:'Void-like humanoid silhouettes with a starfield within. Can read bonded Radiant thoughts silently.',
+   sprenAssist:'Investigating crimes, determining guilt, Intimidation',
+   desc:'Division & Gravitation. Law enforcers — rigid, principled, devoted to justice. Flies alongside destroying.',
+   bonus:{str:1,spd:2,int:0,wil:0,awa:0,pre:2},
+   abilities:['Basic Lashing (flight)','Division (destroy/decay)','Soaring Destruction','Enhance','Regenerate'],
+   dmgBonus:{crit:3,hit:2,miss:0},color:'#9060a0'},
+  {id:'dustbringer',name:'Dustbringer',
+   philosophy:'I will seek self-mastery.',
+   surges:['abrasion','division'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'To control my power, I will control myself.',
+   ideal3:'To understand my power, I will understand what power is.',
+   ideal4:'(Acknowledge obligation — power without responsibility has consequences)',
+   spren:'Ashspren',sprenDesc:'Branching electrical scorches. Deeply hostile to humans due to Recreance spren deaths.',
+   sprenAssist:'Crafting, setting traps, relevant Lore',
+   desc:'Abrasion & Division. Controlled destruction — precision sappers and mobile artillery.',
+   bonus:{str:2,spd:1,int:0,wil:0,awa:0,pre:2},
+   abilities:['Abrasion (frictionless)','Division (decay/destroy)','Searing Dust Storm','Enhance','Regenerate'],
+   dmgBonus:{crit:4,hit:2,miss:0},color:'#c06030'},
+  {id:'edgedancer',name:'Edgedancer',
+   philosophy:'I will remember.',
+   surges:['abrasion','progression'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I will remember those who have been forgotten.',
+   ideal3:'I will listen to those who have been ignored.',
+   ideal4:'(Advocate — carry ordinary peoples concerns to those with power)',
+   spren:'Cultivationspren',sprenDesc:'Tightly interwoven vines with crystal eyes. Chosen by the Ring (cultivationspren council).',
+   sprenAssist:'Insight, finding common ground across cultures',
+   desc:'Abrasion & Progression. Servants of the forgotten — healers, rescuers, devoted to the common people.',
+   bonus:{str:0,spd:2,int:0,wil:2,awa:1,pre:0},
+   abilities:['Abrasion (frictionless motion)','Progression (Regrowth)','Edgedancer Grace','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:1,miss:1},color:'#40a080'},
+  {id:'truthwatcher',name:'Truthwatcher',
+   philosophy:'I will seek truth.',
+   surges:['illumination','progression'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I will seek truth wherever it is hidden.',
+   ideal3:'I will reveal truth to all who seek it.',
+   ideal4:'(Share forbidden knowledge — make it impossible to suppress)',
+   spren:'Mistspren',sprenDesc:'Humanoid mist with a translucent porcelain mask. Curious, adventurous, love novelty.',
+   sprenAssist:'Persuasion, approaching new experiences, understanding perspectives',
+   desc:'Illumination & Progression. Researchers and investigative truth-seekers. Heal and reveal.',
+   bonus:{str:0,spd:0,int:2,wil:3,awa:0,pre:0},
+   abilities:['Illumination (illusions)','Progression (Regrowth)','Spiritual Healing','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:1,miss:1},color:'#6090a0'},
+  {id:'lightweaver',name:'Lightweaver',
+   philosophy:'I will speak my truth.',
+   surges:['illumination','transformation'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'(Admit a simple but difficult emotional truth — e.g. "I am afraid")',
+   ideal3:'(Confront increasingly painful truths — trauma, identity, ingrained misbeliefs)',
+   ideal4:'(Speak the hardest truth you have been avoiding)',
+   spren:'Cryptic (liespren)',sprenDesc:'Ever-shifting 3D fractal patterns. Fascinated by "lies" — jokes, fiction, sarcasm. Exceptional code-breakers.',
+   sprenAssist:'Deduction (patterns, ciphers), picking locks; after 3rd Ideal: detect lies within bond range',
+   desc:'Illumination & Transformation. Artists, entertainers, and spies. Ideals are personal truths, not oaths.',
+   bonus:{str:0,spd:1,int:2,wil:0,awa:2,pre:0},
+   abilities:['Illumination (Lightweaving)','Transformation (Soulcasting)','Distracting Illusion','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:1,miss:0},color:'#c09040'},
+  {id:'willshaper',name:'Willshaper',
+   philosophy:'I will seek freedom.',
+   surges:['cohesion','transportation'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I will seek freedom for those in bondage.',
+   ideal3:'I will fight oppression — each Willshaper completes this personally.',
+   ideal4:'(Ensure those you freed remain free — ongoing accountability)',
+   spren:'Lightspren (Reachers)',sprenDesc:'Bronze humanoids in Cognitive Realm; balls of warm light in Physical. Rhythmic pulse communication. Refuse to bond those who have willingly oppressed others.',
+   sprenAssist:'Travel/fair trade tests, Survival',
+   desc:'Cohesion & Transportation. Build physical and social structures that enable freedom — liberate the captive.',
+   bonus:{str:1,spd:2,int:0,wil:0,awa:2,pre:0},
+   abilities:['Cohesion (Stoneshaping)','Transportation (Cognitive Realm)','Spiritual Cohesion','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:1,miss:0},color:'#c8a030'},
+  {id:'elsecaller',name:'Elsecaller',
+   philosophy:'I will reach my potential.',
+   surges:['transformation','transportation'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'(Personal aspiration declared to inkspren — then pursue that growth)',
+   ideal3:'Leave behind what is comfortable.',
+   ideal4:'Demand deeper introspection — each Ideal harder than the last.',
+   spren:'Inkspren',sprenDesc:'Deep black angular humanoids (can change size). Minimalist speech, unemotional logic. Extreme distrust of humans post-Recreance.',
+   sprenAssist:'Deduction, Discipline, Stealth',
+   desc:'Transformation & Transportation. Wisest Radiants — logisticians and strategists with the strongest Cognitive Realm connection.',
+   bonus:{str:0,spd:0,int:2,wil:2,awa:0,pre:1},
+   abilities:['Transformation (Soulcasting)','Transportation (Elsecalling)','Elsecaller Perspicacity','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:1,miss:0},color:'#3060a0'},
+  {id:'stoneward',name:'Stoneward',
+   philosophy:'I will be there when needed.',
+   surges:['cohesion','tension'],
+   ideal1:'Life before death. Strength before weakness. Journey before destination.',
+   ideal2:'I will step forward when others fall back.',
+   ideal3:'I will be the foundation on which others can build.',
+   ideal4:'Acknowledge own needs — know when sacrifice becomes self-destruction.',
+   spren:'Peakspren',sprenDesc:'Broad-shouldered stone-like humanoids (7+ ft.). Pacifistic; embittered by Recreance. Can move through and hide within stone.',
+   sprenAssist:'Supporting/coordinating groups, Athletics',
+   desc:'Cohesion & Tension. Heavy infantry of the Radiants — dependable, stubborn, defined by teamwork.',
+   bonus:{str:2,spd:0,int:0,wil:1,awa:0,pre:2},
+   abilities:['Cohesion (Stoneshaping)','Tension (rigidity)','Cohesive Teamwork','Enhance','Regenerate'],
+   dmgBonus:{crit:2,hit:2,miss:0},color:'#808080'},
 ];
-
 const SPREN_BONDS={
   windrunner:{name:'Sylphrena',nick:'Syl',stages:['A whisper on the wind follows you...','Syl drifts beside you, curious and cautious.','Syl solidifies into a spear of light. She speaks your name.','Syl argues with you now. She has opinions. Strong ones.','Syl becomes a Shardblade of living silver. She is yours. You are hers.'],color:'#b8d4f0'},
   lightweaver:{name:'Pattern',nick:'Pattern',stages:['Patterns flicker in glass and stone around you...','Pattern hums with mathematical delight on your sleeve.','Pattern speaks in riddles that are also truths.','Pattern confronts you with your own lies. Every one.','Pattern becomes a Shardblade of living crystal. Truth made blade.'],color:'#d4b8f0'},
@@ -1022,6 +1155,383 @@ const PATH_SKILLS={
 // Attribute distribution: 12 points, max 3 per attribute at creation
 const ATTR_POINTS_START=12;
 const ATTR_MAX_CREATE=3;
+
+// ══ DC TABLE (Official Cosmere RPG) ══
+const DC={EASY:10, MEDIUM:15, HARD:20, VERY_HARD:25, NEARLY_IMPOSSIBLE:30};
+
+// ══ RECOVERY DIE (WIL-based, Official) ══
+function getRecoveryDie(wil){
+  if(wil<=0)return'1d4';
+  if(wil<=2)return'1d6';
+  if(wil<=4)return'1d8';
+  if(wil<=6)return'1d10';
+  if(wil<=8)return'1d12';
+  return'1d20';
+}
+function rollRecoveryDie(wil){
+  const sides={d4:4,d6:6,d8:8,d10:10,d12:12,d20:20};
+  const die=getRecoveryDie(wil);
+  return Math.ceil(Math.random()*(sides[die.slice(1)]||4));
+}
+
+// ══ INVESTITURE (Official: 2 + higher of AWA or PRE) ══
+function getMaxInvestiture(stats){
+  const awa=stats&&stats.awa||0;
+  const pre=stats&&stats.pre||0;
+  return 2+Math.max(awa,pre);
+}
+
+// ══ DEFLECT (reduces energy/impact/keen damage — NOT spirit/vital) ══
+// deflect value stored on character; 0 = no armor
+function applyDeflect(dmg, dmgType, deflect){
+  const deflectable=['energy','impact','keen'];
+  if(deflectable.includes(dmgType)&&deflect>0){
+    return Math.max(0,dmg-deflect);
+  }
+  return dmg; // spirit/vital damage bypasses deflect
+}
+
+// ══ TEN SURGES (Official Chapter 6) ══
+// Each is a SKILL with its own attribute
+const SURGES=[
+  {id:'abrasion',      name:'Abrasion',      attr:'spd', orders:['dustbringer','edgedancer'],
+   desc:'Alters friction — nearly eliminates it. Skate surfaces, glide through combat.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'adhesion',      name:'Adhesion',      attr:'pre', orders:['windrunner'],
+   desc:'Binds things together via Full Lashings. Stick objects and surfaces to each other.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'cohesion',      name:'Cohesion',      attr:'wil', orders:['stoneward','willshaper'],
+   desc:'Alters matter at the particle level — Stoneshaping. Make stone moldable like clay.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'division',      name:'Division',      attr:'int', orders:['dustbringer','skybreaker'],
+   desc:'Decays and destroys. Spirit damage. If target reaches 0 HP, they crumble to dust.',
+   dmgType:'spirit',  targetDef:'spirDef'},
+  {id:'gravitation',   name:'Gravitation',   attr:'awa', orders:['skybreaker','windrunner'],
+   desc:'Changes gravity direction and magnitude. Basic Lashings — flight and hurling enemies.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'illumination',  name:'Illumination',  attr:'pre', orders:['lightweaver','truthwatcher'],
+   desc:'Creates convincing visual and auditory illusions — Lightweaving.',
+   dmgType:'energy', targetDef:'cogDef'},
+  {id:'progression',   name:'Progression',   attr:'awa', orders:['edgedancer','truthwatcher'],
+   desc:'Controls growth and healing of living things. Regrowth heals; plants grow rapidly.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'tension',       name:'Tension',       attr:'str', orders:['stoneward'],
+   desc:'Alters rigidity of objects. Harden cloth to armor, walk on liquids.',
+   dmgType:'impact', targetDef:'physDef'},
+  {id:'transformation',name:'Transformation',attr:'wil', orders:['elsecaller','lightweaver'],
+   desc:'Transforms one material into another — Soulcasting. Spirit damage on living targets.',
+   dmgType:'spirit',  targetDef:'spirDef'},
+  {id:'transportation',name:'Transportation',attr:'int', orders:['elsecaller','willshaper'],
+   desc:'Peer into and transport between the Physical and Cognitive realms — Elsecalling.',
+   dmgType:null,      targetDef:'cogDef'},
+];
+
+// Surge scaling by rank
+const SURGE_SCALE=[
+  {rank:1, die:'d4', size:'Small (2.5 ft)'},
+  {rank:2, die:'d6', size:'Medium (5 ft)'},
+  {rank:3, die:'d8', size:'Large (10 ft)'},
+  {rank:4, die:'d10', size:'Huge (15 ft)'},
+  {rank:5, die:'d12', size:'Gargantuan (20 ft)'},
+];
+
+// Order → surges mapping (official)
+const ORDER_SURGES={
+  windrunner:   ['adhesion','gravitation'],
+  lightweaver:  ['illumination','transformation'],
+  edgedancer:   ['abrasion','progression'],
+  stoneward:    ['cohesion','tension'],
+  elsecaller:   ['transformation','transportation'],
+  truthwatcher: ['illumination','progression'],
+  willshaper:   ['cohesion','transportation'],
+  dustbringer:  ['abrasion','division'],
+  skybreaker:   ['division','gravitation'],
+};
+
+// ══ CONDITIONS (Official Chapter 9) ══
+const CONDITIONS={
+  afflicted:   {name:'Afflicted',    desc:'Take specified damage at end of each turn. Stacks separately.'},
+  determined:  {name:'Determined',   desc:'Once when you fail a test, add an Opportunity. Then ends.'},
+  disoriented: {name:'Disoriented',  desc:"No reactions. Senses always obscured. Perception disadvantage."},
+  empowered:   {name:'Empowered',    desc:'Advantage on all tests. Investiture refills each turn. Ends at scene end.'},
+  enhanced:    {name:'Enhanced',     desc:'Attribute bonus as specified. Does NOT change derived stats.'},
+  exhausted:   {name:'Exhausted',    desc:'−X to all test results. Reduce by 1 per long rest.'},
+  focused:     {name:'Focused',      desc:'Focus costs reduced by 1.'},
+  immobilized: {name:'Immobilized',  desc:'Movement rate = 0.'},
+  prone:       {name:'Prone',        desc:'Slowed. Melee attacks against you gain advantage. Stand up as free action.'},
+  restrained:  {name:'Restrained',   desc:'Movement = 0. Disadvantage on all tests except to escape.'},
+  slowed:      {name:'Slowed',       desc:'Movement rate halved.'},
+  stunned:     {name:'Stunned',      desc:'Lose reactions; gain 2 fewer actions on your turn.'},
+  surprised:   {name:'Surprised',    desc:'Lose reactions; gain 1 fewer action. Ends after your next turn.'},
+  unconscious: {name:'Unconscious',  desc:'Can take no actions except Breathe Stormlight/Regenerate (Radiants). Prone.'},
+  // Legacy status conditions
+  poisoned:    {name:'Poisoned',     desc:'Take 1d3+1 vital damage per round. Stacks remaining rounds.'},
+  burning:     {name:'Burning',      desc:'Take 1d2+1 energy damage per round. Stacks remaining rounds.'},
+  voidCorrupted:{name:'Void Corrupted',desc:'Lose 1 Focus per round from Voidlight taint.'},
+};
+
+// Apply a condition to a player object
+function applyCondition(player, condId, value=true){
+  if(!player.conditions)player.conditions={};
+  player.conditions[condId]=value;
+  return player;
+}
+function removeCondition(player, condId){
+  if(player.conditions)delete player.conditions[condId];
+  return player;
+}
+function hasCondition(player, condId){
+  return !!(player.conditions&&player.conditions[condId]);
+}
+
+// ══ INJURY SYSTEM (Official Chapter 9) ══
+const INJURY_EFFECTS=[
+  'Exhausted [−1] (general stamina loss)',
+  'Exhausted [−1] (general stamina loss)',
+  'Exhausted [−2] (severe stamina loss)',
+  'Slowed (injured leg)',
+  'Slowed (injured leg)',
+  'Disoriented (head injury)',
+  'Surprised (shock)',
+  'Can only use one hand (injured arm)',
+];
+
+function rollInjury(player, isShardblade=false){
+  const deflect=player.deflect||0;
+  const existingInjuries=(player.injuries||[]).length;
+  const roll=Math.ceil(Math.random()*20)+deflect-(existingInjuries*5);
+
+  let severity, duration;
+  if(isShardblade){
+    // Spiritual Injury table
+    if(roll>=16)      {severity='Flesh Wound';      duration='until long rest';}
+    else if(roll>=1)  {severity='Permanent Spiritual Injury'; duration='permanent (no non-Invested healing)';}
+    else              {severity='Death';             duration='permanent';}
+  } else {
+    if(roll>=16)      {severity='Flesh Wound';       duration='until long rest';}
+    else if(roll>=6)  {severity='Shallow Injury';    duration:`${Math.ceil(Math.random()*6)} days`;}
+    else if(roll>=1)  {severity='Vicious Injury';    duration:`${Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)} days`;}
+    else if(roll>=-5) {severity='Permanent Injury';  duration:'permanent';}
+    else              {severity='Death';              duration:'permanent';}
+  }
+
+  const effectIdx=Math.floor(Math.random()*8);
+  const effect=INJURY_EFFECTS[effectIdx];
+  const injury={severity,duration,effect,roll,isShardblade};
+
+  if(!player.injuries)player.injuries=[];
+  if(severity!=='Death')player.injuries.push(injury);
+
+  // Apply condition from injury
+  if(effect.includes('Exhausted')){
+    const pen=effect.includes('[−2]')?2:1;
+    if(!player.conditions)player.conditions={};
+    player.conditions.exhausted=(player.conditions.exhausted||0)+pen;
+  } else if(effect.includes('Slowed')){
+    applyCondition(player,'slowed');
+  } else if(effect.includes('Disoriented')){
+    applyCondition(player,'disoriented');
+  } else if(effect.includes('Surprised')){
+    applyCondition(player,'surprised');
+  }
+
+  return injury;
+}
+
+// ══ WEAPONS (Official Chapter 7) ══
+const WEAPONS={
+  // Light Weaponry (Speed)
+  javelin:    {name:'Javelin',    skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'keen',   traits:['Thrown [30/120]','Indirect']},
+  knife:      {name:'Knife',      skill:'lightWeapon', attr:'spd', dmg:'1d4', dmgType:'keen',   traits:['Discreet'],               expertTraits:['Offhand','Thrown [20/60]']},
+  mace:       {name:'Mace',       skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'impact', traits:[],                         expertTraits:['Momentum']},
+  rapier:     {name:'Rapier',     skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'keen',   traits:['Quickdraw'],              expertTraits:['Defensive']},
+  shortspear: {name:'Shortspear', skill:'lightWeapon', attr:'spd', dmg:'1d8', dmgType:'keen',   traits:['Two-Handed'],             expertTraits:['Loses Two-Handed']},
+  sidesword:  {name:'Sidesword',  skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'keen',   traits:['Quickdraw'],              expertTraits:['Offhand']},
+  staff:      {name:'Staff',      skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'impact', traits:['Discreet','Two-Handed'],  expertTraits:['Defensive']},
+  shortbow:   {name:'Shortbow',   skill:'lightWeapon', attr:'spd', dmg:'1d6', dmgType:'keen',   traits:['Two-Handed','Ranged [80/320]'], expertTraits:['Quickdraw']},
+  sling:      {name:'Sling',      skill:'lightWeapon', attr:'spd', dmg:'1d4', dmgType:'impact', traits:['Discreet','Ranged [30/120]'],  expertTraits:['Indirect']},
+  // Heavy Weaponry (Strength)
+  axe:        {name:'Axe',        skill:'heavyWeapon', attr:'str', dmg:'1d6', dmgType:'keen',   traits:['Thrown [20/60]'],         expertTraits:['Offhand']},
+  greatsword: {name:'Greatsword', skill:'heavyWeapon', attr:'str', dmg:'1d10',dmgType:'keen',   traits:['Two-Handed'],             expertTraits:['Deadly']},
+  hammer:     {name:'Hammer',     skill:'heavyWeapon', attr:'str', dmg:'1d10',dmgType:'impact', traits:['Two-Handed'],             expertTraits:['Momentum']},
+  longspear:  {name:'Longspear',  skill:'heavyWeapon', attr:'str', dmg:'1d8', dmgType:'keen',   traits:['Two-Handed','Melee [+5]'],expertTraits:['Defensive']},
+  longsword:  {name:'Longsword',  skill:'heavyWeapon', attr:'str', dmg:'1d8', dmgType:'keen',   traits:['Quickdraw','Two-Handed'], expertTraits:['Loses Two-Handed']},
+  poleaxe:    {name:'Poleaxe',    skill:'heavyWeapon', attr:'str', dmg:'1d10',dmgType:'keen',   traits:['Two-Handed'],             expertTraits:['Melee [+5]']},
+  shield:     {name:'Shield',     skill:'heavyWeapon', attr:'str', dmg:'1d4', dmgType:'impact', traits:['Defensive'],              expertTraits:['Offhand']},
+  crossbow:   {name:'Crossbow',   skill:'heavyWeapon', attr:'str', dmg:'1d8', dmgType:'keen',   traits:['Loaded [1]','Two-Handed','Ranged [100/400]'], expertTraits:['Deadly']},
+  longbow:    {name:'Longbow',    skill:'heavyWeapon', attr:'str', dmg:'1d6', dmgType:'keen',   traits:['Two-Handed','Ranged [150/600]'],              expertTraits:['Indirect']},
+  // Special
+  unarmed:    {name:'Unarmed',    skill:'athletics',   attr:'str', dmg:'1d4', dmgType:'impact', traits:['Momentum','Offhand']},
+  halfShard:  {name:'Half-Shard', skill:'heavyWeapon', attr:'str', dmg:'2d4', dmgType:'impact', traits:['Defensive','Two-Handed'], charges:1, special:'deflect+10'},
+  shardblade: {name:'Shardblade', skill:'heavyWeapon', attr:'str', dmg:'2d8', dmgType:'spirit', traits:['Dangerous','Deadly'],    special:'spiritualInjury'},
+  warhammer:  {name:'Warhammer',  skill:'heavyWeapon', attr:'str', dmg:'2d10',dmgType:'impact', traits:['Cumbersome [5]','Two-Handed']},
+  grandbow:   {name:'Grandbow',   skill:'heavyWeapon', attr:'str', dmg:'2d6', dmgType:'keen',   traits:['Cumbersome [5]','Two-Handed','Ranged [200/800]']},
+};
+
+// ══ ARMOR (Official Chapter 7) ══
+const ARMORS={
+  uniform:    {name:'Uniform',    deflect:0, traits:['Presentable']},
+  leather:    {name:'Leather',    deflect:1, traits:[],           expertTraits:['Presentable']},
+  chain:      {name:'Chain',      deflect:2, traits:['Cumbersome [3]'], expertTraits:['Loses Cumbersome']},
+  breastplate:{name:'Breastplate',deflect:2, traits:['Cumbersome [3]'], expertTraits:['Presentable']},
+  halfPlate:  {name:'Half Plate', deflect:3, traits:['Cumbersome [4]'], expertTraits:['Cumbersome [3] instead']},
+  fullPlate:  {name:'Full Plate', deflect:4, traits:['Cumbersome [5]']},
+  shardplate: {name:'Shardplate', deflect:5, traits:['Dangerous','Unique'], charges:4, bonus:{str:2,spd:2}, special:'shardplateCharges'},
+};
+
+// ══ STARTING KITS (Official Chapter 7) ══
+const STARTING_KITS=[
+  {id:'academic',   name:'Academic',   weapons:['knife'],         armor:'uniform',  spheres:'3d12',
+   extras:['Books and ink','Reference book'],                     expertise:'Literature',
+   desc:'Scholar or professional — knowledge is your sharpest weapon.'},
+  {id:'artisan',    name:'Artisan',    weapons:['hammer','knife'], armor:'leather',  spheres:'4d8',
+   extras:['Instruments','Surgical supplies','Scale'],             expertise:null,
+   desc:'Craftsperson, healer, or entertainer.'},
+  {id:'military',   name:'Military',   weapons:['longsword','knife'],armor:'chain',  spheres:'2d6',
+   extras:['Rations (5 days)','Whetstone','Blanket'],              expertise:'Military Life',
+   desc:'Trained soldier. Disciplined, equipped, reliable.'},
+  {id:'courtier',   name:'Courtier',   weapons:['sidesword'],     armor:'uniform',  spheres:'4d20',
+   extras:['Fine clothing'],                                       expertise:'High Society',
+   bonus:'Noble patron connection',
+   desc:'Noble-adjacent operative. Money and connections open doors.'},
+  {id:'prisoner',   name:'Prisoner',   weapons:[],                armor:null,       spheres:'0',
+   extras:[],                                                      expertise:null,
+   bonus:'Connected to a Radiant spren (2 milestones toward First Ideal)',
+   desc:'Nothing but your wits and a debt to the universe.'},
+  {id:'underworld', name:'Underworld', weapons:['knife','knife'],  armor:'leather',  spheres:'1d20',
+   extras:['Lockpick','Crowbar','Rope (50 ft.)','Alcohol','5 days food'],expertise:'Underworld',
+   desc:'Criminal, mercenary, or survivor. You know how the real world works.'},
+];
+
+// ══ CURRENCY (Spheres — Official Chapter 7) ══
+const GEMSTONES={
+  diamond:  {chip:0.2, mark:1,  broam:4},
+  garnet:   {chip:1,   mark:5,  broam:20},
+  ruby:     {chip:2,   mark:10, broam:40},
+  amethyst: {chip:5,   mark:25, broam:100},
+  emerald:  {chip:10,  mark:50, broam:200},
+};
+function formatMarks(mk){
+  if(!mk||mk<1)return mk+'mk';
+  if(mk>=200)return Math.floor(mk/4)+'b '+Math.round(mk%4)+'m'; // broams + marks
+  return mk+'mk';
+}
+
+// ══ SPREN APPEARANCES (Official Chapter 13 — for GM flavor) ══
+const SPREN_APPEARANCES={
+  angerspren:       'Red pool bubbling at your feet',
+  anticipationspren:'Red streamers drifting in the air',
+  creationspren:    'Silvery shapes constantly shifting form',
+  fearspren:        'Violet blobs wriggling upward',
+  gloryspren:       'Golden orbs slowly circling you',
+  joyspren:         'Blue leaves swirling in an invisible wind',
+  painspren:        'Orange hands grasping upward from the floor',
+  shamespren:       'Red and white petals falling from above',
+  flamespren:       'Dancing humanoid figures in any nearby fire',
+  lifespren:        'Glowing green specks near living plants',
+  rainspren:        'Blue candles with a single watching eye',
+  windspren:        'Ribbons of light dancing in the wind',
+};
+
+// ══ ADVERSARY ROLES (Official Chapter 13) ══
+const ADVERSARY_ROLES={
+  minion:  {name:'Minion', healthMult:0.5, threat:0.5, noCrit:true,
+            rule:'Immediately defeated when suffering an injury (PC decides: dead or unconscious)'},
+  rival:   {name:'Rival',  healthMult:1,   threat:1,   noCrit:false, rule:'Standard adversary rules'},
+  boss:    {name:'Boss',   healthMult:2,   threat:4,
+            rule:'Takes a fast AND slow turn each round; can spend 1 focus for extra action or to remove a condition'},
+};
+
+// Threat calculation for combat difficulty
+function combatThreat(enemies){
+  return enemies.reduce((t,e)=>{
+    const role=ADVERSARY_ROLES[e.role||'rival'];
+    const tierDiff=(e.tier||1)-(e.partyTier||1);
+    const tierMults=[4,2,1,0.5,0.25,0];
+    const mult=tierMults[Math.min(Math.max(tierDiff+2,0),5)];
+    return t+(role.threat||1)*mult;
+  },0);
+}
+
+// Get suggested combat difficulty label
+function combatDifficulty(threat, numPlayers){
+  const ratio=threat/numPlayers;
+  if(ratio<=0.5)return'Easy';
+  if(ratio<=1)return'Average';
+  if(ratio<=1.5)return'Hard';
+  return'Very Hard';
+}
+
+// ══ SHORT REST mechanic (Official Chapter 9) ══
+function doShortRest(player){
+  const wil=player.stats&&player.stats.wil||0;
+  const die=rollRecoveryDie(wil);
+  const recovered=Math.min(die, (player.maxHp||10)-player.hp);
+  player.hp=Math.min(player.maxHp||10, player.hp+recovered);
+  // Also recover some focus
+  const focusRec=Math.min(1,player.maxFocus-(player.focus||0));
+  player.focus=Math.min(player.maxFocus||3,(player.focus||0)+focusRec);
+  return{die:getRecoveryDie(wil),roll:die,hpRecovered:recovered,focusRecovered:focusRec};
+}
+
+// ══ COMBAT OPPORTUNITY/COMPLICATION tables (Official Chapter 10) ══
+const COMBAT_OPPS=[
+  'Friendly reinforcements arrive',
+  'Wounded enemy flees or surrenders',
+  'Innocent bystander escapes',
+  'Enemy is distracted — your next attack gains advantage',
+  'Enemy drops their weapon or gear',
+  'Spot a useful vantage point or resource',
+  'Spot infused spheres on an enemy — you can draw Stormlight',
+  'A spren helps you in a key moment',
+  'Brief respite — recover 1 focus',
+  'Spot a hidden opponent — reveal to allies',
+  'Enemy accidentally reveals a secret',
+  'Buy time — the goal becomes less urgent',
+];
+const COMBAT_COMPS=[
+  'Enemy reinforcements arrive',
+  'An ally trips — they fall Prone',
+  'An ally or innocent is endangered and must be saved',
+  'Enemy is alerted to your presence',
+  'You or an ally drops or damages equipment',
+  'Rain picks up — battlefield navigation becomes harder',
+  'Nearby spheres go dun — a Radiant loses Stormlight access',
+  'A spren is distracted — cannot help in this key moment',
+  'A guard spots you — no advantage on surprise',
+  'An enemy slips away — no Reactive Strike',
+  'The stakes rise — the goal becomes more urgent',
+];
+
+// ══ GOALS/PURPOSE/OBSTACLE (Official Chapter 8) ══
+const PURPOSES=[
+  'Save Others — defend those who cannot protect themselves',
+  'Seek Truth — insatiable curiosity about the world',
+  'Push Yourself to New Heights — discover and surpass your limits',
+  'Find Connection — define yourself by your relationships',
+  'Seek Justice — injustice in any form is intolerable',
+  'Preserve Life — all life has intrinsic value',
+];
+const OBSTACLES=[
+  'Deep Regret — something weighs heavily on your conscience',
+  'Specific Fear — a particular fear that returns unbidden',
+  'Spite — petty grudges, volatile temper, impulsiveness',
+  'Self-Doubt — trouble believing in yourself',
+  'Mistrust of Others — you push people away to avoid disappointment',
+];
+
+// Get damage type label for combat log
+function dmgTypeLabel(dmgType){
+  const labels={energy:'⚡ energy',impact:'💢 impact',keen:'🗡 keen',spirit:'👁 spirit',vital:'☠ vital'};
+  return labels[dmgType]||dmgType||'damage';
+}
+
+// Get surge die roll for a character
+function rollSurgeDie(ranks){
+  const sides=[4,6,8,10,12];
+  const die=sides[Math.min(ranks-1,4)]||4;
+  return Math.ceil(Math.random()*die);
+}
 const ROSHAR_P=['Urithiru','Shattered Plains','Kholinar','Kharbranth','Thaylen City','Azimir','Purelake','Hearthstone','Rathalas','Reshi Isles','Aimia (Akinah)','Frostlands','Bavland','Herdaz','Jah Keved','Alethkar','Tukar','Triax','Liafor','Emul','Marat'];
 const ROSHAR_O=['Braize (Damnation)','Ashyn — the Burning Planet','Aimian Sea','Godforge'];
 const ROSHAR_S=['Shadesmar — Sea of Regret','Shadesmar — Sea of Souls','Shadesmar — Sea of Lost Lights','Nexus of Imagination','Nexus of Truth','Nexus of Transition',"Honor's Perpendicularity","Cultivation's Perpendicularity"];
@@ -1167,14 +1677,73 @@ const SINGER_FORMS={
 };
 
 const HERO_ROLES=[
-  {id:'soldier',name:'Alethi Soldier',icon:'⚔',desc:'Trained in the Kings army. Disciplined, lethal, reliable.',bonus:{str:2,pre:1},ideal:'Strength before weakness.',color:'#c44a28'},
-  {id:'scholar',name:'Kharbranth Scholar',icon:'📜',desc:'Healer, historian, artificer. Knowledge is the sharpest weapon.',bonus:{int:2,wil:1},ideal:'Knowledge before ignorance.',color:'#5a9e8f'},
-  {id:'merchant',name:'Thaylen Merchant',icon:'💎',desc:'Resourceful, well-connected, never without a plan.',bonus:{awa:2,int:1},ideal:'Profit before principle.',color:'#BA7517'},
-  {id:'horneater',name:'Horneater',icon:'🏔',desc:'Peaks-born. Drinks Horneater white for breakfast. Immune to most things.',bonus:{pre:3},ideal:'The Peaks remember.',color:'#888'},
-  {id:'herdazian',name:'Herdazian Fighter',icon:'🗡',desc:'Street-smart guerrilla. Underestimated, always dangerous.',bonus:{spd:2,str:1},ideal:'Survive. Then win.',color:'#7a6e5a'},
-  {id:'shin',name:'Shin Farmer',icon:'🌾',desc:'Deeply out of place. Confusingly wise. Everyone underestimates them.',bonus:{wil:2,awa:1},ideal:'The stone remembers.',color:'#8fa870'},
-  {id:'worldsinger',name:'Worldsinger',icon:'🎵',desc:'Storyteller, diplomat, keeper of memory. Words reshape reality.',bonus:{awa:3},ideal:'Every story matters.',color:'#9b7bb8'},
-  {id:'custom',name:'Custom Hero',icon:'✦',desc:'Write your own path. The world bends to those who refuse its labels.',bonus:{},ideal:'My own.',color:'#a09080'},
+  // ══ OFFICIAL HEROIC PATHS (Chapter 4) ══
+  {id:'agent', name:'Agent', icon:'🗡',
+   keyTalent:'Opportunist',
+   keyTalentDesc:'Once per round, reroll your plot die. The original roll has no effect.',
+   startingSkill:'insight',
+   specialties:['Investigator','Spy','Thief'],
+   buildAttrs:['awa','int','spd'],
+   buildSkills:['Agility','Deception','Deduction','Insight','Light Weaponry','Thievery'],
+   multiPath:['Hunter','Scholar'],
+   desc:'A talented operative who solves problems with a keen mind or deft hand.',
+   bonus:{awa:2,spd:1}, ideal:'Every lock has a key. I just find them faster.',
+   color:'#7a6e5a'},
+  {id:'envoy', name:'Envoy', icon:'🎭',
+   keyTalent:'Rousing Presence',
+   keyTalentDesc:'Choose an ally you can influence — they become Determined until they benefit from it or the scene ends.',
+   startingSkill:'discipline',
+   specialties:['Diplomat','Faithful','Mentor'],
+   buildAttrs:['pre','wil'],
+   buildSkills:['Discipline','Deception','Leadership','Lore','Persuasion'],
+   multiPath:['Leader','Scholar'],
+   desc:'An insightful negotiator who adeptly influences others.',
+   bonus:{pre:2,wil:1}, ideal:'Words are the sharpest weapons. Mine never miss.',
+   color:'#9b7bb8'},
+  {id:'hunter', name:'Hunter', icon:'🏹',
+   keyTalent:'Seek Quarry',
+   keyTalentDesc:'Choose a character as your quarry. Gain advantage on all tests to find, attack, or study them.',
+   startingSkill:'perception',
+   specialties:['Archer','Assassin','Tracker'],
+   buildAttrs:['awa','str','spd'],
+   buildSkills:['Agility','Perception','Stealth','Survival','Light Weaponry','Heavy Weaponry'],
+   multiPath:['Warrior','Agent'],
+   desc:'A skilled sharpshooter and outdoorsperson who seeks and eliminates problems.',
+   bonus:{awa:2,spd:1}, ideal:'I always find what I hunt.',
+   color:'#6a8a5a'},
+  {id:'leader', name:'Leader', icon:'⚔',
+   keyTalent:'Decisive Command',
+   keyTalentDesc:'Gain a command die (d4). Spend 1 focus to give an ally your command die — they roll it with any one test before their next turn ends.',
+   startingSkill:'leadership',
+   specialties:['Champion','Officer','Politico'],
+   buildAttrs:['pre','str','wil'],
+   buildSkills:['Athletics','Deception','Heavy Weaponry','Intimidation','Leadership','Persuasion'],
+   multiPath:['Warrior','Envoy'],
+   desc:'A poised commander who directs and guides others to be their best.',
+   bonus:{pre:2,str:1}, ideal:'My people fight better when I stand with them.',
+   color:'#c44a28'},
+  {id:'scholar', name:'Scholar', icon:'📜',
+   keyTalent:'Erudition',
+   keyTalentDesc:'Choose one cultural or utility expertise and two non-surge cognitive skills — you count as having them temporarily. Reassign after a long rest with library access.',
+   startingSkill:'lore',
+   specialties:['Artifabrian','Strategist','Surgeon'],
+   buildAttrs:['int','pre','spd'],
+   buildSkills:['Crafting','Deduction','Lore','Medicine'],
+   multiPath:['Agent','Envoy'],
+   desc:'An adroit thinker who excels at planning and building.',
+   bonus:{int:2,wil:1}, ideal:'Knowledge is the only power that cannot be taken away.',
+   color:'#5a9e8f'},
+  {id:'warrior', name:'Warrior', icon:'🛡',
+   keyTalent:'Vigilant Stance',
+   keyTalentDesc:'Learn fighting stances. Begin with Vigilant Stance: reduce focus cost of Dodge and Reactive Strike by 1. Enter known stances as a free action.',
+   startingSkill:'athletics',
+   specialties:['Duelist','Shardbearer','Soldier'],
+   buildAttrs:['spd','str','awa','wil'],
+   buildSkills:['Athletics','Light Weaponry','Heavy Weaponry','Intimidation','Leadership','Persuasion'],
+   multiPath:['Leader','Hunter'],
+   desc:'A fighter who relies on their skill, brute strength, or indomitable will.',
+   bonus:{str:2,spd:1}, ideal:'I have survived worse. I will survive this.',
+   color:'#8a7060'},
 ];
 
 // ══ HERO WEAPONS ══
@@ -1396,7 +1965,7 @@ function calcEnemyHP(baseHP, actNum, avgBladeTier){
 }
 
 function enemyAttackRoll(enemy, target){
-  const roll=Math.ceil(Math.random()*20)+Math.floor(enemy.attackBonus||2);
+  const roll=Math.min(20,Math.ceil(Math.random()*20)+Math.floor(enemy.attackBonus||2));
   // Official Physical Defense = 10 + STR + SPD
   const pDef=10+(target.stats&&target.stats.str||0)+(target.stats&&target.stats.spd||0)+(target.shardplate?3:0);
   const hit=roll>pDef;
@@ -1407,30 +1976,51 @@ function enemyAttackRoll(enemy, target){
 function buildCombatChoices(player, combatState){
   const cached=gState.combatChoicesCache&&gState.combatChoicesCache[player.name];
   if(cached&&cached.length>=4)return cached;
-  const stage=getSprenStage(gState.totalMoves||0);
-  const cls=CLASSES.find(c=>c.id===player.classId)||CLASSES[0];
+  const round=gState.combatRound||1;
+  const cls=CLASSES.find(cl=>cl.id===player.classId)||CLASSES[0];
   const sz=gState.partySize||partySize;
   const enemies=(gState.combatEnemies||[]).filter(e=>!e.downed&&e.hp>0);
   const downed=gState.players.slice(0,sz).filter(p=>p&&p.downed);
-  const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<p.maxHp&&!p.downed);
-  const healAmt=getHealAmount(player,stage);
-  const enemy=enemies[0];
-  const choices=[];
-  choices.push(`[ATTACK] ${cls.abilities&&cls.abilities[0]||'Strike'} — channel Stormlight through ${player.shardblade||'your weapon'} at ${enemy?enemy.name:'the enemy'}`);
-  choices.push(`[ATTACK] Read the enemy's position and strike at the gap in their defense`);
-  choices.push(`[DEFEND] Draw their attack, absorb it with Stormlight, and create an opening for allies`);
-  if(downed.length>0&&player.classId==='edgedancer'){
-    choices.push(`[HEAL] Regrowth — pull ${downed[0].name} back from the edge (+${getReviveHP(stage)} HP)`);
-  } else if(downed.length>0&&(player.fragments||0)>=getReviveCost(stage)){
-    choices.push(`[HEAL] Sacrifice ${getReviveCost(stage)} fragments to revive ${downed[0].name}`);
-  } else if(anyInjured&&player.classId==='bondsmith'){
-    choices.push(`[HEAL] Unity pulse — send Stormlight through the party bond (+${getBondsmitnPartyHeal(stage)} HP all)`);
-  } else if(anyInjured&&healAmt>=2){
-    choices.push(`[HEAL] Press Stormlight into your wounds and let it knit flesh (+${healAmt} HP)`);
-  } else {
-    choices.push(`[ATTACK] Full surge — burn every drop of Stormlight in one overwhelming strike`);
-  }
-  return choices;
+  const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<(p.maxHp||10)&&!p.downed);
+  const healAmt=getHealAmount(player,getSprenStage(gState.totalMoves||0));
+  const eName=(enemies[0]&&enemies[0].name)||'the enemy';
+  const weapon=player.weapons&&player.weapons[0];
+  const wName=weapon?weapon.name:(player.shardblade||'my weapon');
+  const surgeId=(ORDER_SURGES[player.classId]||[])[0];
+  const surgeObj=surgeId&&SURGES.find(s=>s.id===surgeId);
+  const surgeName=surgeObj?surgeObj.name:'my surge';
+  const seed=((round-1)%5);
+  const attackPool=[
+    `[ATTACK] I drive forward and unleash ${surgeName} directly into ${eName}'s center of mass`,
+    `[ATTACK] I feint left and swing hard for the gap in ${eName}'s guard with ${wName}`,
+    `[ATTACK] I channel Stormlight through my feet and launch off the ground at ${eName}`,
+    `[ATTACK] I read ${eName}'s weight distribution and strike exactly where balance fails`,
+    `[ATTACK] I put everything into a single overwhelming blow — no holding back`,
+  ];
+  const tacticalPool=[
+    `[ATTACK] I use ${surgeName} to cut off ${eName}'s retreat and force them onto my terms`,
+    `[DEFEND] I draw ${eName}'s strike, let it slide past, and open a path for my allies`,
+    `[ATTACK] I target ${eName}'s weapon arm — end the fight by ending their offense`,
+    `[DEFEND] I put myself between ${eName} and whoever needs protection most`,
+    `[ATTACK] I call ${eName}'s next move before they make it and counter before they adjust`,
+  ];
+  const surgePool=[
+    `[SURGE] I pour Investiture into ${surgeName} and reshape the ground between us`,
+    `[SURGE] I breathe in deep and let ${surgeName} flow through my limbs — faster, stronger`,
+    `[SURGE] I push ${surgeName} beyond its usual limits and see what it can do`,
+    `[SURGE] I use ${surgeName} to create an opening no one else in this fight could make`,
+    `[SURGE] I anchor myself with ${surgeName} and become the immovable point this battle needs`,
+  ];
+  const healPool=[
+    downed.length>0?`[HEAL] I drop to ${downed[0].name}'s side and push Stormlight into the wound`:
+      `[HEAL] I press Stormlight into the worst of my injuries and force them to close`,
+    downed.length>0?`[HEAL] I cover ${downed[0].name} and pour everything I have into keeping them alive`:
+      `[HEAL] I steal a moment to let Progression do its work on whoever needs it most`,
+    `[HEAL] I draw all Stormlight within reach and distribute it among those who need it`,
+    `[HEAL] I sacrifice momentum to stabilize — we cannot win if we keep bleeding out`,
+    `[HEAL] I inhale from the nearest sphere and let the light seal what the last blow opened`,
+  ];
+  return [attackPool[seed], tacticalPool[seed], surgePool[seed], healPool[seed]];
 }
 
 async function generateCombatChoices(player){
@@ -1440,51 +2030,92 @@ async function generateCombatChoices(player){
   const sz=gState.partySize||partySize;
   const enemies=(gState.combatEnemies||[]).filter(e=>!e.downed&&e.hp>0);
   const downed=gState.players.slice(0,sz).filter(p=>p&&p.downed);
-  const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<p.maxHp&&!p.downed);
+  const anyInjured=gState.players.slice(0,sz).some(p=>p&&p.hp<(p.maxHp||10)&&!p.downed);
   const healAmt=getHealAmount(player,stage);
   const loc=getAct(gState.totalMoves||0).location||'the battlefield';
   const round=gState.combatRound||1;
-  const enemyDesc=enemies.map(e=>`${e.name}(${e.hp}/${e.maxHp}HP)`).join(', ')||'defeated enemies';
-  const healOption=downed.length>0?`One option MUST be [HEAL] to revive ${downed[0].name}.`:
-    anyInjured?`One option MUST be [HEAL] to restore ${healAmt}HP to self or ally.`:'';
+  const enemyDesc=enemies.map(e=>`${e.name}(${Math.round(e.hp/e.maxHp*100)}% HP${e.conditions&&Object.keys(e.conditions).length?' '+Object.keys(e.conditions).join(','):''} )`).join(', ')||'no enemies standing';
+  const partyDesc=gState.players.slice(0,sz).filter(p=>p&&!p.downed).map(p=>`${p.name}(${Math.round(p.hp/(p.maxHp||10)*100)}%HP)`).join(', ');
+  const healOption=downed.length>0?`REQUIRED: One option MUST be [HEAL] to attempt reviving ${downed[0].name}.`
+    :anyInjured?`REQUIRED: One option MUST be [HEAL] targeting an injury (estimated +${healAmt}HP).`:'';
+  const surges=ORDER_SURGES[player.classId]||[];
+  const surgeNames=surges.map(id=>SURGES.find(s=>s.id===id)).filter(Boolean).map(s=>s.name).join(' and ');
 
-  const prompt=`Cosmere RPG Combat GM. Round ${round}. ${loc}.
-Generate exactly 4 combat action options for ${player.name} the ${cls.name} (Oath ${player.oathStage||1}/5, ${player.hp}/${player.maxHp}HP${player.shardblade?', wielding '+player.shardblade:''}).
-Enemies present: ${enemyDesc}.
+  // Get the last 2 rounds of choices to avoid repetition
+  const prevChoices=[];
+  if(gState.combatLog){
+    gState.combatLog.slice(-4).forEach(entry=>{
+      if(entry.playerChoices&&entry.playerChoices[player.name]){
+        prevChoices.push(entry.playerChoices[player.name]);
+      }
+    });
+  }
+  const prevWarning=prevChoices.length>0?
+    `\nDO NOT use these phrases or approaches from previous rounds: ${prevChoices.flat().slice(0,6).map(c=>c.slice(0,40)).join(' | ')}`:
+    '';
+
+  // Recent combat narrative for context
+  const recentLog=(gState.combatLog||[]).slice(-2).map(e=>e.text||'').filter(Boolean).join(' ');
+  const contextSnippet=recentLog.slice(0,300);
+
+  const surgesText=surgeNames?`\nSurges available: ${surgeNames}. Weave them into at least one option.`:'';
+  const abilitiesText=(cls.abilities||[]).length?`\nClass abilities: ${cls.abilities.slice(0,3).join(', ')}.`:'';
+  const woundNote=player.hp<(player.maxHp||10)*0.4?`\n${player.name} is badly wounded (${player.hp}/${player.maxHp}HP) — this must show in at least one option.`:'';
+  const injuryNote=(player.injuries&&player.injuries.length)?`\nActive injuries: ${player.injuries.map(i=>i.effect).join(', ')} — let this shape the choices.`:'';
+
+  const prompt=`You are writing 4 combat action choices for a Stormlight Archive RPG. These appear as buttons the player clicks.
+
+ROUND ${round}. LOCATION: ${loc}.
+ACTING CHARACTER: ${player.name}, ${cls.name} (Oath ${player.oathStage||1}/5)${woundNote}${injuryNote}
+ENEMIES: ${enemyDesc}
+ALLIES: ${partyDesc}
+RECENT CONTEXT: ${contextSnippet||'Combat just began.'}${surgesText}${abilitiesText}
 ${healOption}
+${prevWarning}
 
-Rules:
-- Each option is ONE vivid sentence, first person ("I do X" or "${player.name} does X")
-- Options must be meaningfully different: vary between aggressive, tactical, defensive, and situational
-- Use ${cls.name} class abilities creatively: ${(cls.abilities||[]).slice(0,3).join(', ')}
-- Reference the specific location (${loc}) and current enemies
-- Tag each: [ATTACK], [DEFEND], or [HEAL]
-- Round ${round} context: escalate stakes as rounds progress
-- NO generic choices — every option should feel unique to THIS moment
+RULES — EVERY choice must follow ALL of these:
+1. FIRST PERSON ONLY — "I [verb]..." or starts with an action verb implying "I". NEVER "Strike the enemy" or "${player.name} does X".
+2. ONE VIVID SENTENCE — specific, concrete, shows what happens physically.
+3. MECHANICALLY TAGGED — start with [ATTACK], [DEFEND], [HEAL], or [SURGE].
+4. UNIQUE TO THIS MOMENT — reference the specific enemy, location detail, or current status. No generic RPG phrases.
+5. FOUR DISTINCT APPROACHES — one aggressive, one tactical/defensive, one surge/class ability, one situational (healing, terrain, ally help).
+6. NO REPETITION from previous rounds listed above.
 
-Return ONLY a numbered list:
-1. [TAG] action
-2. [TAG] action
-3. [TAG] action
-4. [TAG] action`;
+EXAMPLES OF GOOD choices:
+"[ATTACK] I slam a Basic Lashing into the Fused's chest and hurl them backward into the wall."
+"[DEFEND] I interpose myself between Kal and the singer's spear, taking the blow on my shoulder."
+"[SURGE] I pour Progression into the cracked stone floor and force it to buckle under their feet."
+"[HEAL] I pull ${player.name==='Kaladin'?'Shallan':'my ally'} behind a pillar and breathe Stormlight into the wound."
+
+Return ONLY 4 numbered lines. Nothing else.`;
 
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,
         messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const raw=data.content&&data.content[0]?data.content[0].text:'';
     const parsed=(raw.match(/^\d+\.\s*.+$/gm)||[])
       .map(l=>l.replace(/^\d+\.\s*/,'').trim())
-      .filter(l=>l.length>10)
+      .filter(l=>l.length>15&&/\[ATTACK\]|\[DEFEND\]|\[HEAL\]|\[SURGE\]/.test(l))
       .slice(0,4);
     if(parsed.length>=3){
       if(!gState.combatChoicesCache)gState.combatChoicesCache={};
       gState.combatChoicesCache[player.name]=parsed;
+      // Store in combatLog for future uniqueness checking
+      if(gState.combatLog){
+        const lastEntry=gState.combatLog[gState.combatLog.length-1];
+        if(lastEntry){
+          if(!lastEntry.playerChoices)lastEntry.playerChoices={};
+          lastEntry.playerChoices[player.name]=parsed;
+        }
+      }
       if(myChar&&myChar.name===player.name)renderCombatActions();
     }
-  }catch(e){/* silent — fallback choices still show */}
+  }catch(e){console.warn('generateCombatChoices failed, using fallback:',e.message);}
 }
+
+
 const BLADE_NAMES={windrunner:'Silverwind Blade',lightweaver:'Illusory Edge',edgedancer:'Verdant Blade',stoneward:'Granite Shardblade',elsecaller:'Obsidian Catalyst',truthwatcher:'Starlight Blade',willshaper:'Freedom Edge',dustbringer:'Ember Blade',bondsmith:'Sibling-Touched Blade',skybreaker:'Law Blade'};
 
 // ══ STATE ══
@@ -1688,6 +2319,9 @@ function pickSize(n){
 // ══ NPC GENERATION ══
 function genNPC(slot){
   const cls=CLASSES[Math.floor(Math.random()*CLASSES.length)];
+  // Assign adversary role based on slot/context (Ch.13)
+  const roleKeys=Object.keys(ADVERSARY_ROLES);
+  const npcRole=slot===0?'boss':slot<=1?'rival':'minion'; // slot 0 = boss, 1 = rival, 2+ = minion
   const used=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name):[];
   const avail=NPC_ALL.filter(n=>!used.includes(n));
   const isFemale=Math.random()<0.5;
@@ -1698,7 +2332,7 @@ function genNPC(slot){
   const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
   const hp=12+stats.pre;
   const gender=isFemale?'she/her':'he/him';
-  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender};
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender,role:npcRole,conditions:{},injuries:[],deflect:0,focus:2,maxFocus:2};
 }
 
 // ══ SLOT RENDERING ══
@@ -1784,15 +2418,44 @@ function setTitleStatus(m){const el=document.getElementById('title-status');if(e
 
 // ══ CHARACTER CREATION ══
 // ══ ENHANCED CREATOR ══
+let selKit=null;
 function renderCreate(){
   createStep=1;isRadiant=true;selAncestry='human';selCultures=[];
-  selRole=null;selWeapon=null;
-  charOrigin='';charMotivation='';charBackstory='';charAppearance='';
+  selRole=null;selWeapon=null;selKit=null;
+  charOrigin='';charMotivation='';charObstacle='';charBackstory='';charAppearance='';
   showCreateStep(1);
-  renderColors();renderClasses();renderRoles();renderWeapons();renderCultureGrid();
+  renderColors();renderClasses();renderRoles();renderWeapons();renderCultureGrid();renderKits();
   updateCreateSubmitBtn();
   pickCharType(true);
   setTimeout(()=>pickCharType(true),80);
+}
+
+function renderKits(){
+  const grid=document.getElementById('kit-grid');
+  if(!grid)return;
+  grid.innerHTML=STARTING_KITS.map(k=>`<div class="ccard${selKit&&selKit.id===k.id?' sel':''}" onclick="pickKit('${k.id}')" style="border-color:${selKit&&selKit.id===k.id?'var(--amber2)':'var(--border)'};cursor:pointer;padding:10px 12px;">
+    <div class="ccard-name" style="font-size:13px;">${k.name}</div>
+    <div style="font-size:11px;color:var(--text4);margin-bottom:4px;font-style:italic;">${k.desc}</div>
+    <div style="font-size:11px;color:var(--text3);">
+      ${k.weapons.length?'⚔ '+k.weapons.map(w=>WEAPONS[w]?WEAPONS[w].name:w).join(', '):'No weapons'} &nbsp;|&nbsp;
+      ${k.armor?'🛡 '+(ARMORS[k.armor]?ARMORS[k.armor].name:k.armor):'No armor'}
+    </div>
+    <div style="font-size:11px;color:var(--amber2);margin-top:3px;">💰 ${k.spheres} marks${k.bonus?' · '+k.bonus:''}</div>
+    ${k.expertise?`<div style="font-size:11px;color:var(--teal2);margin-top:2px;">Expertise: ${k.expertise}</div>`:''}
+    ${k.extras&&k.extras.length?`<div style="font-size:10px;color:var(--text5);margin-top:2px;">${k.extras.join(', ')}</div>`:''}
+  </div>`).join('');
+}
+
+function pickKit(id){
+  selKit=STARTING_KITS.find(k=>k.id===id);
+  renderKits();
+  // Apply armor deflect from kit
+  if(selKit&&selKit.armor&&ARMORS[selKit.armor]){
+    window._kitDeflect=ARMORS[selKit.armor].deflect||0;
+  } else {
+    window._kitDeflect=0;
+  }
+  renderStats(rolledStats||{str:2,spd:2,int:2,wil:2,awa:2,pre:2});
 }
 
 function pickAncestry(id){
@@ -1891,6 +2554,11 @@ function pickCharType(radiant){
   if(h){h.classList.toggle('sel',!radiant);}
 }
 
+function pickObstacle(btn,val){
+  charObstacle=val||'';
+  document.querySelectorAll('#obstacle-grid .origin-btn').forEach(b=>b.classList.remove('sel'));
+  if(btn)btn.classList.add('sel');
+}
 function pickOrigin(btn,val){
   document.querySelectorAll('.origin-btn').forEach(b=>{
     if(b.closest('#origin-grid'))b.classList.remove('sel');
@@ -1921,7 +2589,17 @@ function pickClass(id){selClass=CLASSES.find(c=>c.id===id);renderClasses();rollS
 function renderRoles(){
   const grid=document.getElementById('role-grid');
   if(!grid)return;
-  grid.innerHTML=HERO_ROLES.map(r=>`<div class="ccard${selRole&&selRole.id===r.id?' sel':''}" onclick="pickRole('${r.id}')"><div class="ccard-name"><span style="margin-right:6px;">${r.icon}</span>${r.name}</div><div class="ccard-ideal">"${r.ideal}"</div><div class="ccard-desc">${r.desc}</div><div class="ccard-bonus">Bonus: ${Object.entries(r.bonus).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+'+'+e[1]).join(' ')||'Flexible'}</div></div>`).join('');
+  grid.innerHTML=HERO_ROLES.map(r=>`<div class="ccard${selRole&&selRole.id===r.id?' sel':''}" onclick="pickRole('${r.id}')" style="border-color:${selRole&&selRole.id===r.id?r.color:'var(--border)'};cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:22px;">${r.icon}</span>
+      <div class="ccard-name">${r.name}</div>
+    </div>
+    <div style="font-family:var(--font-d);font-size:9px;letter-spacing:1px;color:var(--text5);margin-bottom:3px;">STARTING SKILL: ${(r.startingSkill||'').toUpperCase()} &nbsp;|&nbsp; SPECIALTIES: ${(r.specialties||[]).join(' · ')}</div>
+    <div style="font-size:12px;color:var(--amber2);font-weight:600;margin-bottom:4px;">${r.keyTalent||''}</div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:4px;">${r.keyTalentDesc||''}</div>
+    <div style="font-size:11px;color:var(--text4);font-style:italic;">${r.desc}</div>
+    <div style="font-size:11px;color:var(--text5);margin-top:4px;">Attr bonus: ${Object.entries(r.bonus||{}).filter(e=>e[1]>0).map(e=>e[0].toUpperCase()+' +'+e[1]).join(', ')||'Flexible'}</div>
+  </div>`).join('');
 }
 function pickRole(id){selRole=HERO_ROLES.find(r=>r.id===id);renderRoles();rollStats();}
 
@@ -1967,6 +2645,8 @@ function renderStats(s){
   const physDef=10+(s.str||0)+(s.spd||0);
   const cogDef=10+(s.int||0)+(s.wil||0);
   const spirDef=10+(s.awa||0)+(s.pre||0);
+  const maxInv=getMaxInvestiture(s);
+  const recovDie=getRecoveryDie(s.wil||0);
   const derived=document.getElementById('stats-derived');
   if(derived)derived.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:12px;">
@@ -1986,10 +2666,24 @@ function renderStats(s){
         <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">COG DEF</div>
         <div style="color:var(--text);">${cogDef}</div>
       </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+        <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">SPIR DEF</div>
+        <div style="color:var(--text);">${spirDef}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+        <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">MAX INVESTITURE</div>
+        <div style="color:var(--teal2);">${maxInv} ✦</div>
+      </div>
     </div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;margin-top:6px;font-size:12px;">
-      <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">SPIRITUAL DEF</div>
-      <div style="color:var(--text);">${spirDef}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;font-size:12px;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+        <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">RECOVERY DIE</div>
+        <div style="color:var(--text);">${recovDie}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+        <div style="color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;">DEFLECT</div>
+        <div style="color:var(--text);">0 (no armor)</div>
+      </div>
     </div>`;
 }
 
@@ -2017,30 +2711,57 @@ async function onCreateChar(){
     // ── Stats — always roll fresh if missing or incomplete ──
     if(!rolledStats||!rolledStats.str||!rolledStats.end)rollStats();
     const stats=rolledStats||{str:12,dex:12,int:12,wis:12,cha:12,end:12};
-    const hp=10+(stats.str||10); // Official: HP = 10 + Strength
+    const hp=Math.max(1, 10+(stats.str||0)); // Official: HP = 10 + Strength
 
     // ── Build character ──
     const base={name,color:selColor,stats,hp,maxHp:hp,slot:mySlot,
       physDef,cogDef,spirDef,level:1,skillRanks:{},
+      kit:selKit?selKit.id:'underworld',
+      kitName:selKit?selKit.name:'Custom',
+      weapons:(selKit&&selKit.weapons||[]).map(wid=>WEAPONS[wid]).filter(Boolean),
+      armor:selKit&&selKit.armor?ARMORS[selKit.armor]:null,
+      spheres:selKit?selKit.spheres:'1d20',
       ancestry:selAncestry||'human',
       cultures:selCultures.length?selCultures:['wayfarer'],
       culturalExpertises:selCultures.map(id=>CULTURES.find(cu=>cu.id===id)).filter(Boolean),
       isNPC:false,campaignId,gender,fragments:0,oathStage:1,
+      investiture:0,maxInvestiture:maxInv, // Radiants start using this after First Ideal
+      recovDie,deflect,
       origin:charOrigin||'',motivation:charMotivation||'',
+      purpose:charMotivation||'',obstacle:charObstacle||'',goals:[],
       backstory:charBackstory,appearance:charAppearance};
 
     if(isRadiant){
+      const cls=CLASSES.find(cl=>cl.id===selClass.id)||selClass;
+      const surgeSkills={};
+      (ORDER_SURGES[cls.id]||[]).forEach(sid=>{surgeSkills[sid]=0;});
       myChar={...base,isRadiant:true,
-        className:selClass.name,classId:selClass.id,
-        abilities:selClass.abilities,spren:selClass.spren,
+        className:cls.name,classId:cls.id,
+        philosophy:cls.philosophy,
+        ideal1:cls.ideal1,ideal2:cls.ideal2,ideal3:cls.ideal3,ideal4:cls.ideal4,
+        spren:cls.spren,sprenDesc:cls.sprenDesc||'',sprenAssist:cls.sprenAssist||'',
+        surges:ORDER_SURGES[cls.id]||[],surgeSkills,
+        weaponExpertises:[],armorExpertises:[],
+        abilities:cls.abilities,
+        investiture:maxInv,maxInvestiture:maxInv, // Radiants start with full Investiture
         focus:Math.max(1,2+(stats.wil||0)),maxFocus:Math.max(1,2+(stats.wil||0))};
     } else {
+      const role=HERO_ROLES.find(r=>r.id===(selRole&&selRole.id))||HERO_ROLES[0];
+      // Hero: add starting skill rank
+      if(role.startingSkill&&(!base.skillRanks||!base.skillRanks[role.startingSkill])){
+        if(!base.skillRanks)base.skillRanks={};
+        base.skillRanks[role.startingSkill]=1; // 1 free rank from starting path
+      }
       const wnEl=document.getElementById('in-weapon-name');
       const customName=wnEl?wnEl.value.trim():'';
       const weaponName=customName||(genWeaponName(selWeapon.id)+' '+selWeapon.name);
       myChar={...base,isRadiant:false,
         className:selRole.name,classId:selRole.id,
         roleId:selRole.id,roleName:selRole.name,
+        pathName:role.id,keyTalent:role.keyTalent,keyTalentDesc:role.keyTalentDesc,
+        startingSkill:role.startingSkill,pathSpecialties:role.specialties||[],
+        weaponExpertises:selKit?(selKit.weapons||[]).map(wid=>WEAPONS[wid]?WEAPONS[wid].name:'').filter(Boolean):[],
+        armorExpertises:selKit&&selKit.armor?[ARMORS[selKit.armor]?ARMORS[selKit.armor].name:''].filter(Boolean):[],
         abilities:[selWeapon.name],spren:null,
         weapon:weaponName,weaponId:selWeapon.id,weaponLevel:1,
         weaponData:selWeapon,
@@ -2309,8 +3030,9 @@ function renderConsequenceBoard(){
   const el=document.getElementById('consequence-board');
   if(!el||!gState)return;
   const wm=gState.worldMemory;
-  if(!wm){el.innerHTML='<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No discoveries yet.</div>';return;}
-  let html='';
+  const condPanel=condHtml?`<div style="margin-bottom:8px;"><div style="font-family:var(--font-d);font-size:9px;letter-spacing:2px;color:var(--text4);margin-bottom:4px;">CONDITIONS & INJURIES</div>${condHtml}</div><hr style="border-color:var(--border);margin:8px 0;">`:'';
+  if(!wm){el.innerHTML=condPanel+'<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No discoveries yet.</div>';return;}
+  let html=condPanel;
 
   // Focus status
   if(myChar){
@@ -2517,6 +3239,24 @@ async function refreshGame(){
   renderPill();
 }
 
+// Lightweight party strip re-render (no full DOM rebuild)
+function renderPartyStrip(){
+  const sz=gState&&gState.partySize||partySize;
+  const strip=document.getElementById('party-strip');
+  if(!strip||!gState)return;
+  // Only update ppip elements that changed
+  (gState.players||[]).slice(0,sz).forEach((p,i)=>{
+    if(!p)return;
+    const id='ppip-'+p.name.replace(/\s/g,'_');
+    const ppip=document.getElementById(id);
+    if(!ppip)return; // full rebuild needed
+    const infoEl=ppip.querySelector('.ppip-info');
+    if(!infoEl)return;
+    const newText=p.className+(p.level?' Lv.'+p.level:'')+' · '+p.hp+'/'+p.maxHp+' HP · ◈ '+(p.focus||0)+'/'+(p.maxFocus||3)+' Focus'+(p.isRadiant&&p.maxInvestiture?' · ✦ '+(p.investiture||0)+'/'+p.maxInvestiture+' Inv':'')+(p.deflect?' · DEF '+p.deflect:'')+(p.nextRollAdvantage==='advantage'?' ▲ ADV':p.nextRollAdvantage==='disadvantage'?' ▼ DIS':'')+(p.conditions&&Object.keys(p.conditions).some(k=>p.conditions[k])?' ⚠':'');
+    if(infoEl.textContent!==newText)infoEl.textContent=newText;
+  });
+}
+
 function renderAll(log){
   if(gState&&gState.combatMode&&document.getElementById('s-combat').classList.contains('active')){
     renderCombatScreen();return;
@@ -2661,6 +3401,19 @@ function isSelfTurn(){
   return cur&&cur.name===myChar.name&&!cur.isNPC;
 }
 
+async function doRestAction(){
+  if(!myChar||!gState)return;
+  const result=doShortRest(myChar);
+  const idx=gState.players.findIndex(p=>p&&p.name===myChar.name);
+  if(idx>=0)gState.players[idx]=myChar;
+  saveMyChar(myChar);
+  // Log the rest
+  const detail=`${myChar.name} takes a short rest — recovers ${result.hpRecovered} HP and ${result.focusRecovered} Focus (rolled ${result.die}: ${result.roll})`;
+  addLog({type:'system',who:'',text:detail,choices:[]});
+  renderAll();
+  saveAndBroadcast(gState).catch(()=>{});
+  showToast(`Short rest: +${result.hpRecovered} HP, +${result.focusRecovered} Focus`);
+}
 async function skipTurn(playerName){
   if(!gState)return;
   const sz=gState.partySize||partySize;
@@ -2678,7 +3431,7 @@ async function skipTurn(playerName){
     else if(beatsLeft<=0&&!gState.preCombatTriggered){gState.preCombatTriggered=true;}
   }
   await saveAndBroadcast(gState);
-  const freshLog=await loadLog(true);
+  const freshLog=await loadLogCached(true);
   renderAll(freshLog);
   setBottomFromState(freshLog);
 }
@@ -2773,7 +3526,7 @@ function renderParty(){
     return`<div class="ppip-pair">
       <div class="ppip${gState.turn===i?' active':''}${p.isNPC?' npc':''}" id="ppip-${p.name.replace(/\s/g,'_')}">
         <div class="ppip-top"><div class="ppip-dot" style="background:${p.color};"></div><span class="ppip-name">${p.name}</span></div>
-        <div class="ppip-info">${p.className}${p.level?' Lv.'+p.level:''} · ${p.hp}/${p.maxHp} HP${(p.focus!=null)?' · ◈ '+(p.focus||0)+'/'+(p.maxFocus||5)+' Focus':''}</div>
+        <div class="ppip-info">${p.className}${p.level?' Lv.'+p.level:''} · ${p.hp}/${p.maxHp} HP · ◈ ${p.focus||0}/${p.maxFocus||3} Focus${p.isRadiant&&p.maxInvestiture?` · ✦ ${p.investiture||0}/${p.maxInvestiture} Inv`:''}${p.deflect?` · DEF ${p.deflect}`:''}${p.nextRollAdvantage==='advantage'?' ▲ ADV':p.nextRollAdvantage==='disadvantage'?' ▼ DIS':''}${(p.conditions&&Object.keys(p.conditions).some(k=>p.conditions[k]))?' ⚠':''}</div>
         ${p.nextRollAdvantage?`<div class="ppip-tag" style="color:${p.nextRollAdvantage==='advantage'?'var(--teal2)':'var(--coral2)'};">${p.nextRollAdvantage==='advantage'?'▲ ADVANTAGE':'▼ DISADVANTAGE'}</div>`:''}
         ${bond?`<div class="ppip-tag" style="color:${bond.color};">✦ ${bond.nick} Oath ${p.oathStage||1}/5</div>`:''}
         ${p.isNPC?'<div class="ppip-tag" style="color:var(--teal2);">AI COMPANION</div>':''}
@@ -2843,7 +3596,7 @@ function setBottomLoading(){
   const _bc=document.getElementById('bottom-continue');if(_bc){_bc.style.display='none';_bc.classList.remove('active');}
   document.getElementById('bottom-waiting').style.display='none';
   const tb=document.getElementById('thinking-bar');
-  if(tb)tb.style.display='block';
+  if(tb){tb.style.display='block';tb.classList.add('thinking-active');}
 }
 
 function setBottomFromState(log){
@@ -3011,6 +3764,7 @@ async function handleNPC(log){
   await saveAndBroadcast(gState);
   setBottomLoading();
   await callGM(npcPrompt(pick,cur,from));
+  clearTimeout(_loadingTimer);
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
@@ -3057,9 +3811,12 @@ async function onSubmitAction(){
   errEl.style.display='none';
   if(isLoading)return;
   isLoading=true;
+  // Safety: auto-reset isLoading after 30s to prevent UI freeze
+  const _loadingTimer=setTimeout(()=>{isLoading=false;setBottomFromState();},30000);
   stopSpeaking(); // stop voice when player acts
+  // Immediate visual feedback — don't wait for Sheets
   setBottomLoading();
-  window.scrollTo({top:0,behavior:'smooth'});
+  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
   // Advantage/Disadvantage: roll twice, take best/worst
   const myPlayerData=gState.players.find(p=>p&&p.name===myChar.name);
   const advState=myPlayerData&&myPlayerData.nextRollAdvantage;
@@ -3072,7 +3829,8 @@ async function onSubmitAction(){
     if(pi>=0)delete gState.players[pi].nextRollAdvantage;
   }
   const sk=getStat(action);
-  const {bucket}=getActionBucket(action);
+  const ab=getActionBucket(action);
+  const {bucket}=ab;
   const sv=(myChar.stats&&myChar.stats[sk])||10;
   // Official: modifier = skill_ranks + attribute_score
   const skillRanks=(myChar.skillRanks&&myChar.skillRanks[sk])||0;
@@ -3146,10 +3904,25 @@ async function onSubmitAction(){
       gState.preCombatTriggered=true; // trigger the final tension beat first
     }
   }
-  await saveState(gState);
+  // ── Short rest interception (Ch.9) ──
+  if(ab&&ab.restAction&&myChar){
+    const restResult=doShortRest(myChar);
+    const pidx=gState.players.findIndex(p=>p&&p.name===myChar.name);
+    if(pidx>=0)gState.players[pidx]=myChar;
+    saveMyChar(myChar);
+    await saveAndBroadcast(gState);
+    selActionText='';document.getElementById('custom-in').value='';
+    document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
+    showToast(`⏸ Short rest: +${restResult.hpRecovered} HP, +${restResult.focusRecovered} Focus (${restResult.die}: ${restResult.roll})`);
+    isLoading=false;
+    await refreshGame();
+    return;
+  }
+  await saveAndBroadcast(gState);
   selActionText='';document.getElementById('custom-in').value='';
   document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
   await callGM(turnPrompt(action,total,sk,from));
+  clearTimeout(_loadingTimer);
   isLoading=false;
   const freshLog=await loadLog(true);
   renderAll(freshLog);
@@ -3157,19 +3930,66 @@ async function onSubmitAction(){
 }
 
 function getActionBucket(a){
-  // Returns {bucket, stat}
-  // bucket: 'attack'|'heal'|'revive'|'defend'|'surge'|'skill'
+  // Returns {bucket, stat, skill} — 18 official skills + 10 surges + Stormlight actions
   const t=a.toLowerCase();
-  const isHeal=/\[heal\]|heal|regrow|mend|restore|tend|bandage|cure|knit|stormlight.*wound/.test(t);
+  // ── Short rest (Ch.9) — triggers doShortRest ──
+  if(/\[rest\]|short rest|take a rest|rest and recover|catch.*breath|bind.*wound|tend.*wound/.test(t))
+    return{bucket:'heal',stat:'wil',skill:'medicine',restAction:true};
+  // ── Stormlight actions (Ch.5, Radiants only) ──
+  if(/breathe.*stormlight|inhale.*stormlight|draw.*stormlight/.test(t))
+    return{bucket:'skill',stat:'awa',skill:'perception',stormlightAction:'breathe'};
+  if(/stormlight.*enhance|enhance.*str|enhance.*spd/.test(t))
+    return{bucket:'skill',stat:'wil',skill:'discipline',stormlightAction:'enhance'};
+  if(/stormlight.*regen|regenerate.*stormlight/.test(t))
+    return{bucket:'heal',stat:'awa',skill:'progression',stormlightAction:'regenerate'};
+  // ── Surge detection (Ch.6) — specific surge skills ──
+  if(/basic lashing|reverse lashing|full lashing|gravitation surge/.test(t))
+    return{bucket:'surge',stat:'awa',skill:'gravitation'};
+  if(/abrasion|frictionless|skate along|slide frict/.test(t))
+    return{bucket:'surge',stat:'spd',skill:'abrasion'};
+  if(/adhesion|full lash|bind.*together|stick.*surface/.test(t))
+    return{bucket:'surge',stat:'pre',skill:'adhesion'};
+  if(/stoneshap|cohesion|mold.*stone|reshape.*stone|stone surge/.test(t))
+    return{bucket:'surge',stat:'wil',skill:'cohesion'};
+  if(/division|disintegrat|decay.*surge|destroy.*surge/.test(t))
+    return{bucket:'surge',stat:'int',skill:'division'};
+  if(/lightweav|illumination|illusion surge/.test(t))
+    return{bucket:'surge',stat:'pre',skill:'illumination'};
+  if(/regrowth|progression surge|grow.*plant/.test(t))
+    return{bucket:'surge',stat:'awa',skill:'progression'};
+  if(/tension surge|harden.*cloth|rigidity surge/.test(t))
+    return{bucket:'surge',stat:'str',skill:'tension'};
+  if(/soulcast|transformation surge/.test(t))
+    return{bucket:'surge',stat:'wil',skill:'transformation'};
+  if(/elsecall|cognitive realm|shadesmar|transportation surge/.test(t))
+    return{bucket:'surge',stat:'int',skill:'transportation'};
+  // ── Official 18 skills (physical group) ──
   const isRevive=/revive|stabilize|pull.*back|save.*downed|rouse|wake.*up/.test(t)&&/hobber|ally|companion|downed/.test(t);
-  if(isRevive)return{bucket:'revive',stat:'wil'};
-  if(isHeal)return{bucket:'heal',stat:'wil'};
-  if(/defend|protect|shield|block|parry|stance|barrier|brace/.test(t))return{bucket:'defend',stat:'pre'};
-  if(/soulcast|lash|illusion|surge|transform|summon|conjure|transmute|pattern|lightweave/.test(t))return{bucket:'surge',stat:'int'};
-  if(/search|detect|sense|notice|examine|investigate|scout|perceive/.test(t))return{bucket:'skill',stat:'wil'};
-  if(/persuade|negotiate|threaten|bluff|charm|intimidate|deceive/.test(t))return{bucket:'skill',stat:'awa'};
-  if(/run|dodge|leap|sneak|dash|tumble|evade|sprint|flip|slide/.test(t))return{bucket:'attack',stat:'dex'};
-  return{bucket:'attack',stat:'str'};
+  const isHeal=/\[heal\]|heal|regrow|mend|restore|tend|bandage|cure|knit|medicine/.test(t);
+  if(isRevive)return{bucket:'revive',stat:'wil',skill:'medicine'};
+  if(isHeal)return{bucket:'heal',stat:'wil',skill:'medicine'};
+  if(/sneak|stealth|hide|conceal|shadow.*move/.test(t))return{bucket:'skill',stat:'spd',skill:'stealth'};
+  if(/pick.*lock|pickpocket|steal|sleight|thieve/.test(t))return{bucket:'skill',stat:'spd',skill:'thievery'};
+  if(/dodge|tumble|evade|flip|acrobat|agile move/.test(t))return{bucket:'attack',stat:'spd',skill:'agility'};
+  if(/heavy.*weapon|warhammer|greataxe|maul/.test(t))return{bucket:'attack',stat:'str',skill:'heavyWeapon'};
+  if(/light.*weapon|dagger|knife|shortsword|bow shot/.test(t))return{bucket:'attack',stat:'spd',skill:'lightWeapon'};
+  if(/defend|protect|shield|block|parry|stance|barrier|brace/.test(t))return{bucket:'defend',stat:'pre',skill:'athletics'};
+  // ── Cognitive skills ──
+  if(/craft|build|forge|construct|fabricate|fabrial/.test(t))return{bucket:'skill',stat:'int',skill:'crafting'};
+  if(/deduce|analyze|figure|logic|reason through/.test(t))return{bucket:'skill',stat:'int',skill:'deduction'};
+  if(/lore|history|recall|scholar|research/.test(t))return{bucket:'skill',stat:'int',skill:'lore'};
+  if(/surge|transform|summon|conjure|transmute|pattern|soulcast|lash/.test(t))return{bucket:'surge',stat:'int',skill:'transformation'};
+  if(/focus|concentrate|discipline|willpower|composure/.test(t))return{bucket:'skill',stat:'wil',skill:'discipline'};
+  if(/intimidate|threaten|frighten|scare/.test(t))return{bucket:'skill',stat:'wil',skill:'intimidation'};
+  // ── Spiritual skills ──
+  if(/lie|deceive|trick|bluff|fake|mislead/.test(t))return{bucket:'skill',stat:'pre',skill:'deception'};
+  if(/read.*person|insight|sense.*motive|see.*through/.test(t))return{bucket:'skill',stat:'awa',skill:'insight'};
+  if(/lead|command|inspire|rally|coordinate/.test(t))return{bucket:'skill',stat:'pre',skill:'leadership'};
+  if(/search|detect|sense|notice|examine|investigate|scout|perceive/.test(t))return{bucket:'skill',stat:'awa',skill:'perception'};
+  if(/persuade|negotiate|charm|convince|appeal/.test(t))return{bucket:'skill',stat:'pre',skill:'persuasion'};
+  if(/survive|forage|track|navigate|hunt|wilderness/.test(t))return{bucket:'skill',stat:'awa',skill:'survival'};
+  if(/run|dash|sprint|leap|jump|climb/.test(t))return{bucket:'attack',stat:'str',skill:'athletics'};
+  return{bucket:'attack',stat:'str',skill:'athletics'};
 }
 function getStat(a){return getActionBucket(a).stat;}
 
@@ -3217,159 +4037,102 @@ function applyAdvantageEffect(targetName, isAdvantage){
 }
 
 function getOpportunityEffect(bucket, actor){
+  // Use official combat opportunity table (Ch.10) blended with narrative effects
+  const inCombat=gState&&gState.combatMode;
+  const p=gState&&gState.players.find(x=>x&&x.name===actor);
+
+  // Combat opportunities from official table
+  if(inCombat){
+    const roll=Math.floor(Math.random()*COMBAT_OPPS.length);
+    const officialOpp=COMBAT_OPPS[roll];
+    // Apply mechanical effects for specific opps
+    if(officialOpp.includes('recover 1 focus')&&p){applyFocusChange(actor,1);}
+    if(officialOpp.includes('Stormlight')&&p&&p.isRadiant){
+      p.investiture=Math.min(p.maxInvestiture||0,(p.investiture||0)+2);
+    }
+    // Advantage effect tracked via existing system
+    if(officialOpp.includes('advantage')&&p){
+      applyAdvantageEffect(actor,true);
+    }
+    return officialOpp;
+  }
+
+  // Exploration opportunities — narrative/mechanical blend
   const roll=Math.random();
   if(roll<0.25){
     applyFocusChange(actor,1);
-    return`${actor} steadies — recovers 1 Focus (${(gState.players.find(p=>p&&p.name===actor)||{focus:3}).focus||3} total)`;
+    return`${actor} steadies — recovers 1 Focus (${(p||{focus:3}).focus||3} total)`;
   }
   if(roll<0.50){
-    const allies=gState.players.filter(p=>p&&p.name!==actor&&!p.isNPC&&!p.downed);
+    const allies=(gState&&gState.players||[]).filter(p=>p&&p.name!==actor&&!p.isNPC&&!p.downed);
     if(allies.length){
       const ally=allies[Math.floor(Math.random()*allies.length)];
       applyAdvantageEffect(ally.name,true);
-      return`${ally.name} gains advantage on their next test — ${actor}'s action opened an opportunity`;
-    }
-  }
-  if(roll<0.70){
-    if(bucket==='attack')return`The blow lands with exceptional force — treat as a critical hit for narrative purposes`;
-    if(bucket==='heal')return`The Stormlight surges beyond expectation — the healing is amplified`;
-    if(bucket==='surge')return`The surge manifests with unexpected range or power — it affects more than intended`;
-  }
-  return`A positive narrative shift — something in the environment or situation moves in the party's favor`;
-}
-
-function getComplicationEffect(bucket, actor){
-  const roll=Math.random();
-  if(roll<0.30){
-    applyFocusChange(actor,-1);
-    return`${actor} falters — loses 1 Focus (${Math.max(0,((gState.players.find(p=>p&&p.name===actor)||{focus:3}).focus||3)-1)} remaining)`;
-  }
-  if(roll<0.55){
-    const allies=gState.players.filter(p=>p&&p.name!==actor&&!p.isNPC&&!p.downed);
-    if(allies.length){
-      const ally=allies[Math.floor(Math.random()*allies.length)];
-      applyAdvantageEffect(ally.name,false);
-      return`${ally.name}'s next test is complicated — ${actor}'s action had unforeseen repercussions`;
+      return`${actor} opens an opportunity — ${ally.name} gains advantage on their next test`;
     }
   }
   if(roll<0.75){
-    if(bucket==='attack')return`The attack leaves ${actor} exposed — enemies gain a momentary opening`;
-    if(bucket==='heal')return`The Stormlight falters mid-surge — the healing is reduced or misdirected`;
-    if(bucket==='surge')return`The surge is partially uncontrolled — a secondary unintended effect occurs`;
+    return`${actor} spots a useful detail — the GM reveals a hidden feature of the environment`;
   }
-  return`A narrative complication arises — the situation becomes more complex or a new obstacle appears`;
+  return`${actor} gains a narrative edge — something shifts in the party's favor`;
 }
 
-// ══ GM CALL ══
-async function callGM(prompt){
-  const tb=document.getElementById('thinking-bar');if(tb)tb.style.display='block';
-  // Show typewriter placeholder in story text
-  const storyEl=document.getElementById('story-text');
-  let streamedText='';
-  let streamEntry=null;
-  try{
-    const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',max_tokens:1000,stream:true,
-      messages:[{role:'user',content:prompt}]
-    })});
-    // Stream the response token by token
-    if(res.body&&res.headers.get('content-type')&&res.headers.get('content-type').includes('text/event-stream')){
-      const reader=res.body.getReader();const decoder=new TextDecoder();
-      if(tb)tb.style.display='none';
-      while(true){
-        const{done,value}=await reader.read();if(done)break;
-        const chunk=decoder.decode(value);
-        const lines=chunk.split('\n');
-        for(const line of lines){
-          if(!line.startsWith('data: '))continue;
-          const data=line.slice(6);if(data==='[DONE]')continue;
-          try{
-            const parsed=JSON.parse(data);
-            const delta=parsed.delta&&parsed.delta.type==='text_delta'?parsed.delta.text:'';
-            if(delta){
-              streamedText+=delta;
-              // Update story display in real time
-              if(storyEl){
-                const displayText=streamedText.split(/\[CHOICES/i)[0].trim();
-                storyEl.innerHTML=`<div class="entry-gm"><div class="gm-label">THE CHRONICLE</div><p class="story-para">${displayText}<span class="cursor-blink">|</span></p></div>`;
-              }
-            }
-          }catch(e){}
-        }
-      }
-      const raw=streamedText||'The winds carry no answer tonight.';
-      // Remove cursor and parse normally
-      if(storyEl){const cur=storyEl.querySelector('.cursor-blink');if(cur)cur.remove();}
-      // Fall through to normal processing with raw text
-      let choices=[];let scene=raw;
-      const choicesTagIdx=raw.search(/\[CHOICES/i);
-      if(choicesTagIdx>=0){
-        scene=raw.slice(0,choicesTagIdx).trim();
-        const choiceBlock=raw.slice(choicesTagIdx);
-        choices=(choiceBlock.match(/^\*{0,2}\d+[.)]\s*\*{0,2}.+$/gm)||[])
-          .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
-          .filter(ch=>ch.length>5);
-      }
-      if(!choices.length){
-        choices=(raw.match(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm)||[])
-          .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
-          .filter(ch=>ch.length>5);
-        if(choices.length){scene=raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm,'').replace(/\n{3,}/g,'\n\n').trim();}
-      }
-      if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
-      await addLog({type:'gm',who:'',text:scene,choices});
-      if(tb)tb.style.display='none';
-      updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
-      if(gState&&myChar)checkOathMoment(scene,myChar).catch(()=>{});
-      maybeSpawnHoid(scene,gState&&gState.totalMoves||0).catch(()=>{});
-      return;
-    }
-    // Non-streaming fallback
-    const data=await res.json();
-    if(data.error)throw new Error(JSON.stringify(data.error));
-    const raw=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
-    let choices=[];
-    let scene=raw;
-    const choicesTagIdx=raw.search(/\[CHOICES\]/i);
-    if(choicesTagIdx>=0){
-      scene=raw.slice(0,choicesTagIdx).trim();
-      const choiceBlock=raw.slice(choicesTagIdx);
-      choices=(choiceBlock.match(/^\*{0,2}\d+[.)][\s*]+.+$/gm)||[])
-        .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
-        .filter(ch=>ch.length>5);
-    }
-    if(!choices.length){
-      choices=(raw.match(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm)||[])
-        .map(ch=>ch.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim())
-        .filter(ch=>ch.length>5);
-      if(choices.length){
-        scene=raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}.{10,}$/gm,'').replace(/\n{3,}/g,'\n\n').trim();
+function getComplicationEffect(bucket, actor){
+  // Use official combat complication table (Ch.10)
+  const inCombat=gState&&gState.combatMode;
+  const p=gState&&gState.players.find(x=>x&&x.name===actor);
+
+  if(inCombat){
+    const roll=Math.floor(Math.random()*COMBAT_COMPS.length);
+    const officialComp=COMBAT_COMPS[roll];
+    // Apply mechanical effects
+    if(officialComp.includes('fall Prone')&&p){applyCondition(p,'prone');}
+    if(officialComp.includes('go dun')&&gState){
+      // Narrative — Radiant loses Stormlight access this round
+      if(p&&p.isRadiant){
+        const oldInv=p.investiture||0;
+        p.investiture=Math.max(0,oldInv-2);
+        return officialComp+` (${p.name} loses 2 Investiture)`;
       }
     }
-    if(!choices.length){
-      const optMatch=raw.match(/(OPTIONS|CHOICES|ACTIONS)[:\s]*([\s\S]+)$/i);
-      if(optMatch){
-        scene=raw.slice(0,raw.search(/(OPTIONS|CHOICES|ACTIONS)[:\s]/i)).trim();
-        choices=optMatch[2].split('\n').map(l=>l.replace(/^\*{0,2}\d+[.)]\s*\*{0,2}\s*/,'').replace(/\*{0,2}$/,'').trim()).filter(l=>l.length>5).slice(0,4);
-      }
-    }
-    if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
-    await addLog({type:'gm',who:'',text:scene,choices});
-    const tb2=document.getElementById('thinking-bar');if(tb2)tb2.style.display='none';
-    updateWorldMemory(scene,gState&&gState.lastAction,gState&&gState.totalMoves).catch(()=>{});
-    if(gState&&myChar)checkOathMoment(scene,myChar).catch(()=>{});
-  }catch(e){
-    console.error('callGM error:',e.message);
-    if(gState){gState.lastGM={text:'The Stormlight flickers ['+e.message+']. Refresh to try again.',choices:[],ts:new Date().toISOString()};await saveState(gState);}
-    await addLog({type:'gm',who:'',text:'The Stormlight flickers. Refresh to try again.',choices:[]});
+    if(officialComp.includes('lose')&&p){applyFocusChange(actor,-1);}
+    return officialComp;
   }
+
+  // Exploration complications
+  const roll=Math.random();
+  if(bucket==='heal'||bucket==='revive'){
+    if(roll<0.3){
+      const focLoss=Math.ceil(Math.random()*2);
+      applyFocusChange(actor,-focLoss);
+      return`${actor} overextends — loses ${focLoss} Focus from the effort`;
+    }
+  }
+  if(bucket==='surge'&&p&&p.isRadiant){
+    const invLoss=1;
+    p.investiture=Math.max(0,(p.investiture||0)-invLoss);
+    return`${actor} surges too hard — loses ${invLoss} Investiture as Stormlight escapes`;
+  }
+  if(roll<0.33){
+    applyFocusChange(actor,-1);
+    return`${actor} loses composure — −1 Focus`;
+  }
+  if(roll<0.66){
+    return`${actor}'s action has unexpected consequences — the GM will clarify`;
+  }
+  return`${actor} encounters a complication — something in the environment shifts against the party`;
 }
 
-// ══ TURN PROMPT ══
 function turnPrompt(action,roll,sk,from){
   const m=gState.totalMoves||0;const act=getAct(m);
   const sz=gState.partySize||partySize;const next=gState.players[gState.turn];
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className}${p.isNPC?' NPC':''} ${p.hp}/${p.maxHp}HP${p.oathStage>1?' Oath '+p.oathStage:''})`:'?').join(' | ');
+  const party=gState.players.slice(0,sz).map(p=>{
+    if(!p)return'?';
+    const injCount=p.injuries?p.injuries.length:0;
+    const conds=p.conditions?Object.entries(p.conditions).filter(([k,v])=>v).map(([k])=>CONDITIONS[k]?CONDITIONS[k].name:k):[];
+    const statusStr=[...conds,injCount>0?injCount+'inj':''].filter(Boolean).join(',');
+    return`${p.name}(${p.className}${p.isNPC?' NPC':''} ${p.hp}/${p.maxHp}HP${p.focus!=null?' ◈'+p.focus:''}${p.oathStage>1?' Oath '+p.oathStage:''}${statusStr?' ['+statusStr+']':''})`;
+  }).join(' | ');
   const who=gState.players[from];const loc=act.location||act.name;
   const rollDesc=roll>=18?'CRITICAL SUCCESS — something unexpected and wonderful happens':roll>=14?'Strong success — clean, clear outcome':roll>=10?'Partial success — they get what they want but something is now complicated or wrong':roll>=6?'Failure — what they wanted did not happen, and the world responds':'CRITICAL FAILURE — something goes badly wrong, raise the stakes hard and immediately';
   const gctx=getGenderContext();
@@ -3377,6 +4140,16 @@ function turnPrompt(action,roll,sk,from){
   const wmctx=getWorldMemoryContext();
   const cctx=getCharContext();
   const recentBeats=getRecentBeats();
+  // Recent player choices — inject to prevent repetition
+  const recentPlayerChoices=(gState.actionLog||[])
+    .filter(e=>e.type==='player'&&e.who===next?.name)
+    .slice(-3)
+    .map(e=>e.text||e.action||'')
+    .filter(Boolean);
+  const choiceHistory=recentPlayerChoices.length?
+    `
+RECENT CHOICES BY ${next?.name?.toUpperCase()||'THIS PLAYER'} (DO NOT REPEAT these approaches): ${recentPlayerChoices.map(a=>a.slice(0,50)).join(' | ')}`:
+    '';
   const beatsLeft=(gState.beatsUntilCombat||5)-(gState.beatsSinceLastCombat||0);
   const preCombatNow=gState.preCombatTriggered&&!gState.combatMode;
   const totalBeats=gState.beatsUntilCombat||5;
@@ -3429,7 +4202,7 @@ PLOT DIE — ${pe.type.toUpperCase()}: ${pe.effect}. Weave this naturally into t
 
 Turn ${m}/180. Location: ${loc}. ${act.tag}.
 Party: ${party}${gctx}
-${wmctx}${recentBeats}${mctx}${cctx}
+${wmctx}${recentBeats}${choiceHistory}${mctx}${cctx}
 
 CURRENT ACTION:
 ${who.name} (${who.className}) — "${action}"
@@ -3454,12 +4227,17 @@ WHAT NOT TO DO:
 • Never repeat a sentence opening structure used in the last 3 beats${actHint}${phaseInstr}
 
 [CHOICES FOR ${next?next.name.toUpperCase():'NEXT PLAYER'}]
-Write 4 choices for ${next?next.name:'the next player'} (${next?next.className:'?'}). ${next?next.name:'They'} is the ONLY actor — never include ${gState.players.slice(0,sz).filter(p=>p&&(!next||p.name!==next.name)&&!p.isNPC).map(p=>p.name).join(' or ')||'anyone else'} acting.
-Each: one vivid first-person sentence. No ** markers. Four distinct approaches:
-1. ${next?next.className:'Class'}-specific ability — what only ${next?next.name:'they'} can do
-2. Physical or tactical — body, terrain, environment
-3. Investigate or discover — what this moment reveals
-4. Escalate — bold, high-risk, changes the stakes
+Write 4 action choices for ${next?next.name:'the player'} (${next?next.className:'?'}, Oath ${next?next.oathStage||1:'?'}/5, ${next?next.hp:0}/${next?next.maxHp:10}HP).
+${next?next.name:'They'} is the ONLY actor. NEVER write choices for ${gState.players.slice(0,sz).filter(p=>p&&(!next||p.name!==next.name)&&!p.isNPC).map(p=>p.name).join(', ')||'anyone else'}.
+
+CRITICAL RULES:
+• FIRST PERSON: Every choice MUST start with "I " or an action verb implying "I". NEVER "Strike", "${next?next.name:''} does", or any third-person phrasing.
+• ONE SENTENCE: Specific, vivid, concrete. Show the physical action.
+• UNIQUE TO THIS BEAT: Reference ${loc} directly. No generic RPG phrases.
+• NO REPETITION: Do NOT reuse approaches or verbs from the recent action history above.
+• FOUR DISTINCT TYPES: one using ${next?next.className:'class'} ability/surges, one physical/environmental, one investigative/social, one bold/escalating.
+• GENRE VOICE: Sound like a Stormlight Archive character — determined, grounded, stakes-aware.
+
 ${getLangInstruction()}`;
 }
 
@@ -3566,6 +4344,9 @@ function getSprenMemoryContext(){
 function getCharContext(){
   if(!myChar)return'';
   const parts=[];
+  // Purpose + Obstacle (Official Ch.8) — shape dramatic decisions
+  if(myChar.purpose)parts.push('Purpose: '+myChar.purpose);
+  if(myChar.obstacle)parts.push('Obstacle: '+myChar.obstacle);
   // Official ancestry + culture context
   if(myChar.ancestry)parts.push('Ancestry: '+(myChar.ancestry==='singer'?'Singer':'Human'));
   if((myChar.culturalExpertises||[]).length){
@@ -3588,6 +4369,37 @@ function getCharContext(){
   const physDef=myChar.physDef||(10+(s.str||0)+(s.spd||0));
   const cogDef=myChar.cogDef||(10+(s.int||0)+(s.wil||0));
   parts.push(`Defenses — Physical:${physDef} Cognitive:${cogDef}`);
+  // Inject kit and equipment
+  if(myChar.kitName)parts.push('Starting kit: '+myChar.kitName);
+  if(myChar.armor)parts.push('Armor: '+myChar.armor.name+' (Deflect '+myChar.deflect+')');
+  if(myChar.weapons&&myChar.weapons.length){
+    parts.push('Weapons: '+myChar.weapons.map(w=>w.name+' ['+w.dmg+' '+w.dmgType+']').join(', '));
+  }
+  // Active conditions
+  if(myChar.conditions&&Object.keys(myChar.conditions).length){
+    const activeC=Object.entries(myChar.conditions).filter(([k,v])=>v).map(([k])=>CONDITIONS[k]?CONDITIONS[k].name:k);
+    if(activeC.length)parts.push('Active conditions: '+activeC.join(', '));
+  }
+  // Injuries
+  if(myChar.injuries&&myChar.injuries.length){
+    parts.push('Injuries: '+myChar.injuries.map(i=>i.severity+' ('+i.duration+') — '+i.effect).join('; '));
+  }
+  // Inject philosophy + current Ideal for Radiants
+  if(myChar.isRadiant&&myChar.philosophy){
+    parts.push('Philosophy: '+myChar.philosophy);
+    // Spren personality from CLASSES
+    const cls=CLASSES.find(cl=>cl.id===myChar.classId);
+    if(cls&&cls.sprenDesc)parts.push('Spren personality: '+cls.sprenDesc);
+    if(cls&&cls.sprenAssist)parts.push('Spren test assistance: '+cls.sprenAssist);
+    const idealNum=myChar.oathStage||1;
+    const idealKey='ideal'+idealNum;
+    if(myChar[idealKey])parts.push('Current Ideal ('+idealNum+'): '+myChar[idealKey]);
+    if(myChar.spren)parts.push('Spren: '+myChar.spren+(myChar.sprenAssist?'. Assists with: '+myChar.sprenAssist:''));
+  }
+  // Inject key talent for heroic path characters
+  if(!myChar.isRadiant&&myChar.keyTalent){
+    parts.push('Path key talent: '+myChar.keyTalent+' — '+myChar.keyTalentDesc);
+  }
   if(!myChar.isRadiant&&myChar.weapon){
     const wd=myChar.weaponData;
     const tier=myChar.weaponLevel||1;
@@ -3683,8 +4495,32 @@ function renderSheet(){
     ${stageDesc?`<div style="font-size:14px;font-style:italic;color:var(--text4);padding:6px 0;border-top:1px solid var(--border);margin-top:4px;">${stageDesc}</div>`:''}
     ${(myChar.fragments||0)>=3&&!myChar.shardblade?`<div style="margin-top:8px;"><button class="btn btn-sm btn-gold" onclick="craftBlade()" style="font-size:12px;">⚔ Forge Blade (3 Frags)</button></div>`:''}
     ${(myChar.fragments||0)>=5&&(myChar.bladeLevel||0)<5?`<div style="margin-top:8px;"><button class="btn btn-sm btn-teal" onclick="upgradeBlade()" style="font-size:12px;">⬆ Upgrade Blade (5 Frags)</button></div>`:''}
-    <div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;">SURGES & ABILITIES</div>
+    <div style="margin-top:10px;font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);">SURGES & ABILITIES</div>
     <div class="abils">${myChar.abilities.map(a=>`<span class="abil">${a}</span>`).join('')}</div>
+    ${myChar.isRadiant&&myChar.surges&&myChar.surges.length?`
+    <div style="margin-top:8px;font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);">SURGE SKILLS</div>
+    <div style="font-size:12px;padding:4px 0;">${myChar.surges.map(sid=>{
+      const surge=SURGES.find(s=>s.id===sid);
+      const ranks=(myChar.surgeSkills&&myChar.surgeSkills[sid])||0;
+      const attr=surge?surge.attr:'int';
+      const attrScore=(myChar.stats&&myChar.stats[attr])||0;
+      const mod=ranks+attrScore;
+      return surge?`<div class="sheet-row"><span class="sheet-lbl">${surge.name} (${attr.toUpperCase()})</span><span class="sheet-val">Ranks ${ranks} +${mod} mod</span></div>`:'';
+    }).join('')}</div>`:''}
+    ${myChar.isRadiant&&myChar.philosophy?`
+    <div style="margin-top:8px;font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);">PHILOSOPHY & IDEALS</div>
+    <div style="font-size:12px;color:var(--amber2);font-style:italic;padding:4px 0;">"${myChar.philosophy}"</div>
+    <div style="font-size:11px;color:var(--text3);padding:2px 0;"><span style="color:var(--text4);">1st:</span> ${myChar.ideal1||''}</div>
+    ${myChar.oathStage>=2?`<div style="font-size:11px;color:var(--teal2);padding:2px 0;"><span style="color:var(--text4);">2nd:</span> ${myChar.ideal2||''}</div>`:''}
+    ${myChar.oathStage>=3?`<div style="font-size:11px;color:var(--teal2);padding:2px 0;"><span style="color:var(--text4);">3rd:</span> ${myChar.ideal3||''}</div>`:''}
+    ${myChar.oathStage>=4?`<div style="font-size:11px;color:var(--gold);padding:2px 0;"><span style="color:var(--text4);">4th:</span> ${myChar.ideal4||''}</div>`:''}
+    `:''}
+    ${!myChar.isRadiant&&myChar.keyTalent?`
+    <div style="margin-top:8px;font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);">PATH: ${myChar.roleName||''}</div>
+    <div style="font-size:12px;color:var(--amber2);padding:4px 0;font-weight:600;">${myChar.keyTalent}</div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.5;">${myChar.keyTalentDesc||''}</div>
+    `:''}
+    ${myChar.kit?`<div style="margin-top:10px;font-family:var(--font-d);font-size:10px;letter-spacing:2px;color:var(--text4);">EQUIPMENT — ${myChar.kitName||''}</div>${(myChar.weapons||[]).map(w=>`<div class=\"sheet-row\"><span class=\"sheet-lbl\">${w.name}</span><span class=\"sheet-val\">${w.dmg} ${dmgTypeLabel(w.dmgType)}</span></div>`).join('')}${myChar.armor?`<div class=\"sheet-row\"><span class=\"sheet-lbl\">Armor</span><span class=\"sheet-val\">${myChar.armor.name} · Deflect ${myChar.deflect||0}</span></div>`:''}`:''}
     ${myChar.ancestry?`<div style="margin-top:10px;font-size:12px;color:var(--text4);font-family:var(--font-d);letter-spacing:1px;">ORIGINS</div>
     <div style="font-size:13px;padding:4px 0;"><span style="color:var(--amber2);">Ancestry:</span> ${myChar.ancestry==='singer'?'Singer':'Human'}</div>
     ${(myChar.culturalExpertises||[]).map(cu=>`<div style="font-size:12px;padding:2px 0;"><span style="color:var(--text3);">Culture:</span> <span style="color:var(--text);">${cu.name}</span> <span style="color:var(--text5);font-size:11px;">(${cu.region})</span></div>`).join('')}`:''}`;
@@ -3700,11 +4536,21 @@ function exportToPDF(){
 }
 
 // ══ POLLING ══
+// Debounce utility
+function debounce(fn, ms){
+  let timer;
+  return(...args)=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>fn(...args),ms);
+  };
+}
+const debouncedRenderAll=debounce(renderAll,150);
+const debouncedSetBottom=debounce(setBottomFromState,100);
+
 function startPolling(){
   if(pollTimer)clearInterval(pollTimer);
   pollTimer=setInterval(async()=>{
-    // When WS is connected, WS handles real-time sync.
-    // Poll only as a fallback — back off to 30s when WS is live.
+    // When WS connected, skip polling entirely — WS handles sync
     if(wsConnected)return;
     if(document.getElementById('s-game').classList.contains('active')&&!isLoading){
       await refreshGame();
@@ -3714,12 +4560,26 @@ function startPolling(){
         gState=fresh;renderCombatScreen();renderCombatActions();
       }
     }
-  },wsConnected?30000:8000);
+  },5000); // 5s fallback poll when WS unavailable
   if(!window._stormScroll){
     window.addEventListener('scroll',()=>{if(bottomState==='human-gated'||bottomState==='continue')checkScrollEnable();},{passive:true});
     window._stormScroll=true;
   }
 }
+
+// ══ LOG CACHE — avoid redundant Sheets reads ══
+let _logCache=null;
+let _logCacheTs=0;
+const LOG_CACHE_TTL=3000; // 3 seconds
+async function loadLogCached(force=false){
+  if(!force&&_logCache&&(Date.now()-_logCacheTs)<LOG_CACHE_TTL){
+    return _logCache;
+  }
+  _logCache=await loadLog(force);
+  _logCacheTs=Date.now();
+  return _logCache;
+}
+function invalidateLogCache(){_logCache=null;_logCacheTs=0;}
 
 // ══ PERSISTENCE ══
 function charKey(slot){return'sc_'+(campaignId||'default')+'_slot'+(slot!=null?slot:'x');}
@@ -3848,7 +4708,15 @@ Tag: [COMBAT]. Under 200 words.${getGenderContext()}`;
     const healed=p.maxHp-p.hp;
     if(healed>0)animateHPChange(p.name,Math.round((p.hp/p.maxHp)*100),100,healed,true);
     p.hp=p.maxHp;
+    p.focus=p.maxFocus||3;
     p.fragments=(p.fragments||0)+2;
+    // Ch.9 long rest: Exhausted penalty −1, flesh wounds clear, temp conditions clear
+    if(p.conditions&&p.conditions.exhausted>0){
+      p.conditions.exhausted=Math.max(0,p.conditions.exhausted-1);
+      if(p.conditions.exhausted===0)delete p.conditions.exhausted;
+    }
+    if(p.injuries)p.injuries=p.injuries.filter(i=>i.severity!=='Flesh Wound');
+    if(p.conditions){['surprised','stunned','prone','slowed'].forEach(k=>{delete p.conditions[k];});}
   });
   gState.highstorm=false;
   await saveState(gState);
@@ -4182,8 +5050,8 @@ async function submitCombatAction(){
   if(!gState.pendingActions)gState.pendingActions={};
   gState.pendingActions[myChar.name]=action;
   combatSelectedAction='';
-  await saveAndBroadcast(gState);
-  renderCombatActions();
+  renderCombatActions(); // instant feedback
+  await saveAndBroadcast(gState); // async save in background
   const sz=gState.partySize||partySize;
   gState.players.slice(0,sz).filter(p=>p&&p.isNPC&&!p.downed).forEach(p=>{
     if(!gState.pendingActions[p.name]){
@@ -4243,6 +5111,7 @@ async function resolveRound(){
   // gState.statusEffects could be processed here
 
   // ══ PHASE 2: OFFENSE (attacks, surges) ══
+  await new Promise(r=>setTimeout(r,0)); // yield to UI thread
   allActions.filter(a=>a.phase==='OFFENSE').forEach(a=>{
     if(a.isEnemy){
       const enemy=a.enemy;
@@ -4254,7 +5123,10 @@ async function resolveRound(){
       if(target.defending){dmg=Math.max(1,dmg-2);target.defending=false;}
       if(result.hit){
         target.hp=Math.max(0,target.hp-dmg);
-        if(target.hp===0)target.downed=true;
+        if(target.hp===0){
+          target.downed=true;
+          rollInjury(target,false); // apply injury effect when downed by enemy
+        }
         const ti=gState.players.findIndex(p=>p&&p.name===target.name);
         if(ti>=0)gState.players[ti]=target;
         if(myChar&&myChar.name===target.name){myChar=target;saveMyChar(target);}
@@ -4281,14 +5153,44 @@ async function resolveRound(){
       const target=liveEn[Math.floor(Math.random()*liveEn.length)];
       let detail='';
       if(target&&total>=10){
-        const dmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;
+        // Ch.6: correct defense by surge type; deflect applied to energy/impact/keen
+        const surge=SURGES.find(s=>s.id===a.skill);
+        const defKey=surge?surge.targetDef:'physDef';
+        const dmgType=surge?surge.dmgType:'impact';
+        // Use actual weapon damage die if available (Ch.7)
+        let rawDmg;
+        const weapons=p.weapons||[];
+        const mainWeapon=weapons.find(w=>w&&(a.bucket==='attack'||a.bucket==='surge'))||weapons[0];
+        if(mainWeapon&&mainWeapon.dmg){
+          const dieSize=parseInt((mainWeapon.dmg.match(/d(\d+)/)||['','6'])[1]);
+          const numDice=parseInt((mainWeapon.dmg.match(/^(\d+)d/)||['','1'])[1]);
+          let wDmg=0;for(let _d=0;_d<numDice;_d++)wDmg+=Math.ceil(Math.random()*dieSize);
+          const attrScore=(p.stats&&p.stats[a.stat])||0;
+          const skillMod=(p.skillRanks&&p.skillRanks[a.skill])||0;
+          rawDmg=total>=14?wDmg+(skillMod+attrScore):wDmg; // hit adds modifier, graze is die only
+          if(total>=18)rawDmg+=db.crit||2; // crit bonus on top
+        } else {
+          rawDmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;
+        }
+        const dmg=applyDeflect(rawDmg,dmgType,target.deflect||0);
         target.hp=Math.max(0,target.hp-dmg);
-        if(target.hp<=0)target.downed=true;
+        if(target.hp<=0){
+          target.downed=true;
+          // Official injury roll — Shardblade spirit damage uses spiritual injury table
+          const isShard=dmgType==='spirit'&&(mainWeapon&&mainWeapon.special==='spiritualInjury'||a.bucket==='surge');
+          const injury=rollInjury(target,isShard);
+          if(injury.severity==='Death'){
+            detail=`${target.name} FALLS — ${injury.severity} (roll ${injury.roll})`;
+          } else {
+            detail=`${target.name} FALLS — ${injury.severity} for ${injury.duration}. ${injury.effect}`;
+          }
+        }
+        const weaponName=mainWeapon?mainWeapon.name:'';
         if(total>=18){
-          if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=`${target.name} -${dmg}HP ☄ BURNING`;}
-          else if(p.classId==='elsecaller'){target.poisoned=2;detail=`${target.name} -${dmg}HP ☠ POISONED`;}
-          else{detail=`${target.name} -${dmg}HP CRIT${target.downed?' ☠':''}`;}
-        } else { detail=`${target.name} -${dmg}HP${target.downed?' ☠':''}`; }
+          if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=`${target.name} -${dmg}HP ☄ BURNING${weaponName?' ['+weaponName+']':''}`;}
+          else if(p.classId==='elsecaller'){target.poisoned=2;detail=`${target.name} -${dmg}HP ☠ POISONED${weaponName?' ['+weaponName+']':''}`;}
+          else{detail=`${target.name} -${dmg}HP CRIT [${dmgTypeLabel(dmgType)}${weaponName?', '+weaponName:''}]${target.downed?' ☠':''}`;}
+        } else { detail=`${target.name} -${dmg}HP ${dmgType?'['+dmgTypeLabel(dmgType)+']':''}${target.downed?' ☠':''}`; }
         const ei=gState.combatEnemies.findIndex(e=>e.name===target.name);
         if(ei>=0)gState.combatEnemies[ei]=target;
       } else if(total<6){
@@ -4383,26 +5285,41 @@ async function resolveRound(){
     }
   });
 
-  // ══ PHASE 5: END-OF-TURN EFFECTS ══
-  // Status effect ticks
+  // ══ PHASE 5: END-OF-TURN EFFECTS (Official Ch.9 status ticks) ══
   const sz_st=gState.partySize||partySize;
-  gState.players.slice(0,sz_st).forEach((p,idx)=>{
+  gState.players.slice(0,sz_st).forEach((p,pidx)=>{
     if(!p||p.downed)return;
+    // Legacy status effects
     if(p.poisoned>0){
-      const tick=Math.ceil(Math.random()*3)+1;
-      p.hp=Math.max(0,p.hp-tick);if(p.hp===0)p.downed=true;p.poisoned--;
-      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`poison -${tick}HP${p.poisoned>0?' ('+p.poisoned+' left)':' cleared'}`,isEnemy:false,phase:'END'});
+      const tick=Math.ceil(Math.random()*3)+1; // vital damage, bypasses deflect
+      p.hp=Math.max(0,p.hp-tick);if(p.hp===0){p.downed=true;rollInjury(p);}p.poisoned--;
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',
+        detail:`☠ poison ${dmgTypeLabel('vital')} -${tick}HP${p.poisoned>0?' ('+p.poisoned+'r)':' ✓'}`,isEnemy:false,phase:'END'});
     }
     if(p.burning>0){
-      const tick=Math.ceil(Math.random()*2)+1;
-      p.hp=Math.max(0,p.hp-tick);if(p.hp===0)p.downed=true;p.burning--;
-      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`burn -${tick}HP${p.burning>0?' ('+p.burning+' left)':' out'}`,isEnemy:false,phase:'END'});
+      const tick=applyDeflect(Math.ceil(Math.random()*2)+1,'energy',p.deflect||0);
+      p.hp=Math.max(0,p.hp-tick);if(p.hp===0){p.downed=true;rollInjury(p);}p.burning--;
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',
+        detail:`🔥 burn ${dmgTypeLabel('energy')} -${tick}HP${p.burning>0?' ('+p.burning+'r)':' ✓'}`,isEnemy:false,phase:'END'});
     }
     if(p.voidCorrupted>0){
       applyFocusChange(p.name,-1);p.voidCorrupted--;
-      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',detail:`Voidlight corruption -1 Focus${p.voidCorrupted>0?' ('+p.voidCorrupted+' left)':' cleansed'}`,isEnemy:false,phase:'END'});
+      roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',
+        detail:`👁 Voidlight -1 Focus${p.voidCorrupted>0?' ('+p.voidCorrupted+'r)':' ✓'}`,isEnemy:false,phase:'END'});
     }
-    gState.players[idx]=p;
+    // Official conditions system ticks
+    if(p.conditions){
+      if(p.conditions.afflicted){
+        const afflictDmg=typeof p.conditions.afflicted==='number'?p.conditions.afflicted:1;
+        const finalDmg=applyDeflect(afflictDmg,'energy',p.deflect||0);
+        p.hp=Math.max(0,p.hp-finalDmg);if(p.hp===0){p.downed=true;rollInjury(p);}
+        roundDice.entries.push({name:p.name,roll:'-',bonus:null,total:null,result:'EFFECT',
+          detail:`Afflicted ${dmgTypeLabel('energy')} -${finalDmg}HP`,isEnemy:false,phase:'END'});
+      }
+      // Exhausted: apply penalty to all tests (tracked on p.conditions.exhausted)
+      // Focused: focus costs -1 (applied at point of use)
+    }
+    gState.players[pidx]=p;
     if(myChar&&myChar.name===p.name){myChar=p;saveMyChar(p);}
   });
   (gState.combatEnemies||[]).forEach((e,idx)=>{
@@ -4469,10 +5386,101 @@ async function resolveRound(){
   }
 }
 
+// ══ STREAMING GM CALL ══
+async function callGM(prompt){
+  const tb=document.getElementById('thinking-bar');
+  if(tb){tb.style.display='block';tb.classList.add('thinking-active');}
+  const stEl=document.getElementById('story-text');
+  function renderText(t){
+    return t.replace(/\n\n+/g,'</p><p>').replace(/\n/g,'<br>');
+  }
+  function parseChoices(raw){
+    const choices=[];
+    raw.split('\n').filter(l=>/^\s*\d+[.)]\s/.test(l)||/^\s*[-*]\s/.test(l)).slice(0,4).forEach(l=>{
+      choices.push(l.replace(/^\s*[\d.)*-]+\s+/,'').trim());
+    });
+    return choices;
+  }
+  function cleanScene(raw){
+    return raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}/gm,'').replace(/\*+/g,'').trim();
+  }
+  try{
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,stream:true,
+        messages:[{role:'user',content:prompt}]})
+    });
+    if(res.ok&&res.body){
+      const reader=res.body.getReader();
+      const dec=new TextDecoder();
+      let raw='';
+      if(stEl)stEl.innerHTML='<span class="gm-cursor">|</span>';
+      while(true){
+        const {done,value}=await reader.read();
+        if(done)break;
+        const chunk=dec.decode(value,{stream:true});
+        chunk.split('\n').forEach(line=>{
+          if(line.startsWith('data: ')&&line!=='data: [DONE]'){
+            try{
+              const d=JSON.parse(line.slice(6));
+              const tok=(d.delta&&(d.delta.text||d.delta.value))||'';
+              if(tok){
+                raw+=tok;
+                // Throttle DOM updates — only update every 4 tokens for performance
+                if(raw.length%4===0||tok.includes(' ')||tok.includes('.')){
+                  if(stEl)stEl.innerHTML=renderText(raw)+'<span class="gm-cursor">|</span>';
+                }
+              }
+            }catch(e){}
+          }
+        });
+      }
+      if(stEl)stEl.innerHTML=renderText(raw);
+      const scene=cleanScene(raw);
+      const choices=parseChoices(raw);
+      if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
+      await addLog({type:'gm',who:'',text:scene,choices});
+      if(tb){tb.style.display='none';tb.classList.remove('thinking-active');}
+      maybeSpawnHoid(scene,gState&&gState.totalMoves||0);
+      return;
+    }
+    // Non-streaming fallback
+    const data=await res.json();
+    if(data.error)throw new Error(JSON.stringify(data.error));
+    const raw2=data.content&&data.content[0]?data.content[0].text:'The winds carry no answer tonight.';
+    const scene2=cleanScene(raw2);
+    const choices2=parseChoices(raw2);
+    if(stEl)stEl.innerHTML=renderText(scene2);
+    if(gState){gState.lastGM={text:scene2,choices:choices2,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
+    await addLog({type:'gm',who:'',text:scene2,choices:choices2});
+    maybeSpawnHoid(scene2,gState&&gState.totalMoves||0);
+  }catch(e){
+    console.error('callGM error:',e.message);
+    const errText='The Stormlight flickers ['+e.message+']';
+    if(stEl)stEl.innerHTML=errText;
+    if(gState){gState.lastGM={text:errText,choices:[],ts:new Date().toISOString()};await saveState(gState);}
+    await addLog({type:'gm',who:'',text:errText,choices:[]});
+  }finally{
+    if(tb){tb.style.display='none';tb.classList.remove('thinking-active');}
+  }
+}
+
+
 async function callCombatGM(type, playerActions, enemyResults){
   const sz=gState.partySize||partySize;
-  const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.hp}/${p.maxHp}HP${p.downed?' DOWNED':''})`:'?').join(' | ');
-  const enemies=(gState.combatEnemies||[]).map(e=>`${e.name}(${e.hp}/${e.maxHp}HP${e.downed?' DEFEATED':''})`).join(' | ');
+  const party=gState.players.slice(0,sz).map(p=>{
+    if(!p)return'?';
+    const conds=p.conditions?Object.entries(p.conditions).filter(([k,v])=>v).map(([k])=>CONDITIONS[k]?CONDITIONS[k].name:k):[];
+    const injStr=p.injuries&&p.injuries.length?`${p.injuries.length}inj`:'';
+    const condStr=[...conds,injStr].filter(Boolean).join(',');
+    return`${p.name}(${p.hp}/${p.maxHp}HP${p.downed?' DOWNED':''}${condStr?' ['+condStr+']':''})`;
+  }).join(' | ');
+  const enemies=(gState.combatEnemies||[]).map(e=>{
+    const conds=e.conditions?Object.entries(e.conditions).filter(([k,v])=>v).map(([k])=>CONDITIONS[k]?CONDITIONS[k].name:k):[];
+    const condStr=conds.join(',');
+    return`${e.name}(${e.hp}/${e.maxHp}HP${e.downed?' DEFEATED':''}${condStr?' ['+condStr+']':''})`;
+  }).join(' | ');
   const loc=getAct(gState.totalMoves||0).location||'the battlefield';
   const gctx=getGenderContext();
   const mctx=getSprenMemoryContext();
@@ -4502,29 +5510,46 @@ STYLE RULES — apply all:
 • Do NOT summarize how the party got here`;
 
   } else if(type==='round'){
-    prompt=`You are a combat GM narrating round ${round} of a fight in ${loc}.
+    // Inject spren emotion flavor into combat round
+    const sprenFlavor=round<=2?'Painspren (orange hands) grasp upward near anyone who was hit.':
+      round<=4?'Fearspren (violet blobs) crawl up a wall somewhere in the fight.':
+      'Anticipationspren (red streamers) drift from someone about to break.';
+    // Get previous round text to avoid repetition
+    const prevRoundText=(gState.combatLog||[]).slice(-2).map(e=>e.text||'').filter(Boolean).join(' ');
+    const prevHint=prevRoundText?`
+PREVIOUS ROUND (do NOT repeat sentence structures, imagery, or outcomes from here): "${prevRoundText.slice(0,200)}"`:'';
+    prompt=`You are a combat GM. Round ${round}. ${loc}. ${roundContext}.
 Party: ${party}
 Enemies: ${enemies}
-WHAT ACTUALLY HAPPENED — reference all of this:
-Player outcomes: ${playerActions}
-Enemy attacks: ${(enemyResults||[]).join(' | ')}${gctx}
+WHAT HAPPENED THIS ROUND — weave ALL of this in:
+Player actions: ${playerActions}
+Enemy attacks: ${(enemyResults||[]).join(' | ')}${gctx}${prevHint}
 
-Round context: ${roundContext}
+SPREN PRESENT: ${sprenFlavor}
 
-Write EXACTLY 3 sentences. Craft rules:
-• Every named outcome above must appear — heals as Stormlight surging through flesh, hits as the blow landing and its physical consequence, fumbles as the cost showing on a body
-• Weave all outcomes into ONE coherent moment — not a list, a scene unfolding
-• Momentum: show who currently has the advantage, then end on something that could flip it
-• Sentence variety: mix one long atmospheric sentence with short punchy ones
-• Injuries persist and accumulate — a character hit last round is still hurt
-• No game terminology. No "suddenly". Present tense.
-• End on uncertainty — the outcome is not yet decided`;
+Write EXACTLY 3 sentences. Every rule must be followed:
+• INCLUDE ALL OUTCOMES — every hit, miss, heal, and surge above must appear as a physical consequence
+• ONE SCENE — not a list; a single fluid moment with all outcomes woven together
+• MOMENTUM SHIFT — make clear who has advantage NOW; end on something uncertain
+• SPREN FLAVOR — mention the spren above naturally; they appear near strong emotions
+• INJURIES ACCUMULATE — characters hurt in previous rounds are still hurting
+• SENTENCE VARIATION — one long sentence, two short ones (or vice versa); never three of the same length
+• ROSHAR SPECIFIC — Stormlight glows and wisps; Shardblades shriek in the mind; ground-eating creatures scatter
+• No "suddenly", no "quickly", no game jargon, no narrating intent — only what IS happening
+• Present tense throughout`;
 
   } else if(type==='victory'){
-    prompt=`Combat GM. ${loc}. All enemies defeated.
-Party: ${party}${gctx}${mctx}
+    const injuries=gState.players.slice(0,sz).filter(p=>p&&p.injuries&&p.injuries.length).map(p=>`${p.name}:${p.injuries[0].effect}`).join(', ');
+    const injNote=injuries?`
+Active injuries: ${injuries} — these should show in the aftermath.`:'';
+    prompt=`Combat GM. ${loc}. All enemies defeated. Round ${round}.
+Party: ${party}${gctx}${mctx}${injNote}
 
-Write 2 sentences: the exact moment the last threat falls, and the immediate aftermath — what the survivors feel in their bodies, what the silence sounds like, what changed. No triumphalism. Victory in real fights feels like relief and exhaustion, not glory.`;
+Write 2 sentences. Rules:
+• Sentence 1: The exact physical moment the last enemy falls — specific, visual, definitive
+• Sentence 2: The immediate aftermath — what the survivors feel in their BODIES, not their hearts; what the silence sounds like; one detail that has permanently changed
+• No triumphalism. Victory in real fights tastes like copper and shaking hands.
+• Gloryspren (golden orbs) will appear — mention them once, briefly`;
 
   } else if(type==='defeat'){
     prompt=`Combat GM. ${loc}. All party members downed.
@@ -4552,10 +5577,10 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
   }catch(e){if(el){el.textContent='The battle continues...';el.parentElement.style.opacity='1';}}
   if(type==='opening'||type==='round'){
     gState.combatPhase='choosing';
-    gState.combatChoicesCache={};
-    await saveAndBroadcast(gState);
-    renderCombatScreen();
+    gState.combatChoicesCache={}; // clear so new round generates fresh unique choices
+    renderCombatScreen();   // render immediately for responsiveness
     renderCombatActions();
+    await saveAndBroadcast(gState); // save after UI update
     const sz2=gState.partySize||partySize;
     gState.players.slice(0,sz2).filter(p=>p&&!p.isNPC&&!p.downed).forEach(p=>{
       generateCombatChoices(p).catch(()=>{});
@@ -5095,6 +6120,36 @@ ${text}`}]
 async function maybeTranslateStory(){
   if(lang!=='th')return;
   const el=document.getElementById('story-text');
+  if(!el||!el.innerText||el.innerText.trim().length<10)return;
+  if(/[฀-๿]/.test(el.innerText))return;
+  el.style.opacity='0.5';
+  const translated=await translateToThai(el.innerText);
+  const paras=translated.split('\n').filter(l=>l.trim());
+  el.innerHTML=paras.map(l=>'<p style="margin-bottom:1rem;">'+l+'</p>').join('');
+  el.style.opacity='1';
+}
+
+// ══ PARALLAX ══
+function initParallax(){
+  const card=document.querySelector('.chronicle-card');
+  if(!card||window.innerWidth<900)return;
+  card.style.backgroundImage='radial-gradient(ellipse at center,rgba(255,255,255,0.015) 0%,transparent 70%)';
+  card.style.backgroundSize='200% 200%';
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY;
+    const px=50+y*0.015;const py=50-y*0.008;
+    card.style.backgroundPosition=`${px}% ${py}%`;
+  },{passive:true});
+}
+
+(async()=>{
+  applyLang();
+  loadVoicePreference();
+  showScreen('campaign');
+  try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
+  catch(e){document.getElementById('camp-status').textContent='Connecting... '+e.message;}
+})();
+async function applyThaiToElement(el){
   if(!el||!el.innerText||el.innerText.trim().length<10)return;
   if(/[฀-๿]/.test(el.innerText))return;
   el.style.opacity='0.5';
