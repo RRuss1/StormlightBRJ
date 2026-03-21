@@ -1,0 +1,178 @@
+/* =============================================
+   BASE.CSS — Design Tokens + Reset + Typography
+   Stormlight Chronicles
+   ============================================= */
+
+/* ─── GOOGLE FONTS ─── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+
+/* ─── DESIGN TOKENS ─── */
+:root {
+  /* Backgrounds */
+  --bg:    #0f0d08;
+  --bg2:   #141109;
+  --bg3:   #1c1710;
+  --bg4:   #241e13;
+
+  /* Borders */
+  --border:  #2d2419;
+  --border2: #3d3020;
+  --border3: #5a4020;
+
+  /* Gold palette */
+  --gold:       #C9A84C;
+  --gold-mid:   #DFC080;
+  --gold-bright:#EFE4C8;
+  --gold-light: #F3EBD8;
+  --gold-deep:  #A07830;
+  --gold-dim:   #624e1f;
+  --amber:      #C9A84C;
+  --amber2:     #DFC080;
+  --amber3:     #EFE4C8;
+  --amber-dim:  #624e1f;
+
+  /* Accent palette */
+  --teal:     #1d7a5c;
+  --teal2:    #28a87a;
+  --teal-dim: #0e3d2e;
+  --coral:    #b03828;
+  --coral2:   #d44e30;
+
+  /* Text */
+  --text:  #F8F3E8;
+  --text2: #F0E6CC;
+  --text3: #DFC080;
+  --text4: #A07830;
+  --text5: #624e1f;
+
+  /* Typography */
+  --font-d: 'Cinzel', serif;
+  --font-b: 'Crimson Pro', serif;
+
+  /* Border radius */
+  --r:  10px;
+  --r2: 16px;
+  --r3: 22px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(201,168,76,0.06);
+  --shadow-glow: 0 0 60px rgba(201,168,76,0.12);
+  --shadow-lift: 0 20px 80px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── BASE ─── */
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-b);
+  font-size: 19px;
+  line-height: 1.78;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Rich atmospheric background */
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(100,60,20,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 60% at 10% 80%, rgba(29,122,92,0.05) 0%, transparent 50%);
+}
+
+/* Grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+}
+
+/* Corner glyph watermark on active screens */
+.screen.active::after {
+  content: '⟁';
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  font-family: var(--font-d);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ─── SCREEN SYSTEM ─── */
+.screen { display: none; }
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── SCROLLBARS ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border3); }
+
+/* ─── FORM INPUTS ─── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text) !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(28,23,16,0.9) inset !important;
+  box-shadow: 0 0 0 1000px rgba(28,23,16,0.9) inset !important;
+  caret-color: var(--amber);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+select {
+  background: rgba(28,23,16,0.9);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 9px 14px;
+  font-family: var(--font-b);
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+}
+select:focus { border-color: var(--amber); }
+select option { background: rgba(28,23,16,0.95); color: var(--text); }
+
+/* ─── PRINT ─── */
+#print-header { display: none; }
+@media print {
+  body { background: #fff !important; color: #111 !important; font-size: 12pt; }
+  .party-strip, .bottom-zone, .sheet-toggle, .sheet-panel,
+  #enemy-panel, #initiative-panel, .prog-wrap, .turn-pill,
+  .audio-bar, #export-btn-wrap, #thinking-bar { display: none !important; }
+  .game-top { border-bottom: 1px solid #ccc; padding: 10px 0; margin-bottom: 16px; }
+  .game-logo { font-size: 16pt; font-weight: bold; }
+  #lang-toggle { display: none !important; }
+  .chronicle-card { border: none; }
+  .story-text { font-size: 12pt; color: #111 !important; }
+  #print-header { display: block !important; text-align: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #111; }
+}
+
+/* ─── MOBILE BASE ─── */
+@media (max-width: 640px) {
+  html, body { font-size: 17px; }
+}
