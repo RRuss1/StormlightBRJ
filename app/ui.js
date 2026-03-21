@@ -903,6 +903,9 @@ async function removeSlot(slot){
   renderLobby();
 }
 let lobbyTimer=null;
+// Safety timer — shared between onSubmitAction and handleNPC.
+// Must be module-scope so both functions can clearTimeout() it.
+let _loadingTimer=null;
 
 function startLobbyPolling(){
   if(lobbyTimer)clearInterval(lobbyTimer);
@@ -1898,7 +1901,7 @@ async function onSubmitAction(){
   if(isLoading)return;
   isLoading=true;
   // Safety: auto-reset isLoading after 30s to prevent UI freeze
-  const _loadingTimer=setTimeout(()=>{isLoading=false;setBottomFromState();},30000);
+  _loadingTimer=setTimeout(()=>{isLoading=false;setBottomFromState();},30000);
   stopSpeaking(); // stop voice when player acts
   // Immediate visual feedback — don't wait for Sheets
   setBottomLoading();
