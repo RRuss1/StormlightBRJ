@@ -655,6 +655,20 @@
 .combat-dice-ticker::-webkit-scrollbar { width: 3px; }
 .combat-dice-ticker::-webkit-scrollbar-thumb { background: var(--border2); }
 
+/* ── Culture / expertise grid ── */
+#culture-grid {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border3) transparent;
+}
+#culture-grid::-webkit-scrollbar       { width: 4px; }
+#culture-grid::-webkit-scrollbar-track { background: transparent; }
+#culture-grid::-webkit-scrollbar-thumb {
+  background: var(--border3);
+  border-radius: 2px;
+}
+#culture-grid::-webkit-scrollbar-thumb:hover { background: var(--amber-dim); }
+
 .dice-result-crit { color: var(--gold); }
 .dice-result-hit  { color: var(--teal2); }
 .dice-result-miss { color: var(--text5); }
