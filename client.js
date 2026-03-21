@@ -13,7 +13,7 @@
 // ── CONFIG ────────────────────────────────────────────────────
 const DEFAULT_CONFIG = {
   // Cloudflare Worker base URL — override via env.js
-  apiUrl:  window.STORMLIGHT_CONFIG?.apiUrl  || 'https://stormlight-proxy.goretusk55.workers.dev',
+  apiUrl:  window.STORMLIGHT_CONFIG?.apiUrl  || 'https://stormlight-proxy.rruss7997.workers.dev',
   wsUrl:   window.STORMLIGHT_CONFIG?.wsUrl   || 'wss://stormlight-proxy.rruss7997.workers.dev/session',
   sheetId: window.STORMLIGHT_CONFIG?.sheetId || '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
 };
@@ -22,18 +22,54 @@ export const API_URL = DEFAULT_CONFIG.apiUrl;
 export const WS_URL  = DEFAULT_CONFIG.wsUrl;
 export const SHEET_ID = DEFAULT_CONFIG.sheetId;
 
+// ── RESPONSE CACHE (GET requests only) ───────────────────────
+const _cache = new Map();
+const _CACHE_TTL = 8000; // 8 s — listCampaigns / loadLog
+
+function _cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > _CACHE_TTL) { _cache.delete(key); return null; }
+  return entry.value;
+}
+function _cacheSet(key, value) {
+  _cache.set(key, { value, ts: Date.now() });
+}
+function _cacheInvalidate(prefix) {
+  for (const k of _cache.keys()) if (k.startsWith(prefix)) _cache.delete(k);
+}
+
+// ── DEBOUNCED SAVE ────────────────────────────────────────────
+// Prevent flooding saveState with every keystroke / realtime update
+let _savePending = null;
+export function debounceSaveState(campaignId, gState, delay = 1200) {
+  if (_savePending) clearTimeout(_savePending);
+  _savePending = setTimeout(() => {
+    _savePending = null;
+    saveState(campaignId, gState).catch(console.warn);
+    _cacheInvalidate(`/state/${encodeURIComponent(campaignId)}`);
+  }, delay);
+}
+
 // ── BASE FETCH ────────────────────────────────────────────────
 /**
- * Core fetch wrapper with error handling and retry.
- * @param {string}  path     - Endpoint path (e.g. '/campaigns')
- * @param {object}  options  - fetch() options
- * @param {number}  retries  - Number of retries on 5xx errors
+ * Core fetch wrapper with error handling, GET caching, and retry.
+ * @param {string}  path      - Endpoint path (e.g. '/campaigns')
+ * @param {object}  options   - fetch() options
+ * @param {number}  retries   - Number of retries on 5xx errors
+ * @param {boolean} useCache  - Cache GET responses (default true for GETs)
  */
 async function apiFetch(path, options = {}, retries = 2) {
   const url = path.startsWith('http') ? path : `${API_URL}${path}`;
-  const defaults = {
-    headers: { 'Content-Type': 'application/json' },
-  };
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Short-circuit with cached value for GET requests
+  if (method === 'GET') {
+    const hit = _cacheGet(path);
+    if (hit !== null) return hit;
+  }
+
+  const defaults = { headers: { 'Content-Type': 'application/json' } };
   const config = { ...defaults, ...options, headers: { ...defaults.headers, ...options.headers } };
 
   let lastError;
@@ -45,14 +81,17 @@ async function apiFetch(path, options = {}, retries = 2) {
         throw new APIError(res.status, res.statusText, body);
       }
       const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        return await res.json();
-      }
-      return await res.text();
+      const data = contentType.includes('application/json')
+        ? await res.json()
+        : await res.text();
+
+      // Cache successful GETs
+      if (method === 'GET') _cacheSet(path, data);
+      return data;
     } catch (err) {
       lastError = err;
-      if (err instanceof APIError && err.status < 500) throw err; // 4xx — don't retry
-      if (attempt < retries) await sleep(500 * (attempt + 1)); // exponential backoff
+      if (err instanceof APIError && err.status < 500) throw err;
+      if (attempt < retries) await sleep(400 * Math.pow(2, attempt)); // exp backoff
     }
   }
   throw lastError;
