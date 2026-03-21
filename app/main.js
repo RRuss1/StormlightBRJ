@@ -441,6 +441,548 @@ window.showToastGSAP = function(message) {
         onComplete: () => toast.remove() });
 };
 
+// ═══════════════════════════════════════════════════════════════
+// NEXT LEVEL IDEAS — Six AAA Cinematic Systems
+// ═══════════════════════════════════════════════════════════════
+
+// ── NL-1. STORMLIGHT PARTICLE SYSTEM ─────────────────────────
+// WebGL canvas overlay — drifting blue-white Stormlight motes.
+// Activates on any character card that has Investiture > 0.
+// Usage: stormlightParticles.activate(cardEl) / .deactivate()
+(function _initStormlightParticles() {
+  const PARTICLE_COUNT = 55;
+  const COLORS = ['#b8eaff','#d4f4ff','#e8faff','#9fd8f8','#c0f0ff'];
+  let canvas, ctx, particles = [], raf = null, _active = false;
+
+  function _mkCanvas() {
+    if (canvas) return;
+    canvas = document.createElement('canvas');
+    canvas.id = 'stormlight-canvas';
+    canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;';
+    document.body.appendChild(canvas);
+    ctx = canvas.getContext('2d');
+    _resize();
+    window.addEventListener('resize', _resize, { passive: true });
+  }
+
+  function _resize() {
+    if (!canvas) return;
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function _spawn() {
+    return {
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 1.2 + Math.random() * 2.2,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: -0.25 - Math.random() * 0.45,
+      alpha: 0,
+      targetAlpha: 0.35 + Math.random() * 0.55,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      life: 0,
+      maxLife: 180 + Math.random() * 240,
+    };
+  }
+
+  function _draw() {
+    if (!_active || !ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.life++;
+      p.x += p.vx + Math.sin(p.life * 0.022 + i) * 0.18;
+      p.y += p.vy;
+
+      // Fade in / fade out
+      const progress = p.life / p.maxLife;
+      p.alpha = progress < 0.2
+        ? (progress / 0.2) * p.targetAlpha
+        : progress > 0.8
+          ? ((1 - progress) / 0.2) * p.targetAlpha
+          : p.targetAlpha;
+
+      if (p.life >= p.maxLife) particles[i] = _spawn();
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    raf = requestAnimationFrame(_draw);
+  }
+
+  window.stormlightParticles = {
+    activate() {
+      if (_active) return;
+      _mkCanvas();
+      if (particles.length === 0) {
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const p = _spawn();
+          p.life = Math.floor(Math.random() * p.maxLife); // stagger
+          particles.push(p);
+        }
+      }
+      _active = true;
+      gsap.to(canvas, { opacity: 1, duration: 1.2, ease: 'power2.inOut' });
+      _draw();
+    },
+    deactivate() {
+      if (!_active || !canvas) return;
+      gsap.to(canvas, { opacity: 0, duration: 1.0, ease: 'power2.inOut', onComplete: () => {
+        _active = false;
+        if (raf) cancelAnimationFrame(raf);
+      }});
+    },
+    toggle(on) { on ? this.activate() : this.deactivate(); },
+  };
+})();
+
+// ── NL-2. WEATHER SYSTEM ─────────────────────────────────────
+// CSS-layer wind/rain overlay that activates during combat.
+// Reads the latest GM story text for weather keywords.
+// Usage: WeatherSystem.setWeather('rain'|'storm'|'clear'|'ash')
+(function _initWeatherSystem() {
+  let _weatherEl = null, _current = 'clear';
+
+  const WEATHER_STYLES = {
+    clear: { opacity: 0 },
+    rain: {
+      background: 'repeating-linear-gradient(to bottom, transparent 0, transparent 4px, rgba(180,210,240,0.10) 4px, rgba(180,210,240,0.10) 5px)',
+      backgroundSize: '3px 22px',
+      opacity: 0.65,
+      animation: 'weatherRain 0.22s linear infinite',
+    },
+    storm: {
+      background: 'repeating-linear-gradient(10deg, transparent 0, transparent 3px, rgba(130,180,230,0.18) 3px, rgba(130,180,230,0.18) 4px)',
+      backgroundSize: '4px 18px',
+      opacity: 0.85,
+      animation: 'weatherRain 0.14s linear infinite',
+    },
+    ash: {
+      background: 'radial-gradient(circle at 50% 100%, rgba(80,60,40,0.22) 0%, transparent 70%)',
+      opacity: 0.7,
+    },
+  };
+
+  function _mkEl() {
+    if (_weatherEl) return;
+    _weatherEl = document.createElement('div');
+    _weatherEl.id = 'weather-overlay';
+    _weatherEl.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity 1.2s ease;';
+    // Inject keyframes
+    const style = document.createElement('style');
+    style.textContent = `@keyframes weatherRain { from{background-position:0 0} to{background-position:0 22px} }`;
+    document.head.appendChild(style);
+    document.body.appendChild(_weatherEl);
+  }
+
+  function _detect(text) {
+    if (!text) return 'clear';
+    const t = text.toLowerCase();
+    if (/highstorm|stormwall|lightning/.test(t)) return 'storm';
+    if (/rain|downpour|drizzle|wet/.test(t))     return 'rain';
+    if (/ash|dust|smoke|haze/.test(t))           return 'ash';
+    return 'clear';
+  }
+
+  window.WeatherSystem = {
+    setWeather(type) {
+      _mkEl();
+      if (_current === type) return;
+      _current = type;
+      const s = WEATHER_STYLES[type] || WEATHER_STYLES.clear;
+      Object.assign(_weatherEl.style, {
+        background: s.background || '',
+        backgroundSize: s.backgroundSize || '',
+        animation: s.animation || 'none',
+      });
+      gsap.to(_weatherEl, { opacity: s.opacity || 0, duration: 1.5, ease: 'power2.inOut' });
+    },
+    detectFromText(text) { this.setWeather(_detect(text)); },
+    clear() { this.setWeather('clear'); },
+  };
+})();
+
+// ── NL-3. OATH PROGRESSION CEREMONY ──────────────────────────
+// Full-screen GSAP cinematic sequence when an Ideal is spoken.
+// Usage: OathCeremony.play(idealNumber, orderName, idealText)
+(function _initOathCeremony() {
+  window.OathCeremony = {
+    play(idealNumber = 1, orderName = 'Windrunner', idealText = '') {
+      // Overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position:fixed;inset:0;z-index:10000;
+        background:rgba(8,6,3,0.97);
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        pointer-events:all;opacity:0;
+      `;
+
+      // Glyph
+      const glyph = document.createElement('div');
+      glyph.textContent = '⟁';
+      glyph.style.cssText = `
+        font-family:var(--font-d);font-size:72px;
+        color:var(--gold);text-align:center;
+        text-shadow:0 0 60px rgba(201,168,76,0.8),0 0 120px rgba(201,168,76,0.4);
+        opacity:0;transform:scale(0.5);
+      `;
+
+      // Order name
+      const order = document.createElement('div');
+      order.textContent = orderName.toUpperCase();
+      order.style.cssText = `
+        font-family:var(--font-d);font-size:11px;letter-spacing:6px;
+        color:var(--gold-mid);margin-top:12px;opacity:0;
+      `;
+
+      // Ideal number label
+      const label = document.createElement('div');
+      label.textContent = `THE ${['FIRST','SECOND','THIRD','FOURTH','FIFTH'][idealNumber-1] || 'FIRST'} IDEAL`;
+      label.style.cssText = `
+        font-family:var(--font-d);font-size:9px;letter-spacing:8px;
+        color:var(--text4);margin-top:8px;opacity:0;
+      `;
+
+      // Ideal text
+      const words = document.createElement('div');
+      words.textContent = `"${idealText || 'Life before death. Strength before weakness. Journey before destination.'}"`;
+      words.style.cssText = `
+        font-family:var(--font-b);font-size:22px;font-style:italic;
+        color:var(--text2);text-align:center;max-width:560px;
+        line-height:1.7;margin-top:32px;padding:0 24px;opacity:0;
+      `;
+
+      // "These Words are accepted." line
+      const accepted = document.createElement('div');
+      accepted.textContent = '"These Words are accepted."';
+      accepted.style.cssText = `
+        font-family:var(--font-d);font-size:13px;letter-spacing:2px;
+        color:var(--gold-dim);margin-top:40px;opacity:0;
+      `;
+
+      // Dismiss hint
+      const hint = document.createElement('div');
+      hint.textContent = 'TAP TO CONTINUE';
+      hint.style.cssText = `
+        font-family:var(--font-d);font-size:9px;letter-spacing:4px;
+        color:var(--text5);position:absolute;bottom:36px;opacity:0;
+      `;
+
+      overlay.append(glyph, order, label, words, accepted, hint);
+      document.body.appendChild(overlay);
+
+      const tl = gsap.timeline();
+      tl.to(overlay,   { opacity: 1,               duration: 0.5 })
+        .to(glyph,     { opacity: 1, scale: 1,      duration: 0.9, ease: 'elastic.out(1,0.7)' })
+        .to(glyph,     { textShadow: '0 0 120px rgba(201,168,76,1),0 0 240px rgba(201,168,76,0.6)', duration: 0.6, ease:'power2.out', yoyo:true, repeat:1 }, '-=0.2')
+        .to(order,     { opacity: 1,                duration: 0.5 }, '-=0.3')
+        .to(label,     { opacity: 1,                duration: 0.4 }, '-=0.2')
+        .to(words,     { opacity: 1, y: 0,          duration: 0.7, ease:'power2.out' }, '+=0.2')
+        .to(accepted,  { opacity: 0.8,              duration: 0.6 }, '+=0.8')
+        .to(hint,      { opacity: 0.4,              duration: 0.5 }, '+=1.0');
+
+      // Particle burst on glyph
+      setTimeout(() => window.stormlightParticles?.activate(), 300);
+
+      // Dismiss on click
+      const _dismiss = () => {
+        gsap.to(overlay, { opacity: 0, duration: 0.5, onComplete: () => {
+          overlay.remove();
+          window.stormlightParticles?.deactivate();
+        }});
+      };
+      overlay.addEventListener('click', _dismiss, { once: true });
+      // Auto-dismiss after 9 seconds
+      setTimeout(_dismiss, 9000);
+    },
+  };
+})();
+
+// ── NL-4. STORY TYPEWRITER MODE ───────────────────────────────
+// Character-by-character text reveal for the GM story panel.
+// Usage: TypewriterMode.reveal(element, text, onDone?)
+//        TypewriterMode.enabled = true/false   (toggle in settings)
+(function _initTypewriterMode() {
+  let _enabled = false;
+  let _currentAnim = null;
+
+  window.TypewriterMode = {
+    get enabled() { return _enabled; },
+    set enabled(v) { _enabled = !!v; localStorage.setItem('sc_typewriter', v ? '1' : '0'); },
+
+    /** Reveal HTML text content char-by-char in the given element. */
+    reveal(el, html, onDone) {
+      if (!el) { onDone?.(); return; }
+      if (!_enabled) {
+        el.innerHTML = html;
+        onDone?.();
+        return;
+      }
+
+      // Cancel any in-progress animation
+      if (_currentAnim) { clearInterval(_currentAnim); _currentAnim = null; }
+
+      // Strip HTML for typing; then re-render final HTML after
+      const plain = html.replace(/<[^>]+>/g, '');
+      let i = 0;
+      el.textContent = '';
+
+      // Type plain chars at ~28ms/char
+      _currentAnim = setInterval(() => {
+        if (i < plain.length) {
+          el.textContent += plain[i++];
+          // Auto-scroll to bottom of story panel
+          const panel = el.closest('.chronicle-card, .story-body, #story-text');
+          if (panel) panel.scrollTop = panel.scrollHeight;
+        } else {
+          clearInterval(_currentAnim);
+          _currentAnim = null;
+          // Swap to richly rendered HTML once typing is done
+          el.innerHTML = html;
+          onDone?.();
+        }
+      }, 22);
+    },
+
+    /** Skip to end immediately */
+    skip() {
+      if (_currentAnim) { clearInterval(_currentAnim); _currentAnim = null; }
+    },
+  };
+
+  // Load saved preference
+  _enabled = localStorage.getItem('sc_typewriter') === '1';
+})();
+
+// ── NL-5. PROCEDURAL AMBIENT CHORD (Web Audio API) ───────────
+// Synthesizes a shifting ambient chord — calm outside combat,
+// tense sustained tones when combat is active.
+// Usage: AmbientAudio.startCombat() / .endCombat() / .setVolume(0-1)
+(function _initAmbientAudio() {
+  let _ctx = null, _gainNode = null, _oscillators = [], _active = false, _volume = 0.06;
+
+  // Pentatonic scale frequencies — calm (Hz)
+  const CALM_CHORD  = [55, 82.41, 110, 164.81];   // A1 E2 A2 E3
+  const COMBAT_CHORD = [58.27, 87.31, 116.54, 155.56]; // Bb1 F2 Bb2 Eb3 (tense)
+
+  function _ensureCtx() {
+    if (_ctx) return true;
+    try {
+      _ctx = new (window.AudioContext || window.webkitAudioContext)();
+      _gainNode = _ctx.createGain();
+      _gainNode.gain.value = 0;
+      _gainNode.connect(_ctx.destination);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function _buildChord(freqs) {
+    _oscillators.forEach(o => { try { o.stop(); } catch(e){} });
+    _oscillators = [];
+    if (!_ctx || !_gainNode) return;
+
+    freqs.forEach((freq, i) => {
+      const osc = _ctx.createOscillator();
+      const oscGain = _ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      // Slight detuning for warmth
+      osc.detune.value = (i % 2 === 0 ? 1 : -1) * (2 + i * 0.5);
+      oscGain.gain.value = 0.22 - i * 0.03;
+      osc.connect(oscGain);
+      oscGain.connect(_gainNode);
+      osc.start();
+      _oscillators.push(osc);
+    });
+  }
+
+  function _fade(targetVol, duration = 2.0) {
+    if (!_gainNode) return;
+    _gainNode.gain.cancelScheduledValues(_ctx.currentTime);
+    _gainNode.gain.linearRampToValueAtTime(targetVol, _ctx.currentTime + duration);
+  }
+
+  window.AmbientAudio = {
+    start() {
+      if (_active || !_ensureCtx()) return;
+      if (_ctx.state === 'suspended') _ctx.resume();
+      _buildChord(CALM_CHORD);
+      _fade(_volume);
+      _active = true;
+    },
+    startCombat() {
+      if (!_ensureCtx()) return;
+      if (_ctx.state === 'suspended') _ctx.resume();
+      _buildChord(COMBAT_CHORD);
+      _fade(_volume * 1.6, 1.2);
+      _active = true;
+    },
+    endCombat() {
+      if (!_active || !_ctx) return;
+      _buildChord(CALM_CHORD);
+      _fade(_volume, 2.5);
+    },
+    stop() {
+      if (!_ctx) return;
+      _fade(0, 1.0);
+      setTimeout(() => {
+        _oscillators.forEach(o => { try { o.stop(); } catch(e){} });
+        _oscillators = [];
+        _active = false;
+      }, 1200);
+    },
+    setVolume(v) {
+      _volume = Math.max(0, Math.min(1, v));
+      if (_gainNode && _active) _fade(_volume, 0.5);
+      localStorage.setItem('sc_ambient_vol', _volume);
+    },
+    get active() { return _active; },
+  };
+
+  // Load saved volume
+  const saved = parseFloat(localStorage.getItem('sc_ambient_vol'));
+  if (!isNaN(saved)) _volume = saved;
+})();
+
+// ── NL-6. GSAP MOTIONPATH SPREN COMPANION ────────────────────
+// A spren SVG sprite that traces a lazy orbital path around the
+// active player's combat card. Updates when the active card changes.
+// Usage: SprenCompanion.attachTo(cardEl) / .detach()
+(function _initSprenCompanion() {
+  let _sprEl = null, _motionTween = null, _orbitTween = null;
+
+  function _mkSpren() {
+    if (_sprEl) return;
+    _sprEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    _sprEl.setAttribute('viewBox', '0 0 24 24');
+    _sprEl.style.cssText = `
+      position:fixed;width:22px;height:22px;
+      pointer-events:none;z-index:60;opacity:0;
+      filter:drop-shadow(0 0 6px rgba(180,230,255,0.9));
+    `;
+    // Simple honorspren shape — glowing white-blue diamond
+    _sprEl.innerHTML = `
+      <polygon points="12,2 22,12 12,22 2,12" fill="rgba(200,235,255,0.85)" stroke="rgba(180,220,255,0.6)" stroke-width="0.8"/>
+      <polygon points="12,5 19,12 12,19 5,12"  fill="rgba(220,245,255,0.5)"/>
+      <circle cx="12" cy="12" r="2.2" fill="white" opacity="0.9"/>
+    `;
+    document.body.appendChild(_sprEl);
+  }
+
+  function _orbit(cardEl) {
+    if (!cardEl || !_sprEl) return;
+    // Get card bounds and place spren on a smooth elliptical orbit around it
+    const update = () => {
+      const rect = cardEl.getBoundingClientRect();
+      if (!rect.width) return;
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      const rx = rect.width  / 2 + 22;
+      const ry = rect.height / 2 + 16;
+
+      // Orbit using parametric t → x,y
+      let angle = 0;
+      if (_orbitTween) _orbitTween.kill();
+      _orbitTween = gsap.to({ t: 0 }, {
+        t: Math.PI * 2,
+        duration: 5.5,
+        ease: 'none',
+        repeat: -1,
+        onUpdate: function() {
+          const t = this.targets()[0].t;
+          const x = cx + Math.cos(t) * rx - 11;
+          const y = cy + Math.sin(t) * ry - 11;
+          gsap.set(_sprEl, { x, y });
+        },
+      });
+    };
+    update();
+    // Refresh on resize / scroll
+    window.addEventListener('resize', update, { passive: true });
+  }
+
+  window.SprenCompanion = {
+    attachTo(cardEl) {
+      _mkSpren();
+      if (_orbitTween) _orbitTween.kill();
+      gsap.killTweensOf(_sprEl);
+      gsap.to(_sprEl, { opacity: 1, duration: 0.6, ease: 'power2.out' });
+      _orbit(cardEl);
+    },
+    detach() {
+      if (!_sprEl) return;
+      if (_orbitTween) { _orbitTween.kill(); _orbitTween = null; }
+      gsap.to(_sprEl, { opacity: 0, duration: 0.4, ease: 'power2.in' });
+    },
+    /** Call whenever the active card changes in combat. */
+    updateActiveCard(cardEl) {
+      if (!cardEl) { this.detach(); return; }
+      this.attachTo(cardEl);
+    },
+  };
+})();
+
+// ── NL-7. WIRE UP SYSTEMS TO GAME EVENTS ─────────────────────
+// Connect weather detection to story updates, particles to combat
+// entrance, ambient audio to scene transitions, and spren companion
+// to turn changes — so everything runs automatically.
+window.addEventListener('load', () => {
+  // ── Combat screen → activate weather + ambient + particles ──
+  const _origShowScreen = window.showScreen;
+  if (_origShowScreen) {
+    // Already patched in section 3; hook via CustomEvent instead
+    document.addEventListener('sc:screenChange', (e) => {
+      const id = e.detail?.screen;
+      if (id === 'combat') {
+        AmbientAudio.startCombat();
+        stormlightParticles.activate();
+      } else if (id === 'game') {
+        AmbientAudio.endCombat();
+      } else if (id === 'title' || id === 'campaign') {
+        AmbientAudio.stop();
+        stormlightParticles.deactivate();
+        WeatherSystem.clear();
+      }
+    });
+  }
+
+  // ── Story text update → weather detection ──
+  // Poll the story-text element for changes; detect weather keywords
+  const storyEl = document.getElementById('story-text');
+  if (storyEl) {
+    const storyObserver = new MutationObserver(() => {
+      WeatherSystem.detectFromText(storyEl.textContent);
+    });
+    storyObserver.observe(storyEl, { childList: true, subtree: true, characterData: true });
+  }
+
+  // ── Spren companion: follow active turn card ──
+  document.addEventListener('sc:turnChange', (e) => {
+    const card = e.detail?.cardEl || document.querySelector('.char-combat-card.active-turn');
+    SprenCompanion.updateActiveCard(card);
+  });
+
+  // ── Rules engine events → UI feedback ──
+  document.addEventListener('rules:attack', (e) => {
+    const { result } = e.detail || {};
+    if (!result) return;
+    if (result.outcome === 'crit') window.animateCritHit?.(e.detail.cardEl);
+    if (result.outcome === 'miss' || result.outcome === 'graze') return;
+    window.animateDamageFlash?.();
+  });
+
+  document.addEventListener('rules:unconscious', (e) => {
+    const card = e.detail?.cardEl;
+    if (card) window.shakeCombatCard?.(card);
+  });
+});
+
 // ── 11. BOOT ──────────────────────────────────────────────────
 (async () => {
   applyLang();
