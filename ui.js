@@ -16,8 +16,6 @@
 
 // ── WEBSOCKET SESSION ─────────────────────────────────────────
 // ══ WEBSOCKET SESSION ══
-let ws=null,wsConnected=false;
-const WS_URL='wss://stormlight-proxy.rruss7997.workers.dev/session';
 
 function connectSession(){
   if(!campaignId||!myChar)return;
@@ -100,11 +98,6 @@ function showToast(message){
 
 
 // ── SHEETS API ────────────────────────────────────────────────
-let gState=null,myChar=null,mySlot=null,selClass=null,selColor=null,rolledStats=null;
-let selActionText='',sheetOpen=false,isLoading=false,pollTimer=null,partySize=3;
-let campaignId=null,pendingCampNum=null;
-let bottomState='';
-let lastGMTs=''; // timestamp of last rendered GM entry — detects new ones
 
 // ══ LOCATION SEED ══
 function pickLocations(seed){
@@ -125,7 +118,6 @@ function getAct(m){return ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];}
 function getSprenStage(m){if(m<20)return 0;if(m<50)return 1;if(m<90)return 2;if(m<140)return 3;return 4;}
 
 // ══ JWT / SHEETS AUTH ══
-let _tok=null,_tokExp=0;
 async function tok(){if(_tok&&Date.now()<_tokExp)return _tok;_tok=await getAT();_tokExp=Date.now()+3500000;return _tok;}
 async function getAT(){
   const h={alg:'RS256',typ:'JWT'},now=Math.floor(Date.now()/1000);
@@ -430,7 +422,6 @@ function setTitleStatus(m){const el=document.getElementById('title-status');if(e
 
 // ══ CHARACTER CREATION ══
 // ══ ENHANCED CREATOR ══
-let selKit=null;
 function renderCreate(){
   createStep=1;isRadiant=true;selAncestry='human';selCultures=[];
   selRole=null;selWeapon=null;selKit=null;
@@ -633,7 +624,6 @@ function pickWeapon(id){selWeapon=HERO_WEAPONS.find(w=>w.id===id);renderWeapons(
 // Official: player distributes 12 points, max 3 per attribute at creation
 // We auto-assign a balanced spread and let them adjust
 // Point-buy allocation (12 points, max 3 each at creation)
-let _pbAlloc={str:2,spd:2,int:2,wil:2,awa:2,pre:2};
 
 function getClassBonus(){
   const bonus=isRadiant?(selClass?selClass.bonus:{}):(selRole?selRole.bonus:{});
@@ -913,6 +903,9 @@ async function removeSlot(slot){
   renderLobby();
 }
 let lobbyTimer=null;
+// Safety timer shared between onSubmitAction and handleNPC — must be module-scope
+// so both functions can clearTimeout() it correctly.
+let _loadingTimer=null;
 
 function startLobbyPolling(){
   if(lobbyTimer)clearInterval(lobbyTimer);
@@ -1908,7 +1901,7 @@ async function onSubmitAction(){
   if(isLoading)return;
   isLoading=true;
   // Safety: auto-reset isLoading after 30s to prevent UI freeze
-  const _loadingTimer=setTimeout(()=>{isLoading=false;setBottomFromState();},30000);
+  _loadingTimer=setTimeout(()=>{isLoading=false;setBottomFromState();},30000);
   stopSpeaking(); // stop voice when player acts
   // Immediate visual feedback — don't wait for Sheets
   setBottomLoading();
@@ -2348,7 +2341,6 @@ ${getLangInstruction()}`;
 
 // ── AUDIO + VOICE + LANGUAGE ──────────────────────────────────
 // ══ AUDIO ENGINE ══
-let audioCtx=null,audioNodes={},audioOn=false,masterGain=null;
 function initAudio(){
   if(audioCtx)return;
   try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.3;masterGain.connect(audioCtx.destination);}
@@ -2562,7 +2554,6 @@ function setStormIntensity(type){
 // ══════════════════════════════════════
 // ══════════════════════════════════════
 // ══════════════════════════════════════
-let lang=localStorage.getItem('sc_lang')||'en';
 
 function T(str){return str;}
 
@@ -2604,8 +2595,6 @@ async function batchTranslate(strings){
   return strings.map(str=>thaiCache[str]||str);
 }
 
-let thaiCache={};
-let uiTranslating=false;
 
 async function applyThaiToPage(){
   if(uiTranslating||lang!=='th')return;

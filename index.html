@@ -60,7 +60,7 @@
   <!-- Override API endpoints here for dev vs production -->
   <script>
     window.STORMLIGHT_CONFIG = {
-      apiUrl:  'https://stormlight-proxy.rruss7997.workers.dev',
+      apiUrl:  'https://stormlight-proxy.goretusk55.workers.dev',
       wsUrl:   'wss://stormlight-proxy.rruss7997.workers.dev/session',
       sheetId: '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
       // dev: set to http://localhost:8787 when running wrangler dev
@@ -253,7 +253,7 @@
           <span data-tr>Cultural Expertises</span>
           <span class="normal-case text-xs ml-2" style="color:var(--text5)">(choose up to 2)</span>
         </label>
-        <div id="culture-grid" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1" style="max-height:280px"></div>
+        <div id="culture-grid" class="grid grid-cols-2 gap-2 overflow-y-auto pr-1" style="max-height:280px;overscroll-behavior:contain"></div>
       </div>
 
       <div class="flex justify-end mt-2">
