@@ -1172,7 +1172,17 @@ async function callGM(prompt){
     return choices;
   }
   function cleanScene(raw){
-    return raw.replace(/^\*{0,2}\d+[.)]\s+\*{0,2}/gm,'').replace(/\*+/g,'').trim();
+    return raw
+      // Strip [CHOICES] / [CHOICES FOR X] block and everything after it
+      .replace(/\[CHOICES[^\]]*\][\s\S]*/i,'')
+      // Strip "Name's Options:" header and all following lines
+      .replace(/^[\w '\-]+'s\s+Options?:\s*[\s\S]*/im,'')
+      .replace(/^Options?\s+for\s+[\w\s]+:\s*[\s\S]*/im,'')
+      // Strip trailing numbered list — 2+ consecutive numbered lines = leaked choices
+      .replace(/(\n\s*\d+[.)]\s+[^\n]+){2,}\s*$/s,'')
+      // Strip bold markers
+      .replace(/\*+/g,'')
+      .trim();
   }
   try{
     const res=await fetch(PROXY_URL,{
@@ -1199,14 +1209,14 @@ async function callGM(prompt){
                 raw+=tok;
                 // Throttle DOM updates — only update every 4 tokens for performance
                 if(raw.length%4===0||tok.includes(' ')||tok.includes('.')){
-                  if(stEl)stEl.innerHTML=renderText(raw)+'<span class="gm-cursor">|</span>';
+                  if(stEl)stEl.innerHTML=renderText(cleanScene(raw))+'<span class="gm-cursor">|</span>';
                 }
               }
             }catch(e){}
           }
         });
       }
-      if(stEl)stEl.innerHTML=renderText(raw);
+      if(stEl)stEl.innerHTML=renderText(cleanScene(raw));
       const scene=cleanScene(raw);
       const choices=parseChoices(raw);
       if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
