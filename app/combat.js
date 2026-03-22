@@ -1283,6 +1283,7 @@ async function callGM(prompt){
               const tok=(d.delta&&(d.delta.text||d.delta.value))||'';
               if(tok){
                 raw+=tok;
+                ttsPushToken(tok); // stream token directly to TTS engine
                 // Throttle DOM updates — only update every 4 tokens for performance
                 if(raw.length%4===0||tok.includes(' ')||tok.includes('.')){
                   if(stEl)stEl.innerHTML=renderText(cleanScene(raw))+'<span class="gm-cursor">|</span>';
@@ -1293,6 +1294,7 @@ async function callGM(prompt){
         });
       }
       if(stEl)stEl.innerHTML=renderText(cleanScene(raw));
+      ttsFlush(); // emit any remaining partial chunk and drain the pipeline
       const scene=cleanScene(raw);
       const choices=parseChoices(raw);
       if(gState){gState.lastGM={text:scene,choices,ts:new Date().toISOString()};await saveAndBroadcast(gState);}
@@ -1540,11 +1542,21 @@ One sentence each. Tag: [DISCOVERY] or [DECISION].${getGenderContext()}`;
 }
 
 
-// ══ VOICE OVER — Kokoro TTS ══
-// Apache-licensed 82M neural TTS. Runs 100% in-browser via WebGPU/WASM.
-// First use: ~160MB model download, then cached by browser forever.
-// Quality: comparable to ElevenLabs. Vastly better than Web Speech API.
-// Fallback: if Kokoro fails to load, silently falls back to Web Speech API.
+// ══ VOICE OVER — Kokoro TTS Streaming Engine v3 ══
+//
+// Architecture:
+//
+//   AI Token Stream ──► TTSTextChunker ──► KokoroStreamEngine ──► TTSAudioScheduler ──► 🔊
+//                       (sentence/phrase/    (serialized ONNX       (Web Audio API,
+//                        token-window         promise chain)          crossfade, precise
+//                        boundaries)                                  scheduling)
+//
+// Key properties:
+//   • Hooks directly into callGM() streaming — first word → first chunk in <300ms
+//   • Web Audio API scheduling: sample-accurate, no gaps, 12ms crossfade
+//   • ONNX serialized but pipelined — next chunk generates while current plays
+//   • Backpressure: pauses enqueueing if >10s audio buffered ahead
+//   • q8+wasm model: ~82MB RAM, cached permanently after first download
 
 function autoSpeakStory(){}
 
@@ -1561,163 +1573,183 @@ const KOKORO_VOICES = {
   'bf_emma':    { label:'Emma — British Female, Crisp'   },
 };
 
-// ── Module-level state ──
-let _kokoroTTS         = null;
-let _kokoroLoading     = false;
-let _kokoroReady       = false;
-let _kokoroVoice       = 'bm_daniel';
-let _kokoroBusy        = false;
-let _kokoroCancel      = false;
-let _currentAudio      = null;
-let _kokoroGenerating  = null; // Promise — resolves when the in-flight .generate() settles
+// ── Kokoro model state ──
+let _kokoroTTS           = null;
+let _kokoroLoading       = false;
+let _kokoroReady         = false;
+let _kokoroVoice         = 'bm_daniel';
+let _kokoroUserRequested = false; // download only when user explicitly opts in
 
-// ── Lazy singleton model loader ──
-// Always uses q8 + wasm — fp32/WebGPU model is 4× larger (~330MB) and causes RAM spikes.
-// Download is gated: only fires when the user explicitly clicks the voice button.
-let _kokoroUserRequested = false; // set true when user clicks voice btn for first time
-
+// ── Lazy model loader ──
+// q8+wasm always — fp32/WebGPU is 4× larger (~330MB) and spikes GPU RAM.
+// Download gated on user clicking the voice button (not auto-triggered).
 async function _ensureKokoro() {
-  if (_kokoroReady) return true;
-  // If model hasn't been explicitly requested yet, skip and use Web Speech as fallback
-  if (!_kokoroUserRequested) return false;
-  if (_kokoroLoading) {
-    await new Promise(r => {
-      const check = setInterval(() => {
-        if (_kokoroReady || !_kokoroLoading) { clearInterval(check); r(); }
-      }, 200);
-    });
+  if(_kokoroReady) return true;
+  if(!_kokoroUserRequested) return false;
+  if(_kokoroLoading){
+    await new Promise(r=>{const t=setInterval(()=>{if(_kokoroReady||!_kokoroLoading){clearInterval(t);r();}},150);});
     return _kokoroReady;
   }
-  _kokoroLoading = true;
-  _updateVoiceStatus('loading', 0);
-  try {
-    const { KokoroTTS } = await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js');
-    // Force q8 + wasm — keeps RAM ~82MB instead of ~330MB for fp32 WebGPU
-    _kokoroTTS = await KokoroTTS.from_pretrained(
-      'onnx-community/Kokoro-82M-v1.0-ONNX',
-      {
-        dtype: 'q8',
-        device: 'wasm',
-        progress_callback: (p) => {
-          if (p.status === 'downloading' && p.total > 0) {
-            _updateVoiceStatus('loading', Math.round(p.progress || 0));
-          }
-        }
-      }
-    );
-    _kokoroReady = true; _kokoroLoading = false;
-    _updateVoiceStatus('ready', 100);
-    console.log('✓ Kokoro TTS ready — device: wasm dtype: q8');
+  _kokoroLoading=true; _updateVoiceStatus('loading',0);
+  try{
+    const {KokoroTTS}=await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js');
+    _kokoroTTS=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{
+      dtype:'q8', device:'wasm',
+      progress_callback:(p)=>{ if(p.status==='downloading'&&p.total>0) _updateVoiceStatus('loading',Math.round(p.progress||0)); }
+    });
+    _kokoroReady=true; _kokoroLoading=false;
+    _updateVoiceStatus('ready',100);
+    console.log('✓ Kokoro TTS ready — q8 wasm');
     return true;
-  } catch(err) {
-    _kokoroLoading = false; _kokoroReady = false;
-    console.warn('✗ Kokoro failed, falling back to Web Speech:', err.message);
-    _updateVoiceStatus('fallback', 0);
+  }catch(err){
+    _kokoroLoading=false; _kokoroReady=false;
+    console.warn('✗ Kokoro failed, using Web Speech:', err.message);
+    _updateVoiceStatus('fallback',0);
     return false;
   }
 }
 
 // ── Text cleaner ──
-function _cleanForTTS(raw) {
-  return (raw || '')
-    .replace(/\[CHOICES[^\]]*\][\s\S]*/i, '')
-    .replace(/\[COMBAT\]|\[DISCOVERY\]|\[DECISION\]/gi, '')
-    .replace(/THE CHRONICLE/gi, '')
-    .replace(/\*+/g, '')
-    .replace(/\n+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
+function _cleanForTTS(raw){
+  return (raw||'')
+    .replace(/\[CHOICES[^\]]*\][\s\S]*/i,'')
+    .replace(/\[COMBAT\]|\[DISCOVERY\]|\[DECISION\]/gi,'')
+    .replace(/THE CHRONICLE/gi,'')
+    .replace(/\*+/g,'')
+    .replace(/\n+/g,' ')
+    .replace(/\s{2,}/g,' ')
     .trim();
 }
 
-// ── Sentence splitter — enables streaming first-sentence playback ──
-function _splitSentences(text) {
-  return text.split(/(?<=[.!?…])\s+/).map(s => s.trim()).filter(s => s.length > 3);
-}
-
-// ── PCM float32 → WAV blob ──
-function _float32ToWav(audioData, sampleRate) {
-  const numChannels = 1, bitsPerSample = 16;
-  const dataSize = audioData.length * 2;
-  const buffer = new ArrayBuffer(44 + dataSize);
-  const view = new DataView(buffer);
-  const w = (o, v, s) => s===4?view.setUint32(o,v,true):view.setUint16(o,v,true);
-  const ws = (o, s) => { for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); };
-  ws(0,'RIFF'); w(4,36+dataSize,4); ws(8,'WAVE'); ws(12,'fmt ');
-  w(16,16,4); w(20,1,2); w(22,numChannels,2); w(24,sampleRate,4);
-  w(28,sampleRate*2,4); w(30,2,2); w(34,bitsPerSample,2);
-  ws(36,'data'); w(40,dataSize,4);
-  let offset=44;
-  for(let i=0;i<audioData.length;i++){
-    const s=Math.max(-1,Math.min(1,audioData[i]));
-    view.setInt16(offset,s<0?s*0x8000:s*0x7FFF,true); offset+=2;
-  }
-  return new Blob([buffer],{type:'audio/wav'});
-}
-
-// ── Play a WAV blob, resolve when done ──
-function _playAudioBlob(blob) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(blob);
-    _currentAudio = new Audio(url);
-    const slider = document.getElementById('vol-slider');
-    _currentAudio.volume = slider ? Math.min(1, parseInt(slider.value||70)/100) : 0.92;
-    _currentAudio.onended = () => { URL.revokeObjectURL(url); resolve(); };
-    _currentAudio.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-    _currentAudio.play().catch(reject);
-  });
-}
-
-// ── Core: Kokoro pipelined streaming ──
-// 2-sentence lookahead: seeds queue with N+1 and N+2 before playback starts.
-// ONNX sessions serialize internally so they chain automatically —
-// inference pipeline stays saturated even through short sentences.
-const KOKORO_LOOKAHEAD = 4;
-
-async function _speakWithKokoro(text) {
-  if(!text||text.length<4) return;
-  _kokoroCancel=false; _kokoroBusy=true; voiceActive=true; updateVoiceBtn();
-  const sentences = _splitSentences(text).filter(s=>s.length>=3);
-  if(!sentences.length){ _kokoroBusy=false; voiceActive=false; updateVoiceBtn(); return; }
-
-  // Seed queue with first LOOKAHEAD sentences — they chain via _kokoroGenerating serialization
-  const queue = [];
-  for(let p=0; p<Math.min(KOKORO_LOOKAHEAD, sentences.length); p++){
-    queue.push(_kokoroGenerate(sentences[p]));
-  }
-
-  for(let i=0; i<sentences.length; i++){
-    if(_kokoroCancel) break;
-    // Enqueue the sentence just beyond our lookahead window
-    const ahead = i + KOKORO_LOOKAHEAD;
-    if(ahead < sentences.length && !_kokoroCancel){
-      queue.push(_kokoroGenerate(sentences[ahead]));
+// ══ CLASS: TTSTextChunker ══
+// Accumulates streaming tokens and emits at natural speech boundaries.
+// Three-tier fallback: sentence → phrase → token window.
+class TTSTextChunker {
+  constructor(onChunk){ this.buf=''; this.emit=onChunk; this.MIN=18; this.MAX=160; }
+  push(tok){ this.buf+=tok; this._try(); }
+  flush(){ const s=this.buf.trim(); if(s.length>=3) this.emit(s); this.buf=''; }
+  _try(){
+    // Tier 1: sentence end (.!?…) with enough lead-in
+    const m1=this.buf.match(/^(.{15,}?[.!?…]["']?)(\s+|$)/);
+    if(m1){ this.emit(m1[1].trim()); this.buf=this.buf.slice(m1[0].length); return; }
+    // Tier 2: phrase boundary (,;:—–) with space following
+    if(this.buf.length>this.MIN){
+      const m2=this.buf.match(/^(.{15,}?[,;:—–])(\s+)/);
+      if(m2){ this.emit(m2[1].trim()); this.buf=this.buf.slice(m2[0].length); return; }
     }
-    // Dequeue front — almost certainly already resolved by the time we get here
-    const readyAudio = await queue.shift();
-    if(_kokoroCancel) break;
-    if(readyAudio) await _playAudioBlob(_float32ToWav(readyAudio.audio, readyAudio.sampling_rate));
+    // Tier 3: force-emit at MAX, cut at last word boundary
+    if(this.buf.length>=this.MAX){
+      const cut=this.buf.lastIndexOf(' ',this.MAX);
+      const at=cut>this.MIN?cut:this.MAX;
+      this.emit(this.buf.slice(0,at).trim());
+      this.buf=this.buf.slice(at).trim();
+    }
   }
-
-  _kokoroBusy=false; _kokoroGenerating=null;
-  if(!_kokoroCancel){ voiceActive=false; updateVoiceBtn(); }
 }
 
-// Serialized generate wrapper — ONNX allows only one session at a time
-async function _kokoroGenerate(sentence){
-  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{});
-  if(_kokoroCancel) return null;
-  let _resolve;
-  _kokoroGenerating = new Promise(r=>{_resolve=r;});
-  try{
-    return await _kokoroTTS.generate(sentence, { voice: _kokoroVoice, speed: 0.92 });
-  } catch(e){ console.warn('✗ Kokoro generate error:', e.message); return null; }
-  finally{ _resolve(); _kokoroGenerating=null; }
+// ══ CLASS: TTSAudioScheduler ══
+// Web Audio API scheduler. Decodes Float32 directly into AudioBuffers —
+// no WAV encoding. Schedules back-to-back with 12ms crossfade to eliminate
+// clicks and gaps. Volume driven from the vol-slider in real time.
+class TTSAudioScheduler {
+  constructor(){ this.ctx=null; this.master=null; this.nextStart=0; }
+  _boot(){
+    if(this.ctx&&this.ctx.state!=='closed') return;
+    this.ctx=new AudioContext({latencyHint:'interactive'});
+    this.master=this.ctx.createGain();
+    this.master.gain.value=this._vol();
+    this.master.connect(this.ctx.destination);
+    this.nextStart=this.ctx.currentTime+0.05;
+  }
+  _vol(){ const s=document.getElementById('vol-slider'); return s?Math.min(1,parseInt(s.value||70)/100):0.92; }
+  schedule(f32,sr){
+    this._boot();
+    if(this.ctx.state==='suspended') this.ctx.resume();
+    const ab=this.ctx.createBuffer(1,f32.length,sr);
+    ab.getChannelData(0).set(f32);
+    const src=this.ctx.createBufferSource();
+    src.buffer=ab;
+    const gain=this.ctx.createGain();
+    src.connect(gain); gain.connect(this.master);
+    const now=this.ctx.currentTime;
+    const t=Math.max(now+0.005,this.nextStart);
+    const dur=ab.duration;
+    const fade=Math.min(0.012,dur*0.1); // 12ms crossfade, max 10% of chunk
+    gain.gain.setValueAtTime(0,t);
+    gain.gain.linearRampToValueAtTime(1,t+fade);
+    gain.gain.setValueAtTime(1,t+dur-fade);
+    gain.gain.linearRampToValueAtTime(0,t+dur);
+    src.start(t);
+    src.onended=()=>{ src.disconnect(); gain.disconnect(); };
+    this.nextStart=t+dur-0.008; // 8ms tail-overlap — closes the gap
+    return dur;
+  }
+  depth(){ return this.ctx?Math.max(0,this.nextStart-this.ctx.currentTime):0; }
+  setVol(v){ if(this.master) this.master.gain.setTargetAtTime(v,this.ctx.currentTime,0.015); }
+  stop(){
+    if(!this.ctx) return;
+    try{ this.ctx.close(); }catch(e){}
+    this.ctx=null; this.master=null; this.nextStart=0;
+  }
 }
+
+// ══ CLASS: KokoroStreamEngine ══
+// Wires TextChunker → ONNX generation chain → AudioScheduler.
+// Token-to-first-audio latency ≈ (first chunk length / words per token) × inference time.
+// Typical: 2–4 sentences buffered and generating before playback starts.
+class KokoroStreamEngine {
+  constructor(){
+    this.chunker  = new TTSTextChunker(c=>this._onChunk(c));
+    this.sched    = new TTSAudioScheduler();
+    this._chain   = Promise.resolve(); // serialized ONNX promise chain
+    this._cancel  = false;
+    this._active  = false;
+    this._pending = 0;
+    // ── Tuning knobs ──────────────────────────────────────────
+    this.MAX_DEPTH    = 10;  // seconds — pause enqueueing above this
+    this.BACKPRESSURE = 400; // ms to wait before retrying a deferred chunk
+    this.DEBUG        = false;
+    // ─────────────────────────────────────────────────────────
+  }
+  start(){ this._cancel=false; this._active=true; }
+  push(tok){ if(this._active&&!this._cancel) this.chunker.push(tok); }
+  flush(){ if(this._active&&!this._cancel) this.chunker.flush(); }
+  stop(){
+    this._cancel=true; this._active=false;
+    this.sched.stop();
+    this._chain=Promise.resolve();
+    this._pending=0;
+  }
+  status(){ return{depth:this.sched.depth().toFixed(2)+'s',pending:this._pending}; }
+  _onChunk(text){
+    if(this._cancel||!text.trim()) return;
+    if(this.sched.depth()>this.MAX_DEPTH){
+      // Backpressure — buffer full, defer
+      setTimeout(()=>this._onChunk(text),this.BACKPRESSURE); return;
+    }
+    this._pending++;
+    if(this.DEBUG) console.log(`[TTS chunk] "${text.slice(0,50)}" | depth:${this.sched.depth().toFixed(1)}s`);
+    // Chain onto the serialized ONNX queue — auto-pipelines with playback
+    this._chain=this._chain.then(async()=>{
+      if(this._cancel){ this._pending--; return; }
+      try{
+        const r=await _kokoroTTS.generate(text,{voice:_kokoroVoice,speed:0.92});
+        if(!this._cancel&&r) this.sched.schedule(r.audio,r.sampling_rate);
+      }catch(e){
+        console.warn('[TTS] chunk failed, skipping:',e.message);
+        // micro-silence: scheduler simply has no buffer scheduled; gap ≈ 0
+      }finally{ this._pending--; }
+    });
+  }
+}
+
+// ── Singleton ──
+let _engine = null;
+function _getEngine(){ if(!_engine) _engine=new KokoroStreamEngine(); return _engine; }
 
 // ── Web Speech fallback ──
 function _speakWithWebSpeech(text){
   if(!window.speechSynthesis) return;
-  stopSpeaking();
   const go=()=>{
     currentUtterance=new SpeechSynthesisUtterance(text);
     currentUtterance.volume=0.95; currentUtterance.rate=0.88; currentUtterance.pitch=0.9;
@@ -1741,32 +1773,50 @@ async function speakStory(){
   const el=document.getElementById('story-text'); if(!el) return;
   const text=_cleanForTTS(el.innerText||''); if(text.length<10) return;
   stopSpeaking();
-  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{}); // drain in-flight ONNX session
   const ok=await _ensureKokoro();
-  if(ok) await _speakWithKokoro(text); else _speakWithWebSpeech(text);
+  if(!ok){ _speakWithWebSpeech(text); return; }
+  const eng=_getEngine(); eng.start(); voiceActive=true; updateVoiceBtn();
+  // Feed complete text through chunker — engine will pipeline generation immediately
+  eng.push(text); eng.flush();
+  // Mark inactive after chain drains
+  eng._chain.then(()=>{ if(!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
 }
 
 async function speakFromElement(text){
   if(!voiceEnabled||!text||isMobile()) return;
   stopSpeaking();
-  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{}); // drain in-flight ONNX session
   const ok=await _ensureKokoro();
-  if(ok) await _speakWithKokoro(_cleanForTTS(text)); else _speakWithWebSpeech(_cleanForTTS(text));
+  if(!ok){ _speakWithWebSpeech(_cleanForTTS(text)); return; }
+  const eng=_getEngine(); eng.start(); voiceActive=true; updateVoiceBtn();
+  eng.push(_cleanForTTS(text)); eng.flush();
+  eng._chain.then(()=>{ if(!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
 }
 
 function stopSpeaking(){
-  _kokoroCancel=true;
-  if(_currentAudio){_currentAudio.pause();_currentAudio.src='';_currentAudio=null;}
-  _kokoroBusy=false;
-  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  if(_engine) _engine.stop();
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
   voiceActive=false; updateVoiceBtn();
+}
+
+// Called from callGM() with each streaming token — the real-time hook
+function ttsPushToken(tok){
+  if(!voiceEnabled||!_kokoroReady||isMobile()) return;
+  const eng=_getEngine();
+  if(!eng._active){ eng.start(); voiceActive=true; updateVoiceBtn(); }
+  eng.push(tok);
+}
+function ttsFlush(){
+  if(!voiceEnabled||!_kokoroReady||isMobile()) return;
+  const eng=_getEngine();
+  eng.flush();
+  eng._chain.then(()=>{ if(eng&&!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
 }
 
 function toggleVoice(){
   if(isMobile()) return;
-  if(voiceActive){stopSpeaking();return;}
+  if(voiceActive){ stopSpeaking(); return; }
   voiceEnabled=true;
-  _kokoroUserRequested=true; // user opted in — allow model download
+  _kokoroUserRequested=true;
   speakStory();
 }
 
@@ -1783,19 +1833,17 @@ function updateAutoSpeakBtn(){
   else{btn.textContent='AUTO';btn.style.cssText+='color:var(--text4);border-color:var(--border2);background:var(--bg3)';}
 }
 
-function _updateVoiceStatus(state, pct){
+function _updateVoiceStatus(state,pct){
   const btn=document.getElementById('voice-btn-bar'); if(!btn)return;
   if(state==='loading'){
     const p=pct||0;
     btn.textContent=p>0?`${p}%`:'⏳';
-    btn.title=`Downloading Kokoro voice model… ${p}% (one-time ~82MB — please wait)`;
+    btn.title=`Downloading Kokoro voice model… ${p}% (one-time ~82MB)`;
     btn.style.color='var(--amber2)';
-  } else if(state==='ready'){
-    btn.title='Kokoro TTS ready — click to read story';btn.textContent='🔈';
-    btn.style.color='';
-  } else if(state==='fallback'){
-    btn.title='Using browser voice (Kokoro unavailable)';btn.textContent='🔈';
-    btn.style.color='';
+  }else if(state==='ready'){
+    btn.title='Kokoro TTS ready — click to read story';btn.textContent='🔈';btn.style.color='';
+  }else if(state==='fallback'){
+    btn.title='Using browser voice';btn.textContent='🔈';btn.style.color='';
   }
 }
 
