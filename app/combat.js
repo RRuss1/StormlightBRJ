@@ -1667,29 +1667,51 @@ function _playAudioBlob(blob) {
   });
 }
 
-// ── Core: Kokoro sentence-by-sentence streaming ──
+// ── Core: Kokoro pipelined streaming ──
+// 2-sentence lookahead: seeds queue with N+1 and N+2 before playback starts.
+// ONNX sessions serialize internally so they chain automatically —
+// inference pipeline stays saturated even through short sentences.
+const KOKORO_LOOKAHEAD = 4;
+
 async function _speakWithKokoro(text) {
   if(!text||text.length<4) return;
   _kokoroCancel=false; _kokoroBusy=true; voiceActive=true; updateVoiceBtn();
-  const sentences = _splitSentences(text);
-  for(const sentence of sentences){
-    if(_kokoroCancel) break;
-    if(sentence.length<3) continue;
-    try{
-      // Serialize — wait for any prior .generate() to fully settle before starting a new one
-      if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{});
-      if(_kokoroCancel) break;
-      let _resolve;
-      _kokoroGenerating = new Promise(r=>{_resolve=r;});
-      let result;
-      try{ result = await _kokoroTTS.generate(sentence, { voice: _kokoroVoice, speed: 0.92 }); }
-      finally{ _resolve(); _kokoroGenerating=null; }
-      if(_kokoroCancel) break;
-      await _playAudioBlob(_float32ToWav(result.audio, result.sampling_rate));
-    } catch(e){ _kokoroGenerating=null; console.warn('✗ Kokoro sentence error:', e.message); }
+  const sentences = _splitSentences(text).filter(s=>s.length>=3);
+  if(!sentences.length){ _kokoroBusy=false; voiceActive=false; updateVoiceBtn(); return; }
+
+  // Seed queue with first LOOKAHEAD sentences — they chain via _kokoroGenerating serialization
+  const queue = [];
+  for(let p=0; p<Math.min(KOKORO_LOOKAHEAD, sentences.length); p++){
+    queue.push(_kokoroGenerate(sentences[p]));
   }
-  _kokoroBusy=false;
+
+  for(let i=0; i<sentences.length; i++){
+    if(_kokoroCancel) break;
+    // Enqueue the sentence just beyond our lookahead window
+    const ahead = i + KOKORO_LOOKAHEAD;
+    if(ahead < sentences.length && !_kokoroCancel){
+      queue.push(_kokoroGenerate(sentences[ahead]));
+    }
+    // Dequeue front — almost certainly already resolved by the time we get here
+    const readyAudio = await queue.shift();
+    if(_kokoroCancel) break;
+    if(readyAudio) await _playAudioBlob(_float32ToWav(readyAudio.audio, readyAudio.sampling_rate));
+  }
+
+  _kokoroBusy=false; _kokoroGenerating=null;
   if(!_kokoroCancel){ voiceActive=false; updateVoiceBtn(); }
+}
+
+// Serialized generate wrapper — ONNX allows only one session at a time
+async function _kokoroGenerate(sentence){
+  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{});
+  if(_kokoroCancel) return null;
+  let _resolve;
+  _kokoroGenerating = new Promise(r=>{_resolve=r;});
+  try{
+    return await _kokoroTTS.generate(sentence, { voice: _kokoroVoice, speed: 0.92 });
+  } catch(e){ console.warn('✗ Kokoro generate error:', e.message); return null; }
+  finally{ _resolve(); _kokoroGenerating=null; }
 }
 
 // ── Web Speech fallback ──
