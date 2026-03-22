@@ -377,8 +377,8 @@ async function onEnter(){
     gState=await loadState();
     if(gState){partySize=gState.partySize||partySize;if(gState.locationSeed)buildActs(gState.locationSeed);}
     myChar=loadMyChar();
-    if(myChar&&gState&&gState.phase==='playing'){showGameScreen();return;}
-    if(myChar&&gState&&gState.phase==='pregame'){showScreen('lobby');renderLobby();startLobbyPolling();return;}
+    if(myChar&&gState&&gState.phase==='playing'){mySlot=myChar.slot??mySlot;showGameScreen();return;}
+    if(myChar&&gState&&gState.phase==='pregame'){mySlot=myChar.slot??mySlot;showScreen('lobby');renderLobby();startLobbyPolling();return;}
     // No character — claim the next open slot (first-done = slot 1, etc.)
     setTitleStatus('Reserving your slot...');
     const slotIdx=await claimNextSlot();
@@ -404,18 +404,20 @@ async function claimNextSlot(){
   // Atomically claim the next open slot via a fresh state read.
   // First-done gets slot 0, second gets slot 1, etc.
   // Re-reads state immediately before writing to minimize race window.
+  // On refresh mid-creation, reclaims the placeholder left by THIS session
+  // (matched via SESSION_ID) so the user keeps their original slot.
   try{
     const fresh=await loadState();
     if(fresh){gState=fresh;partySize=fresh.partySize||partySize;}
     if(!gState){gState={players:new Array(partySize).fill(null),partySize,turn:0,
       totalMoves:0,phase:'pregame',campaignId,campaignName:campaignId};}
     if(!gState.players)gState.players=new Array(gState.partySize||partySize).fill(null);
-    // Find first null slot — skip placeholders (another player is in-progress there)
-    const idx=gState.players.findIndex(p=>!p);
+    // Find first null slot OR a placeholder left by THIS session (refresh recovery)
+    const idx=gState.players.findIndex(p=>!p||(p.isPlaceholder&&p.sessionId===SESSION_ID));
     if(idx===-1)return -1; // all slots taken
     mySlot=idx;
     const placeholder={name:'...',className:'Joining...',classId:'pending',
-      color:'#555',hp:0,maxHp:0,slot:idx,isNPC:false,campaignId,isPlaceholder:true};
+      color:'#555',hp:0,maxHp:0,slot:idx,isNPC:false,campaignId,isPlaceholder:true,sessionId:SESSION_ID};
     gState.players[idx]=placeholder;
     await saveState(gState);
     // Notify session of slot claim

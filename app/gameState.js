@@ -1206,6 +1206,14 @@ const BLADE_NAMES={windrunner:'Silverwind Blade',lightweaver:'Illusory Edge',edg
 let gState    = null;   // Full campaign game state from Sheets
 let myChar    = null;   // This player's character object
 let mySlot    = null;   // Slot index for this player
+
+// Unique ID for this browser tab session — survives refresh, dies on tab close.
+// Used to reclaim stale placeholders left by a mid-creation refresh.
+const SESSION_ID = sessionStorage.getItem('sc_session') || (()=>{
+  const id = Math.random().toString(36).slice(2,10);
+  sessionStorage.setItem('sc_session', id);
+  return id;
+})();
 let selClass  = null;   // Selected class during creation
 let selColor  = null;   // Selected color during creation
 let rolledStats = null; // Stats from character creation
