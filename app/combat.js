@@ -1562,17 +1562,24 @@ const KOKORO_VOICES = {
 };
 
 // ── Module-level state ──
-let _kokoroTTS      = null;
-let _kokoroLoading  = false;
-let _kokoroReady    = false;
-let _kokoroVoice    = 'bm_daniel';
-let _kokoroBusy     = false;
-let _kokoroCancel   = false;
-let _currentAudio   = null;
+let _kokoroTTS         = null;
+let _kokoroLoading     = false;
+let _kokoroReady       = false;
+let _kokoroVoice       = 'bm_daniel';
+let _kokoroBusy        = false;
+let _kokoroCancel      = false;
+let _currentAudio      = null;
+let _kokoroGenerating  = null; // Promise — resolves when the in-flight .generate() settles
 
 // ── Lazy singleton model loader ──
+// Always uses q8 + wasm — fp32/WebGPU model is 4× larger (~330MB) and causes RAM spikes.
+// Download is gated: only fires when the user explicitly clicks the voice button.
+let _kokoroUserRequested = false; // set true when user clicks voice btn for first time
+
 async function _ensureKokoro() {
   if (_kokoroReady) return true;
+  // If model hasn't been explicitly requested yet, skip and use Web Speech as fallback
+  if (!_kokoroUserRequested) return false;
   if (_kokoroLoading) {
     await new Promise(r => {
       const check = setInterval(() => {
@@ -1582,28 +1589,30 @@ async function _ensureKokoro() {
     return _kokoroReady;
   }
   _kokoroLoading = true;
-  _updateVoiceStatus('loading');
+  _updateVoiceStatus('loading', 0);
   try {
     const { KokoroTTS } = await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js');
-    let device = 'wasm', dtype = 'q8';
-    try {
-      if (navigator.gpu) {
-        const adapter = await navigator.gpu.requestAdapter();
-        if (adapter) { device = 'webgpu'; dtype = 'fp32'; }
-      }
-    } catch(e) {}
+    // Force q8 + wasm — keeps RAM ~82MB instead of ~330MB for fp32 WebGPU
     _kokoroTTS = await KokoroTTS.from_pretrained(
       'onnx-community/Kokoro-82M-v1.0-ONNX',
-      { dtype, device }
+      {
+        dtype: 'q8',
+        device: 'wasm',
+        progress_callback: (p) => {
+          if (p.status === 'downloading' && p.total > 0) {
+            _updateVoiceStatus('loading', Math.round(p.progress || 0));
+          }
+        }
+      }
     );
     _kokoroReady = true; _kokoroLoading = false;
-    _updateVoiceStatus('ready');
-    console.log('✓ Kokoro TTS ready — device:', device, 'dtype:', dtype);
+    _updateVoiceStatus('ready', 100);
+    console.log('✓ Kokoro TTS ready — device: wasm dtype: q8');
     return true;
   } catch(err) {
     _kokoroLoading = false; _kokoroReady = false;
     console.warn('✗ Kokoro failed, falling back to Web Speech:', err.message);
-    _updateVoiceStatus('fallback');
+    _updateVoiceStatus('fallback', 0);
     return false;
   }
 }
@@ -1667,10 +1676,17 @@ async function _speakWithKokoro(text) {
     if(_kokoroCancel) break;
     if(sentence.length<3) continue;
     try{
-      const result = await _kokoroTTS.generate(sentence, { voice: _kokoroVoice, speed: 0.92 });
+      // Serialize — wait for any prior .generate() to fully settle before starting a new one
+      if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{});
+      if(_kokoroCancel) break;
+      let _resolve;
+      _kokoroGenerating = new Promise(r=>{_resolve=r;});
+      let result;
+      try{ result = await _kokoroTTS.generate(sentence, { voice: _kokoroVoice, speed: 0.92 }); }
+      finally{ _resolve(); _kokoroGenerating=null; }
       if(_kokoroCancel) break;
       await _playAudioBlob(_float32ToWav(result.audio, result.sampling_rate));
-    } catch(e){ console.warn('✗ Kokoro sentence error:', e.message); }
+    } catch(e){ _kokoroGenerating=null; console.warn('✗ Kokoro sentence error:', e.message); }
   }
   _kokoroBusy=false;
   if(!_kokoroCancel){ voiceActive=false; updateVoiceBtn(); }
@@ -1703,6 +1719,7 @@ async function speakStory(){
   const el=document.getElementById('story-text'); if(!el) return;
   const text=_cleanForTTS(el.innerText||''); if(text.length<10) return;
   stopSpeaking();
+  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{}); // drain in-flight ONNX session
   const ok=await _ensureKokoro();
   if(ok) await _speakWithKokoro(text); else _speakWithWebSpeech(text);
 }
@@ -1710,6 +1727,7 @@ async function speakStory(){
 async function speakFromElement(text){
   if(!voiceEnabled||!text||isMobile()) return;
   stopSpeaking();
+  if(_kokoroGenerating) await _kokoroGenerating.catch(()=>{}); // drain in-flight ONNX session
   const ok=await _ensureKokoro();
   if(ok) await _speakWithKokoro(_cleanForTTS(text)); else _speakWithWebSpeech(_cleanForTTS(text));
 }
@@ -1725,7 +1743,9 @@ function stopSpeaking(){
 function toggleVoice(){
   if(isMobile()) return;
   if(voiceActive){stopSpeaking();return;}
-  voiceEnabled=true; speakStory();
+  voiceEnabled=true;
+  _kokoroUserRequested=true; // user opted in — allow model download
+  speakStory();
 }
 
 function updateVoiceBtn(){
@@ -1741,11 +1761,20 @@ function updateAutoSpeakBtn(){
   else{btn.textContent='AUTO';btn.style.cssText+='color:var(--text4);border-color:var(--border2);background:var(--bg3)';}
 }
 
-function _updateVoiceStatus(state){
+function _updateVoiceStatus(state, pct){
   const btn=document.getElementById('voice-btn-bar'); if(!btn)return;
-  if(state==='loading'){btn.title='Loading Kokoro voice model (one-time ~160MB)…';btn.textContent='⏳';}
-  else if(state==='ready'){btn.title='Kokoro TTS ready — click to read story';btn.textContent='🔈';}
-  else if(state==='fallback'){btn.title='Using browser voice (Kokoro unavailable)';btn.textContent='🔈';}
+  if(state==='loading'){
+    const p=pct||0;
+    btn.textContent=p>0?`${p}%`:'⏳';
+    btn.title=`Downloading Kokoro voice model… ${p}% (one-time ~82MB — please wait)`;
+    btn.style.color='var(--amber2)';
+  } else if(state==='ready'){
+    btn.title='Kokoro TTS ready — click to read story';btn.textContent='🔈';
+    btn.style.color='';
+  } else if(state==='fallback'){
+    btn.title='Using browser voice (Kokoro unavailable)';btn.textContent='🔈';
+    btn.style.color='';
+  }
 }
 
 function setVoice(voiceVal){
