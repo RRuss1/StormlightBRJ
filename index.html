@@ -757,25 +757,26 @@
      AUDIO BAR (fixed, bottom-right)
      ═══════════════════════════════════════════════════════ -->
 <div class="audio-bar" id="audio-bar">
+  <!-- Storm sound -->
   <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()" title="Toggle Storm">🔇</button>
   <span class="audio-label font-display text-xs tracking-widest" id="audio-label" style="color:var(--text5)">OFF</span>
-  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)"/>
-  <div style="width:1px;height:16px;background:var(--border2);margin:0 2px"></div>
-  <!-- Kokoro TTS voice selector -->
-  <select id="voice-select" onchange="setVoice(this.value)" title="Narrator voice"
-    style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;padding:3px 6px;cursor:pointer;max-width:130px;">
-    <option value="bm_daniel">Daniel · British M</option>
-    <option value="bm_george">George · British M</option>
-    <option value="am_echo">Echo · American M</option>
-    <option value="am_adam">Adam · American M</option>
-    <option value="am_michael">Michael · American M</option>
-    <option value="af_heart">Heart · American F</option>
-    <option value="af_sky">Sky · American F</option>
-    <option value="af_nicole">Nicole · American F</option>
-    <option value="bf_emma">Emma · British F</option>
-  </select>
+  <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="30" oninput="setVolume(this.value)" title="Storm volume"/>
+  <div style="width:1px;height:16px;background:var(--border2);margin:0 4px"></div>
+  <!-- Narrator TTS -->
   <button id="voice-btn-bar" onclick="toggleVoice()"
-    class="text-sm cursor-pointer p-0.5" style="background:none;border:none" title="Read story aloud (Kokoro TTS)">🔈</button>
+    class="text-sm cursor-pointer p-0.5" style="background:none;border:none" title="Read story aloud">🔈</button>
+  <select id="voice-select" onchange="setVoice(this.value)" title="Narrator voice"
+    style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text4);font-family:var(--font-d);font-size:9px;letter-spacing:1px;padding:3px 6px;cursor:pointer;max-width:140px;">
+    <!-- populated by populateVoiceSelect() -->
+  </select>
+  <div style="width:1px;height:16px;background:var(--border2);margin:0 4px"></div>
+  <!-- TTS sliders -->
+  <span class="audio-label font-display text-xs tracking-widest" style="color:var(--text5)">VOL</span>
+  <input type="range" class="vol-slider" id="tts-vol-slider" min="0" max="100" value="95" title="Narrator volume"/>
+  <span class="audio-label font-display text-xs tracking-widest" style="color:var(--text5)">SPD</span>
+  <input type="range" class="vol-slider" id="rate-slider" min="50" max="180" value="90" title="Narrator speed"/>
+  <span class="audio-label font-display text-xs tracking-widest" style="color:var(--text5)">PCH</span>
+  <input type="range" class="vol-slider" id="pitch-slider" min="50" max="200" value="100" title="Narrator pitch"/>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════

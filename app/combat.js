@@ -1542,72 +1542,16 @@ One sentence each. Tag: [DISCOVERY] or [DECISION].${getGenderContext()}`;
 }
 
 
-// ══ VOICE OVER — Kokoro TTS Streaming Engine v3 ══
+// ══ VOICE OVER — Web Speech API Engine ══
 //
 // Architecture:
+//   AI Token Stream ──► TTSTextChunker ──► WebSpeechEngine ──► SpeechSynthesis ──► 🔊
 //
-//   AI Token Stream ──► TTSTextChunker ──► KokoroStreamEngine ──► TTSAudioScheduler ──► 🔊
-//                       (sentence/phrase/    (serialized ONNX       (Web Audio API,
-//                        token-window         promise chain)          crossfade, precise
-//                        boundaries)                                  scheduling)
-//
-// Key properties:
-//   • Hooks directly into callGM() streaming — first word → first chunk in <300ms
-//   • Web Audio API scheduling: sample-accurate, no gaps, 12ms crossfade
-//   • ONNX serialized but pipelined — next chunk generates while current plays
-//   • Backpressure: pauses enqueueing if >10s audio buffered ahead
-//   • q8+wasm model: ~82MB RAM, cached permanently after first download
+// Streaming: tokens accumulate in chunker → emitted at sentence/phrase boundaries
+// → queued in WebSpeechEngine → spoken in sequence with no gaps.
+// Pitch / rate / volume controlled by sliders in the audio bar.
 
 function autoSpeakStory(){}
-
-// ── Voice catalogue ──
-const KOKORO_VOICES = {
-  'am_echo':    { label:'Echo — American Male, Warm'     },
-  'am_adam':    { label:'Adam — American Male, Deep'     },
-  'am_michael': { label:'Michael — American Male, Clear' },
-  'af_heart':   { label:'Heart — American Female, Warm'  },
-  'af_sky':     { label:'Sky — American Female, Bright'  },
-  'af_nicole':  { label:'Nicole — American Female, Calm' },
-  'bm_daniel':  { label:'Daniel — British Male, Noble'   },
-  'bm_george':  { label:'George — British Male, Gravelly'},
-  'bf_emma':    { label:'Emma — British Female, Crisp'   },
-};
-
-// ── Kokoro model state ──
-let _kokoroTTS           = null;
-let _kokoroLoading       = false;
-let _kokoroReady         = false;
-let _kokoroVoice         = 'bm_daniel';
-let _kokoroUserRequested = false; // download only when user explicitly opts in
-
-// ── Lazy model loader ──
-// q8+wasm always — fp32/WebGPU is 4× larger (~330MB) and spikes GPU RAM.
-// Download gated on user clicking the voice button (not auto-triggered).
-async function _ensureKokoro() {
-  if(_kokoroReady) return true;
-  if(!_kokoroUserRequested) return false;
-  if(_kokoroLoading){
-    await new Promise(r=>{const t=setInterval(()=>{if(_kokoroReady||!_kokoroLoading){clearInterval(t);r();}},150);});
-    return _kokoroReady;
-  }
-  _kokoroLoading=true; _updateVoiceStatus('loading',0);
-  try{
-    const {KokoroTTS}=await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js');
-    _kokoroTTS=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{
-      dtype:'q8', device:'wasm',
-      progress_callback:(p)=>{ if(p.status==='downloading'&&p.total>0) _updateVoiceStatus('loading',Math.round(p.progress||0)); }
-    });
-    _kokoroReady=true; _kokoroLoading=false;
-    _updateVoiceStatus('ready',100);
-    console.log('✓ Kokoro TTS ready — q8 wasm');
-    return true;
-  }catch(err){
-    _kokoroLoading=false; _kokoroReady=false;
-    console.warn('✗ Kokoro failed, using Web Speech:', err.message);
-    _updateVoiceStatus('fallback',0);
-    return false;
-  }
-}
 
 // ── Text cleaner ──
 function _cleanForTTS(raw){
@@ -1621,6 +1565,27 @@ function _cleanForTTS(raw){
     .trim();
 }
 
+// ── Slider helpers ──
+function _ttsVol()  { const s=document.getElementById('tts-vol-slider');  return s?parseInt(s.value)/100:0.95; }
+function _ttsRate() { const s=document.getElementById('rate-slider');     return s?parseInt(s.value)/100:0.9;  }
+function _ttsPitch(){ const s=document.getElementById('pitch-slider');    return s?parseInt(s.value)/100:1.0;  }
+
+// ── Preferred voice resolution ──
+function _resolveVoice(){
+  const vv=window.speechSynthesis.getVoices();
+  const sel=document.getElementById('voice-select');
+  if(sel&&sel.value){
+    const match=vv.find(v=>v.name===sel.value);
+    if(match)return match;
+  }
+  const prefs=['Daniel','George','Arthur','Aaron','Alex'];
+  for(const n of prefs){const v=vv.find(x=>x.name===n);if(v)return v;}
+  return vv.find(x=>x.lang==='en-GB'&&x.localService)
+      || vv.find(x=>x.lang.startsWith('en'))
+      || vv[0]
+      || null;
+}
+
 // ══ CLASS: TTSTextChunker ══
 // Accumulates streaming tokens and emits at natural speech boundaries.
 // Three-tier fallback: sentence → phrase → token window.
@@ -1629,15 +1594,12 @@ class TTSTextChunker {
   push(tok){ this.buf+=tok; this._try(); }
   flush(){ const s=this.buf.trim(); if(s.length>=3) this.emit(s); this.buf=''; }
   _try(){
-    // Tier 1: sentence end (.!?…) with enough lead-in
     const m1=this.buf.match(/^(.{15,}?[.!?…]["']?)(\s+|$)/);
     if(m1){ this.emit(m1[1].trim()); this.buf=this.buf.slice(m1[0].length); return; }
-    // Tier 2: phrase boundary (,;:—–) with space following
     if(this.buf.length>this.MIN){
       const m2=this.buf.match(/^(.{15,}?[,;:—–])(\s+)/);
       if(m2){ this.emit(m2[1].trim()); this.buf=this.buf.slice(m2[0].length); return; }
     }
-    // Tier 3: force-emit at MAX, cut at last word boundary
     if(this.buf.length>=this.MAX){
       const cut=this.buf.lastIndexOf(' ',this.MAX);
       const at=cut>this.MIN?cut:this.MAX;
@@ -1647,149 +1609,77 @@ class TTSTextChunker {
   }
 }
 
-// ══ CLASS: TTSAudioScheduler ══
-// Web Audio API scheduler. Decodes Float32 directly into AudioBuffers —
-// no WAV encoding. Schedules back-to-back with 12ms crossfade to eliminate
-// clicks and gaps. Volume driven from the vol-slider in real time.
-class TTSAudioScheduler {
-  constructor(){ this.ctx=null; this.master=null; this.nextStart=0; }
-  _boot(){
-    if(this.ctx&&this.ctx.state!=='closed') return;
-    this.ctx=new AudioContext({latencyHint:'interactive'});
-    this.master=this.ctx.createGain();
-    this.master.gain.value=this._vol();
-    this.master.connect(this.ctx.destination);
-    this.nextStart=this.ctx.currentTime+0.05;
-  }
-  _vol(){ const s=document.getElementById('vol-slider'); return s?Math.min(1,parseInt(s.value||70)/100):0.92; }
-  schedule(f32,sr){
-    this._boot();
-    if(this.ctx.state==='suspended') this.ctx.resume();
-    const ab=this.ctx.createBuffer(1,f32.length,sr);
-    ab.getChannelData(0).set(f32);
-    const src=this.ctx.createBufferSource();
-    src.buffer=ab;
-    const gain=this.ctx.createGain();
-    src.connect(gain); gain.connect(this.master);
-    const now=this.ctx.currentTime;
-    const t=Math.max(now+0.005,this.nextStart);
-    const dur=ab.duration;
-    const fade=Math.min(0.012,dur*0.1); // 12ms crossfade, max 10% of chunk
-    gain.gain.setValueAtTime(0,t);
-    gain.gain.linearRampToValueAtTime(1,t+fade);
-    gain.gain.setValueAtTime(1,t+dur-fade);
-    gain.gain.linearRampToValueAtTime(0,t+dur);
-    src.start(t);
-    src.onended=()=>{ src.disconnect(); gain.disconnect(); };
-    this.nextStart=t+dur-0.008; // 8ms tail-overlap — closes the gap
-    return dur;
-  }
-  depth(){ return this.ctx?Math.max(0,this.nextStart-this.ctx.currentTime):0; }
-  setVol(v){ if(this.master) this.master.gain.setTargetAtTime(v,this.ctx.currentTime,0.015); }
-  stop(){
-    if(!this.ctx) return;
-    try{ this.ctx.close(); }catch(e){}
-    this.ctx=null; this.master=null; this.nextStart=0;
-  }
-}
-
-// ══ CLASS: KokoroStreamEngine ══
-// Wires TextChunker → ONNX generation chain → AudioScheduler.
-// Token-to-first-audio latency ≈ (first chunk length / words per token) × inference time.
-// Typical: 2–4 sentences buffered and generating before playback starts.
-class KokoroStreamEngine {
+// ══ CLASS: WebSpeechEngine ══
+// Queues text chunks and speaks them back-to-back using SpeechSynthesis.
+// Each utterance picks up live slider values so mid-story adjustments apply immediately.
+class WebSpeechEngine {
   constructor(){
-    this.chunker  = new TTSTextChunker(c=>this._onChunk(c));
-    this.sched    = new TTSAudioScheduler();
-    this._chain   = Promise.resolve(); // serialized ONNX promise chain
-    this._cancel  = false;
+    this._queue   = [];
     this._active  = false;
-    this._pending = 0;
-    // ── Tuning knobs ──────────────────────────────────────────
-    this.MAX_DEPTH    = 10;  // seconds — pause enqueueing above this
-    this.BACKPRESSURE = 400; // ms to wait before retrying a deferred chunk
-    this.DEBUG        = false;
-    // ─────────────────────────────────────────────────────────
+    this._cancel  = false;
+    this._busy    = false;
+    this._chunker = new TTSTextChunker(t=>this._enqueue(t));
   }
   start(){ this._cancel=false; this._active=true; }
-  push(tok){ if(this._active&&!this._cancel) this.chunker.push(tok); }
-  flush(){ if(this._active&&!this._cancel) this.chunker.flush(); }
+  push(tok){ if(this._active&&!this._cancel) this._chunker.push(tok); }
+  flush(){ if(this._active&&!this._cancel) this._chunker.flush(); }
   stop(){
-    this._cancel=true; this._active=false;
-    this.sched.stop();
-    this._chain=Promise.resolve();
-    this._pending=0;
+    this._cancel=true; this._active=false; this._busy=false;
+    this._queue=[];
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
   }
-  status(){ return{depth:this.sched.depth().toFixed(2)+'s',pending:this._pending}; }
-  _onChunk(text){
-    if(this._cancel||!text.trim()) return;
-    if(this.sched.depth()>this.MAX_DEPTH){
-      // Backpressure — buffer full, defer
-      setTimeout(()=>this._onChunk(text),this.BACKPRESSURE); return;
-    }
-    this._pending++;
-    if(this.DEBUG) console.log(`[TTS chunk] "${text.slice(0,50)}" | depth:${this.sched.depth().toFixed(1)}s`);
-    // Chain onto the serialized ONNX queue — auto-pipelines with playback
-    this._chain=this._chain.then(async()=>{
-      if(this._cancel){ this._pending--; return; }
-      try{
-        const r=await _kokoroTTS.generate(text,{voice:_kokoroVoice,speed:0.92});
-        if(!this._cancel&&r) this.sched.schedule(r.audio,r.sampling_rate);
-      }catch(e){
-        console.warn('[TTS] chunk failed, skipping:',e.message);
-        // micro-silence: scheduler simply has no buffer scheduled; gap ≈ 0
-      }finally{ this._pending--; }
-    });
+  _enqueue(text){
+    if(!text.trim()||this._cancel) return;
+    this._queue.push(text);
+    if(!this._busy) this._next();
+  }
+  _next(){
+    if(this._cancel||!this._queue.length){ this._busy=false; return; }
+    this._busy=true;
+    const text=this._queue.shift();
+    const utt=new SpeechSynthesisUtterance(text);
+    utt.volume=_ttsVol();
+    utt.rate  =_ttsRate();
+    utt.pitch =_ttsPitch();
+    const v=_resolveVoice(); if(v) utt.voice=v;
+    utt.onend=utt.onerror=()=>{
+      if(!this._cancel&&this._queue.length){ this._next(); return; }
+      this._busy=false;
+      if(!this._cancel){ voiceActive=false; updateVoiceBtn(); }
+    };
+    window.speechSynthesis.speak(utt);
   }
 }
 
 // ── Singleton ──
 let _engine = null;
-function _getEngine(){ if(!_engine) _engine=new KokoroStreamEngine(); return _engine; }
+function _getEngine(){ if(!_engine||!_engine._active) _engine=new WebSpeechEngine(); return _engine; }
 
-// ── Web Speech fallback ──
-function _speakWithWebSpeech(text){
-  if(!window.speechSynthesis) return;
-  const go=()=>{
-    currentUtterance=new SpeechSynthesisUtterance(text);
-    currentUtterance.volume=0.95; currentUtterance.rate=0.88; currentUtterance.pitch=0.9;
-    const vv=window.speechSynthesis.getVoices();
-    const prefs=['Daniel','George','Arthur','Aaron','Alex'];
-    let v=null;
-    for(const n of prefs){v=vv.find(x=>x.name===n);if(v)break;}
-    if(!v)v=vv.find(x=>x.lang==='en-GB'&&x.localService)||vv.find(x=>x.lang.startsWith('en'))||vv[0];
-    if(v)currentUtterance.voice=v;
-    currentUtterance.onend=currentUtterance.onerror=()=>{voiceActive=false;updateVoiceBtn();};
-    window.speechSynthesis.speak(currentUtterance);
-    voiceActive=true; updateVoiceBtn();
-  };
-  if(window.speechSynthesis.getVoices().length>0)go();
-  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;go();};}
+// ── Populate voice selector from system voices ──
+function populateVoiceSelect(){
+  const sel=document.getElementById('voice-select'); if(!sel) return;
+  const stored=localStorage.getItem('sc_voice')||'';
+  const vv=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
+  if(!vv.length) return;
+  sel.innerHTML=vv.map(v=>`<option value="${v.name}"${v.name===stored?' selected':''}>${v.name} (${v.lang})</option>`).join('');
+  if(!stored||!vv.find(v=>v.name===stored)) sel.value=vv[0].name;
 }
 
 // ── Public API ──
-async function speakStory(){
+function speakStory(){
   if(!voiceEnabled||isMobile()) return;
   const el=document.getElementById('story-text'); if(!el) return;
   const text=_cleanForTTS(el.innerText||''); if(text.length<10) return;
   stopSpeaking();
-  const ok=await _ensureKokoro();
-  if(!ok){ _speakWithWebSpeech(text); return; }
   const eng=_getEngine(); eng.start(); voiceActive=true; updateVoiceBtn();
-  // Feed complete text through chunker — engine will pipeline generation immediately
-  eng.push(text); eng.flush();
-  // Mark inactive after chain drains
-  eng._chain.then(()=>{ if(!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
+  eng._enqueue(text);
 }
 
-async function speakFromElement(text){
+function speakFromElement(text){
   if(!voiceEnabled||!text||isMobile()) return;
   stopSpeaking();
-  const ok=await _ensureKokoro();
-  if(!ok){ _speakWithWebSpeech(_cleanForTTS(text)); return; }
   const eng=_getEngine(); eng.start(); voiceActive=true; updateVoiceBtn();
-  eng.push(_cleanForTTS(text)); eng.flush();
-  eng._chain.then(()=>{ if(!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
+  eng._enqueue(_cleanForTTS(text));
 }
 
 function stopSpeaking(){
@@ -1798,31 +1688,30 @@ function stopSpeaking(){
   voiceActive=false; updateVoiceBtn();
 }
 
-// Called from callGM() with each streaming token — the real-time hook
+// Called from callGM() with each streaming token
 function ttsPushToken(tok){
-  if(!voiceEnabled||!_kokoroReady||isMobile()) return;
+  if(!voiceEnabled||isMobile()) return;
   const eng=_getEngine();
   if(!eng._active){ eng.start(); voiceActive=true; updateVoiceBtn(); }
   eng.push(tok);
 }
 function ttsFlush(){
-  if(!voiceEnabled||!_kokoroReady||isMobile()) return;
-  const eng=_getEngine();
-  eng.flush();
-  eng._chain.then(()=>{ if(eng&&!eng._cancel){ voiceActive=false; updateVoiceBtn(); } });
+  if(!voiceEnabled||isMobile()) return;
+  _getEngine().flush();
 }
 
 function toggleVoice(){
   if(isMobile()) return;
   if(voiceActive){ stopSpeaking(); return; }
   voiceEnabled=true;
-  _kokoroUserRequested=true;
-  speakStory();
+  const vv=window.speechSynthesis.getVoices();
+  if(vv.length) speakStory();
+  else{ window.speechSynthesis.onvoiceschanged=()=>{ window.speechSynthesis.onvoiceschanged=null; populateVoiceSelect(); speakStory(); }; }
 }
 
 function updateVoiceBtn(){
   const label=voiceActive?'🔊':'🔈';
-  const title=voiceActive?'Stop reading':'Read story aloud';
+  const title=voiceActive?'Stop narration':'Read story aloud';
   const b=document.getElementById('voice-btn-bar'); if(b){b.textContent=label;b.title=title;}
 }
 
@@ -1833,32 +1722,18 @@ function updateAutoSpeakBtn(){
   else{btn.textContent='AUTO';btn.style.cssText+='color:var(--text4);border-color:var(--border2);background:var(--bg3)';}
 }
 
-function _updateVoiceStatus(state,pct){
-  const btn=document.getElementById('voice-btn-bar'); if(!btn)return;
-  if(state==='loading'){
-    const p=pct||0;
-    btn.textContent=p>0?`${p}%`:'⏳';
-    btn.title=`Downloading Kokoro voice model… ${p}% (one-time ~82MB)`;
-    btn.style.color='var(--amber2)';
-  }else if(state==='ready'){
-    btn.title='Kokoro TTS ready — click to read story';btn.textContent='🔈';btn.style.color='';
-  }else if(state==='fallback'){
-    btn.title='Using browser voice';btn.textContent='🔈';btn.style.color='';
-  }
-}
-
 function setVoice(voiceVal){
   localStorage.setItem('sc_voice',voiceVal);
-  const legacyMap={
-    'male_deep':'bm_george','male_warm':'am_echo','male_gravelly':'bm_george',
-    'female_british':'bf_emma','female_warm':'af_heart','female_clear':'af_sky',
-  };
-  _kokoroVoice=KOKORO_VOICES[voiceVal]?voiceVal:(legacyMap[voiceVal]||'bm_daniel');
   if(voiceActive){stopSpeaking();setTimeout(speakStory,100);}
 }
 
 function loadVoicePreference(){
-  const stored=localStorage.getItem('sc_voice'); if(stored)setVoice(stored);
+  const stored=localStorage.getItem('sc_voice');
+  const sel=document.getElementById('voice-select');
+  if(stored&&sel){sel.value=stored;}
+  // Populate voice list when voices are available
+  if(window.speechSynthesis.getVoices().length) populateVoiceSelect();
+  else window.speechSynthesis.onvoiceschanged=()=>{ window.speechSynthesis.onvoiceschanged=null; populateVoiceSelect(); };
 }
 
 function isMobile(){return/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);}

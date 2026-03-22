@@ -790,7 +790,7 @@
    ───────────────────────────────────────────── */
 .audio-bar {
   position: fixed;
-  top: 9px; right: 14px;  /* ── Moved from footer to header zone ── */
+  top: 9px; left: 50%; transform: translateX(-50%); /* ── Centered in header zone ── */
   bottom: auto;
   z-index: 200;            /* Above game-top (z-index: 10) */
   display: none;

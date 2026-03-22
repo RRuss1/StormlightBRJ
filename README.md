@@ -130,13 +130,12 @@ Knight Radiants grow stronger as they speak their Oaths. There are 5 per order, 
 
 ## Voice Narration
 
-Click **🔈** in the game bar to have the chronicle read aloud by **Kokoro TTS** — an 82MB neural voice model that runs entirely in your browser, no server required.
+Click **🔈** in the game bar to have the chronicle read aloud using your browser's built-in speech synthesis — no download required.
 
-- **First use:** the model downloads once (~82MB) and is cached permanently in your browser — subsequent sessions load instantly
-- **Download progress** is shown live on the button (e.g. `47%`)
-- **Voices available:** Daniel (British Male), George (British Male Gravelly), Emma (British Female), Echo, Adam, Michael, Heart, Sky, Nicole
-- **Streaming pipeline:** narration begins speaking before the AI finishes writing — the engine chunks text at sentence and phrase boundaries and pipelines generation 4 sentences ahead so playback is continuous with no gaps
-- **Fallback:** if Kokoro fails to load, the browser's built-in speech synthesis takes over automatically
+- **Voices:** populated from your OS/browser's installed English voices (Chrome typically offers 20+)
+- **Streaming:** narration begins speaking as the AI writes — text is chunked at sentence and phrase boundaries and queued for gapless playback
+- **Controls:** VOL · SPD · PCH sliders let you tune narrator volume, speed, and pitch in real time
+- **Voice selector:** choose any installed voice; your preference is saved across sessions
 
 ---
 
@@ -176,7 +175,7 @@ Your saga unfolds across 34 locations including Hearthstone, the Shattered Plain
 
 - **AI:** Claude Sonnet via Anthropic API — streaming narration, structured JSON combat output, 12-responsibility DM system prompt
 - **Rules engine:** Custom Cosmere RPG implementation — resolveAttack(), applyCondition(), plot die, Focus economy
-- **Voice:** Kokoro 82M ONNX (q8 quantized, WASM backend) via kokoro-js — 4-sentence lookahead pipeline, Web Audio API scheduling, 12ms crossfade
+- **Voice:** Web Speech API — browser-native TTS, sentence-chunked streaming pipeline, pitch/rate/volume sliders
 - **Audio:** Procedural Web Audio API — no samples, everything synthesized
 - **State:** Cloudflare KV via Workers proxy — multiplayer sync, persistent campaign state
 - **No framework:** Vanilla JS / HTML / CSS + GSAP for animation
