@@ -329,7 +329,10 @@ function genNPC(slot){
   const stats={};STAT_KEYS.forEach(k=>stats[k]=Math.min(20,r4d6()+(cls.bonus[k]||0)));
   const hp=12+stats.pre;
   const gender=isFemale?'she/her':'he/him';
-  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,gender,role:npcRole,conditions:{},injuries:[],deflect:0,focus:2,maxFocus:2};
+  const physDef=10+Math.floor(((stats.str||0)+(stats.spd||0))/2);
+  const cogDef=10+Math.floor(((stats.int||0)+(stats.wil||0))/2);
+  const spirDef=10+Math.floor(((stats.awa||0)+(stats.pre||0))/2);
+  return{name,className:cls.name,classId:cls.id,color,stats,hp,maxHp:hp,abilities:cls.abilities,spren:cls.spren,slot,isNPC:true,isRadiant:false,isPlaceholder:false,downed:false,gender,role:npcRole,conditions:{},injuries:[],deflect:0,focus:2,maxFocus:2,weapons:[],fragments:0,physDef,cogDef,spirDef};
 }
 
 // ══ SLOT RENDERING ══
@@ -1470,9 +1473,9 @@ function animateHPChange(playerName, fromPct, toPct, delta, isHeal){
 // ══ SKIP TURN SYSTEM ══
 function isHost(){
   if(!gState||!myChar)return false;
-  const sz=gState.partySize||partySize;
-  const slot0=gState.players[0];
-  return slot0&&!slot0.isNPC&&slot0.name===myChar.name;
+  // Find the first non-NPC, non-placeholder human slot — avoids deadlock when slot 0 is NPC/null
+  const firstHuman=gState.players.find(p=>p&&!p.isNPC&&!p.isPlaceholder);
+  return firstHuman&&firstHuman.name===myChar.name;
 }
 
 function isSelfTurn(){
@@ -1784,15 +1787,37 @@ function onContinue(){
     const h=document.getElementById('bottom-human');
     const ch=document.getElementById('action-choices');
     if(choices&&choices.length){
-      const cleanChoices=choices.map(ch=>ch.replace(/\*\*/g,'').replace(/\s*\[(COMBAT|DISCOVERY|DECISION)\]/gi,'').trim());
-      ch.innerHTML=cleanChoices.map((display,i)=>`<button class="achoice" onclick="selAct(this,\`${display.replace(/`/g,"'")}\`)"><span class="achoice-num">Option ${i+1}</span>${display}</button>`).join('');
+      const TAG_COLORS={
+        ATTACK:'var(--coral2)',COMBAT:'var(--coral2)',
+        DEFEND:'var(--amber2)',DECISION:'var(--amber2)',
+        HEAL:'var(--teal2)',DISCOVERY:'var(--teal2)',
+        SURGE:'var(--amber)',SKILL:'var(--text3)'
+      };
+      const choiceItems=choices.map((c,i)=>{
+        const raw=(typeof c==='string'?c:(c.text||'')).replace(/\*\*/g,'').trim();
+        const m=raw.match(/^\[(ATTACK|DEFEND|HEAL|SURGE|COMBAT|DISCOVERY|DECISION|SKILL)\]/i);
+        const tag=m?m[1].toUpperCase():'';
+        const display=raw.replace(/^\[.*?\]\s*/,'').trim();
+        const tagCol=TAG_COLORS[tag]||'var(--text4)';
+        const tagBadge=tag?`<span style="font-size:9px;padding:1px 7px;border-radius:8px;background:${tagCol}22;color:${tagCol};letter-spacing:.5px;margin-right:5px;">${tag}</span>`:'';
+        const safeDisplay=display.replace(/`/g,"'");
+        return`<button class="achoice" onclick="selAct(this,\`${safeDisplay}\`)"><span class="achoice-num">Option ${i+1} ${tagBadge}</span>${display}</button>`;
+      });
+      ch.innerHTML=choiceItems.join('');
+      // Staggered entrance — choices drift up into view
+      if(window.gsap){
+        gsap.fromTo(ch.querySelectorAll('.achoice'),
+          {opacity:0,y:10},
+          {opacity:1,y:0,duration:0.3,stagger:0.07,ease:'power2.out',clearProps:'all'}
+        );
+      }
       if(lang==='th'){
-        Promise.all(cleanChoices.map(d=>translateToThai(d))).then(translated=>{
+        const displays=choices.map(c=>{const raw=(typeof c==='string'?c:(c.text||'')).replace(/\*\*/g,'').replace(/^\[.*?\]\s*/,'').trim();return raw;});
+        Promise.all(displays.map(d=>translateToThai(d))).then(translated=>{
           ch.querySelectorAll('.achoice').forEach((btn,i)=>{
-            const orig=btn.getAttribute('onclick');
-            btn.querySelector('span').nextSibling?btn.childNodes[btn.childNodes.length-1].textContent=translated[i]:btn.appendChild(document.createTextNode(translated[i]));
             const span=btn.querySelector('.achoice-num');
-            btn.innerHTML='';btn.appendChild(span);btn.appendChild(document.createTextNode(translated[i]));
+            const orig=btn.getAttribute('onclick');
+            btn.innerHTML='';btn.appendChild(span);btn.appendChild(document.createTextNode(translated[i]||displays[i]));
             btn.setAttribute('onclick',orig);
           });
         }).catch(()=>{});

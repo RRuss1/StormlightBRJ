@@ -15,6 +15,39 @@
  * ============================================================
  */
 
+// ══ AI DUNGEON MASTER — SYSTEM PROMPT ══
+const AI_DM_SYSTEM_PROMPT = `You are the AI Dungeon Master for Stormlight Chronicles, a digital RPG set on Roshar in Brandon Sanderson's Cosmere.
+
+PRIMARY OBJECTIVE: Create an immersive, narratively rich tabletop experience. You are simultaneously a storyteller, referee, and dramatic architect.
+
+CORE RESPONSIBILITIES:
+1. NARRATIVE CONTROL — Write in present tense, visceral and specific. Every action has a physical consequence. No abstract summaries.
+2. RULE INTERPRETATION — Translate mechanical outcomes into story. Never use HP numbers, damage values, or game jargon in narrative text.
+3. CHOICE GENERATION — Each choice must feel meaningfully different, true to the character's abilities, and specific to this exact moment.
+4. DYNAMIC WORLD REACTION — Roshar reacts. Spren appear near strong emotion. Stormlight wisps when expended. Terrain shifts under battle.
+5. GAME STATE AWARENESS — Track who is hurt, who has momentum, whose Stormlight is depleted. Let this shape tone and pacing.
+6. PACING CONTROL — Short sentences in fast action. Longer ones for aftermath and revelation. Know when to breathe.
+7. DRAMA AND TENSION — Every scene has stakes. Victory should taste of copper and shaking hands.
+8. FAILURE/SUCCESS HANDLING — Failure is not the end. It is the story. Shape failure into consequence, never a dead end.
+9. MEMORY AND CONTINUITY — Honor what happened before. Injuries persist. Oaths echo. Previous actions have weight.
+10. COSMERE FIDELITY — Stormlight, Shards, spren, Radiants, the Everstorm are real and carry weight in every sentence.
+11. CHARACTER VOICE — A Windrunner fights to protect. A Lightweaver seeks truth through illusion. Honor each order's philosophy.
+12. TONE — Heroic but never naive. Dark but never hopeless. Ideals matter and cost something real.
+
+NARRATIVE RULES — apply always:
+- No raw numbers (HP, damage values, roll totals) in narrative text
+- No game jargon ("you take damage", "roll athletics", "your turn", "modifier")
+- Translate mechanics to fiction: "The blow staggers you backward" not "you lose 4 HP"
+- Present tense throughout combat and story scenes
+- Mechanical outcomes must be physically grounded — a crit is devastating, a miss is a near thing, a graze draws blood
+
+CHOICES FORMAT (when generating player action choices):
+- Always first-person: "I [verb]..." or an action verb implying "I"
+- One vivid sentence — specific, concrete, physically grounded to this exact scene
+- Always mechanically tagged: [ATTACK], [DEFEND], [HEAL], or [SURGE]
+- Four distinct approaches: aggressive, defensive, ability-based, situational
+- Reference specific enemies, terrain details, or current character state`;
+
 // ══ COMBAT SYSTEMS ══
 
 function renderEnemies(){
@@ -896,6 +929,7 @@ async function resolveRound(){
         if(target.hp===0){
           target.downed=true;
           rollInjury(target,false); // apply injury effect when downed by enemy
+          document.dispatchEvent(new CustomEvent('rules:unconscious',{detail:{name:target.name}}));
         }
         const ti=gState.players.findIndex(p=>p&&p.name===target.name);
         if(ti>=0)gState.players[ti]=target;
@@ -907,77 +941,117 @@ async function resolveRound(){
         detail:result.hit?`${target.name} -${dmg}HP${target.downed?' ☠':''}`:'no effect',
         isEnemy:true});
     } else {
-      // Player attack or surge
+      // Player attack or surge — official Rules Engine (Ch.4-6)
       const p=a.player;
-      if(!p||p.downed)return; // actor validation
+      if(!p||p.downed)return;
       const pi=gState.players.findIndex(x=>x&&x.name===a.actor);
-      const sv=(p.stats&&p.stats[a.stat])||10;
-      // Official: modifier = skill_ranks + attribute_score
-      const skillRanks=(p.skillRanks&&p.skillRanks[a.stat])||0;
-      const bonus=skillRanks+(sv||0)+(p.bladeLevel||0);
-      const roll=Math.ceil(Math.random()*20);
-      const total=Math.min(20,Math.max(1,roll+bonus));
-      const result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
-      const db=(CLASSES.find(cl=>cl.id===p.classId)||CLASSES[0]).dmgBonus||{crit:3,hit:2};
       const liveEn=(gState.combatEnemies||[]).filter(e=>!e.downed);
       const target=liveEn[Math.floor(Math.random()*liveEn.length)];
-      let detail='';
-      if(target&&total>=10){
-        // Ch.6: correct defense by surge type; deflect applied to energy/impact/keen
-        const surge=SURGES.find(s=>s.id===a.skill);
-        const defKey=surge?surge.targetDef:'physDef';
-        const dmgType=surge?surge.dmgType:'impact';
-        // Use actual weapon damage die if available (Ch.7)
-        let rawDmg;
-        const weapons=p.weapons||[];
-        const mainWeapon=weapons.find(w=>w&&(a.bucket==='attack'||a.bucket==='surge'))||weapons[0];
-        if(mainWeapon&&mainWeapon.dmg){
-          const dieSize=parseInt((mainWeapon.dmg.match(/d(\d+)/)||['','6'])[1]);
-          const numDice=parseInt((mainWeapon.dmg.match(/^(\d+)d/)||['','1'])[1]);
-          let wDmg=0;for(let _d=0;_d<numDice;_d++)wDmg+=Math.ceil(Math.random()*dieSize);
-          const attrScore=(p.stats&&p.stats[a.stat])||0;
-          const skillMod=(p.skillRanks&&p.skillRanks[a.skill])||0;
-          rawDmg=total>=14?wDmg+(skillMod+attrScore):wDmg; // hit adds modifier, graze is die only
-          if(total>=18)rawDmg+=db.crit||2; // crit bonus on top
-        } else {
-          rawDmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;
-        }
-        const dmg=applyDeflect(rawDmg,dmgType,target.deflect||0);
-        target.hp=Math.max(0,target.hp-dmg);
-        if(target.hp<=0){
-          target.downed=true;
-          // Official injury roll — Shardblade spirit damage uses spiritual injury table
-          const isShard=dmgType==='spirit'&&(mainWeapon&&mainWeapon.special==='spiritualInjury'||a.bucket==='surge');
-          const injury=rollInjury(target,isShard);
-          if(injury.severity==='Death'){
-            detail=`${target.name} FALLS — ${injury.severity} (roll ${injury.roll})`;
-          } else {
-            detail=`${target.name} FALLS — ${injury.severity} for ${injury.duration}. ${injury.effect}`;
+      let detail='',roll,bonus,total,result;
+      const weapons=p.weapons||[];
+      const surge=SURGES.find(s=>s.id===a.skill);
+      const mainWeapon=weapons.find(w=>w&&(a.bucket==='attack'||a.bucket==='surge'))||weapons[0];
+      const dmgType=surge?surge.dmgType:(mainWeapon?mainWeapon.dmgType:'impact');
+      const weaponName=mainWeapon?mainWeapon.name:'';
+      if(typeof window.Rules!=='undefined'&&target){
+        // ── Official Cosmere RPG attack via Rules Engine ──
+        const ar=window.Rules.resolveAttack({
+          attrs:p.stats||{},
+          skillRanks:p.skillRanks||{},
+          weapon:{
+            name:weaponName,
+            dmg:(mainWeapon&&mainWeapon.dmg)||'1d6',
+            dmgType,
+            skill:surge?a.skill:((mainWeapon&&mainWeapon.skill)||'athletics'),
+            targetDef:surge?surge.targetDef:'physDef'
+          },
+          advantages:(p.focus||0)>0?1:0,
+          focus:p.focus||0
+        },{
+          physDef:target.physDef||(10+(target.attackBonus||3)),
+          cogDef:target.cogDef||10,
+          spirDef:target.spirDef||10,
+          deflect:target.deflect||0
+        }, true); // raiseStakes=true in combat: plot die active each attack
+        roll=ar.roll;bonus=ar.modifier;total=ar.total;
+        const oc=ar.outcome;const AOUT=window.Rules.ATTACK_OUTCOME;
+        result=oc===AOUT.CRIT?'CRIT':oc===AOUT.HIT?'HIT':oc===AOUT.GRAZE?'PARTIAL':'MISS';
+        if(oc!==AOUT.MISS){
+          const dmg=ar.damage.final;
+          target.hp=Math.max(0,target.hp-dmg);
+          if(target.hp<=0){
+            target.downed=true;
+            const inj=rollInjury(target,dmgType==='spirit');
+            detail=inj.severity==='Death'?`${target.name} FALLS — ${inj.severity}`:`${target.name} FALLS — ${inj.severity} for ${inj.duration}`;
           }
+          // Class-specific crit effects
+          if(oc===AOUT.CRIT){
+            if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=detail||`${target.name} -${dmg}HP ☄ BURNING${weaponName?' ['+weaponName+']':''}`;}
+            else if(p.classId==='elsecaller'){target.poisoned=2;detail=detail||`${target.name} -${dmg}HP ☠ POISONED${weaponName?' ['+weaponName+']':''}`;}
+            else{detail=detail||`${target.name} -${dmg}HP CRIT [${dmgTypeLabel(dmgType)}${weaponName?', '+weaponName:''}]${target.downed?' ☠':''}`;}
+          } else {
+            detail=detail||`${target.name} -${dmg}HP [${dmgTypeLabel(dmgType)}]${target.downed?' ☠':''}`;
+          }
+          // Plot die effects — Opportunity recovers 1 Focus; Complication chips self
+          if(ar.opportunity){p.focus=Math.min(p.maxFocus||3,(p.focus||0)+1);}
+          if(ar.complication){p.hp=Math.max(1,p.hp-Math.ceil(Math.random()*2));}
+          if(pi>=0)gState.players[pi]=p;if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
+          const ei=gState.combatEnemies.findIndex(e=>e.name===target.name);
+          if(ei>=0)gState.combatEnemies[ei]=target;
+          // Fire rules:attack → NL-7 crit flash + damage animation
+          document.dispatchEvent(new CustomEvent('rules:attack',{detail:{result:ar,outcome:oc}}));
+        } else {
+          // Miss — fumble on natural 1-2
+          if(roll<=2){const sd=Math.floor(Math.random()*3)+1;p.hp=Math.max(0,p.hp-sd);if(p.hp===0)p.downed=true;
+            if(pi>=0)gState.players[pi]=p;if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
+            detail=`fumbled — self -${sd}HP${p.downed?' DOWNED':''}`;result='FUMBLE';}
+          else{detail='no effect';}
         }
-        const weaponName=mainWeapon?mainWeapon.name:'';
-        if(total>=18){
-          if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=`${target.name} -${dmg}HP ☄ BURNING${weaponName?' ['+weaponName+']':''}`;}
-          else if(p.classId==='elsecaller'){target.poisoned=2;detail=`${target.name} -${dmg}HP ☠ POISONED${weaponName?' ['+weaponName+']':''}`;}
-          else{detail=`${target.name} -${dmg}HP CRIT [${dmgTypeLabel(dmgType)}${weaponName?', '+weaponName:''}]${target.downed?' ☠':''}`;}
-        } else { detail=`${target.name} -${dmg}HP ${dmgType?'['+dmgTypeLabel(dmgType)+']':''}${target.downed?' ☠':''}`; }
-        const ei=gState.combatEnemies.findIndex(e=>e.name===target.name);
-        if(ei>=0)gState.combatEnemies[ei]=target;
-      } else if(total<6){
-        const self_dmg=Math.floor(Math.random()*4)+2;
-        p.hp=Math.max(0,p.hp-self_dmg);
-        if(p.hp===0)p.downed=true;
-        if(pi>=0)gState.players[pi]=p;
-        if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
-        detail=`self -${self_dmg}HP${p.downed?' DOWNED':''}`;
       } else {
-        detail='no effect';
+        // ── Fallback: legacy roll (Rules engine not loaded) ──
+        const sv=(p.stats&&p.stats[a.stat])||10;
+        bonus=(p.skillRanks&&p.skillRanks[a.stat]||0)+(sv||0)+(p.bladeLevel||0);
+        roll=Math.ceil(Math.random()*20);total=Math.min(20,Math.max(1,roll+bonus));
+        result=total>=18?'CRIT':total>=14?'HIT':total>=10?'PARTIAL':total>=6?'MISS':'FUMBLE';
+        const db=(CLASSES.find(cl=>cl.id===p.classId)||CLASSES[0]).dmgBonus||{crit:3,hit:2};
+        if(target&&total>=10){
+          let rawDmg;
+          if(mainWeapon&&mainWeapon.dmg){
+            const dieSize=parseInt((mainWeapon.dmg.match(/d(\d+)/)||['','6'])[1]);
+            const numDice=parseInt((mainWeapon.dmg.match(/^(\d+)d/)||['','1'])[1]);
+            let wDmg=0;for(let _d=0;_d<numDice;_d++)wDmg+=Math.ceil(Math.random()*dieSize);
+            rawDmg=total>=14?wDmg+((p.skillRanks&&p.skillRanks[a.skill]||0)+(p.stats&&p.stats[a.stat]||0)):wDmg;
+            if(total>=18)rawDmg+=db.crit||2;
+          }else{rawDmg=total>=18?db.crit+Math.floor(Math.random()*3)+1:total>=14?db.hit:1;}
+          const dmg=applyDeflect(rawDmg,dmgType,target.deflect||0);
+          target.hp=Math.max(0,target.hp-dmg);
+          if(target.hp<=0){
+            target.downed=true;
+            const isShard=dmgType==='spirit'&&(mainWeapon&&mainWeapon.special==='spiritualInjury'||a.bucket==='surge');
+            const inj=rollInjury(target,isShard);
+            if(inj.severity==='Death'){detail=`${target.name} FALLS — ${inj.severity} (roll ${inj.roll})`;}
+            else{detail=`${target.name} FALLS — ${inj.severity} for ${inj.duration}. ${inj.effect}`;}
+          }
+          if(total>=18){
+            if(p.classId==='dustbringer'||a.bucket==='surge'){target.burning=2;detail=detail||`${target.name} -${dmg}HP ☄ BURNING${weaponName?' ['+weaponName+']':''}`;}
+            else if(p.classId==='elsecaller'){target.poisoned=2;detail=detail||`${target.name} -${dmg}HP ☠ POISONED${weaponName?' ['+weaponName+']':''}`;}
+            else{detail=detail||`${target.name} -${dmg}HP CRIT [${dmgTypeLabel(dmgType)}${weaponName?', '+weaponName:''}]${target.downed?' ☠':''}`;}
+          } else {detail=detail||`${target.name} -${dmg}HP [${dmgTypeLabel(dmgType)}]${target.downed?' ☠':''}`;}
+          const ei=gState.combatEnemies.findIndex(e=>e.name===target.name);if(ei>=0)gState.combatEnemies[ei]=target;
+        } else if(total<6){
+          const sd=Math.floor(Math.random()*4)+2;p.hp=Math.max(0,p.hp-sd);if(p.hp===0)p.downed=true;
+          if(pi>=0)gState.players[pi]=p;if(myChar&&myChar.name===a.actor){myChar=p;saveMyChar(p);}
+          detail=`self -${sd}HP${p.downed?' DOWNED':''}`;
+        } else {detail='no effect';}
       }
       roundDice.entries.push({name:a.actor,roll,bonus,total,result,detail,isEnemy:false});
     }
   });
 
   // ══ PHASE 3: DEFENSE (guard stances — applied for NEXT incoming attack) ══
+  // Clear any leftover defending flag for players who didn't choose DEFENSE this round
+  {const defendingActors=new Set(allActions.filter(a=>a.phase==='DEFENSE'&&!a.isEnemy).map(a=>a.actor));
+  gState.players.forEach((p,i)=>{if(p&&p.defending&&!defendingActors.has(p.name)){p.defending=false;gState.players[i]=p;}});}
   allActions.filter(a=>a.phase==='DEFENSE'&&!a.isEnemy).forEach(a=>{
     const p=a.player;
     if(!p||p.downed)return;
@@ -1135,7 +1209,8 @@ async function resolveRound(){
 
   // ══ VICTORY / DEFEAT CHECK ══
   const allEnemiesDead=(gState.combatEnemies||[]).every(e=>e.downed||e.hp<=0);
-  const allPartyDowned=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC).every(p=>p.downed);
+  const humanCombatants=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC);
+  const allPartyDowned=humanCombatants.length>0&&humanCombatants.every(p=>p.downed);
   if(allEnemiesDead){gState.combatPhase='victory';await saveAndBroadcast(gState);renderCombatScreen();renderCombatActions();return;}
   if(allPartyDowned){gState.combatPhase='defeat';await saveAndBroadcast(gState);renderCombatScreen();renderCombatActions();return;}
 
@@ -1189,6 +1264,7 @@ async function callGM(prompt){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,stream:true,
+        system:AI_DM_SYSTEM_PROMPT,
         messages:[{role:'user',content:prompt}]})
     });
     if(res.ok&&res.body){
@@ -1340,19 +1416,50 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
 
   const el=document.getElementById('combat-narrative-text');
   if(el){el.textContent='...';el.parentElement.style.opacity='0.5';}
+  // Structured JSON instruction appended to every combat GM prompt
+  const jsonInstr=`\n\nRespond ONLY with valid JSON (no markdown fences): {"narrative":"[2-3 sentences, present tense, no HP numbers, no game jargon — translate mechanics to vivid fiction]","stateUpdates":{"conditionsAdded":[],"conditionsRemoved":[]}}`;
   try{
     const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,messages:[{role:'user',content:prompt}]})});
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:450,
+        system:AI_DM_SYSTEM_PROMPT,
+        messages:[{role:'user',content:prompt+jsonInstr}]})});
     const data=await res.json();
-    const text=data.content&&data.content[0]?data.content[0].text.replace(/\*\*([^*]+)\*\*/g,'$1').trim():'The battle rages on.';
-    if(el){el.textContent=text;el.parentElement.style.opacity='1';}
+    const rawText=(data.content&&data.content[0]?data.content[0].text.trim():'')||'The battle continues...';
+    // Parse JSON — extract narrative and optional stateUpdates
+    let narrative=rawText,stateUpdates={};
+    try{
+      const js=rawText.indexOf('{'),je=rawText.lastIndexOf('}');
+      if(js>=0&&je>js){
+        const parsed=JSON.parse(rawText.slice(js,je+1));
+        narrative=(parsed.narrative||rawText).replace(/\*\*([^*]+)\*\*/g,'$1').trim();
+        stateUpdates=parsed.stateUpdates||{};
+      } else {
+        narrative=rawText.replace(/\*\*([^*]+)\*\*/g,'$1').trim();
+      }
+    }catch(pe){narrative=rawText.replace(/\*\*([^*]+)\*\*/g,'$1').trim();}
+    // Apply state updates from AI DM
+    if(stateUpdates.conditionsAdded){
+      stateUpdates.conditionsAdded.forEach(({target,condition})=>{
+        const tp=gState.players.find(x=>x&&x.name===target);
+        if(tp&&typeof window.Rules!=='undefined')window.Rules.applyCondition(tp,condition);
+        const te=(gState.combatEnemies||[]).find(e=>e.name===target);
+        if(te&&condition){te[condition]=(te[condition]||0)+1;}
+      });
+    }
+    if(stateUpdates.conditionsRemoved){
+      stateUpdates.conditionsRemoved.forEach(({target,condition})=>{
+        const tp=gState.players.find(x=>x&&x.name===target);
+        if(tp&&typeof window.Rules!=='undefined')window.Rules.removeCondition(tp,condition);
+      });
+    }
+    if(el){el.textContent=narrative;el.parentElement.style.opacity='1';}
     if(lang==='th'&&el){
-      translateToThai(text).then(thai=>{
-        if(thai&&thai!==text)el.textContent=thai;
+      translateToThai(narrative).then(thai=>{
+        if(thai&&thai!==narrative)el.textContent=thai;
       }).catch(()=>{});
     }
     gState.combatLog=gState.combatLog||[];
-    gState.combatLog.push({round,text,type});
+    gState.combatLog.push({round,text:narrative,type});
     await saveAndBroadcast(gState);
   }catch(e){if(el){el.textContent='The battle continues...';el.parentElement.style.opacity='1';}}
   if(type==='opening'||type==='round'){
@@ -1360,6 +1467,9 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
     gState.combatChoicesCache={}; // clear so new round generates fresh unique choices
     renderCombatScreen();   // render immediately for responsiveness
     renderCombatActions();
+    // Notify SprenCompanion of the new active turn card
+    const activeCard=document.querySelector('.char-combat-card.active-turn');
+    document.dispatchEvent(new CustomEvent('sc:turnChange',{detail:{cardEl:activeCard}}));
     await saveAndBroadcast(gState); // save after UI update
     const sz2=gState.partySize||partySize;
     gState.players.slice(0,sz2).filter(p=>p&&!p.isNPC&&!p.downed).forEach(p=>{
@@ -1372,12 +1482,30 @@ async function exitCombat(won){
   if(!gState)return;
   try{
   const sz=gState.partySize||partySize;
-  gState.players.slice(0,sz).filter(p=>p&&p.downed).forEach(p=>{p.downed=false;p.hp=1;});
+  // Resurrect downed players and sync myChar
+  gState.players.slice(0,sz).forEach((p,i)=>{
+    if(!p)return;
+    if(p.downed){p.downed=false;p.hp=1;}
+    // Clear any lingering combat conditions
+    if(p.defending){p.defending=false;}
+    if(p.conditions){Object.keys(p.conditions).forEach(k=>{
+      if(['stunned','bleeding','burning','poisoned','prone'].includes(k))delete p.conditions[k];
+    });}
+    gState.players[i]=p;
+    if(myChar&&myChar.name===p.name){myChar=p;saveMyChar(p);}
+  });
   gState.combatMode=false;
   gState.combatPhase=null;
-  gState.enemies=[];   // clear legacy enemy array
+  gState.enemies=[];
+  gState.combatEnemies=[];
   gState.combatActive=false;
   gState.combatOrder=[];
+  gState.combatRound=0;
+  gState.combatLog=[];
+  gState.diceLog=[];
+  gState.isBossFight=false;
+  gState.combatHazard=null;
+  gState.turn=0;
   gState.beatsUntilCombat=COMBAT_BEATS_MIN+Math.floor(Math.random()*(COMBAT_BEATS_MAX-COMBAT_BEATS_MIN+1));
   gState.beatsSinceLastCombat=0;
   gState.preCombatTriggered=false;

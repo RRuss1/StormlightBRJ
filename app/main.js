@@ -70,6 +70,9 @@ window.addEventListener('load', () => {
       case 'game':     _animateGameScreen();     break;
       case 'combat':   _animateCombatScreen();   break;
     }
+
+    // Dispatch sc:screenChange so NL-7 weather/audio/spren hooks fire
+    document.dispatchEvent(new CustomEvent('sc:screenChange', { detail: { screen: id } }));
   };
 
   // ── Global button micro-feedback ──────────────────────────
