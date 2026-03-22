@@ -140,8 +140,8 @@ function _animateTitleScreen() {
     .from('#s-title .title-h2',    { opacity: 0, y: 16,  duration: 0.42 }, '-=0.28')
     .from('#s-title .title-line',  { opacity: 0, scaleX: 0, duration: 0.50, transformOrigin: 'center' }, '-=0.24')
     .from('#s-title .title-quote', { opacity: 0, y: 12,  duration: 0.42 }, '-=0.20')
-    .from('#s-title .psz-wrap',    { opacity: 0, y: 10,  duration: 0.40 }, '-=0.10')
-    .from('#s-title .btn',         { opacity: 0, y: 8,   duration: 0.35, stagger: 0.09 }, '-=0.18');
+    .from('#s-title .psz-wrap',    { opacity: 0, y: 10,  duration: 0.40, clearProps:'all' }, '-=0.10')
+    .from('#s-title .btn',         { opacity: 0, y: 8,   duration: 0.35, stagger: 0.09, clearProps:'all' }, '-=0.18');
 
   // Idle float on title glyph
   const glyph = document.querySelector('#s-title .title-glyph');

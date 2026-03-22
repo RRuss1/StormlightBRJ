@@ -305,6 +305,34 @@ function renderPSZ(){
   const locked=gState&&gState.phase!=='pregame';
   if(locked)partySize=gState.partySize||3;
   document.getElementById('psz-row').innerHTML=[2,3,4,5].map(n=>`<div class="psz${partySize===n?' sel':''}${locked?' locked':''}" onclick="${locked?'':`pickSize(${n})`}">${n} Players</div>`).join('');
+  // Render party slot preview cards under "Radiant Company"
+  const preview=document.getElementById('title-party-preview');
+  if(preview){
+    const sz=partySize;
+    preview.style.gridTemplateColumns=`repeat(${sz},1fr)`;
+    preview.innerHTML=Array.from({length:sz},(_,i)=>{
+      const p=gState&&gState.players&&gState.players[i];
+      if(p&&!p.isPlaceholder&&!p.isNPC){
+        return`<div class="slot filled" style="text-align:center;padding:10px 8px;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${p.color||'var(--amber2)'};flex-shrink:0;"></div>
+            <div style="font-family:var(--font-d);font-size:12px;color:var(--amber2);">${p.name}</div>
+          </div>
+          <div style="font-size:11px;color:var(--text4);">${p.className||''}</div>
+        </div>`;
+      } else if(p&&p.isNPC){
+        return`<div class="slot npc-slot" style="text-align:center;padding:10px 8px;">
+          <div style="font-family:var(--font-d);font-size:11px;color:var(--text4);margin-bottom:2px;">Slot ${i+1} · AI</div>
+          <div style="font-family:var(--font-d);font-size:12px;color:var(--amber2);">${p.name}</div>
+        </div>`;
+      } else {
+        return`<div class="slot" style="text-align:center;padding:10px 8px;">
+          <div style="font-size:11px;color:var(--text5);font-family:var(--font-d);letter-spacing:1px;">Slot ${i+1}</div>
+          <div style="font-size:10px;color:var(--text5);margin-top:4px;font-style:italic;">Open</div>
+        </div>`;
+      }
+    }).join('');
+  }
 }
 function pickSize(n){
   if(gState&&gState.phase!=='pregame')return;
@@ -980,7 +1008,8 @@ function renderLobby(){
   if(subEl)subEl.textContent=`${humans} player${humans!==1?'s':''} · ${npcs} AI companion${npcs!==1?'s':''} · ${empty} slot${empty!==1?'s':''} open`;
   const grid=document.getElementById('lobby-slots');
   if(!grid){console.error('renderLobby: lobby-slots not found');return;}
-  const cols=sz<=3?`repeat(${sz},1fr)`:'repeat(3,1fr)';
+  // Fill the full row — 2→2col, 3→3col, 4→4col, 5→3col (2+3 wrap cleanly)
+  const cols=sz===5?'repeat(3,1fr)':`repeat(${sz},1fr)`;
   grid.style.gridTemplateColumns=cols;
   const isPlaying=gState.phase==='playing';
   grid.innerHTML=Array.from({length:sz},(_,i)=>{
