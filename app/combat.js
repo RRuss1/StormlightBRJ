@@ -543,6 +543,7 @@ async function enterCombat(){
   const actNum=getAct(gState.totalMoves||0).num||1;
   const avgBlade=gState.players.slice(0,sz).filter(Boolean).reduce((a,p)=>a+(p.bladeLevel||0),0)/sz;
   const loc=(getAct(gState.totalMoves||0).location||'').toLowerCase();
+  // ── Enemy pools — fallback only, used when GM text matching produces nothing ──
   const ENEMY_POOLS={
     shadesmar:[ {name:'Voidspren',type:'Spirit',baseHP:8,dmg:3,attackBonus:2},{name:'Gloomform',type:'Unmade Fragment',baseHP:14,dmg:5,attackBonus:4},{name:'Midnight Essence',type:'Unmade Shard',baseHP:11,dmg:4,attackBonus:3},{name:'Cognitive Shadow',type:'Remnant',baseHP:9,dmg:3,attackBonus:3},{name:'Spren Construct',type:'Splinter',baseHP:7,dmg:4,attackBonus:4} ],
     plains:[ {name:'Parshendi Warrior',type:'Warrior',baseHP:10,dmg:4,attackBonus:3},{name:'Parshendi Shardbearer',type:'Elite',baseHP:18,dmg:7,attackBonus:5},{name:'Parshendi Scout',type:'Scout',baseHP:8,dmg:3,attackBonus:3},{name:'Stormform Parshendi',type:'Voidbringer',baseHP:14,dmg:6,attackBonus:4},{name:'Warform Soldier',type:'Heavy',baseHP:16,dmg:5,attackBonus:4} ],
@@ -552,17 +553,153 @@ async function enterCombat(){
     sea:[ {name:'Sea Fiend',type:'Aimian',baseHP:12,dmg:5,attackBonus:4},{name:'Dysian Aimian',type:'Ancient',baseHP:16,dmg:6,attackBonus:4},{name:'Void Leviathan',type:'Sea Creature',baseHP:20,dmg:7,attackBonus:3},{name:'Santhid Spawn',type:'Creature',baseHP:10,dmg:4,attackBonus:3} ],
     default:[ {name:'Void Creature',type:'Unknown',baseHP:10,dmg:4,attackBonus:3},{name:'Darkform Soldier',type:'Soldier',baseHP:14,dmg:5,attackBonus:4},{name:'Voidspren Bound',type:'Corrupted',baseHP:9,dmg:4,attackBonus:3},{name:'Unmade Thrall',type:'Servant',baseHP:12,dmg:4,attackBonus:3},{name:'Stormspawn',type:'Creature',baseHP:11,dmg:5,attackBonus:4},{name:'Parshman Soldier',type:'Voidbringer',baseHP:13,dmg:4,attackBonus:3} ],
   };
-  let poolKey='default';
-  if(loc.includes('shadesmar')||loc.includes('nexus')||loc.includes('regret')||loc.includes('souls'))poolKey='shadesmar';
-  else if(loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar')||loc.includes('herdaz'))poolKey='plains';
-  else if(loc.includes('braize')||loc.includes('damnation'))poolKey='braize';
-  else if(loc.includes('urithiru')||loc.includes('kharbranth')||loc.includes('thaylen'))poolKey='urithiru';
-  else if(loc.includes('hearthstone')||loc.includes('reshi')||loc.includes('purelake')||loc.includes('bavland'))poolKey='hearthstone';
-  else if(loc.includes('sea')||loc.includes('aimian')||loc.includes('aimia'))poolKey='sea';
-  const fullPool=ENEMY_POOLS[poolKey];
-  const shuffled=[...fullPool].sort(()=>Math.random()-0.5);
-  const pool=shuffled.slice(0,2);
-  const count=Math.min(sz,2);
+
+  // ── Narrative-driven enemy extraction ─────────────────────────────────────
+  // Read the GM's last story beat and try to derive enemies directly from it.
+  // Priority order:
+  //   1. Narrative match  — something in the GM text names the enemies
+  //   2. Location fallback — traditional pool key based on act location
+  //
+  // NARRATIVE_ENEMY_PATTERNS: [{keywords, enemies[]}]
+  // keywords: array of regex — ALL must match for the entry to fire (AND logic)
+  // enemies:  array of {name, type, baseHP, dmg, attackBonus}
+  // Each entry can produce 1–4 distinct enemy variants (different sizes/ranks).
+  // ─────────────────────────────────────────────────────────────────────────
+  const NARRATIVE_ENEMY_PATTERNS = [
+    // ── Crustacean / sea creatures ──
+    { keywords: [/crabs?|crab.like|crystalline.shell|clicking/i],
+      enemies: [
+        {name:'Aimian Shore Crab',   type:'Creature', baseHP:7,  dmg:3, attackBonus:2},
+        {name:'Crab Swarm Cluster',  type:'Swarm',    baseHP:5,  dmg:2, attackBonus:2},
+        {name:'Giant Lighthouse Crab',type:'Elite',   baseHP:14, dmg:5, attackBonus:3},
+        {name:'Bioluminescent Crab', type:'Creature', baseHP:8,  dmg:3, attackBonus:2},
+      ]},
+    // ── Sea / ocean creatures ──
+    { keywords: [/depths?|bioluminescent|phosphorescent|aimian.sea|ocean|leviathan/i],
+      enemies: [
+        {name:'Depth Crawler',       type:'Sea Creature', baseHP:11, dmg:4, attackBonus:3},
+        {name:'Bioluminescent Horror',type:'Unknown',     baseHP:14, dmg:5, attackBonus:3},
+        {name:'Aimian Sea Spawn',    type:'Ancient',      baseHP:16, dmg:6, attackBonus:4},
+      ]},
+    // ── Parshendi / Parshmen soldiers ──
+    { keywords: [/parshendi|parshman|listener|warform|stormform|voidform/i],
+      enemies: [
+        {name:'Parshendi Warrior',   type:'Warrior', baseHP:10, dmg:4, attackBonus:3},
+        {name:'Parshendi Scout',     type:'Scout',   baseHP:8,  dmg:3, attackBonus:3},
+        {name:'Stormform Parshendi', type:'Elite',   baseHP:14, dmg:6, attackBonus:4},
+        {name:'Warform Soldier',     type:'Heavy',   baseHP:16, dmg:5, attackBonus:4},
+      ]},
+    // ── Human bandits / soldiers ──
+    { keywords: [/bandit|thief|brigand|soldiers?|guards?|mercenaries|assassin|scout/i],
+      enemies: [
+        {name:'Alethi Deserter',     type:'Soldier', baseHP:10, dmg:4, attackBonus:3},
+        {name:'Mercenary Blade',     type:'Fighter', baseHP:12, dmg:4, attackBonus:3},
+        {name:'Road Bandit',         type:'Rogue',   baseHP:8,  dmg:3, attackBonus:2},
+        {name:'Armored Guard',       type:'Elite',   baseHP:14, dmg:5, attackBonus:4},
+      ]},
+    // ── Fused / ancient voidbringers ──
+    { keywords: [/fused|ancient.enemy|regals?|magnified/i],
+      enemies: [
+        {name:'Fused',               type:'Ancient',      baseHP:22, dmg:8, attackBonus:6},
+        {name:'Regal',               type:'Parsh Void',   baseHP:12, dmg:5, attackBonus:4},
+        {name:'Magnified One',       type:'Fused Elite',  baseHP:18, dmg:7, attackBonus:5},
+        {name:'Heavenly One',        type:'Fused',        baseHP:15, dmg:6, attackBonus:5},
+      ]},
+    // ── Cognitive / Shadesmar entities ──
+    { keywords: [/spren|cognitive|shadesmar|midnight.essence|unmade|splinter/i],
+      enemies: [
+        {name:'Voidspren',           type:'Spirit',           baseHP:8,  dmg:3, attackBonus:2},
+        {name:'Midnight Essence',    type:'Unmade Shard',     baseHP:11, dmg:4, attackBonus:3},
+        {name:'Cognitive Shadow',    type:'Remnant',          baseHP:9,  dmg:3, attackBonus:3},
+        {name:'Gloomform',           type:'Unmade Fragment',  baseHP:14, dmg:5, attackBonus:4},
+      ]},
+    // ── Storm creatures / highstorm ──
+    { keywords: [/highstorm|storm.creature|stormspren|windspren.*hostile|thunderclast/i],
+      enemies: [
+        {name:'Highstorm Elemental', type:'Storm',     baseHP:18, dmg:6, attackBonus:4},
+        {name:'Stormspren Fury',     type:'Spren',     baseHP:10, dmg:4, attackBonus:3},
+        {name:'Thunderclast Shard',  type:'Stone Beast',baseHP:24,dmg:7, attackBonus:4},
+      ]},
+    // ── Chasmfiends / greatshells ──
+    { keywords: [/chasmfiend|greatshell|larkin|gemheart|carapace|chrysalis/i],
+      enemies: [
+        {name:'Juvenile Chasmfiend', type:'Greatshell', baseHP:20, dmg:7, attackBonus:4},
+        {name:'Chasmfiend Scout',    type:'Creature',   baseHP:12, dmg:5, attackBonus:3},
+        {name:'Larkin Swarm',        type:'Swarm',      baseHP:6,  dmg:2, attackBonus:2},
+      ]},
+    // ── Rotspren / corrupted ──
+    { keywords: [/rotspren|corrupted|plague|sickness|decay|festering/i],
+      enemies: [
+        {name:'Rotspren Cluster',    type:'Corruption', baseHP:7,  dmg:3, attackBonus:2},
+        {name:'Corrupted Townsman',  type:'Parshman',   baseHP:11, dmg:4, attackBonus:2},
+        {name:'Decayform Soldier',   type:'Voidbringer',baseHP:13, dmg:5, attackBonus:3},
+      ]},
+    // ── Shades / cognitive shadows ──
+    { keywords: [/shade[s]?|shadow.*attack|darkness.*moves|figure.*emerges/i],
+      enemies: [
+        {name:'Cognitive Shade',     type:'Shadow',      baseHP:9,  dmg:4, attackBonus:3},
+        {name:'Nachtis Shade',       type:'Darkness',    baseHP:12, dmg:5, attackBonus:3},
+        {name:'Unmade Thrall',       type:'Servant',     baseHP:12, dmg:4, attackBonus:3},
+      ]},
+    // ── Wild animals / creatures (generic) ──
+    { keywords: [/wolves?|hounds?|predator|beast|wild.creature|stalking/i],
+      enemies: [
+        {name:'Roshar Wolf',         type:'Beast',    baseHP:8,  dmg:3, attackBonus:3},
+        {name:'Stonehorn',           type:'Creature', baseHP:14, dmg:5, attackBonus:3},
+        {name:'Greatwolf Alpha',     type:'Elite',    baseHP:16, dmg:6, attackBonus:4},
+      ]},
+    // ── Bandits attacking a caravan / ambush ──
+    { keywords: [/ambush|surround|outnumber|outnumbered|we.re.trapped|no.escape/i],
+      enemies: [
+        {name:'Ambush Leader',       type:'Soldier',  baseHP:14, dmg:5, attackBonus:4},
+        {name:'Ambush Flanker',      type:'Scout',    baseHP:9,  dmg:3, attackBonus:3},
+        {name:'Crossbow Thug',       type:'Ranged',   baseHP:8,  dmg:4, attackBonus:2},
+      ]},
+  ];
+
+  // ── Try to match narrative enemies from GM text ────────────────────────────
+  function extractEnemiesFromNarrative(gmText) {
+    if (!gmText) return null;
+    for (const pattern of NARRATIVE_ENEMY_PATTERNS) {
+      const allMatch = pattern.keywords.every(re => re.test(gmText));
+      if (allMatch) return pattern.enemies;
+    }
+    return null; // no match — use location fallback
+  }
+
+  // ── Decide pool: narrative → location fallback ─────────────────────────────
+  const narrativeGMText = (gState.lastGM && gState.lastGM.text) || '';
+  const narrativeEnemies = extractEnemiesFromNarrative(narrativeGMText);
+
+  let pool, count;
+  if (narrativeEnemies) {
+    // ── Narrative match: pick 2-3 variants from the matched pool ──
+    // Always include at least one "grunt" (lowest baseHP) and one "elite" (highest).
+    const sorted = [...narrativeEnemies].sort((a,b) => a.baseHP - b.baseHP);
+    const numVariants = Math.min(narrativeEnemies.length, Math.max(2, sz - 1));
+    const spread = [];
+    // Spread across the pool to get variety (weakest, median, strongest)
+    const step = Math.max(1, Math.floor(sorted.length / numVariants));
+    for (let i = 0; i < numVariants; i++) spread.push(sorted[Math.min(i * step, sorted.length - 1)]);
+    // Number of enemy INSTANCES scales with party size: 1-player = 1-2, 4-player = 3-4
+    count = Math.max(1, Math.min(sz, Math.floor(sz * 0.75) + 1));
+    // Assign instances across the spread pool
+    pool = Array.from({length: count}, (_, i) => spread[i % spread.length]);
+    console.log('⟁ Narrative enemies:', pool.map(e=>e.name).join(', '));
+  } else {
+    // ── Location fallback ──────────────────────────────────────────────────
+    let poolKey = 'default';
+    if (loc.includes('shadesmar')||loc.includes('nexus')||loc.includes('regret')||loc.includes('souls')) poolKey='shadesmar';
+    else if (loc.includes('plains')||loc.includes('alethkar')||loc.includes('kholinar')||loc.includes('herdaz')) poolKey='plains';
+    else if (loc.includes('braize')||loc.includes('damnation')) poolKey='braize';
+    else if (loc.includes('urithiru')||loc.includes('kharbranth')||loc.includes('thaylen')) poolKey='urithiru';
+    else if (loc.includes('hearthstone')||loc.includes('reshi')||loc.includes('purelake')||loc.includes('bavland')) poolKey='hearthstone';
+    else if (loc.includes('sea')||loc.includes('aimian')||loc.includes('aimia')) poolKey='sea';
+    const fullPool = ENEMY_POOLS[poolKey];
+    const shuffled = [...fullPool].sort(() => Math.random() - 0.5);
+    count = Math.min(sz, 2);
+    pool = shuffled.slice(0, count);
+  }
   // Scale enemy damage to party avg HP — prevent one-shots
   const livePlayers=gState.players.slice(0,sz).filter(p=>p&&!p.isNPC&&!p.isPlaceholder);
   const avgPartyHP=livePlayers.length
