@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYOAhub — Choose Your Adventure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { background: none; border: none; cursor: pointer; font-family: inherit; }
+
+:root {
+  --gold:       #C9A84C;
+  --gold-hi:    #EFD97A;
+  --gold-lo:    #7A5F28;
+  --teal:       #28A87A;
+  --teal-lo:    #0D4A35;
+  --red:        #C0392B;
+  --glass:      rgba(6, 14, 30, 0.55);
+  --glass-b:    rgba(255,255,255,0.08);
+  --text:       #F0E6CC;
+  --muted:      rgba(240,230,204,0.52);
+  --fd: 'Cinzel', serif;
+  --fb: 'Crimson Pro', serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #05090f;
+  color: var(--text);
+  font-family: var(--fb);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── FULL-SCREEN BACKGROUND ── */
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: url('bg.jpg') center center / cover no-repeat;
+  /* Darken enough to read text, keep nebula visible */
+  filter: brightness(0.35) saturate(0.8);
+  transform: scale(1.04); /* slight oversize prevents edge bleed on scale */
+  transition: filter 1.2s ease;
+}
+/* Radial vignette — darkens edges, keeps center brighter */
+#bg-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 46%,
+      transparent 20%,
+      rgba(3,7,16,0.65) 80%,
+      rgba(3,7,16,0.92) 100%),
+    linear-gradient(to bottom,
+      rgba(3,7,16,0.45) 0%,
+      transparent 15%,
+      transparent 70%,
+      rgba(3,7,16,0.9) 100%);
+  pointer-events: none;
+}
+/* Subtle gold atmosphere at center */
+#bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse 55% 45% at 50% 46%,
+    rgba(201,168,76,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* ── PARTICLES CANVAS ── */
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── SCREEN SYSTEM ── */
+/* Every screen sits fixed over the full viewport */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* ── NAV (shared) ── */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 56px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.logo {
+  font-family: 'Cinzel Decorative', var(--fd);
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(201,168,76,0.5);
+  cursor: pointer;
+}
+.logo em { color: var(--gold-hi); font-style: normal; }
+.nav-r { display: flex; align-items: center; gap: 26px; }
+.nav-link {
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color .2s;
+  padding: 4px 0;
+}
+.nav-link:hover { color: var(--text); }
+.nav-sep { width: 4px; height: 4px; border-radius: 50%; background: rgba(201,168,76,0.28); }
+.btn-login {
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 9px 22px;
+  border-radius: 7px;
+  border: 1px solid rgba(40,168,122,0.5);
+  color: var(--teal);
+  background: rgba(40,168,122,0.07);
+  transition: all .2s;
+}
+.btn-login:hover { background: rgba(40,168,122,0.15); box-shadow: 0 0 18px rgba(40,168,122,0.2); }
+
+
+/* ═══════════════════════════════════════════════
+   LANDING — two big cards + tagline
+   ═══════════════════════════════════════════════ */
+#s-landing { overflow: hidden; }
+
+.landing-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 24px;
+}
+
+/* Tagline above cards */
+.landing-eyebrow {
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold-lo);
+  margin-bottom: 18px;
+  opacity: 0;
+}
+
+.landing-title {
+  font-family: 'Cinzel Decorative', var(--fd);
+  font-size: clamp(38px, 5.5vw, 72px);
+  font-weight: 700;
+  line-height: 1.12;
+  text-align: center;
+  color: var(--gold);
+  text-shadow:
+    0 0 40px rgba(201,168,76,0.6),
+    0 0 100px rgba(201,168,76,0.18);
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+  opacity: 0;
+}
+
+.landing-sub {
+  font-family: var(--fb);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.7;
+  margin-bottom: 52px;
+  opacity: 0;
+}
+
+/* THE TWO HERO CARDS */
+.hero-cards {
+  display: flex;
+  gap: 24px;
+  opacity: 0;
+}
+
+.hero-card {
+  width: 280px;
+  padding: 40px 36px 36px;
+  border-radius: 22px;
+  border: 1px solid var(--glass-b);
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition:
+    transform .3s cubic-bezier(.34,1.56,.64,1),
+    box-shadow .3s ease,
+    border-color .3s ease;
+  transform-style: preserve-3d;
+  position: relative;
+  overflow: hidden;
+}
+
+/* shimmer sweep on hover */
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(130deg,
+    transparent 30%,
+    rgba(255,255,255,0.04) 50%,
+    transparent 70%);
+  transform: translateX(-100%);
+  transition: transform .5s ease;
+}
+.hero-card:hover::before { transform: translateX(100%); }
+
+.hero-card:hover { transform: translateY(-8px); }
+
+/* Enter card */
+.card-enter {
+  border-color: rgba(201,168,76,0.22);
+  background: linear-gradient(160deg,
+    rgba(201,168,76,0.06) 0%,
+    rgba(6,14,30,0.55) 100%);
+}
+.card-enter:hover {
+  border-color: rgba(201,168,76,0.48);
+  box-shadow:
+    0 20px 60px rgba(201,168,76,0.2),
+    0 0 0 1px rgba(201,168,76,0.1) inset;
+}
+
+/* Create card */
+.card-create {
+  border-color: rgba(40,168,122,0.22);
+  background: linear-gradient(160deg,
+    rgba(40,168,122,0.06) 0%,
+    rgba(6,14,30,0.55) 100%);
+}
+.card-create:hover {
+  border-color: rgba(40,168,122,0.45);
+  box-shadow:
+    0 20px 60px rgba(40,168,122,0.18),
+    0 0 0 1px rgba(40,168,122,0.08) inset;
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-enter .card-icon {
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.25);
+}
+.card-create .card-icon {
+  background: rgba(40,168,122,0.1);
+  border: 1px solid rgba(40,168,122,0.25);
+}
+
+.card-title {
+  font-family: var(--fd);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.card-enter .card-title  { color: var(--gold); }
+.card-create .card-title { color: var(--teal); }
+
+.card-desc {
+  font-family: var(--fb);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.card-arrow {
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  opacity: 0.5;
+  transition: opacity .2s;
+}
+.hero-card:hover .card-arrow { opacity: 1; }
+.card-enter .card-arrow  { color: var(--gold); }
+.card-create .card-arrow { color: var(--teal); }
+
+
+/* ═══════════════════════════════════════════════
+   WORLDS HUB
+   ═══════════════════════════════════════════════ */
+#s-worlds { overflow-y: auto; }
+
+.worlds-header {
+  text-align: center;
+  padding: 52px 48px 28px;
+  flex-shrink: 0;
+}
+.worlds-title {
+  font-family: var(--fd);
+  font-size: 38px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-shadow: 0 0 32px rgba(201,168,76,0.35);
+  margin-bottom: 8px;
+}
+.worlds-sub {
+  font-family: var(--fb);
+  font-size: 15px;
+  font-style: italic;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* Tabs */
+.worlds-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 36px;
+}
+.wtab {
+  font-family: var(--fd);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  transition: all .2s;
+}
+.wtab:hover { color: var(--text); }
+.wtab.on {
+  border-color: rgba(201,168,76,0.28);
+  color: var(--gold);
+  background: rgba(201,168,76,0.07);
+}
+
+/* Grid */
+.worlds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 20px;
+  padding: 0 48px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* World card */
+.wcard {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition:
+    transform .28s cubic-bezier(.34,1.56,.64,1),
+    box-shadow .28s,
+    border-color .28s;
+}
+.wcard:hover { transform: translateY(-6px); }
+
+.wcard-art {
+  height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+/* gradient fade from art into body */
+.wcard-art::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to top, var(--glass), transparent);
+}
+
+.wcard-body { padding: 14px 18px 20px; }
+.wcard-badges { display: flex; gap: 7px; margin-bottom: 8px; }
+.badge {
+  font-family: var(--fd);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.badge-official   { background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.22); color: var(--gold); }
+.badge-community  { background: rgba(40,168,122,0.09); border: 1px solid rgba(40,168,122,0.2); color: var(--teal); }
+.badge-private    { background: rgba(120,120,140,0.1); border: 1px solid rgba(120,120,140,0.2); color: #9090aa; }
+
+.wcard-name {
+  font-family: var(--fd);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  margin-bottom: 5px;
+}
+.wcard-desc {
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted);
+  margin-bottom: 12px;
+  line-height: 1.55;
+}
+.wcard-meta { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+.wcard-btn {
+  width: 100%;
+  padding: 9px;
+  border-radius: 7px;
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: 1px solid;
+  background: transparent;
+  transition: background .2s;
+}
+
+/* Create-new dashed card */
+.wcard-new {
+  border: 1px dashed rgba(201,168,76,0.18);
+  background: rgba(6,14,30,0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 270px;
+  gap: 10px;
+  transition: all .25s;
+}
+.wcard-new:hover {
+  border-color: rgba(201,168,76,0.4);
+  background: rgba(201,168,76,0.04);
+}
+.new-plus  { font-size: 32px; color: var(--gold-lo); transition: color .2s; }
+.new-label { font-family: var(--fd); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lo); transition: color .2s; }
+.wcard-new:hover .new-plus,
+.wcard-new:hover .new-label { color: var(--gold); }
+
+
+/* ═══════════════════════════════════════════════
+   WIZARD
+   ═══════════════════════════════════════════════ */
+#s-wizard {
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.wiz-box {
+  background: rgba(5,12,26,0.82);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(201,168,76,0.13);
+  border-radius: 26px;
+  padding: 48px 52px;
+  width: 100%;
+  max-width: 580px;
+  margin: 20px;
+}
+
+/* progress dots */
+.wiz-dots {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 32px;
+}
+.wdot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(201,168,76,0.17);
+  transition: all .28s;
+}
+.wdot.on   { background: var(--gold); box-shadow: 0 0 9px rgba(201,168,76,0.5); transform: scale(1.35); }
+.wdot.done { background: rgba(201,168,76,0.42); }
+
+.wstep { display: none; }
+.wstep.on { display: block; }
+
+.wstep-eyebrow {
+  font-family: var(--fd);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-lo);
+  margin-bottom: 7px;
+}
+.wstep-title {
+  font-family: var(--fd);
+  font-size: 24px;
+  color: var(--gold);
+  margin-bottom: 26px;
+  letter-spacing: .8px;
+}
+
+.wfield { margin-bottom: 18px; }
+.wlabel {
+  font-family: var(--fd);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 7px;
+}
+.winput {
+  width: 100%;
+  padding: 11px 15px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s;
+  resize: vertical;
+}
+.winput:focus { border-color: rgba(201,168,76,0.36); }
+.winput::placeholder { color: rgba(240,230,204,0.2); }
+
+.wopts { display: flex; flex-wrap: wrap; gap: 8px; }
+.wopt {
+  padding: 7px 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--fd);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .18s;
+}
+.wopt:hover { border-color: rgba(201,168,76,0.28); color: var(--text); }
+.wopt.on { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.09); }
+
+/* wizard nav row */
+.wiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.wiz-back { font-family: var(--fd); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); transition: color .2s; }
+.wiz-back:hover { color: var(--text); }
+.wiz-next {
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 11px 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(201,168,76,0.42);
+  background: rgba(201,168,76,0.08);
+  color: var(--gold);
+  transition: all .2s;
+}
+.wiz-next:hover { background: rgba(201,168,76,0.18); box-shadow: 0 4px 18px rgba(201,168,76,0.2); }
+
+/* finish row (step 6) */
+.wiz-finish { display: flex; gap: 12px; margin-top: 20px; }
+.btn-publish {
+  flex: 1;
+  padding: 13px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #D4A94E, #9A6E24);
+  color: #1a1005;
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.32);
+}
+.btn-publish:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.45); }
+
+/* step 6 preview panel */
+.wiz-preview {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.3);
+}
+.prev-eyebrow { font-size: 9px; letter-spacing: 2px; color: rgba(240,230,204,0.3); font-family: var(--fd); margin-bottom: 9px; }
+#prev-title { font-family: 'Cinzel'; font-size: 20px; color: var(--gold); margin-bottom: 3px; letter-spacing: 1px; }
+.prev-sub { font-size: 12px; font-style: italic; color: var(--muted); margin-bottom: 10px; }
+.prev-tags { display: flex; gap: 7px; }
+.prev-tag {
+  font-size: 9px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-family: var(--fd);
+  letter-spacing: 1px;
+}
+
+/* shared back-button top-left */
+.screen-back {
+  position: absolute;
+  top: 30px; left: 52px;
+  z-index: 20;
+  font-family: var(--fd);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: color .2s;
+}
+.screen-back:hover { color: var(--text); }
+
+
+/* ── HAMBURGER ── */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  transition: all .2s;
+  cursor: pointer;
+}
+.hamburger:hover {
+  border-color: rgba(201,168,76,0.3);
+  background: rgba(201,168,76,0.07);
+}
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: all .25s ease;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.hamburger-menu {
+  position: fixed;
+  top: 72px;
+  right: 52px;
+  z-index: 100;
+  background: rgba(5,12,26,0.92);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.hamburger-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+.hamburger-menu button {
+  font-family: var(--fd);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 11px 16px;
+  border-radius: 8px;
+  text-align: left;
+  transition: all .15s;
+  width: 100%;
+}
+.hamburger-menu button:hover {
+  color: var(--gold);
+  background: rgba(201,168,76,0.07);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.18); border-radius: 2px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .hero-cards { flex-direction: column; align-items: center; }
+  .hero-card  { width: 100%; max-width: 320px; }
+  .nav { padding: 18px 22px; }
+  .worlds-grid { grid-template-columns: 1fr; padding: 0 20px 60px; }
+  .wiz-box { padding: 34px 24px; margin: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Full-screen background -->
+<div id="bg"></div>
+<div id="bg-vignette"></div>
+<div id="bg-glow"></div>
+
+<!-- Animated geometric particle canvas -->
+<canvas id="particles"></canvas>
+
+<!-- ════════════════════════════════════════
+     SCREEN 1 — LANDING
+     Two cards only. Nothing else.
+     ════════════════════════════════════════ -->
+<div class="screen active" id="s-landing">
+
+  <nav class="nav">
+    <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
+    <button class="hamburger" onclick="toggleMenu()" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Dropdown menu -->
+  <div class="hamburger-menu" id="hbmenu">
+    <button onclick="goTo('worlds');toggleMenu()">Worlds</button>
+    <button onclick="goTo('worlds');toggleMenu()">Campaigns</button>
+    <button onclick="toggleMenu()">Login</button>
+  </div>
+
+  <div class="landing-body">
+
+    <div class="landing-eyebrow" id="l-eye">Multiplayer AI-Powered RPG</div>
+
+    <h1 class="landing-title" id="l-title">
+      Choose Your Own<br>Adventure
+    </h1>
+
+    <p class="landing-sub" id="l-sub">
+      Multiplayer AI-powered RPGs —<br>infinite worlds, solo or with friends.
+    </p>
+
+    <!-- THE TWO CARDS -->
+    <div class="hero-cards" id="l-cards">
+
+      <div class="hero-card card-enter" onclick="goTo('worlds')">
+        <div class="card-icon">
+          <!-- Globe / portal icon -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="12" stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.8"/>
+            <ellipse cx="16" cy="16" rx="5" ry="12" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.5"/>
+            <line x1="4" y1="16" x2="28" y2="16" stroke="#C9A84C" stroke-width="1" opacity="0.5"/>
+            <line x1="7" y1="10" x2="25" y2="10" stroke="#C9A84C" stroke-width="0.8" opacity="0.3"/>
+            <line x1="7" y1="22" x2="25" y2="22" stroke="#C9A84C" stroke-width="0.8" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="card-title">Enter a World</div>
+        <div class="card-desc">Browse existing worlds and jump into a campaign — solo or with your party.</div>
+        <div class="card-arrow">Explore →</div>
+      </div>
+
+      <div class="hero-card card-create" onclick="goTo('wizard')">
+        <div class="card-icon">
+          <!-- Wand / build icon -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <line x1="6" y1="26" x2="20" y2="12" stroke="#28A87A" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 12 L24 8" stroke="#28A87A" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="26" cy="6" r="3" stroke="#28A87A" stroke-width="1.5" fill="none" opacity="0.7"/>
+            <circle cx="10" cy="9" r="1.5" fill="#28A87A" opacity="0.5"/>
+            <circle cx="24" cy="22" r="1.5" fill="#28A87A" opacity="0.5"/>
+            <circle cx="6"  cy="14" r="1"   fill="#28A87A" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="card-title">Create a World</div>
+        <div class="card-desc">Build your own world from scratch — your rules, your lore, your adventure.</div>
+        <div class="card-arrow">Build →</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 2 — WORLD HUB
+     All available worlds as cards
+     ════════════════════════════════════════ -->
+<div class="screen" id="s-worlds">
+
+  <button class="screen-back" onclick="goTo('landing')">← Back</button>
+
+  <nav class="nav" style="padding-left:140px;">
+    <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
+    <div class="nav-r">
+      <button class="btn-login" onclick="goTo('wizard')">+ Create World</button>
+    </div>
+  </nav>
+
+  <div class="worlds-header">
+    <h2 class="worlds-title">Worlds</h2>
+    <p class="worlds-sub">Choose a world to begin your campaign</p>
+  </div>
+
+  <div class="worlds-tabs">
+    <button class="wtab on" onclick="filterWorlds('all',this)">All</button>
+    <button class="wtab"    onclick="filterWorlds('official',this)">Official</button>
+    <button class="wtab"    onclick="filterWorlds('community',this)">Community</button>
+    <button class="wtab"    onclick="filterWorlds('mine',this)">Mine</button>
+  </div>
+
+  <div class="worlds-grid" id="worlds-grid">
+
+    <!-- Stormlight -->
+    <div class="wcard" data-tier="official"
+         style="border-color:rgba(201,168,76,0.14);"
+         onclick="pickWorld('stormlight')">
+      <div class="wcard-art" style="
+        background:
+          radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.4) 0%, transparent 66%),
+          linear-gradient(170deg,#071510,#0d2018);">
+        <svg width="58" height="58" viewBox="0 0 80 80" fill="none" style="position:relative;z-index:2;">
+          <polygon points="40,7 73,68 7,68" stroke="#C9A84C" stroke-width="2.2" fill="none" opacity="0.9"/>
+          <polygon points="40,23 61,60 19,60" stroke="#C9A84C" stroke-width="1.3" fill="none" opacity="0.5"/>
+          <circle cx="40" cy="40" r="4.5" fill="#C9A84C" opacity="0.85"/>
+        </svg>
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-official">🏛 Official</span></div>
+        <div class="wcard-name" style="color:var(--gold)">Stormlight Chronicles</div>
+        <div class="wcard-desc">Knights Radiant. Shardblades. A 180-turn epic across three acts.</div>
+        <div class="wcard-meta">★★★★★ · Cosmere RPG · Epic Heroic</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(201,168,76,0.38);color:var(--gold);"
+          onclick="event.stopPropagation();pickWorld('stormlight')">Play →</button>
+      </div>
+    </div>
+
+    <!-- D&D -->
+    <div class="wcard" data-tier="official"
+         style="border-color:rgba(192,57,43,0.14);"
+         onclick="pickWorld('dnd5e')">
+      <div class="wcard-art" style="
+        background:
+          radial-gradient(ellipse at 50% 100%, rgba(180,50,20,0.52) 0%, transparent 66%),
+          linear-gradient(170deg,#1a0804,#2a1008);">
+        <svg width="58" height="58" viewBox="0 0 80 80" fill="none" style="position:relative;z-index:2;">
+          <line x1="40" y1="9" x2="40" y2="60" stroke="#e07060" stroke-width="3" stroke-linecap="round"/>
+          <line x1="26" y1="44" x2="54" y2="44" stroke="#e07060" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse cx="40" cy="64" rx="5" ry="3.5" stroke="#e07060" stroke-width="1.5" fill="none" opacity="0.6"/>
+          <path d="M37 9 L40 4 L43 9 L40 16Z" fill="#e07060" opacity="0.85"/>
+        </svg>
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-official">🏛 Official</span></div>
+        <div class="wcard-name" style="color:#e07060">D&amp;D 5e</div>
+        <div class="wcard-desc">Classic fantasy. Official Basic Rules. Fighters, Wizards, and Dragons.</div>
+        <div class="wcard-meta">★★★★★ · D&amp;D 5e · Classic Fantasy</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(192,57,43,0.4);color:#e07060;"
+          onclick="event.stopPropagation();pickWorld('dnd5e')">Play →</button>
+      </div>
+    </div>
+
+    <!-- Community example -->
+    <div class="wcard" data-tier="community"
+         style="border-color:rgba(40,168,122,0.13);">
+      <div class="wcard-art" style="
+        background:
+          radial-gradient(ellipse at 50% 100%, rgba(40,168,122,0.34) 0%, transparent 66%),
+          linear-gradient(170deg,#061410,#0a2018);">
+        <svg width="58" height="58" viewBox="0 0 80 80" fill="none" style="position:relative;z-index:2;">
+          <polygon points="40,10 60,38 50,68 30,68 20,38" stroke="#5acaaa" stroke-width="2" fill="none" opacity="0.7"/>
+          <circle cx="40" cy="40" r="8" stroke="#5acaaa" stroke-width="1.4" fill="none" opacity="0.45"/>
+          <circle cx="40" cy="40" r="3" fill="#5acaaa" opacity="0.8"/>
+        </svg>
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-community">🌐 Community</span></div>
+        <div class="wcard-name" style="color:#5acaaa">Grimdark Hinterlands</div>
+        <div class="wcard-desc">Ash and iron. Dark consequences. No heroes — only survivors.</div>
+        <div class="wcard-meta">★★★★☆ · Custom · Dark &amp; Gritty</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(40,168,122,0.36);color:#5acaaa;">Play →</button>
+      </div>
+    </div>
+
+    <!-- Add new tile -->
+    <div class="wcard wcard-new" onclick="goTo('wizard')">
+      <div class="new-plus">⊕</div>
+      <div class="new-label">Create a World</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 3 — WIZARD
+     6-step world builder
+     ════════════════════════════════════════ -->
+<div class="screen" id="s-wizard">
+
+  <button class="screen-back" onclick="wizBack()">← Back</button>
+
+  <div class="wiz-box">
+
+    <div class="wiz-dots" id="wiz-dots">
+      <div class="wdot on"></div><div class="wdot"></div><div class="wdot"></div>
+      <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
+    </div>
+
+    <!-- Step 1 — Identity -->
+    <div class="wstep on" id="ws-1">
+      <div class="wstep-eyebrow">Step 1 of 6 — World Identity</div>
+      <div class="wstep-title">Name Your World</div>
+      <div class="wfield">
+        <label class="wlabel">World Name</label>
+        <input class="winput" type="text" placeholder="e.g. The Shattered Expanse..." id="wiz-name">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">One-Line Description</label>
+        <input class="winput" type="text" placeholder="e.g. A dying empire held together by blood magic...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Tone</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Epic Heroic</div>
+          <div class="wopt" onclick="selOpt(this)">Dark &amp; Gritty</div>
+          <div class="wopt" onclick="selOpt(this)">Cosmic Horror</div>
+          <div class="wopt" onclick="selOpt(this)">Political Intrigue</div>
+          <div class="wopt" onclick="selOpt(this)">Whimsical</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 — Magic -->
+    <div class="wstep" id="ws-2">
+      <div class="wstep-eyebrow">Step 2 of 6 — Magic System</div>
+      <div class="wstep-title">Define Your Magic</div>
+      <div class="wfield">
+        <label class="wlabel">Does magic exist?</label>
+        <div class="wopts">
+          <div class="wopt on" onclick="selOpt(this)">Yes</div>
+          <div class="wopt" onclick="selOpt(this)">No</div>
+          <div class="wopt" onclick="selOpt(this)">Rare &amp; Feared</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">What is it called?</label>
+        <input class="winput" type="text" placeholder="e.g. The Weave, Soul Binding, Void Energy...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Powered by</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Willpower</div>
+          <div class="wopt" onclick="selOpt(this)">Blood Cost</div>
+          <div class="wopt" onclick="selOpt(this)">Study &amp; Ritual</div>
+          <div class="wopt" onclick="selOpt(this)">Divine Gift</div>
+          <div class="wopt" onclick="selOpt(this)">Emotion</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 — Stats -->
+    <div class="wstep" id="ws-3">
+      <div class="wstep-eyebrow">Step 3 of 6 — Stat System</div>
+      <div class="wstep-title">How Are Heroes Measured?</div>
+      <div class="wfield">
+        <label class="wlabel">Choose a stat system</label>
+        <div class="wopts" style="flex-direction:column;gap:10px;">
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">Cosmere Stats</strong>
+            <span style="font-size:9px;opacity:0.55;">STR · SPD · INT · WIL · AWA · PRE</span>
+          </div>
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">D&amp;D Stats</strong>
+            <span style="font-size:9px;opacity:0.55;">STR · DEX · CON · INT · WIS · CHA</span>
+          </div>
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">Simplified</strong>
+            <span style="font-size:9px;opacity:0.55;">Body · Mind · Spirit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 — World Facts -->
+    <div class="wstep" id="ws-4">
+      <div class="wstep-eyebrow">Step 4 of 6 — World Facts</div>
+      <div class="wstep-title">Shape Your World</div>
+      <div class="wfield">
+        <label class="wlabel">Major Factions</label>
+        <input class="winput" type="text" placeholder="e.g. The Iron Throne, The Wandering Court...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Key Locations (up to 3)</label>
+        <input class="winput" type="text" placeholder="e.g. The Ashen Wastes, Port Mourne...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">The Central Conflict</label>
+        <textarea class="winput" rows="3" placeholder="What drives the story? Who wants what, and why can't they have it..."></textarea>
+      </div>
+    </div>
+
+    <!-- Step 5 — GM -->
+    <div class="wstep" id="ws-5">
+      <div class="wstep-eyebrow">Step 5 of 6 — GM Personality</div>
+      <div class="wstep-title">Voice of Your World</div>
+      <div class="wfield">
+        <label class="wlabel">Narrator Style</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Epic &amp; Mythic</div>
+          <div class="wopt" onclick="selOpt(this)">Gritty &amp; Realistic</div>
+          <div class="wopt" onclick="selOpt(this)">Mysterious &amp; Eerie</div>
+          <div class="wopt" onclick="selOpt(this)">Playful &amp; Witty</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Combat Frequency</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Rare &amp; Meaningful</div>
+          <div class="wopt" onclick="selOpt(this)">Moderate</div>
+          <div class="wopt" onclick="selOpt(this)">Action-Heavy</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Story Focus</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Political</div>
+          <div class="wopt" onclick="selOpt(this)">Exploration</div>
+          <div class="wopt" onclick="selOpt(this)">Combat</div>
+          <div class="wopt" onclick="selOpt(this)">Character Drama</div>
+          <div class="wopt" onclick="selOpt(this)">Mixed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 — Theme -->
+    <div class="wstep" id="ws-6">
+      <div class="wstep-eyebrow">Step 6 of 6 — Visual Identity</div>
+      <div class="wstep-title">How Does It Look?</div>
+      <div class="wfield">
+        <label class="wlabel">Primary Color</label>
+        <div style="display:flex;gap:11px;align-items:center;">
+          <input type="color" id="cp" value="#C9A84C"
+            style="width:42px;height:42px;border:none;background:none;border-radius:8px;cursor:pointer;">
+          <input class="winput" type="text" id="cp-hex" value="#C9A84C"
+            style="width:105px;" oninput="syncColor(this.value)">
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Title Font</label>
+        <div class="wopts">
+          <div class="wopt on" onclick="selOpt(this)" style="font-family:'Cinzel'">Cinzel</div>
+          <div class="wopt" onclick="selOpt(this)" style="font-family:'Crimson Pro'">Crimson Pro</div>
+          <div class="wopt" onclick="selOpt(this)">Oswald</div>
+          <div class="wopt" onclick="selOpt(this)">Playfair</div>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <div class="wiz-preview">
+        <div class="prev-eyebrow">PREVIEW</div>
+        <div id="prev-title">Your World Name</div>
+        <div class="prev-sub">A saga begins in the dark...</div>
+        <div class="prev-tags">
+          <span class="prev-tag" id="prev-crit"
+            style="border:1px solid #C9A84C44;color:#C9A84C;background:#C9A84C18;">CRIT!</span>
+          <span class="prev-tag"
+            style="border:1px solid rgba(40,168,122,0.28);color:#28A87A;background:rgba(40,168,122,0.09);">SUCCESS</span>
+          <span class="prev-tag"
+            style="border:1px solid rgba(118,162,232,0.28);color:#76a2e8;background:rgba(118,162,232,0.09);">PARTIAL</span>
+        </div>
+      </div>
+
+      <div class="wiz-finish">
+        <button class="wiz-next" style="flex:1;padding:13px;" onclick="finishWizard(false)">Save as Private</button>
+        <button class="btn-publish" onclick="finishWizard(true)">Publish to Hub</button>
+      </div>
+    </div>
+
+    <!-- Nav row (hidden on step 6) -->
+    <div class="wiz-nav" id="wiz-nav">
+      <button class="wiz-back" id="wiz-back-btn" onclick="wizStep(-1)">← Back</button>
+      <button class="wiz-next" onclick="wizStep(1)">Next →</button>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+/* ── GEOMETRIC PARTICLE CANVAS ── */
+(function(){
+  const c = document.getElementById('particles');
+  const x = c.getContext('2d');
+  let W, H, nodes;
+
+  // Three palette colors — gold, blue, teal
+  // Each stored as [r, g, b] for interpolation
+  const COLORS = [
+    [201, 168,  76],  // #C9A84C  gold
+    [118, 162, 232],  // #76A2E8  blue
+    [128, 209, 204],  // #80D1CC  teal
+  ];
+
+  // Interpolate between two RGB arrays by t (0–1)
+  function lerpRGB(a, b, t){
+    return [
+      Math.round(a[0] + (b[0]-a[0])*t),
+      Math.round(a[1] + (b[1]-a[1])*t),
+      Math.round(a[2] + (b[2]-a[2])*t),
+    ];
+  }
+
+  function resize(){
+    W = c.width  = window.innerWidth;
+    H = c.height = window.innerHeight;
+    nodes = Array.from({length:22}, ()=>({
+      x:  Math.random()*W,
+      y:  Math.random()*H,
+      vx: (Math.random()-.5)*.2,
+      vy: (Math.random()-.5)*.2,
+      // Assign each node one of the three palette colors
+      rgb: COLORS[Math.floor(Math.random()*COLORS.length)],
+    }));
+  }
+
+  function tick(){
+    x.clearRect(0,0,W,H);
+    nodes.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+    });
+
+    // Draw lines — blend color between the two endpoint nodes
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<230){
+          const fade = 1 - d/230;
+          const alpha = 0.16 * fade;
+          // Midpoint color — blend the two node colors
+          const mid = lerpRGB(nodes[i].rgb, nodes[j].rgb, 0.5);
+          // Use a gradient along the line for a richer look
+          const grad = x.createLinearGradient(
+            nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y
+          );
+          grad.addColorStop(0,   `rgba(${nodes[i].rgb.join(',')},${alpha * 1.8})`);
+          grad.addColorStop(0.5, `rgba(${mid.join(',')},${alpha * 0.8})`);
+          grad.addColorStop(1,   `rgba(${nodes[j].rgb.join(',')},${alpha * 1.8})`);
+          x.beginPath();
+          x.moveTo(nodes[i].x, nodes[i].y);
+          x.lineTo(nodes[j].x, nodes[j].y);
+          x.strokeStyle = grad;
+          x.lineWidth = 1.3;
+          x.stroke();
+        }
+      }
+    }
+
+    // Draw vertex dots — brightest points in the system
+    nodes.forEach(n=>{
+      const [r,g,b] = n.rgb;
+      // Outer glow
+      const glow = x.createRadialGradient(n.x, n.y, 0, n.x, n.y, 8);
+      glow.addColorStop(0,   `rgba(${r},${g},${b},0.30)`);
+      glow.addColorStop(0.4, `rgba(${r},${g},${b},0.22)`);
+      glow.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+      x.beginPath();
+      x.arc(n.x, n.y, 8, 0, Math.PI*2);
+      x.fillStyle = glow;
+      x.fill();
+      // Bright core dot
+      x.beginPath();
+      x.arc(n.x, n.y, 1.5, 0, Math.PI*2);
+      x.fillStyle = `rgba(${r},${g},${b},1.0)`;
+      x.fill();
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize',resize);
+  resize(); tick();
+})();
+
+/* ── ROUTER ── */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('s-'+id);
+  if(!el) return;
+  el.classList.add('active');
+  gsap.fromTo(el,
+    {opacity:0, y:16, filter:'blur(6px)'},
+    {opacity:1, y:0,  filter:'blur(0px)', duration:.42, ease:'power2.out'}
+  );
+  if(id==='landing') animateLanding(false);
+  if(id==='worlds')  animateHub();
+  if(id==='wizard')  { _ws=1; renderStep(); }
+}
+
+function pickWorld(id){
+  alert('⟁ "'+id+'" campaign picker — wires in Phase 2');
+}
+
+/* ── LANDING ANIM ── */
+function animateLanding(boot){
+  const d = boot ? .1 : 0;
+  gsap.fromTo('#l-eye',   {opacity:0,y:14}, {opacity:1,y:0,duration:.6,delay:d,    ease:'power2.out'});
+  gsap.fromTo('#l-title', {opacity:0,y:28}, {opacity:1,y:0,duration:.75,delay:d+.1,ease:'power3.out'});
+  gsap.fromTo('#l-sub',   {opacity:0,y:20}, {opacity:1,y:0,duration:.7, delay:d+.22,ease:'power3.out'});
+  gsap.fromTo('#l-cards', {opacity:0,y:24}, {opacity:1,y:0,duration:.65,delay:d+.34,ease:'power3.out'});
+}
+
+/* ── WORLDS ANIM ── */
+function animateHub(){
+  gsap.fromTo('.wcard',
+    {opacity:0,y:20,scale:.97},
+    {opacity:1,y:0,scale:1,duration:.4,stagger:.07,ease:'power3.out',clearProps:'all'}
+  );
+}
+
+/* ── FILTER ── */
+function filterWorlds(tier,btn){
+  document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('#worlds-grid .wcard:not(.wcard-new)').forEach(c=>{
+    c.style.display=(tier==='all'||c.dataset.tier===tier)?'':'none';
+  });
+}
+
+/* ── WIZARD ── */
+let _ws=1;
+const WS_MAX=6;
+
+function wizStep(dir){
+  const n=_ws+dir;
+  if(n<1||n>WS_MAX) return;
+  _ws=n; renderStep();
+}
+
+function wizBack(){
+  if(_ws<=1) goTo('worlds'); else wizStep(-1);
+}
+
+function renderStep(){
+  document.querySelectorAll('.wstep').forEach((s,i)=>s.classList.toggle('on',i+1===_ws));
+  document.querySelectorAll('.wdot').forEach((d,i)=>{
+    d.classList.toggle('on',  i+1===_ws);
+    d.classList.toggle('done',i+1<_ws);
+  });
+  document.getElementById('wiz-back-btn').style.visibility=_ws>1?'visible':'hidden';
+  document.getElementById('wiz-nav').style.display=_ws<WS_MAX?'flex':'none';
+  gsap.fromTo('#ws-'+_ws,{opacity:0,x:16},{opacity:1,x:0,duration:.26,ease:'power2.out'});
+  if(_ws===WS_MAX) updatePreview();
+}
+
+function selOpt(el){
+  el.closest('.wopts').querySelectorAll('.wopt').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  if(_ws===WS_MAX) updatePreview();
+}
+
+function syncColor(val){
+  if(/^#[0-9A-Fa-f]{6}$/.test(val)){
+    document.getElementById('cp').value=val; updatePreview();
+  }
+}
+
+function updatePreview(){
+  const p=document.getElementById('cp').value;
+  const n=document.getElementById('wiz-name')?.value||'Your World Name';
+  const pt=document.getElementById('prev-title');
+  const pc=document.getElementById('prev-crit');
+  if(pt){pt.style.color=p; pt.textContent=n||'Your World Name';}
+  if(pc){pc.style.color=p; pc.style.borderColor=p+'44'; pc.style.background=p+'18';}
+}
+
+function finishWizard(publish){
+  const name   = document.getElementById('wiz-name')?.value.trim()||'My World';
+  const color  = document.getElementById('cp')?.value||'#C9A84C';
+  const tier   = publish?'community':'mine';
+
+  const grid  = document.getElementById('worlds-grid');
+  const newBtn= grid.querySelector('.wcard-new');
+  const card  = document.createElement('div');
+  card.className='wcard';
+  card.dataset.tier=tier;
+  card.style.cssText=`border-color:${color}28;opacity:0;`;
+  card.innerHTML=`
+    <div class="wcard-art" style="background:radial-gradient(ellipse at 50% 100%,${color}33 0%,transparent 66%),linear-gradient(170deg,#0a0e18,#101620);">
+      <svg width="54" height="54" viewBox="0 0 80 80" fill="none" style="position:relative;z-index:2;">
+        <circle cx="40" cy="40" r="26" stroke="${color}" stroke-width="2" fill="none" opacity="0.7"/>
+        <circle cx="40" cy="40" r="12" stroke="${color}" stroke-width="1.2" fill="none" opacity="0.4"/>
+        <circle cx="40" cy="40" r="4"  fill="${color}" opacity="0.9"/>
+      </svg>
+    </div>
+    <div class="wcard-body">
+      <div class="wcard-badges">
+        <span class="badge" style="background:${color}18;border:1px solid ${color}40;color:${color};">
+          ${publish?'🌐 Community':'🔒 Private'}
+        </span>
+      </div>
+      <div class="wcard-name" style="color:${color}">${name}</div>
+      <div class="wcard-desc">Your custom world — ready to play.</div>
+      <div class="wcard-meta">Just created · Custom</div>
+      <button class="wcard-btn" style="border-color:${color}50;color:${color};">Play →</button>
+    </div>`;
+
+  grid.insertBefore(card, newBtn);
+  goTo('worlds');
+  gsap.fromTo(card,
+    {opacity:0,scale:.88,y:22},
+    {opacity:1,scale:1,y:0,duration:.5,delay:.3,ease:'back.out(1.6)'}
+  );
+}
+
+/* ── 3D CARD TILT ── */
+function initTilt(){
+  document.querySelectorAll('.hero-card,.wcard:not(.wcard-new)').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      gsap.to(card,{rotateY:x*10,rotateX:-y*8,duration:.2,overwrite:'auto'});
+    });
+    card.addEventListener('mouseleave',()=>{
+      gsap.to(card,{rotateY:0,rotateX:0,duration:.5,ease:'elastic.out(1,.5)'});
+    });
+  });
+}
+
+/* ── COLOR PICKER SYNC ── */
+document.getElementById('cp').addEventListener('input',function(){
+  document.getElementById('cp-hex').value=this.value;
+  updatePreview();
+});
+
+
+/* ── HAMBURGER MENU ── */
+function toggleMenu(){
+  const hb = document.getElementById('hamburger');
+  const menu = document.getElementById('hbmenu');
+  hb.classList.toggle('open');
+  menu.classList.toggle('open');
+}
+// Close on outside click
+document.addEventListener('click', e => {
+  const hb   = document.getElementById('hamburger');
+  const menu = document.getElementById('hbmenu');
+  if(hb && menu && !hb.contains(e.target) && !menu.contains(e.target)){
+    hb.classList.remove('open');
+    menu.classList.remove('open');
+  }
+});
+
+/* ── BOOT ── */
+window.addEventListener('load',()=>{
+  animateLanding(true);
+  initTilt();
+});
+</script>
+</body>
+</html>
