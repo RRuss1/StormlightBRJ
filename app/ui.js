@@ -1403,8 +1403,22 @@ function renderActionLog(){
   const el=document.getElementById('action-log-list');if(!el||!gState)return;
   const log=gState.actionLog||[];
   if(!log.length){el.innerHTML='<div style="color:var(--text5);font-size:12px;font-style:italic;text-align:center;padding:12px;">No actions yet</div>';return;}
+  // CRIT!   #C9A84C  gold
+  // SUCCESS #28A87A  teal
+  // PARTIAL #76A2E8  blue
+  // FAILED  #B03828  red
+  // FUMBLE  #93979E  gray
+  function resultColor(s){
+    const u=(s||'').toUpperCase();
+    if(u==='CRIT!'||u==='CRIT') return'#C9A84C';
+    if(u==='SUCCESS')            return'#28A87A';
+    if(u==='PARTIAL')            return'#76A2E8';
+    if(u==='FAILED')             return'#B03828';
+    if(u==='FUMBLE')             return'#93979E';
+    return'var(--text4)';
+  }
   el.innerHTML=log.map(e=>{
-    const col=e.success==='critical!'?'var(--gold)':e.success==='success'?'var(--teal2)':e.success==='partial'?'var(--amber2)':e.success==='failed'?'var(--coral2)':'#c44a28';
+    const col=resultColor(e.success);
     const p=gState.players&&gState.players.find(x=>x&&x.name===e.name);
     const nameCol=p?p.color:'var(--text3)';
     return`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.5;">
@@ -1414,7 +1428,7 @@ function renderActionLog(){
       </div>
       <div style="color:var(--text2);margin:2px 0;">${e.verb} ${e.noun}</div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <span style="color:${col};font-family:var(--font-d);font-size:10px;letter-spacing:1px;">[${e.success}]</span>
+        <span style="color:${col};font-family:var(--font-d);font-size:10px;letter-spacing:1px;font-weight:700;">[${e.success}]</span>
         <span style="color:var(--text4);font-size:10px;">d20:${e.roll}${e.total&&e.total!==e.roll?'→'+e.total:''}</span>
         ${e.hpMsg?`<span style="color:${e.hpMsg.includes('⬆')?'var(--teal2)':'var(--coral2)'};font-size:10px;">${e.hpMsg.split(' ').slice(0,3).join(' ')}</span>`:''}
       </div>
@@ -1957,38 +1971,11 @@ async function onSubmitAction(){
   if(!action){errEl.textContent='Choose or describe an action first.';errEl.style.display='block';return;}
   errEl.style.display='none';
   if(isLoading)return;
-
-  // ── [COMBAT] choice = instant combat entry — no GM narration needed ──
-  // The player has explicitly chosen to engage. Skip callGM entirely.
-  // Log the action, advance the turn counter, then enter combat immediately.
-  // The combat GM's opening narration will describe what happens next.
+  // If the player chose a [COMBAT] tagged option, enter combat immediately
   if(selActionTag==='COMBAT'||/^\[COMBAT\]/i.test(action)){
-    selActionTag='';
     gState.combatMode=true;
     gState.preCombatTriggered=true;
-    isLoading=true;
-    stopSpeaking();
-    setBottomLoading();
-    requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
-    // Roll for the action (affects opening combat GM context)
-    const _cbRoll=Math.ceil(Math.random()*20);
-    const _cbSk=getStat(action);
-    const _cbBonus=(myChar.skillRanks&&myChar.skillRanks[_cbSk]||0)+((myChar.stats&&myChar.stats[_cbSk])||10)+(myChar.bladeLevel||0);
-    const _cbTotal=Math.min(20,Math.max(1,_cbRoll+_cbBonus));
-    document.getElementById('dice-flash').textContent=`d20:${_cbRoll} + ${_cbSk.toUpperCase()}(${_cbBonus>=0?'+':''}${_cbBonus}) = ${_cbTotal}`;
-    addActionLog(myChar.name, action, _cbRoll, '', _cbTotal);
-    await addLog({type:'player',who:myChar.name,text:action,choices:[]});
-    const _cbSz=gState.partySize||partySize;
-    gState.turn=(gState.turn+1)%_cbSz;
-    gState.totalMoves=(gState.totalMoves||0)+1;
-    await saveAndBroadcast(gState);
-    selActionText='';document.getElementById('custom-in').value='';
-    document.querySelectorAll('.achoice').forEach(b=>b.classList.remove('sel'));
-    isLoading=false;
-    enterCombat();
-    return;
   }
-
   selActionTag=''; // clear after use
   isLoading=true;
   // Safety: auto-reset isLoading after 30s to prevent UI freeze
