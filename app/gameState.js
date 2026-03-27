@@ -29,8 +29,9 @@ const _sys = window.StormlightSystem;
 window.SystemData = _sys;
 function loadSystem(systemId) {
   const systems = {
-    stormlight: window.StormlightSystem,
-    dnd5e:      window.DnD5eSystem,
+    stormlight:   window.StormlightSystem,
+    dnd5e:        window.DnD5eSystem,
+    wretcheddeep: window.WretchedDeepSystem,
   };
   // Custom worlds built via wizard
   if (systemId && systemId.startsWith('custom-') && window.CustomSystem) {

@@ -83,11 +83,11 @@
   font-family: 'Cinzel Decorative', var(--fd);
   font-size: 18px;
   letter-spacing: 3px;
-  color: var(--gold);
-  text-shadow: 0 0 24px rgba(201,168,76,0.5), 0 2px 10px rgba(0,0,0,0.9);
+  color: var(--cream-light);
+  text-shadow: 0 0 18px rgba(46,202,168,0.3), 0 2px 10px rgba(0,0,0,0.9);
   cursor: pointer;
 }
-.logo em { color: var(--gold-hi); font-style: normal; }
+.logo em { color: var(--cream-light); font-style: normal; }
 .nav-r { display: flex; align-items: center; gap: 26px; }
 .nav-link {
   font-family: var(--fd);

@@ -148,7 +148,7 @@
       <div style="font-family:'Crimson Pro',serif;font-size:clamp(13px,1.4vw,16px);font-style:italic;color:#8ab4d4;opacity:0.85;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,0.6);">Dynamic stories. Instant choices. Infinite outcomes.</div>
     </div>
     <h1 class="landing-title" id="l-title">
-      Choose Your Own<br><span class="accent">Adventure</span>
+      Choose Your Own<br>Adventure
 
     </h1>
     <p class="landing-sub" id="l-sub">
@@ -269,6 +269,24 @@
         <button class="wcard-btn"
           style="border-color:rgba(192,57,43,0.4);color:#e07060;"
           onclick="event.stopPropagation();pickWorld('dnd5e')">Play →</button>
+      </div>
+    </div>
+
+    <!-- The Wretched Deep -->
+    <div class="wcard" data-tier="official"
+         style="border-color:rgba(123,63,142,0.14);"
+         onclick="pickWorld('wretcheddeep')">
+      <div class="wcard-art">
+        <img src="GameCardImgs/Monk.png" alt="The Wretched Deep" class="wcard-img">
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-official">🏛 Official</span></div>
+        <div class="wcard-name" style="color:#7B3F8E">The Wretched Deep</div>
+        <div class="wcard-desc">Corruption. Obsession. A crown that whispers in the dark. No heroes — only survivors.</div>
+        <div class="wcard-meta">★★★★★ · Dark Horror · Survival</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(123,63,142,0.4);color:#7B3F8E;"
+          onclick="event.stopPropagation();pickWorld('wretcheddeep')">Play →</button>
       </div>
     </div>
 
@@ -1359,6 +1377,7 @@
      ═══════════════════════════════════════════════════════ -->
 <script src="app/systems/stormlight.js"></script>
 <script src="app/systems/dnd5e.js"></script>
+<script src="app/systems/wretcheddeep.js"></script>
 <script src="app/systems/custom.js"></script>
 <script src="app/enemyPatterns.js"></script>
 <script src="app/gameState.js"></script>

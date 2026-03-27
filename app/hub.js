@@ -559,6 +559,12 @@ async function _fetchCommunityWorlds() {
     const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A2:J100`, {
       headers: { Authorization: `Bearer ${t}` }
     });
+    if (!res.ok) {
+      // WorldLibrary tab doesn't exist yet — not an error, just no community worlds
+      console.log('WorldLibrary tab not found — no community worlds to load');
+      _communityFetchedAt = Date.now(); // cache the "empty" result so we don't retry immediately
+      return [];
+    }
     const data = await res.json();
     const rows = data.values || [];
     _communityWorldsCache = rows.map(r => {
