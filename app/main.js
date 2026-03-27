@@ -1030,6 +1030,12 @@ window.addEventListener('load', () => {
   applyLang();
   loadVoicePreference();
 
+  // If on a hub screen (landing, worlds, wizard), let hub.js handle boot — don't load campaigns
+  const _bootHash = (window.location.hash || '').split('?')[0];
+  if (!_bootHash || _bootHash === '#landing' || _bootHash === '#worlds' || _bootHash === '#wizard') {
+    return; // Hub boot handled by hub.js
+  }
+
   // Show campaign screen
   showScreen('campaign');
 

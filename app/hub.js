@@ -468,17 +468,17 @@ function initTilt(){
 
 /* ── HAMBURGER MENU ── */
 function toggleMenu(){
-  const hb = document.getElementById('hamburger');
   const menu = document.getElementById('hbmenu');
-  hb.classList.toggle('open');
-  menu.classList.toggle('open');
+  // Toggle all hamburger buttons (landing + worlds page both have one)
+  document.querySelectorAll('.hamburger').forEach(hb => hb.classList.toggle('open'));
+  if (menu) menu.classList.toggle('open');
 }
 // Close on outside click
 document.addEventListener('click', e => {
-  const hb   = document.getElementById('hamburger');
   const menu = document.getElementById('hbmenu');
-  if(hb && menu && !hb.contains(e.target) && !menu.contains(e.target)){
-    hb.classList.remove('open');
+  const clickedHamburger = e.target.closest('.hamburger');
+  if (!clickedHamburger && menu && !menu.contains(e.target)) {
+    document.querySelectorAll('.hamburger').forEach(hb => hb.classList.remove('open'));
     menu.classList.remove('open');
   }
 });
@@ -755,6 +755,8 @@ function pickWorld(worldId) {
 
   window.location.hash = '#campaign';
   showScreen('campaign');
+  // Load campaigns filtered for this world
+  if (typeof initCampaignPicker === 'function') initCampaignPicker();
 }
 
 // ── HASH ROUTER ──────────────────────────────────────────
