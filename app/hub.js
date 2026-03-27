@@ -135,6 +135,8 @@ function animateHub(){
     {opacity:0,y:20,scale:.97},
     {opacity:1,y:0,scale:1,duration:.4,stagger:.07,ease:'power3.out',clearProps:'all'}
   );
+  // Re-init tilt for world cards (may not have been bound yet)
+  setTimeout(initTilt, 100);
 }
 
 /* ── FILTER ── */
@@ -388,6 +390,8 @@ Risk level: ${magicRisk.toLowerCase()}.`;
 /* ── 3D CARD TILT ── */
 function initTilt(){
   document.querySelectorAll('.hero-card,.wcard:not(.wcard-new)').forEach(card=>{
+    if (card._tiltBound) return; // prevent duplicate listeners
+    card._tiltBound = true;
     card.addEventListener('mousemove',e=>{
       const r=card.getBoundingClientRect();
       const cx=(e.clientX-r.left)/r.width-.5;
