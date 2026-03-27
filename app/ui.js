@@ -673,12 +673,33 @@ function renderCreate(){
     }
   }
 
+  // Ancestry label
+  const ancestryLabel = document.getElementById('ancestry-label');
+  if (ancestryLabel) ancestryLabel.textContent = sysId==='dnd5e'?'Race':'Ancestry';
+
   // System-aware submit button
   showCreateStep(1);
+  renderAncestryGrid();
   renderColors();renderClasses();renderRoles();renderWeapons();renderCultureGrid();renderKits();
   updateCreateSubmitBtn();
   pickCharType(true);
   setTimeout(()=>{pickCharType(true);renderStatsPointBuy();},80);
+}
+
+function renderAncestryGrid(){
+  const grid = document.getElementById('ancestry-grid');
+  if (!grid) return;
+  const anc = window.ANCESTRIES || [];
+  if (!anc.length) { grid.innerHTML = ''; return; }
+  // Default to first ancestry
+  if (!anc.find(a => a.id === selAncestry)) selAncestry = anc[0].id;
+  grid.style.gridTemplateColumns = anc.length <= 2 ? 'repeat(2,1fr)' : `repeat(${Math.min(anc.length,4)},1fr)`;
+  grid.innerHTML = anc.map(a => `
+    <div class="type-card${selAncestry===a.id?' sel':''}" onclick="pickAncestry('${a.id}')" title="${a.name}">
+      <div class="font-display text-sm font-semibold" style="color:${a.color||'var(--text)'}">${a.name}</div>
+      <div class="text-xs italic mt-1" style="color:var(--gold-mid)">${(a.desc||'').slice(0,60)}${(a.desc||'').length>60?'...':''}</div>
+    </div>
+  `).join('');
 }
 
 function renderKits(){
@@ -711,8 +732,7 @@ function pickKit(id){
 
 function pickAncestry(id){
   selAncestry=id;
-  document.getElementById('ancestry-human').classList.toggle('sel',id==='human');
-  document.getElementById('ancestry-singer').classList.toggle('sel',id==='singer');
+  renderAncestryGrid();
 }
 
 function renderCultureGrid(){
@@ -808,6 +828,7 @@ function updateCreateSubmitBtn(){
   const _submitTexts = {
     stormlight: { r: 'Speak the First Oath →', h: 'Enter the Storm →' },
     dnd5e:      { r: 'Begin Your Adventure →', h: 'Begin Your Adventure →' },
+    wretcheddeep: { r: 'Descend into the Deep →', h: 'Descend into the Deep →' },
   };
   const _st = _submitTexts[_sId] || { r: 'Create Character →', h: 'Create Character →' };
   btn.textContent = isRadiant ? _st.r : _st.h;
@@ -1979,7 +2000,7 @@ function renderStory(log){
   if(gState&&gState.lastGM&&!dlog.some(e=>e.type==='gm')){
     dlog=[...dlog,{type:'gm',who:'',text:gState.lastGM.text,choices:gState.lastGM.choices,ts:gState.lastGM.ts||'mem'}];
   }
-  if(!dlog.length){el.innerHTML='<div style="text-align:center;color:var(--text4);font-style:italic;padding:2rem 0;"><span data-tr>Waiting for all Radiants to join...</span></div>';return;}
+  if(!dlog.length){el.innerHTML='<div style="text-align:center;color:var(--text4);font-style:italic;padding:2rem 0;"><span data-tr>Waiting for all players to join...</span></div>';return;}
 
   const latestGM=[...dlog].reverse().find(e=>e.type==='gm');
   const isNew=latestGM&&(latestGM.ts||'new')!==lastGMTs;

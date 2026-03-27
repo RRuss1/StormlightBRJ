@@ -454,6 +454,10 @@
         <textarea class="winput" rows="3" id="wiz-lore" placeholder="Describe the history, myths, and feel of your world. The more you give, the richer the AI narration..."></textarea>
       </div>
       <div class="wfield">
+        <label class="wlabel">Playable Races (comma separated, min 2)</label>
+        <input class="winput" type="text" id="wiz-races" placeholder="e.g. Human, Elf, Dwarf, Orc, Fae...">
+      </div>
+      <div class="wfield">
         <label class="wlabel">Naming Style</label>
         <div class="wopts" data-field="namingStyle">
           <div class="wopt" onclick="selOpt(this)">Western Fantasy</div>
@@ -782,7 +786,7 @@
 
   <div class="flex flex-wrap justify-center gap-3">
     <button class="btn btn-gold" id="enter-btn" onclick="setTimeout(onEnter,0)">
-      <span data-tr>⟁ Enter the Storm</span>
+      <span data-tr id="enter-btn-text">Begin Campaign</span>
     </button>
     <button class="btn btn-sm btn-danger" onclick="onReset()">
       <span data-tr>Reset Campaign</span>
@@ -814,24 +818,13 @@
         <span data-tr>Choose your ancestry and up to two cultural expertises.</span>
       </p>
 
-      <!-- Ancestry -->
+      <!-- Ancestry / Race (populated dynamically) -->
       <div class="mb-7">
         <label class="block font-display text-xs tracking-widest uppercase mb-2.5" style="color:var(--text4)">
-          <span data-tr>Ancestry</span>
+          <span data-tr id="ancestry-label">Ancestry</span>
         </label>
-        <div class="grid grid-cols-2 gap-3 mb-4">
-          <div class="type-card sel" id="ancestry-human" onclick="pickAncestry('human')" title="Human ancestry">
-            <div class="text-3xl mb-2">👤</div>
-            <div class="font-display text-sm font-semibold" style="color:var(--text)">Human</div>
-            <div class="text-xs italic mt-1" style="color:var(--amber2)">"Adaptable and widespread."</div>
-            <div class="text-xs mt-1.5" style="color:var(--text5)">Bonus talent from any heroic path at each tier</div>
-          </div>
-          <div class="type-card" id="ancestry-singer" onclick="pickAncestry('singer')" title="Singer ancestry">
-            <div class="text-3xl mb-2">🎶</div>
-            <div class="font-display text-sm font-semibold" style="color:var(--text)">Singer</div>
-            <div class="text-xs italic mt-1" style="color:var(--amber2)">"Change form. Change purpose."</div>
-            <div class="text-xs mt-1.5" style="color:var(--text5)">Change Form key talent · Bonus form talent · Singer talent tree</div>
-          </div>
+        <div class="grid grid-cols-2 gap-3 mb-4" id="ancestry-grid">
+          <!-- Rendered by renderAncestryGrid() -->
         </div>
       </div>
 
@@ -1146,7 +1139,7 @@
 
   <!-- Thinking bar -->
   <div id="thinking-bar" style="display:none">
-    <span class="font-display text-xs tracking-widest uppercase" id="thinking-label" style="color:var(--gold)">⟁ The Stormfather deliberates</span>
+    <span class="font-display text-xs tracking-widest uppercase" id="thinking-label" style="color:var(--gold)">⟁ The Game Master deliberates</span>
     <span class="inline-flex gap-1.5 ml-3 align-middle">
       <span class="pulse-dot" style="animation-delay:0s"></span>
       <span class="pulse-dot" style="animation-delay:0.2s"></span>
@@ -1206,7 +1199,7 @@
         </div>
         <div class="story-text" id="story-text">
           <div class="text-center italic py-8" style="color:var(--text5)">
-            <span data-tr>Waiting for all Radiants to join...</span>
+            <span data-tr>Waiting for all players to join...</span>
           </div>
         </div>
 
@@ -1215,7 +1208,7 @@
           <!-- Loading state -->
           <div id="bottom-loading" class="hidden px-6 py-10 text-center">
             <div class="loading-text font-display text-xs tracking-widest uppercase mb-4" style="color:var(--gold)">
-              <span data-tr>The Stormfather deliberates</span>
+              <span data-tr>The Game Master deliberates</span>
             </div>
             <div class="flex justify-center gap-2.5">
               <div class="pulse-dot" style="animation-delay:0s"></div>

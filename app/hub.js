@@ -310,6 +310,7 @@ function finishWizard(publish){
   // Read all text inputs
   const magicName     = document.getElementById('wiz-magic-name')?.value.trim()||'Magic';
   const magicResource = document.getElementById('wiz-magic-resource')?.value.trim()||'Mana';
+  const races         = document.getElementById('wiz-races')?.value.trim()||'';
   const factions      = document.getElementById('wiz-factions')?.value.trim()||'';
   const locations     = document.getElementById('wiz-locations')?.value.trim()||'';
   const conflict      = document.getElementById('wiz-conflict')?.value.trim()||'';
@@ -395,6 +396,7 @@ Physics: ${physics.toLowerCase()}. Death rules: ${deathRules.toLowerCase()}. Tim
       tone: toneInstruction,
       npcFlavor: `${namingStyle} naming convention. NPC depth: ${npcDepth.toLowerCase()}.`,
     },
+    races: races ? races.split(',').map(s=>s.trim()).filter(Boolean) : [],
     locations: locArray,
     factions,
     conflict,
@@ -722,7 +724,8 @@ function pickWorld(worldId) {
   const tag = sys.tagline || '';
   const thinkLabel = worldId === 'dnd5e' ? '⚔ The Dungeon Master deliberates'
                    : worldId === 'stormlight' ? '⟁ The Stormfather deliberates'
-                   : glyph + ' The GM deliberates';
+                   : worldId === 'wretcheddeep' ? '👁 The Crown whispers'
+                   : glyph + ' The Game Master deliberates';
   // Campaign screen
   const campGlyph = document.getElementById('camp-glyph');
   const campTitle = document.getElementById('camp-title');
@@ -751,6 +754,8 @@ function pickWorld(worldId) {
   const classHeading = document.getElementById('class-heading');
   const classFlavor = document.getElementById('class-flavor');
   if (partyLabel) partyLabel.textContent = worldId==='stormlight'?'Radiant Company':worldId==='dnd5e'?'Adventuring Party':'Your Party';
+  const enterText = document.getElementById('enter-btn-text');
+  if (enterText) enterText.textContent = worldId==='stormlight'?'⟁ Enter the Storm':worldId==='dnd5e'?'⚔ Begin Campaign':glyph+' Begin Campaign';
   if (classHeading) classHeading.textContent = worldId==='stormlight'?'Your Order':worldId==='dnd5e'?'Your Class':'Your Class';
   if (classFlavor) classFlavor.textContent = worldId==='stormlight'?'The Stormfather watches. Choose carefully.':worldId==='dnd5e'?'The dungeon awaits. Choose your path.':'Choose wisely.';
 

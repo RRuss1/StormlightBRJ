@@ -185,12 +185,20 @@ window.CustomSystem = {
         {id:'hammer',name:'Hammer',type:'Blunt',dmgBonus:{crit:4,hit:2,miss:0},desc:'Crushes armor and bone.',tiers:['Standard','Fine','Masterwork','Enchanted','Legendary']},
       ],
 
-      ancestries: cfg.ancestries || [
-        {id:'human',name:'Human',desc:'Adaptable and ambitious. The most common folk.',size:'Medium',bonusTalentSource:'background',bonusTalentTiers:[1,4,8,12,16,19],color:'#C4972F'},
-        {id:'elf',name:'Elf',desc:'Graceful and long-lived. Attuned to magic and nature.',size:'Medium',bonusTalentSource:'heritage',bonusTalentTiers:[1,5,10,15,20],color:'#2E8B57'},
-        {id:'dwarf',name:'Dwarf',desc:'Stout and hardy. Masters of stone and steel.',size:'Medium',bonusTalentSource:'heritage',bonusTalentTiers:[1,5,10,15,20],color:'#8B4513'},
-        {id:'halfling',name:'Halfling',desc:'Small but brave. Lucky and nimble.',size:'Small',bonusTalentSource:'heritage',bonusTalentTiers:[1,5,10,15,20],color:'#DAA520'},
-      ],
+      ancestries: (cfg.races && cfg.races.length >= 2)
+        ? cfg.races.map((name, i) => ({
+            id: name.toLowerCase().replace(/\s+/g,''),
+            name,
+            desc: name + ' — a playable race in ' + (cfg.name || 'this world') + '.',
+            size: 'Medium',
+            bonusTalentSource: 'heritage',
+            bonusTalentTiers: [1,5,10,15,20],
+            color: pri, // use world primary color
+          }))
+        : cfg.ancestries || [
+          {id:'human',name:'Human',desc:'Adaptable and ambitious.',size:'Medium',bonusTalentSource:'background',bonusTalentTiers:[1,4,8,12,16,19],color:pri},
+          {id:'other',name:'Other',desc:'A unique heritage.',size:'Medium',bonusTalentSource:'heritage',bonusTalentTiers:[1,5,10,15,20],color:sec},
+        ],
 
       cultures: cfg.cultures || [
         {id:'urban',name:'City-Born',region:'Major Cities',lang:'Common',desc:'Raised in a bustling city among trade and politics.',expertise:'City navigation, guild knowledge, social etiquette.',color:'#9B2335'},

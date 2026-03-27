@@ -453,7 +453,7 @@
    COMPONENT: CAMPAIGN CARD
    ───────────────────────────────────────────── */
 .camp-card {
-  background: linear-gradient(145deg, rgba(36,30,19,0.95) 0%, rgba(28,23,16,0.98) 100%);
+  background: var(--bg2);
   border: 1px solid var(--border2);
   border-radius: var(--r3);
   padding: 20px 18px;
@@ -469,28 +469,28 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
   opacity: 0;
   transition: opacity 0.3s;
 }
 .camp-card:hover {
-  border-color: rgba(201,168,76,0.55);
-  background: linear-gradient(145deg, rgba(46,36,22,0.98) 0%, rgba(36,28,18,1) 100%);
+  border-color: var(--gold);
+  background: var(--bg3);
   transform: translateY(-4px) scale(1.015);
-  box-shadow: var(--shadow-lift), 0 0 40px rgba(201,168,76,0.10);
+  box-shadow: var(--shadow-lift), var(--shadow-glow);
 }
 .camp-card:active { transform: translateY(-1px) scale(0.99); transition: transform 0.1s ease; }
 .camp-card:hover::before { opacity: 1; }
 .camp-card:hover .camp-del { opacity: 1; }
 .camp-card.active-camp {
-  border-color: rgba(201,168,76,0.6);
-  box-shadow: 0 0 0 1px rgba(201,168,76,0.2), var(--shadow-glow);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim), var(--shadow-glow);
 }
 .camp-card.new-camp {
   border-style: dashed;
   border-color: var(--border2);
   text-align: center;
-  background: rgba(20,17,9,0.6);
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -499,11 +499,11 @@
   min-height: 110px;
 }
 .camp-card.new-camp:hover {
-  border-color: var(--amber);
-  background: rgba(36,30,19,0.8);
+  border-color: var(--gold);
+  background: var(--bg2);
 }
 .camp-card.new-camp:hover .camp-new-icon,
-.camp-card.new-camp:hover .camp-new-txt { color: var(--amber2); }
+.camp-card.new-camp:hover .camp-new-txt { color: var(--gold-mid); }
 .camp-del {
   position: absolute;
   top: 10px; right: 12px;
@@ -1070,14 +1070,14 @@
 #new-camp-modal {
   display: none;
   margin-top: 1.5rem;
-  background: linear-gradient(145deg, rgba(36,30,19,0.98), rgba(24,20,12,0.99));
-  border: 1px solid var(--amber-dim);
+  background: var(--bg2);
+  border: 1px solid var(--border3);
   border-radius: var(--r3);
   padding: 1.75rem;
   max-width: 440px;
   width: 100%;
   text-align: left;
-  box-shadow: var(--shadow-lift), 0 0 40px rgba(201,168,76,0.1);
+  box-shadow: var(--shadow-lift), var(--shadow-glow);
 }
 
 /* Spren card */
