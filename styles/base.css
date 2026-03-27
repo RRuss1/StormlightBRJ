@@ -67,6 +67,11 @@
   --glow-combat:        rgba(212,78,48,0.12);
   --glow-heal:          rgba(29,122,92,0.18);
 
+  /* Theme overridable tokens */
+  --theme-primary:   #C9A84C;
+  --theme-secondary: #28A87A;
+  --theme-danger:    #B03828;
+
   /* Hub tokens (CYOAhub landing/worlds/wizard) */
   --gold-hi:    #EFD97A;
   --gold-lo:    #7A5F28;

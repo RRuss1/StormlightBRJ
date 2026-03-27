@@ -1,14 +1,69 @@
 # CYOAhub — Session Status
 
 **Date:** 2026-03-27
-**Repo:** github.com/rruss1/StormlightBRJ (rename to `cyoahub` pending)
-**Live:** rruss1.github.io/StormlightBRJ → will become rruss1.github.io/cyoahub
-**Worker:** `cyoahub-proxy.rruss7997.workers.dev` (renamed from stormlight-proxy)
+**Repo:** github.com/rruss1/CYOAHUB
+**Live:** rruss1.github.io/CYOAHUB
+**Worker:** `cyoahub-proxy.rruss7997.workers.dev`
 **Sheet ID:** `1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw`
 
 ---
 
-## What Was Done This Session
+## What Was Done This Session (2026-03-27 PM)
+
+### Phase 3 — D&D 5e System (Complete)
+- Created `app/systems/dnd5e.js` (~800 lines) — full D&D 5e Basic Rules data
+  - 4 classes: Cleric (Life), Fighter (Champion), Rogue (Thief), Wizard (Evocation)
+  - 4 races: Human, Hill Dwarf, High Elf, Lightfoot Halfling
+  - 6 backgrounds: Acolyte, Criminal, Folk Hero, Noble, Sage, Soldier
+  - 18 skills, 20+ weapons, 13 armor types, 17 conditions
+  - 23 spells (cantrips through 3rd level) for Cleric & Wizard
+  - D&D-specific enemy pools (dungeon, wilderness, underdark, town)
+  - D&D gmContext for Forgotten Realms AI narration
+  - Crimson/candlelight theme tokens
+- Added `dnd5e` to `loadSystem()` in `gameState.js`
+- D&D world card already in index.html — now fully wired
+
+### Phase 3.5 — Enemy System Refactor (Complete)
+- Created `app/enemyPatterns.js` (~800 lines) — shared enemy pattern library
+  - 15 categories, 57 patterns, 200+ enemy variants
+  - Categories: Undead, Demons, Dragons, Giants, Goblinoids, Beasts, Fey, Elementals, Aberrations, Sea, Lycanthropes, Plants, Human Enemies, Mythological, Swarms
+  - `ENEMY_CATEGORY_REGISTRY` array for wizard UI checkboxes
+  - `SHARED_ENEMY_PATTERNS` object keyed by category ID
+- Moved Stormlight-specific enemy pools + patterns into `stormlight.js` (`enemyPools`, `enemyPatterns`, `enemyCategories`)
+- Refactored `combat.js` to merge system-specific + shared patterns at runtime
+- Each system declares `enemyCategories` array to filter the shared library
+
+### Phase 4 — Custom World Builder (Complete)
+- Created `app/systems/custom.js` — builds SystemData-compatible object from wizard worldConfig
+  - Generic 4-class system (Warrior, Mage, Rogue, Healer)
+  - All fields from SystemData shape present with sensible defaults
+  - `cfg.enemies.categories` flows from wizard checkboxes
+- Added **Step 5: Enemy Types** to wizard (7 steps total now)
+  - Checkbox grid with all 15 enemy categories from the shared library
+  - Category icons, names, descriptions
+  - Selection state tracked in `_selectedEnemyCategories`
+- `finishWizard()` now builds worldConfig and stores it for `loadSystem()`
+- Wizard steps renumbered from 6 → 7
+
+### Phase 5 — World Library API (Complete)
+- Added `loadWorldLibrary()` to `api/client.js` — reads WorldLibrary tab, 60s cache
+- Added `publishWorld()` — appends worldConfig as JSON row
+- WorldLibrary tab columns: worldId, tier, name, tagline, author, system, config, rating, plays, published
+
+### Phase 6 — Polish (Partial)
+- Theme injection: `loadSystem()` now sets `data-system` on body and overrides CSS custom properties
+- D&D theme CSS in `hub.css` — body[data-system="dnd5e"] overrides
+- Theme-overridable tokens (`--theme-primary`, `--theme-secondary`, `--theme-danger`) in `base.css`
+- Enemy category grid CSS with responsive layout
+
+### Documentation
+- Fresh `README.md` — architecture, tech stack, adding systems guide
+- Updated `CYOAHUB_STATUS.md` — reflects repo rename, all phases
+- Stale worker URLs in MARKDOWNS/ still reference old names (archive/reference)
+
+---
+
+## Previous Session Work
 
 ### Phase 0 — Rebrand (Complete)
 - `STORMLIGHT_CONFIG` → `CYOA_CONFIG` in all code files
@@ -48,85 +103,80 @@
 ```
 cyoahub/
 ├── index.html                 ← 9 screens: 3 hub + 6 game
+├── README.md                  ← Fresh project README
 ├── assets/
 │   ├── bg.jpg                 ← Nebula background (landing)
 │   ├── background worlds.jpg  ← Worlds screen backdrop
 │   ├── EnterWorlds.png        ← Landing hero card image
 │   └── CreateWorld.png        ← Landing hero card image
 ├── GameCardImgs/              ← User-selectable card art (add more here)
-│   ├── DnD.png
-│   ├── Dragons.png
-│   ├── FACE1.png
-│   ├── Monk.png
-│   ├── Palace.png
-│   ├── RedHorse.png
-│   ├── Stormlight.png
-│   ├── Unicorns.png
-│   └── cosmic face.png
+│   ├── DnD.png ... (9 images)
 ├── app/
 │   ├── systems/
-│   │   └── stormlight.js      ← All Stormlight data + gmContext
+│   │   ├── stormlight.js      ← Stormlight data + enemyPools + enemyPatterns
+│   │   ├── dnd5e.js           ← D&D 5e Basic Rules data + gmContext
+│   │   └── custom.js          ← Builds SystemData from wizard worldConfig
+│   ├── enemyPatterns.js       ← Shared enemy library (15 categories, 57+ patterns)
 │   ├── gameState.js           ← System loader + aliases + game functions
 │   ├── rulesEngine.js         ← window.Rules API (Cosmere math)
-│   ├── hub.js                 ← Hub particles, wizard, router, image picker
+│   ├── hub.js                 ← Hub particles, 7-step wizard, router, enemy picker
 │   ├── ui.js                  ← UI rendering + enhanced showScreen()
-│   ├── combat.js              ← Combat + parameterized GM prompts
+│   ├── combat.js              ← Combat + system-aware enemy pools
 │   └── main.js                ← GSAP, Lenis control, NL-7 systems
 ├── api/
-│   └── client.js              ← Network layer
+│   └── client.js              ← Network layer + WorldLibrary API
 ├── styles/
-│   ├── base.css               ← Design tokens + reset
-│   ├── hub.css                ← Hub screen styles
+│   ├── base.css               ← Design tokens + theme overrides + reset
+│   ├── hub.css                ← Hub styles + enemy category grid + D&D theme
 │   ├── animations.css         ← Keyframes
 │   └── components.css         ← Game UI components
-└── CYOAhubfiles/              ← Old reference files (can delete eventually)
+├── MARKDOWNS/                 ← Rulebook chapters + project docs (archive)
+└── CYOAhubfiles/              ← Old reference files (archive)
 ```
 
 ## Script Load Order
 ```
-stormlight.js → gameState.js → rulesEngine.js → hub.js → ui.js → combat.js → main.js
+stormlight.js → dnd5e.js → custom.js → enemyPatterns.js → gameState.js → rulesEngine.js → hub.js → ui.js → combat.js → main.js
 ```
 
 ---
 
 ## Known Issues
 
-1. **Landing page scroll** — scrollbar appears but mousewheel doesn't work. Lenis is destroyed on hub screens but the fixed-position flex container may still be preventing native scroll. Needs CSS investigation (likely the flex children shrinking to fit instead of overflowing).
+1. **Landing page scroll** — scrollbar appears but mousewheel doesn't work. Lenis is destroyed on hub screens but the fixed-position flex container may still be preventing native scroll.
 
-2. **Game screen titles hardcoded** — `index.html` lines 428, 499, 872, 904 say "Stormlight Chronicles". These should eventually become dynamic based on `SystemData.name` when entering a world.
+2. **Game screen titles hardcoded** — `index.html` says "Stormlight Chronicles" in game screens. Should become dynamic via `SystemData.name`.
 
-3. **Repo not yet renamed** — Still `StormlightBRJ` on GitHub. Rename to `cyoahub` in Settings → Repository name.
+3. **D&D character creation flow** — existing UI branching (`isRadiant` flag) needs adaptation for D&D's class+background model. Currently loads data but creation flow may need tweaks.
+
+4. **rulesEngine.js** — currently Cosmere-only math. D&D ability modifier, proficiency bonus, AC calculation, and death saves need to be added alongside existing Cosmere rules. Combat works but uses Cosmere formulas for D&D characters.
+
+5. **WorldLibrary Google Sheet tab** — tab needs to be manually created with column headers: worldId, tier, name, tagline, author, system, config, rating, plays, published.
+
+6. **Dynamic world hub** — hub currently uses hardcoded world cards. Need to wire `loadWorldLibrary()` to render community/published worlds dynamically.
+
+7. **Wizard data collection** — Steps 1-4 and 6 collect UI selections but don't yet read all form values into worldConfig. Only name, color, and enemy categories are fully wired.
 
 ---
 
 ## What's Next
 
-### Immediate
+### Immediate (Bug Squash)
 - Fix landing page mousewheel scroll
-- Test full flow: landing → worlds → pick Stormlight → campaign picker → game → combat
-- Verify no regressions in existing Stormlight gameplay
+- Test full flow for BOTH systems: Stormlight and D&D 5e
+- Adapt character creation UI for D&D class+background model
+- Add D&D math to rulesEngine.js (ability modifiers, proficiency, AC, death saves)
 
-### Phase 3 — D&D 5e
-- Create `app/systems/dnd5e.js` — races, classes, backgrounds, spells, monsters, gmContext
-- Source: `PlayerBasicRulesV03.pdf` (114pp, on file)
-- D&D rules engine: ability modifier, proficiency bonus, AC, spell slots, death saves
-- D&D theme CSS — crimson/parchment, Uncial Antiqua + IM Fell English
+### Phase 5 Completion
+- Create WorldLibrary tab in Google Sheet manually
+- Wire world hub to render dynamically from sheet data
+- Publish flow: wizard → save to sheet → card appears in hub
 
-### Phase 4 — Custom World Builder
-- Wire wizard form → `worldConfig` → `window.SystemData` via `app/systems/custom.js`
-- Custom gmContext builder generates all 6 fields from wizard answers
-- Save/publish to `WorldLibrary` Google Sheet
-
-### Phase 5 — World Library
-- Create `WorldLibrary` tab in Google Sheet (column headers ready)
-- `loadWorldLibrary()` in `api/client.js`
-- World Hub renders dynamically from sheet data instead of hardcoded HTML
-
-### Phase 6 — Polish
+### Phase 6 Completion
 - Hamburger menu → real auth
-- Per-world CSS theme injection
 - Mobile layout (1-column grid)
 - Campaign invite link sharing
+- Per-world font loading (Uncial Antiqua for D&D, etc.)
 
 ---
 

@@ -335,3 +335,53 @@ export async function sheetsDelete(saConfig, sheetId, title) {
     }
   );
 }
+
+// ══ WORLD LIBRARY (Phase 5) ══
+// WorldLibrary tab columns: worldId | tier | name | tagline | author | system | config | rating | plays | published
+let _worldLibraryCache = null;
+let _worldLibraryCacheTime = 0;
+const WORLD_LIBRARY_CACHE_MS = 60000; // 60s cache
+
+export async function loadWorldLibrary(saConfig, sheetId) {
+  const now = Date.now();
+  if (_worldLibraryCache && (now - _worldLibraryCacheTime) < WORLD_LIBRARY_CACHE_MS) {
+    return _worldLibraryCache;
+  }
+  try {
+    const rows = await sheetsGet(saConfig, sheetId, 'WorldLibrary!A2:J100');
+    if (!rows || !rows.length) return [];
+    _worldLibraryCache = rows.map(r => ({
+      worldId:   r[0] || '',
+      tier:      r[1] || 'community',
+      name:      r[2] || 'Unnamed World',
+      tagline:   r[3] || '',
+      author:    r[4] || 'Unknown',
+      system:    r[5] || 'custom',
+      config:    r[6] ? JSON.parse(r[6]) : {},
+      rating:    parseFloat(r[7]) || 0,
+      plays:     parseInt(r[8]) || 0,
+      published: r[9] === 'true' || r[9] === 'TRUE',
+    }));
+    _worldLibraryCacheTime = now;
+    return _worldLibraryCache;
+  } catch (e) {
+    console.error('Failed to load WorldLibrary:', e);
+    return _worldLibraryCache || [];
+  }
+}
+
+export async function publishWorld(saConfig, sheetId, worldConfig) {
+  const row = [
+    worldConfig.id || 'custom-' + Date.now(),
+    'community',
+    worldConfig.name || 'Unnamed World',
+    worldConfig.tagline || '',
+    worldConfig.author || 'Anonymous',
+    'custom',
+    JSON.stringify(worldConfig),
+    '0',
+    '0',
+    'false',
+  ];
+  return sheetsAppend(saConfig, sheetId, 'WorldLibrary!A:J', [row]);
+}

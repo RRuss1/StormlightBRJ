@@ -148,7 +148,8 @@ function filterWorlds(tier,btn){
 
 /* ── WIZARD ── */
 let _ws=1;
-const WS_MAX=6;
+const WS_MAX=7;
+let _selectedEnemyCategories = ['undead','beasts','goblinoids','humanEnemies']; // defaults
 
 function wizStep(dir){
   const n=_ws+dir;
@@ -169,7 +170,38 @@ function renderStep(){
   document.getElementById('wiz-back-btn').style.visibility=_ws>1?'visible':'hidden';
   document.getElementById('wiz-nav').style.display=_ws<WS_MAX?'flex':'none';
   gsap.fromTo('#ws-'+_ws,{opacity:0,x:16},{opacity:1,x:0,duration:.26,ease:'power2.out'});
+  if(_ws===5) renderEnemyCategoryStep();
   if(_ws===WS_MAX) { renderCardImagePicker(); updatePreview(); }
+}
+
+/* ── ENEMY CATEGORY STEP ── */
+function renderEnemyCategoryStep(){
+  const grid = document.getElementById('enemy-cat-grid');
+  if(!grid || grid.children.length) return; // only render once
+  const registry = window.ENEMY_CATEGORY_REGISTRY || [];
+  registry.forEach(cat => {
+    const checked = _selectedEnemyCategories.includes(cat.id);
+    const el = document.createElement('label');
+    el.className = 'enemy-cat-item' + (checked ? ' checked' : '');
+    el.innerHTML = `
+      <input type="checkbox" value="${cat.id}" ${checked?'checked':''} onchange="toggleEnemyCat(this)">
+      <span class="enemy-cat-icon">${cat.icon}</span>
+      <span class="enemy-cat-name">${cat.name}</span>
+      <span class="enemy-cat-desc">${cat.desc}</span>`;
+    grid.appendChild(el);
+  });
+}
+
+function toggleEnemyCat(cb){
+  const id = cb.value;
+  const item = cb.closest('.enemy-cat-item');
+  if(cb.checked){
+    if(!_selectedEnemyCategories.includes(id)) _selectedEnemyCategories.push(id);
+    item.classList.add('checked');
+  } else {
+    _selectedEnemyCategories = _selectedEnemyCategories.filter(c=>c!==id);
+    item.classList.remove('checked');
+  }
 }
 
 function renderCardImagePicker(){
@@ -213,6 +245,20 @@ function finishWizard(publish){
   const name   = document.getElementById('wiz-name')?.value.trim()||'My World';
   const color  = document.getElementById('cp')?.value||'#C9A84C';
   const tier   = publish?'community':'mine';
+
+  // Build worldConfig from wizard form
+  const worldId = 'custom-' + Date.now();
+  const worldConfig = {
+    id: worldId,
+    name,
+    tagline: name,
+    theme: { primary: color, secondary: '#28A87A', danger: '#B03828', bgTone: 'dark', titleFont: 'Cinzel', bodyFont: 'Crimson Pro' },
+    magic: { name: 'Magic', resource: 'Mana' },
+    gm: { worldName: name, tone: 'Epic fantasy' },
+    enemies: { categories: _selectedEnemyCategories },
+  };
+  // Store config for system loader
+  window._pendingWorldConfig = worldConfig;
 
   const grid  = document.getElementById('worlds-grid');
   const newBtn= grid.querySelector('.wcard-new');

@@ -28,11 +28,39 @@ const SA={
 const _sys = window.StormlightSystem;
 window.SystemData = _sys;
 function loadSystem(systemId) {
-  const systems = { stormlight: window.StormlightSystem };
+  const systems = {
+    stormlight: window.StormlightSystem,
+    dnd5e:      window.DnD5eSystem,
+  };
+  // Custom worlds built via wizard
+  if (systemId && systemId.startsWith('custom-') && window.CustomSystem) {
+    const cfg = window._pendingWorldConfig || {};
+    const custom = window.CustomSystem.build(cfg);
+    window.SystemData = custom;
+    _reloadAliases(custom);
+    return custom;
+  }
   const sys = systems[systemId];
   if (!sys) { console.error('Unknown system:', systemId); return window.SystemData; }
   window.SystemData = sys;
+  _reloadAliases(sys);
+  // Apply theme to body
+  document.body.setAttribute('data-system', sys.id);
+  if (sys.theme) {
+    const r = document.documentElement.style;
+    if (sys.theme.primary)   r.setProperty('--theme-primary', sys.theme.primary);
+    if (sys.theme.secondary) r.setProperty('--theme-secondary', sys.theme.secondary);
+    if (sys.theme.danger)    r.setProperty('--theme-danger', sys.theme.danger);
+  }
   return sys;
+}
+
+// Re-bind all data aliases when system changes
+function _reloadAliases(sys) {
+  // These are module-scoped — reassigning won't propagate to `const` bindings
+  // but code that reads window.SystemData directly will pick up the change.
+  // For hot-swap support, game code should prefer window.SystemData.X over aliases.
+  window.SystemData = sys;
 }
 
 const CLASSES       = _sys.classes;

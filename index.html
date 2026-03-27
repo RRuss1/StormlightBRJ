@@ -229,12 +229,12 @@
   <div class="wiz-box">
     <div class="wiz-dots" id="wiz-dots">
       <div class="wdot on"></div><div class="wdot"></div><div class="wdot"></div>
-      <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
+      <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
     </div>
 
     <!-- Step 1 — Identity -->
     <div class="wstep on" id="ws-1">
-      <div class="wstep-eyebrow">Step 1 of 6 — World Identity</div>
+      <div class="wstep-eyebrow">Step 1 of 7 — World Identity</div>
       <div class="wstep-title">Name Your World</div>
       <div class="wfield">
         <label class="wlabel">World Name</label>
@@ -258,7 +258,7 @@
 
     <!-- Step 2 — Magic -->
     <div class="wstep" id="ws-2">
-      <div class="wstep-eyebrow">Step 2 of 6 — Magic System</div>
+      <div class="wstep-eyebrow">Step 2 of 7 — Magic System</div>
       <div class="wstep-title">Define Your Magic</div>
       <div class="wfield">
         <label class="wlabel">Does magic exist?</label>
@@ -286,7 +286,7 @@
 
     <!-- Step 3 — Stats -->
     <div class="wstep" id="ws-3">
-      <div class="wstep-eyebrow">Step 3 of 6 — Stat System</div>
+      <div class="wstep-eyebrow">Step 3 of 7 — Stat System</div>
       <div class="wstep-title">How Are Heroes Measured?</div>
       <div class="wfield">
         <label class="wlabel">Choose a stat system</label>
@@ -309,7 +309,7 @@
 
     <!-- Step 4 — World Facts -->
     <div class="wstep" id="ws-4">
-      <div class="wstep-eyebrow">Step 4 of 6 — World Facts</div>
+      <div class="wstep-eyebrow">Step 4 of 7 — World Facts</div>
       <div class="wstep-title">Shape Your World</div>
       <div class="wfield">
         <label class="wlabel">Major Factions</label>
@@ -325,9 +325,19 @@
       </div>
     </div>
 
-    <!-- Step 5 — GM -->
+    <!-- Step 5 — Enemy Categories -->
     <div class="wstep" id="ws-5">
-      <div class="wstep-eyebrow">Step 5 of 6 — GM Personality</div>
+      <div class="wstep-eyebrow">Step 5 of 7 — Enemy Types</div>
+      <div class="wstep-title">What Lurks in Your World?</div>
+      <p class="wstep-desc" style="color:var(--amber2);opacity:.7;font-size:.88rem;margin-bottom:18px;">Select the enemy categories your world will use. The AI GM will draw from these pools during combat.</p>
+      <div class="enemy-cat-grid" id="enemy-cat-grid">
+        <!-- Populated dynamically by hub.js renderEnemyCategoryStep() -->
+      </div>
+    </div>
+
+    <!-- Step 6 — GM -->
+    <div class="wstep" id="ws-6">
+      <div class="wstep-eyebrow">Step 6 of 7 — GM Personality</div>
       <div class="wstep-title">Voice of Your World</div>
       <div class="wfield">
         <label class="wlabel">Narrator Style</label>
@@ -358,9 +368,9 @@
       </div>
     </div>
 
-    <!-- Step 6 — Theme -->
-    <div class="wstep" id="ws-6">
-      <div class="wstep-eyebrow">Step 6 of 6 — Visual Identity</div>
+    <!-- Step 7 — Theme -->
+    <div class="wstep" id="ws-7">
+      <div class="wstep-eyebrow">Step 7 of 7 — Visual Identity</div>
       <div class="wstep-title">How Does It Look?</div>
       <div class="wfield">
         <label class="wlabel">Card Image</label>
@@ -1128,6 +1138,9 @@
      Load order: system data → game state → rules → ui → combat → boot/GSAP
      ═══════════════════════════════════════════════════════ -->
 <script src="app/systems/stormlight.js"></script>
+<script src="app/systems/dnd5e.js"></script>
+<script src="app/systems/custom.js"></script>
+<script src="app/enemyPatterns.js"></script>
 <script src="app/gameState.js"></script>
 <script src="app/rulesEngine.js"></script>
 <script src="app/hub.js"></script>
