@@ -37,13 +37,11 @@ function loadSystem(systemId) {
     const cfg = window._pendingWorldConfig || {};
     const custom = window.CustomSystem.build(cfg);
     window.SystemData = custom;
-    _reloadAliases(custom);
     return custom;
   }
   const sys = systems[systemId];
   if (!sys) { console.error('Unknown system:', systemId); return window.SystemData; }
   window.SystemData = sys;
-  _reloadAliases(sys);
   // Apply theme to body
   document.body.setAttribute('data-system', sys.id);
   if (sys.theme) {
