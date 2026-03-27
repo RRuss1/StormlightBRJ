@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * app/rulesEngine.js — Official Cosmere RPG Rules Engine
- * Stormlight Chronicles
+ * CYOAhub
  * ============================================================
  * Full tabletop → digital rules mapping for:
  *   1.  Stat derivation (defenses, HP, Focus, Investiture)

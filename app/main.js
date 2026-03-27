@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * app/main.js — Application Bootstrap + GSAP Animation System
- * Stormlight Chronicles
+ * CYOAhub
  * ============================================================
  * Responsibilities:
  *   1. Initialize Lenis smooth scroll
@@ -18,20 +18,39 @@
  */
 
 // ── 1. LENIS SMOOTH SCROLL ────────────────────────────────────
-let lenis;
+// Lenis hijacks wheel events — only activate on game screens, not hub.
+let lenis, _lenisRaf;
+function startLenis() {
+  if (lenis || typeof Lenis === 'undefined') return;
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    smoothWheel: true,
+  });
+  function raf(time) { lenis.raf(time); _lenisRaf = requestAnimationFrame(raf); }
+  _lenisRaf = requestAnimationFrame(raf);
+}
+function destroyLenis() {
+  if (!lenis) return;
+  lenis.destroy();
+  lenis = null;
+  if (_lenisRaf) { cancelAnimationFrame(_lenisRaf); _lenisRaf = null; }
+}
+// Only start Lenis on game screens — hub screens use native scroll
+document.addEventListener('sc:screenChange', (e) => {
+  const hub = ['landing', 'worlds', 'wizard'];
+  if (hub.includes(e.detail?.screen)) {
+    destroyLenis();
+  } else {
+    startLenis();
+  }
+});
+// Don't start Lenis at boot if on a hub screen
 window.addEventListener('load', () => {
-  if (typeof Lenis !== 'undefined') {
-    lenis = new Lenis({
-      duration: 1.2,
-      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-    });
-    function rafLenis(time) {
-      lenis.raf(time);
-      requestAnimationFrame(rafLenis);
-    }
-    requestAnimationFrame(rafLenis);
+  const _h = (window.location.hash || '').split('?')[0];
+  if (_h && _h !== '#landing' && _h !== '#worlds' && _h !== '#wizard') {
+    startLenis();
   }
 });
 

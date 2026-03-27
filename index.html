@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stormlight Chronicles</title>
+  <title>CYOAhub</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,8 92,88 8,88' fill='none' stroke='%23C9A84C' stroke-width='7'/><polygon points='50,28 76,72 24,72' fill='none' stroke='%23C9A84C' stroke-width='4'/></svg>"/>
@@ -11,7 +11,7 @@
   <!-- ── FONTS ── -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
 
   <!-- ── TAILWIND CSS ── -->
   <!-- Provides: layout, spacing, typography, flexbox, grid, responsive utilities -->
@@ -53,15 +53,16 @@
   <!-- ── STYLESHEETS ── -->
   <!-- Load order matters: base → animations → components -->
   <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/hub.css"/>
   <link rel="stylesheet" href="styles/animations.css"/>
   <link rel="stylesheet" href="styles/components.css"/>
 
   <!-- ── ENV CONFIG ── -->
   <!-- Override API endpoints here for dev vs production -->
   <script>
-    window.STORMLIGHT_CONFIG = {
-      apiUrl:  'https://stormlight-proxy.rruss7997.workers.dev',
-      wsUrl:   'wss://stormlight-proxy.rruss7997.workers.dev/session',
+    window.CYOA_CONFIG = {
+      apiUrl:  'https://cyoahub-proxy.rruss7997.workers.dev',
+      wsUrl:   'wss://cyoahub-proxy.rruss7997.workers.dev/session',
       sheetId: '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
       // dev: set to http://localhost:8787 when running wrangler dev
     };
@@ -71,9 +72,352 @@
 <body class="min-h-screen">
 
 <!-- ══════════════════════════════════════════════════════════
+     HUB BACKGROUNDS (visible on landing/worlds/wizard screens)
+     ═══════════════════════════════════════════════════════ -->
+<div id="bg" class="hub-only"></div>
+<div id="bg-vignette" class="hub-only"></div>
+<div id="bg-glow" class="hub-only"></div>
+<canvas id="hub-particles" class="hub-only"></canvas>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN: LANDING (CYOAhub home)
+     ═══════════════════════════════════════════════════════ -->
+<div id="s-landing" class="screen active">
+
+  <nav class="nav">
+    <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
+    <button class="hamburger" onclick="toggleMenu()" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Dropdown menu -->
+  <div class="hamburger-menu" id="hbmenu">
+    <button onclick="goTo('worlds');toggleMenu()">Worlds</button>
+    <button onclick="goTo('worlds');toggleMenu()">Campaigns</button>
+    <button onclick="toggleMenu()">Login</button>
+  </div>
+
+  <div class="landing-body">
+    <div class="landing-eyebrow" id="l-eye">Multiplayer AI-Powered RPG</div>
+    <h1 class="landing-title" id="l-title">
+      Choose Your Own<br>Adventure
+    </h1>
+    <p class="landing-sub" id="l-sub">
+      Multiplayer AI-powered RPGs —<br>infinite worlds, solo or with friends.
+    </p>
+
+    <!-- THE TWO HERO CARDS -->
+    <div class="hero-cards" id="l-cards">
+      <div class="hero-card card-enter" onclick="goTo('worlds')">
+        <div class="card-img" style="background-image:url('assets/EnterWorlds.png')"></div>
+        <div class="card-overlay">
+          <div class="card-title">Enter a World</div>
+          <div class="card-desc">Browse existing worlds and jump into a campaign — solo or with your party.</div>
+          <div class="card-arrow">Explore →</div>
+        </div>
+      </div>
+
+      <div class="hero-card card-create" onclick="goTo('wizard')">
+        <div class="card-img" style="background-image:url('assets/CreateWorld.png')"></div>
+        <div class="card-overlay">
+          <div class="card-title">Create a World</div>
+          <div class="card-desc">Build your own world from scratch — your rules, your lore, your adventure.</div>
+          <div class="card-arrow">Build →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN: WORLD HUB
+     ═══════════════════════════════════════════════════════ -->
+<div id="s-worlds" class="screen">
+
+  <button class="screen-back" onclick="goTo('landing')">← Back</button>
+
+  <nav class="nav" style="padding-left:140px;">
+    <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
+    <div class="nav-r">
+      <button class="btn-login" onclick="goTo('wizard')">+ Create World</button>
+    </div>
+  </nav>
+
+  <div class="worlds-header">
+    <h2 class="worlds-title">Worlds</h2>
+    <p class="worlds-sub">Choose a world to begin your campaign</p>
+  </div>
+
+  <div class="worlds-tabs">
+    <button class="wtab on" onclick="filterWorlds('all',this)">All</button>
+    <button class="wtab"    onclick="filterWorlds('official',this)">Official</button>
+    <button class="wtab"    onclick="filterWorlds('community',this)">Community</button>
+    <button class="wtab"    onclick="filterWorlds('mine',this)">Mine</button>
+  </div>
+
+  <div class="worlds-grid" id="worlds-grid">
+
+    <!-- Stormlight Chronicles -->
+    <div class="wcard" data-tier="official"
+         style="border-color:rgba(201,168,76,0.14);"
+         onclick="pickWorld('stormlight')">
+      <div class="wcard-art">
+        <img src="GameCardImgs/Stormlight.png" alt="Stormlight Chronicles" class="wcard-img">
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-official">🏛 Official</span></div>
+        <div class="wcard-name" style="color:var(--gold)">Stormlight Chronicles</div>
+        <div class="wcard-desc">Knights Radiant. Shardblades. A 180-turn epic across three acts.</div>
+        <div class="wcard-meta">★★★★★ · Cosmere RPG · Epic Heroic</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(201,168,76,0.38);color:var(--gold);"
+          onclick="event.stopPropagation();pickWorld('stormlight')">Play →</button>
+      </div>
+    </div>
+
+    <!-- D&D 5e -->
+    <div class="wcard" data-tier="official"
+         style="border-color:rgba(192,57,43,0.14);"
+         onclick="pickWorld('dnd5e')">
+      <div class="wcard-art">
+        <img src="GameCardImgs/DnD.png" alt="D&amp;D 5e" class="wcard-img">
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-official">🏛 Official</span></div>
+        <div class="wcard-name" style="color:#e07060">D&amp;D 5e</div>
+        <div class="wcard-desc">Classic fantasy. Official Basic Rules. Fighters, Wizards, and Dragons.</div>
+        <div class="wcard-meta">★★★★★ · D&amp;D 5e · Classic Fantasy</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(192,57,43,0.4);color:#e07060;"
+          onclick="event.stopPropagation();pickWorld('dnd5e')">Play →</button>
+      </div>
+    </div>
+
+    <!-- Community example: Grimdark Hinterlands -->
+    <div class="wcard" data-tier="community"
+         style="border-color:rgba(40,168,122,0.13);">
+      <div class="wcard-art">
+        <img src="GameCardImgs/Dragons.png" alt="Grimdark Hinterlands" class="wcard-img">
+      </div>
+      <div class="wcard-body">
+        <div class="wcard-badges"><span class="badge badge-community">🌐 Community</span></div>
+        <div class="wcard-name" style="color:#5acaaa">Grimdark Hinterlands</div>
+        <div class="wcard-desc">Ash and iron. Dark consequences. No heroes — only survivors.</div>
+        <div class="wcard-meta">★★★★☆ · Custom · Dark &amp; Gritty</div>
+        <button class="wcard-btn"
+          style="border-color:rgba(40,168,122,0.36);color:#5acaaa;">Play →</button>
+      </div>
+    </div>
+
+    <!-- Add new tile -->
+    <div class="wcard wcard-new" onclick="goTo('wizard')">
+      <div class="new-plus">⊕</div>
+      <div class="new-label">Create a World</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN: WIZARD (world builder)
+     ═══════════════════════════════════════════════════════ -->
+<div id="s-wizard" class="screen">
+
+  <button class="screen-back" onclick="wizBack()">← Back</button>
+
+  <div class="wiz-box">
+    <div class="wiz-dots" id="wiz-dots">
+      <div class="wdot on"></div><div class="wdot"></div><div class="wdot"></div>
+      <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
+    </div>
+
+    <!-- Step 1 — Identity -->
+    <div class="wstep on" id="ws-1">
+      <div class="wstep-eyebrow">Step 1 of 6 — World Identity</div>
+      <div class="wstep-title">Name Your World</div>
+      <div class="wfield">
+        <label class="wlabel">World Name</label>
+        <input class="winput" type="text" placeholder="e.g. The Shattered Expanse..." id="wiz-name">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">One-Line Description</label>
+        <input class="winput" type="text" placeholder="e.g. A dying empire held together by blood magic...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Tone</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Epic Heroic</div>
+          <div class="wopt" onclick="selOpt(this)">Dark &amp; Gritty</div>
+          <div class="wopt" onclick="selOpt(this)">Cosmic Horror</div>
+          <div class="wopt" onclick="selOpt(this)">Political Intrigue</div>
+          <div class="wopt" onclick="selOpt(this)">Whimsical</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 — Magic -->
+    <div class="wstep" id="ws-2">
+      <div class="wstep-eyebrow">Step 2 of 6 — Magic System</div>
+      <div class="wstep-title">Define Your Magic</div>
+      <div class="wfield">
+        <label class="wlabel">Does magic exist?</label>
+        <div class="wopts">
+          <div class="wopt on" onclick="selOpt(this)">Yes</div>
+          <div class="wopt" onclick="selOpt(this)">No</div>
+          <div class="wopt" onclick="selOpt(this)">Rare &amp; Feared</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">What is it called?</label>
+        <input class="winput" type="text" placeholder="e.g. The Weave, Soul Binding, Void Energy...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Powered by</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Willpower</div>
+          <div class="wopt" onclick="selOpt(this)">Blood Cost</div>
+          <div class="wopt" onclick="selOpt(this)">Study &amp; Ritual</div>
+          <div class="wopt" onclick="selOpt(this)">Divine Gift</div>
+          <div class="wopt" onclick="selOpt(this)">Emotion</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 — Stats -->
+    <div class="wstep" id="ws-3">
+      <div class="wstep-eyebrow">Step 3 of 6 — Stat System</div>
+      <div class="wstep-title">How Are Heroes Measured?</div>
+      <div class="wfield">
+        <label class="wlabel">Choose a stat system</label>
+        <div class="wopts" style="flex-direction:column;gap:10px;">
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">Cosmere Stats</strong>
+            <span style="font-size:9px;opacity:0.55;">STR · SPD · INT · WIL · AWA · PRE</span>
+          </div>
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">D&amp;D Stats</strong>
+            <span style="font-size:9px;opacity:0.55;">STR · DEX · CON · INT · WIS · CHA</span>
+          </div>
+          <div class="wopt" onclick="selOpt(this)" style="text-align:left;border-radius:10px;padding:12px 15px;">
+            <strong style="display:block;font-size:10px;margin-bottom:2px;">Simplified</strong>
+            <span style="font-size:9px;opacity:0.55;">Body · Mind · Spirit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 — World Facts -->
+    <div class="wstep" id="ws-4">
+      <div class="wstep-eyebrow">Step 4 of 6 — World Facts</div>
+      <div class="wstep-title">Shape Your World</div>
+      <div class="wfield">
+        <label class="wlabel">Major Factions</label>
+        <input class="winput" type="text" placeholder="e.g. The Iron Throne, The Wandering Court...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Key Locations (up to 3)</label>
+        <input class="winput" type="text" placeholder="e.g. The Ashen Wastes, Port Mourne...">
+      </div>
+      <div class="wfield">
+        <label class="wlabel">The Central Conflict</label>
+        <textarea class="winput" rows="3" placeholder="What drives the story? Who wants what, and why can't they have it..."></textarea>
+      </div>
+    </div>
+
+    <!-- Step 5 — GM -->
+    <div class="wstep" id="ws-5">
+      <div class="wstep-eyebrow">Step 5 of 6 — GM Personality</div>
+      <div class="wstep-title">Voice of Your World</div>
+      <div class="wfield">
+        <label class="wlabel">Narrator Style</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Epic &amp; Mythic</div>
+          <div class="wopt" onclick="selOpt(this)">Gritty &amp; Realistic</div>
+          <div class="wopt" onclick="selOpt(this)">Mysterious &amp; Eerie</div>
+          <div class="wopt" onclick="selOpt(this)">Playful &amp; Witty</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Combat Frequency</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Rare &amp; Meaningful</div>
+          <div class="wopt" onclick="selOpt(this)">Moderate</div>
+          <div class="wopt" onclick="selOpt(this)">Action-Heavy</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Story Focus</label>
+        <div class="wopts">
+          <div class="wopt" onclick="selOpt(this)">Political</div>
+          <div class="wopt" onclick="selOpt(this)">Exploration</div>
+          <div class="wopt" onclick="selOpt(this)">Combat</div>
+          <div class="wopt" onclick="selOpt(this)">Character Drama</div>
+          <div class="wopt" onclick="selOpt(this)">Mixed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 — Theme -->
+    <div class="wstep" id="ws-6">
+      <div class="wstep-eyebrow">Step 6 of 6 — Visual Identity</div>
+      <div class="wstep-title">How Does It Look?</div>
+      <div class="wfield">
+        <label class="wlabel">Card Image</label>
+        <div class="card-image-grid" id="card-image-grid"></div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Primary Color</label>
+        <div style="display:flex;gap:11px;align-items:center;">
+          <input type="color" id="cp" value="#C9A84C"
+            style="width:42px;height:42px;border:none;background:none;border-radius:8px;cursor:pointer;">
+          <input class="winput" type="text" id="cp-hex" value="#C9A84C"
+            style="width:105px;" oninput="syncColor(this.value)">
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Title Font</label>
+        <div class="wopts">
+          <div class="wopt on" onclick="selOpt(this)" style="font-family:'Cinzel'">Cinzel</div>
+          <div class="wopt" onclick="selOpt(this)" style="font-family:'Crimson Pro'">Crimson Pro</div>
+          <div class="wopt" onclick="selOpt(this)">Oswald</div>
+          <div class="wopt" onclick="selOpt(this)">Playfair</div>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <div class="wiz-preview">
+        <div class="prev-eyebrow">PREVIEW</div>
+        <div id="prev-title">Your World Name</div>
+        <div class="prev-sub">A saga begins in the dark...</div>
+        <div class="prev-tags">
+          <span class="prev-tag" id="prev-crit"
+            style="border:1px solid #C9A84C44;color:#C9A84C;background:#C9A84C18;">CRIT!</span>
+          <span class="prev-tag"
+            style="border:1px solid rgba(40,168,122,0.28);color:#28A87A;background:rgba(40,168,122,0.09);">SUCCESS</span>
+          <span class="prev-tag"
+            style="border:1px solid rgba(118,162,232,0.28);color:#76a2e8;background:rgba(118,162,232,0.09);">PARTIAL</span>
+        </div>
+      </div>
+
+      <div class="wiz-finish">
+        <button class="wiz-next" style="flex:1;padding:13px;" onclick="finishWizard(false)">Save as Private</button>
+        <button class="btn-publish" onclick="finishWizard(true)">Publish to Hub</button>
+      </div>
+    </div>
+
+    <!-- Nav row (hidden on step 6) -->
+    <div class="wiz-nav" id="wiz-nav">
+      <button class="wiz-back" id="wiz-back-btn" onclick="wizStep(-1)">← Back</button>
+      <button class="wiz-next" onclick="wizStep(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
      SCREEN: CAMPAIGN PICKER
      ═══════════════════════════════════════════════════════ -->
-<div id="s-campaign" class="screen active">
+<div id="s-campaign" class="screen">
   <div class="absolute top-4 right-4">
     <button id="lang-toggle-camp" onclick="toggleLang()"
       class="bg-transparent border rounded-full px-3.5 py-1.5 cursor-pointer font-display text-xs tracking-widest"
@@ -781,10 +1125,12 @@
 
 <!-- ══════════════════════════════════════════════════════════
      SCRIPTS
-     Load order: game data → ui logic → combat → boot/GSAP
+     Load order: system data → game state → rules → ui → combat → boot/GSAP
      ═══════════════════════════════════════════════════════ -->
+<script src="app/systems/stormlight.js"></script>
 <script src="app/gameState.js"></script>
 <script src="app/rulesEngine.js"></script>
+<script src="app/hub.js"></script>
 <script src="app/ui.js"></script>
 <script src="app/combat.js"></script>
 <script src="app/main.js"></script>

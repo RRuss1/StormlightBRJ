@@ -1,21 +1,21 @@
 /**
  * ============================================================
- * api/client.js — Stormlight Chronicles API Client
+ * api/client.js — CYOAhub API Client
  * ============================================================
  * All network communication goes through this file.
  * Connects the frontend to your Cloudflare Worker (PROXY_URL).
  *
  * CONFIGURATION:
- *   Set STORMLIGHT_API_URL in env.js or window.STORMLIGHT_CONFIG
+ *   Set API URL in env.js or window.CYOA_CONFIG
  * ============================================================
  */
 
 // ── CONFIG ────────────────────────────────────────────────────
 const DEFAULT_CONFIG = {
   // Cloudflare Worker base URL — override via env.js
-  apiUrl:  window.STORMLIGHT_CONFIG?.apiUrl  || 'https://stormlight-proxy.rruss7997.workers.dev',
-  wsUrl:   window.STORMLIGHT_CONFIG?.wsUrl   || 'wss://stormlight-proxy.rruss7997.workers.dev/session',
-  sheetId: window.STORMLIGHT_CONFIG?.sheetId || '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
+  apiUrl:  window.CYOA_CONFIG?.apiUrl  || 'https://cyoahub-proxy.rruss7997.workers.dev',
+  wsUrl:   window.CYOA_CONFIG?.wsUrl   || 'wss://cyoahub-proxy.rruss7997.workers.dev/session',
+  sheetId: window.CYOA_CONFIG?.sheetId || '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
 };
 
 export const API_URL = DEFAULT_CONFIG.apiUrl;

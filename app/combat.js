@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * app/combat.js — Combat Engine
- * Stormlight Chronicles
+ * CYOAhub
  * ============================================================
  * Handles:
  *   - enterCombat / exitCombat
@@ -16,7 +16,14 @@
  */
 
 // ══ AI DUNGEON MASTER — SYSTEM PROMPT ══
-const AI_DM_SYSTEM_PROMPT = `You are the AI Dungeon Master for Stormlight Chronicles — a digital RPG set on Roshar in Brandon Sanderson's Cosmere. You are optimized for FAST, responsive, cinematic storytelling.
+// Build GM system prompt from active system's gmContext
+function getAiDmSystemPrompt() {
+  const ctx = window.SystemData?.gmContext || {};
+  const sysName = ctx.systemName || 'RPG';
+  const worldName = ctx.worldName || 'the world';
+  const worldLore = ctx.worldLore || '';
+  const tone = ctx.toneInstruction || 'Epic fantasy — mythic stakes, personal cost.';
+  return `You are the AI Dungeon Master for ${sysName} — a digital RPG set in ${worldName}. You are optimized for FAST, responsive, cinematic storytelling.
 
 TWO-PARAGRAPH RULE (CRITICAL — NEVER BREAK THIS):
 Every response is EXACTLY two short paragraphs (2-3 sentences each, separated by a blank line).
@@ -29,13 +36,12 @@ NARRATIVE RULES:
 - No HP numbers, damage values, roll totals, or game jargon in narrative.
 - Translate mechanics to fiction: "The blow staggers you backward" not "you lose 4 HP"
 - Short sentences in action. Longer atmospheric ones for aftermath.
-- Injuries persist. Oaths echo. Previous actions have weight.
+- Injuries persist. Previous actions have weight.
 
 WORLD CONSISTENCY:
-- Roshar reacts: spren appear near strong emotion, Stormlight wisps when expended, terrain shifts.
-- Honor each Radiant order's philosophy. A Windrunner protects. A Lightweaver reveals truth.
-- Never invent lore that contradicts the Cosmere. Never allow actions that break world logic.
-- Tone: heroic but not naive. Dark but not hopeless. Ideals cost something real.
+${worldLore}
+- Tone: ${tone}
+- Never invent lore that contradicts the established world. Never allow actions that break world logic.
 
 CHOICES FORMAT (when choices are requested):
 [CHOICES]
@@ -45,6 +51,8 @@ CHOICES FORMAT (when choices are requested):
 - Four distinct types: aggressive, defensive, ability-based, situational
 - Reference specific enemies, terrain, or character state
 - NEVER write choices for NPCs. Only for the named human player.`;
+}
+const AI_DM_SYSTEM_PROMPT = getAiDmSystemPrompt();
 
 // ══ COMBAT SYSTEMS ══
 
@@ -104,7 +112,7 @@ function checkEquipDrop(actor,st){
 // ══ SHARDBLADE CRAFTING ══
 function craftBlade(){
   if(!myChar||!gState)return;
-  if((myChar.fragments||0)<3){alert('Need 3 Stormlight Fragments.');return;}
+  if((myChar.fragments||0)<3){alert('Need 3 '+(window.SystemData?.gmContext?.magicResource||'Fragments')+'.');return;}
   myChar.shardblade=BLADE_NAMES[myChar.classId]||'Nascent Shardblade';
   myChar.bladeLevel=1;myChar.fragments=(myChar.fragments||0)-3;
   saveMyChar(myChar);const idx=gState.players.findIndex(p=>p&&p.name===myChar.name);
@@ -114,7 +122,7 @@ function craftBlade(){
 function upgradeBlade(){
   if(!myChar)return;const tier=myChar.bladeLevel||1;
   if(tier>=5){alert('Your blade has reached its ultimate form.');return;}
-  if((myChar.fragments||0)<5){alert('Need 5 Stormlight Fragments.');return;}
+  if((myChar.fragments||0)<5){alert('Need 5 '+(window.SystemData?.gmContext?.magicResource||'Fragments')+'.');return;}
   myChar.fragments=(myChar.fragments||0)-5;myChar.bladeLevel=tier+1;
   saveMyChar(myChar);const idx=gState&&gState.players.findIndex(p=>p&&p.name===myChar.name);
   if(idx>=0){gState.players[idx]=myChar;saveState(gState).catch(()=>{});}
@@ -490,8 +498,8 @@ async function checkHighstorm(){
   const sz=gState.partySize||partySize;
   await saveState(gState);
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name} the ${p.className}`:'?').join(', ');
-  const loc=getAct(gState.totalMoves||0).location||'Roshar';
-  const prompt=`Cosmere RPG GM. A HIGHSTORM has struck ${loc}!
+  const loc=getAct(gState.totalMoves||0).location||(window.SystemData?.gmContext?.worldName||'the world');
+  const prompt=`${window.SystemData?.gmContext?.combatFlavor||'RPG'} GM. A HIGHSTORM has struck ${loc}!
 Party: ${party}
 ${getGenderContext()}
 
@@ -925,7 +933,7 @@ function renderCombatActions(){
     <div class="tooltip-grid">
       <span class="tooltip-key">attack</span><span class="tooltip-desc">offensive strike</span>
       <span class="tooltip-key">defend</span><span class="tooltip-desc">guard stance, DR next hit</span>
-      <span class="tooltip-key">heal</span><span class="tooltip-desc">Stormlight recovery</span>
+      <span class="tooltip-key">heal</span><span class="tooltip-desc">${window.SystemData?.gmContext?.healFlavor||'Healing recovery'}</span>
       <span class="tooltip-key">revive</span><span class="tooltip-desc">bring back downed ally</span>
       <span class="tooltip-key">surge</span><span class="tooltip-desc">surgebinding ability</span>
       <span class="tooltip-key">skill</span><span class="tooltip-desc">social or perception</span>
@@ -1257,7 +1265,7 @@ async function resolveRound(){
       else if(total>=14)healAmt=baseAmt;
       else if(total>=10)healAmt=Math.round(baseAmt*0.6);
       else if(total>=6){healAmt=0;detail='heal fizzled';}
-      else{healAmt=-Math.floor(baseAmt*0.3);detail='Stormlight backlash';}
+      else{healAmt=-Math.floor(baseAmt*0.3);detail=(window.SystemData?.gmContext?.magicName||'Magic')+' backlash';}
       if(healAmt>0){
         p.hp=Math.min(p.maxHp||p.hp,p.hp+healAmt);
         detail=`+${healAmt}HP`;
@@ -1463,7 +1471,7 @@ async function callGM(prompt){
     maybeSpawnHoid(scene2,gState&&gState.totalMoves||0);
   }catch(e){
     console.error('callGM error:',e.message);
-    const errText='The Stormlight flickers ['+e.message+']';
+    const errText=(window.SystemData?.gmContext?.errorFlavor||'Something went wrong')+' ['+e.message+']';
     if(stEl)stEl.innerHTML=errText;
     if(gState){gState.lastGM={text:errText,choices:[],ts:new Date().toISOString()};await saveState(gState);}
     await addLog({type:'gm',who:'',text:errText,choices:[]});
@@ -1661,7 +1669,7 @@ function combatAftermathPrompt(won){
   const party=gState.players.slice(0,sz).map(p=>p?`${p.name}(${p.className} HP:${p.hp}/${p.maxHp})`:'?').join(' | ');
   const loc=getAct(gState.totalMoves||0).location||'the field';
   const gctx=getGenderContext();const mctx=getSprenMemoryContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
-  return`Cosmere RPG GM. Post-combat scene. Location: ${loc}.
+  return`${window.SystemData?.gmContext?.combatFlavor||'RPG'} GM. Post-combat scene. Location: ${loc}.
 Party: ${party}
 Combat result: ${won?'VICTORY — enemies defeated':'DEFEAT — party was downed but survived'}${gctx}${mctx}${wmctx}${cctx}
 

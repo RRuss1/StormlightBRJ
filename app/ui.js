@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * app/ui.js — UI Controllers & Rendering
- * Stormlight Chronicles
+ * CYOAhub
  * ============================================================
  * Handles:
  *   - Campaign picker, creation, lobby
@@ -180,11 +180,27 @@ function showScreen(id){
   const target=document.getElementById('s-'+id);
   if(!target){
     console.error('showScreen: no element with id s-'+id);
-    alert('showScreen ERROR: s-'+id+' not found');
     return;
   }
   target.classList.add('active');
   window.scrollTo(0,0);
+
+  // Hub backgrounds visible only on hub screens
+  const isHub = ['landing','worlds','wizard'].includes(id);
+  document.querySelectorAll('.hub-only').forEach(el => {
+    el.style.display = isHub ? '' : 'none';
+  });
+
+  // GSAP transition for hub screens
+  if (isHub && typeof gsap !== 'undefined') {
+    gsap.fromTo(target,
+      { opacity: 0, y: 16, filter: 'blur(6px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.42, ease: 'power2.out' }
+    );
+  }
+
+  // Note: sc:screenChange event is dispatched by main.js showScreen wrapper
+
   if(lang==='th')setTimeout(applyThaiToPage,100);
 }
 
@@ -1291,7 +1307,8 @@ function openingPrompt(){
   const names=gState.players.slice(0,sz).map(p=>`${p.name} the ${p.className}${p.isNPC?' (NPC — acts via D4 dice, no AI decisions)':' (human player)'}`).join(', ');
   const a1=ACTS[0],a2=ACTS[1],a3=ACTS[2];
   const gctx=getGenderContext();const wmctx=getWorldMemoryContext();const cctx=getCharContext();
-  return`You are the Game Master for a Cosmere DND-style RPG on Roshar (Way of Kings universe). 180-turn epic saga across 3 acts.
+  const _gc = window.SystemData?.gmContext || {};
+  return`You are the Game Master for ${_gc.combatFlavor||'a'} RPG set in ${_gc.worldName||'an epic world'}. 180-turn epic saga across 3 acts.
 
 ACTS: I (1-60): ${a1.location} | II (61-120): ${a2.location} | III (121-180): ${a3.location}
 PARTY: ${names}${gctx}
@@ -1950,7 +1967,7 @@ It is now ${next?next.name+"'s turn ("+next.className+' human)':'next turn'}.
 [CHOICES]
 4 first-person choices for ${next?next.name:'the next player'} (${next?next.className:'?'}) ONLY. Tagged [COMBAT], [DISCOVERY], or [DECISION]. One sentence each. Four distinct approaches.`;
 
-  return`Cosmere RPG GM. Turn ${m}/180. ${act.tag}: ${loc}.
+  return`${window.SystemData?.gmContext?.combatFlavor||'RPG'} GM. Turn ${m}/180. ${act.tag}: ${loc}.
 Party: ${party}${gctx}${mctx}${wmctx}
 
 NPC ${npc.name} (${npc.className}) chose: "${action}"
@@ -2368,7 +2385,7 @@ Past the threshold. Every discovery should add texture to a threat without namin
       phaseInstr=`
 
 PHASE — DISCOVERY (${beatNum}/${totalBeats}):
-Fresh ground. Build ${loc} with sensory specificity — what makes this place unlike anywhere else on Roshar. Introduce details that will matter. No hints at combat yet. Let the world feel vast.`;
+Fresh ground. Build ${loc} with sensory specificity — what makes this place unlike anywhere else in ${window.SystemData?.gmContext?.worldName||'this world'}. Introduce details that will matter. No hints at combat yet. Let the world feel vast.`;
     }
   }
 
@@ -2392,7 +2409,7 @@ PLOT DIE — ${pe.type.toUpperCase()}: ${pe.effect}. Weave this naturally into t
 4 choices for ${next?next.name:'the player'} (${next?next.className:'?'}, Oath ${next?next.oathStage||1:'?'}/5, ${next?next.hp:0}/${next?next.maxHp:10}HP).
 Rules: first-person ("I [verb]..."), one vivid sentence each, tagged [ATTACK]/[DEFEND]/[HEAL]/[SURGE]/[COMBAT]/[DISCOVERY]/[DECISION], four distinct types (ability, physical, investigative, bold). Reference ${loc}. No repetition from recent history. ONLY for ${next?next.name:'this player'} — never write choices for other characters.`;
 
-  return`You are the GM of a Cosmere RPG on Roshar. Turn ${m}/180. Location: ${loc}. ${act.tag}.
+  return`You are the GM of ${window.SystemData?.gmContext?.combatFlavor||'an'} RPG in ${window.SystemData?.gmContext?.worldName||'the world'}. Turn ${m}/180. Location: ${loc}. ${act.tag}.
 Party: ${party}${gctx}
 ${wmctx}${recentBeats}${choiceHistory}${mctx}${cctx}
 
@@ -2806,6 +2823,13 @@ if(typeof loadVoicePreference==='undefined'){
 (async()=>{
   applyLang();
   loadVoicePreference();
+  // If hash points to a hub screen (or empty = landing), let hub.js handle boot
+  const _hash = (window.location.hash || '').split('?')[0];
+  if (!_hash || _hash === '#landing' || _hash === '#worlds' || _hash === '#wizard') {
+    // Hub boot — hub.js hubBoot() will run on window.load
+    return;
+  }
+  // Game boot — show campaign picker
   showScreen('campaign');
   try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
   catch(e){document.getElementById('camp-status').textContent='Connecting... '+e.message;}
