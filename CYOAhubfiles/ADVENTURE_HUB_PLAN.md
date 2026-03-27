@@ -3,9 +3,9 @@
 **Project:** Stormlight Chronicles → CYOAhub  
 **Tagline:** Multiplayer AI-powered RPGs  
 **Date:** 2026-03-26  
-**Repo:** github.com/rruss1/cyoahub (rename from StormlightBRJ)  
+**Repo:** github.com/rruss1/cyoahub (rename from CYOAHUB)  
 **Live:** rruss1.github.io/cyoahub  
-**Worker:** stormlight-proxy.rruss7997.workers.dev (rename optional, not urgent)  
+**Worker:** cyoahub-proxy.rruss7997.workers.dev (rename optional, not urgent)  
 **Sheet ID:** 1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw
 
 ---
@@ -304,7 +304,7 @@ New tab: `WorldLibrary`. Each row = one world.
 **Don't touch:** Stormlight lore, class names, GM prompts, CSS animation class names.
 
 ```bash
-grep -r "StormlightBRJ\|STORMLIGHT_CONFIG" . # must return nothing before push
+grep -r "STORMLIGHT_CONFIG" . # must return nothing before push
 git commit -m "rebrand: STORMLIGHT_CONFIG → CYOA_CONFIG, title → CYOAhub"
 # Then rename repo in GitHub UI: Settings → cyoahub
 ```
@@ -429,7 +429,7 @@ Publish flow saves `worldConfig` JSON to sheet row.
 
 - Always edit `app/`, `api/`, `styles/` — never root-level JS in the RPG app
 - One commit per fix; `node --check` every JS file after edit
-- `grep -r "goretusk55"` must return nothing before any push
+- `grep -r "rruss7997"` must return nothing before any push
 - `rulesEngine.js` loads before `ui.js` — maintain script order in `index.html`
 - `gState.system` defaults to `'stormlight'` — never break existing campaigns
 - Landing `index.html` and RPG app `index.html` are **different files** — do not confuse them

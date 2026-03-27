@@ -79,6 +79,20 @@
   --red:        #C0392B;
   --glass:      rgba(6, 14, 30, 0.55);
   --glass-b:    rgba(255,255,255,0.08);
+
+  /* CYOAhub Platform Palette */
+  --cream-light:  #F0DDD1;
+  --cream-mid:    #DFC4AB;
+  --cream-sand:   #CCC4AC;
+  --cream-off:    #E8E4D4;
+  --sage:         #B8C4AC;
+  --steel-teal:   #5E8E98;
+  --dark-teal:    #3A6E78;
+  --deep-teal:    #2A5860;
+  --glow-mint:    #2ECAA8;
+  --glow-cerulean:#3498B8;
+  --glow-pink:    #F06090;
+  --glow-crimson: #E81868;
   --muted:      rgba(240,230,204,0.52);
   --fd:         'Cinzel', serif;
   --fb:         'Crimson Pro', serif;

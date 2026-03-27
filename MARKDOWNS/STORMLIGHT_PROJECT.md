@@ -1,7 +1,7 @@
 # ⟁ Stormlight Chronicles — Project Bible
 
-**Live URL:** https://rruss1.github.io/StormlightBRJ/  
-**Repo:** github.com/rruss1/StormlightBRJ  
+**Live URL:** https://rruss1.github.io/CYOAHUB/  
+**Repo:** github.com/rruss1/CYOAHUB  
 **Stack:** Single-file HTML/CSS/JS · Google Sheets API v4 · Anthropic Claude API · Cloudflare Worker  
 **File stats:** 244KB · 4,167 lines · 194 functions · 32KB CSS · 178KB JS
 
@@ -23,7 +23,7 @@ Browser (index.html — single file, everything)
     │     Per campaign: Campaign_xyz_State (JSON blob in A1)
     │                   Campaign_xyz_Log   (one entry per row)
     │
-    ├── Cloudflare Worker  →  stormlight-proxy.goretusk55.workers.dev
+    ├── Cloudflare Worker  →  cyoahub-proxy.rruss7997.workers.dev
     │     Anthropic API proxy (hides key from client)
     │
     └── Anthropic Claude API
@@ -38,7 +38,7 @@ Browser (index.html — single file, everything)
 
 **Google Sheet ID:** `1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw`  
 **Service Account:** `stormlightbrj@stormlight-rpg.iam.gserviceaccount.com`  
-**Worker URL:** `https://stormlight-proxy.goretusk55.workers.dev`
+**Worker URL:** `https://cyoahub-proxy.rruss7997.workers.dev`
 
 ---
 
@@ -323,5 +323,5 @@ Start every new session:
 
 ```bash
 npm install -g @anthropic-ai/claude-code
-cd ~/StormlightBRJ && claude
+cd ~/CYOAHUB && claude
 ```

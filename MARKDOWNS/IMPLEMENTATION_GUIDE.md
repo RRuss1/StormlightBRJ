@@ -6,7 +6,7 @@
 ## 1. FILE STRUCTURE
 
 ```
-StormlightBRJ/
+CYOAHUB/
 ├── index.html              ← Entry point (clean shell, Tailwind classes)
 ├── IMPLEMENTATION_GUIDE.md ← You are here
 │
@@ -34,8 +34,8 @@ Open `index.html` and find this block near the top:
 ```html
 <script>
   window.STORMLIGHT_CONFIG = {
-    apiUrl:  'https://stormlight-proxy.goretusk55.workers.dev',  // ← PROD Worker
-    wsUrl:   'wss://stormlight-proxy.rruss7997.workers.dev/session',
+    apiUrl:  'https://cyoahub-proxy.rruss7997.workers.dev',  // ← PROD Worker
+    wsUrl:   'wss://cyoahub-proxy.rruss7997.workers.dev/session',
     sheetId: '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw',
   };
 </script>
@@ -223,7 +223,7 @@ To run locally, you need **any static file server** — the app has no build ste
 
 ```bash
 # Option A: Python (simplest)
-cd StormlightBRJ
+cd CYOAHUB
 python3 -m http.server 3000
 
 # Option B: VS Code Live Server extension
@@ -242,7 +242,7 @@ No npm install required. No build step.
 
 ## 9. DEPLOYING TO GITHUB PAGES
 
-The project at `https://rruss1.github.io/StormlightBRJ/` is served directly from GitHub.
+The project at `https://rruss1.github.io/CYOAHUB/` is served directly from GitHub.
 To deploy updates:
 
 ```bash

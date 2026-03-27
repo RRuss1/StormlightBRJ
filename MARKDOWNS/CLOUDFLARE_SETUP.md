@@ -55,7 +55,7 @@ One Durable Object instance per active campaign. It holds all player WebSocket c
 
 - Node.js 16.17.0 or later — check with `node --version`
 - A Cloudflare account (free) — https://dash.cloudflare.com/sign-up
-- The existing `stormlight-proxy` Worker already deployed
+- The existing `cyoahub-proxy` Worker already deployed
 
 ---
 
@@ -85,12 +85,12 @@ wrangler login
 
 ## STEP 3 — Get Your Existing Worker Code
 
-Your current Worker is the Anthropic proxy at `stormlight-proxy.goretusk55.workers.dev`. We need to update it — not replace it. The simplest path is to edit it directly in the Cloudflare dashboard first to confirm things work, then move to a proper local project.
+Your current Worker is the Anthropic proxy at `cyoahub-proxy.rruss7997.workers.dev`. We need to update it — not replace it. The simplest path is to edit it directly in the Cloudflare dashboard first to confirm things work, then move to a proper local project.
 
 **Option A — Edit in Cloudflare Dashboard (fastest)**
 1. Go to https://dash.cloudflare.com
 2. Click **Workers & Pages** in the left sidebar
-3. Click your `stormlight-proxy` Worker
+3. Click your `cyoahub-proxy` Worker
 4. Click **Edit Code**
 5. Replace the entire code with the new Worker code below
 6. Click **Save and Deploy**
@@ -99,7 +99,7 @@ Your current Worker is the Anthropic proxy at `stormlight-proxy.goretusk55.worke
 
 ```bash
 # Create a new local project
-mkdir stormlight-worker && cd stormlight-worker
+mkdir cyoahub-worker && cd cyoahub-worker
 npm create cloudflare@latest .
 # Prompts — choose:
 #   → Hello World example
@@ -304,7 +304,7 @@ If using local project, replace `wrangler.jsonc` with:
 
 ```jsonc
 {
-  "name": "stormlight-proxy",
+  "name": "cyoahub-proxy",
   "main": "src/index.js",
   "compatibility_date": "2024-09-23",
 
@@ -376,7 +376,7 @@ wrangler deploy
 # Or from Dashboard: click Save and Deploy
 ```
 
-Your Worker URL stays the same: `https://stormlight-proxy.goretusk55.workers.dev`
+Your Worker URL stays the same: `https://cyoahub-proxy.rruss7997.workers.dev`
 
 ---
 
@@ -392,7 +392,7 @@ Add this near the top of the `<script>` block, after the constants:
 // ══ WEBSOCKET SESSION ══
 let ws = null;
 let wsConnected = false;
-const WS_URL = 'wss://stormlight-proxy.goretusk55.workers.dev/session';
+const WS_URL = 'wss://cyoahub-proxy.rruss7997.workers.dev/session';
 
 function connectSession() {
   if (!campaignId || !myChar) return;
@@ -583,7 +583,7 @@ document.getElementById('custom-in')?.addEventListener('input', broadcastTyping)
 **"WebSocket connection failed"**
 - Check that the Worker deployed successfully in Cloudflare dashboard
 - Make sure the DO binding `GAME_SESSIONS` is configured
-- Try the `/ping` endpoint: `curl https://stormlight-proxy.goretusk55.workers.dev/ping`
+- Try the `/ping` endpoint: `curl https://cyoahub-proxy.rruss7997.workers.dev/ping`
 
 **"Missing campaign" error**
 - The `campaign` query param wasn't passed — make sure `connectSession()` is called after `campaignId` and `myChar` are both set
@@ -616,11 +616,11 @@ document.getElementById('custom-in')?.addEventListener('input', broadcastTyping)
 ## File Locations
 
 ```
-stormlight-worker/        ← Cloudflare Worker project (new)
+cyoahub-worker/        ← Cloudflare Worker project (new)
   src/index.js            ← Worker + GameSession DO code
   wrangler.jsonc          ← Cloudflare config
 
-StormlightBRJ/            ← Game repo (existing)
+CYOAHUB/            ← Game repo (existing)
   index.html              ← Game code (add WebSocket section)
   README.md               ← Player docs
   STORMLIGHT_PROJECT.md   ← Project overview

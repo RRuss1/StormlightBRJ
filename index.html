@@ -80,6 +80,57 @@
 <canvas id="hub-particles" class="hub-only"></canvas>
 
 <!-- ══════════════════════════════════════════════════════════
+     GLOBAL: Hamburger dropdown + Modals (accessible from all hub screens)
+     ═══════════════════════════════════════════════════════ -->
+<div class="hamburger-menu" id="hbmenu">
+  <button onclick="openFAQ();toggleMenu()">FAQ</button>
+  <button onclick="openFeedback();toggleMenu()">Feedback</button>
+  <button onclick="openContribute();toggleMenu()">Contribute</button>
+</div>
+
+<!-- FAQ Modal -->
+<div class="hub-modal" id="faq-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="hub-modal-box">
+    <button class="hub-modal-close" onclick="document.getElementById('faq-modal').style.display='none'">&times;</button>
+    <div class="hub-modal-scroll" id="faq-content"></div>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="hub-modal" id="feedback-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="hub-modal-box" style="max-width:480px;">
+    <button class="hub-modal-close" onclick="document.getElementById('feedback-modal').style.display='none'">&times;</button>
+    <div style="text-align:center;padding:10px 0 20px;">
+      <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--deep-teal);margin-bottom:12px;">Feedback</div>
+      <p style="font-family:'Crimson Pro',serif;color:#3a4a50;font-size:14px;margin-bottom:24px;">Found a bug? Have an idea? Let us know.</p>
+      <a href="https://github.com/RRuss1/CYOAHUB/issues/new" target="_blank"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
+        style="border:1px solid var(--dark-teal);background:rgba(42,88,96,0.08);color:var(--deep-teal);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
+        Open GitHub Issue
+      </a>
+      <p style="color:var(--steel-teal);font-size:11px;margin-top:16px;">Or email: <span style="color:var(--dark-teal);">rruss7997@gmail.com</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Contribute Modal -->
+<div class="hub-modal" id="contribute-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="hub-modal-box" style="max-width:480px;">
+    <button class="hub-modal-close" onclick="document.getElementById('contribute-modal').style.display='none'">&times;</button>
+    <div style="text-align:center;padding:10px 0 20px;">
+      <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--deep-teal);margin-bottom:12px;">Contribute</div>
+      <p style="font-family:'Crimson Pro',serif;color:#3a4a50;font-size:14px;margin-bottom:8px;">CYOAhub is open source. Build worlds, fix bugs, add features.</p>
+      <p style="font-family:'Crimson Pro',serif;color:var(--steel-teal);font-size:13px;margin-bottom:24px;">Create new game systems, design enemy patterns, improve the AI GM prompts, or help with UI polish.</p>
+      <a href="https://github.com/RRuss1/CYOAHUB" target="_blank"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
+        style="border:1px solid var(--dark-teal);background:rgba(42,88,96,0.08);color:var(--deep-teal);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
      SCREEN: LANDING (CYOAhub home)
      ═══════════════════════════════════════════════════════ -->
 <div id="s-landing" class="screen active">
@@ -91,55 +142,6 @@
     </button>
   </nav>
 
-  <!-- Dropdown menu -->
-  <div class="hamburger-menu" id="hbmenu">
-    <button onclick="openFAQ();toggleMenu()">FAQ</button>
-    <button onclick="openFeedback();toggleMenu()">Feedback</button>
-    <button onclick="openContribute();toggleMenu()">Contribute</button>
-  </div>
-
-  <!-- FAQ Modal -->
-  <div class="hub-modal" id="faq-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
-    <div class="hub-modal-box">
-      <button class="hub-modal-close" onclick="document.getElementById('faq-modal').style.display='none'">&times;</button>
-      <div class="hub-modal-scroll" id="faq-content"></div>
-    </div>
-  </div>
-
-  <!-- Feedback Modal -->
-  <div class="hub-modal" id="feedback-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
-    <div class="hub-modal-box" style="max-width:480px;">
-      <button class="hub-modal-close" onclick="document.getElementById('feedback-modal').style.display='none'">&times;</button>
-      <div style="text-align:center;padding:10px 0 20px;">
-        <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold);margin-bottom:12px;">Feedback</div>
-        <p style="font-family:'Crimson Pro',serif;color:var(--muted);font-size:14px;margin-bottom:24px;">Found a bug? Have an idea? Let us know.</p>
-        <a href="https://github.com/RRuss1/CYOAHUB/issues/new" target="_blank"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
-          style="border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.08);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
-          Open GitHub Issue
-        </a>
-        <p style="color:rgba(240,230,204,0.3);font-size:11px;margin-top:16px;">Or email: <span style="color:var(--muted);">rruss7997@gmail.com</span></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Contribute Modal -->
-  <div class="hub-modal" id="contribute-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
-    <div class="hub-modal-box" style="max-width:480px;">
-      <button class="hub-modal-close" onclick="document.getElementById('contribute-modal').style.display='none'">&times;</button>
-      <div style="text-align:center;padding:10px 0 20px;">
-        <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold);margin-bottom:12px;">Contribute</div>
-        <p style="font-family:'Crimson Pro',serif;color:var(--muted);font-size:14px;margin-bottom:8px;">CYOAhub is open source. Build worlds, fix bugs, add features.</p>
-        <p style="font-family:'Crimson Pro',serif;color:rgba(240,230,204,0.4);font-size:13px;margin-bottom:24px;">Create new game systems, design enemy patterns, improve the AI GM prompts, or help with UI polish.</p>
-        <a href="https://github.com/RRuss1/CYOAHUB" target="_blank"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
-          style="border:1px solid rgba(40,168,122,0.5);background:rgba(40,168,122,0.08);color:#28a87a;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
-          View on GitHub
-        </a>
-      </div>
-    </div>
-  </div>
-
   <div class="landing-body">
     <div id="l-eye" style="text-align:center;">
       <div style="font-family:'Cinzel',serif;font-size:clamp(16px,2.2vw,22px);letter-spacing:3px;color:#28a8a0;text-shadow:0 0 20px rgba(40,168,160,0.4),0 2px 8px rgba(0,0,0,0.7);">Boundless Worlds Await — Choose What Comes Next</div>
@@ -147,6 +149,7 @@
     </div>
     <h1 class="landing-title" id="l-title">
       Choose Your Own<br><span class="accent">Adventure</span>
+
     </h1>
     <p class="landing-sub" id="l-sub">
       Multiplayer AI-powered RPGs —<br>infinite worlds, solo or with friends.
@@ -209,13 +212,14 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="s-worlds" class="screen">
 
-  <button class="screen-back" onclick="goTo('landing')">← Back</button>
-
-  <nav class="nav" style="padding-left:140px;">
-    <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
-    <div class="nav-r">
-      <button class="btn-login" onclick="goTo('wizard')">+ Create World</button>
+  <nav class="nav">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button class="screen-back-inline" onclick="goTo('landing')">←</button>
+      <div class="logo" onclick="goTo('landing')">CYOA<em>HUB</em></div>
     </div>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <div class="worlds-header">
@@ -266,12 +270,6 @@
           style="border-color:rgba(192,57,43,0.4);color:#e07060;"
           onclick="event.stopPropagation();pickWorld('dnd5e')">Play →</button>
       </div>
-    </div>
-
-    <!-- Add new tile -->
-    <div class="wcard wcard-new" onclick="goTo('wizard')">
-      <div class="new-plus">⊕</div>
-      <div class="new-label">Create a World</div>
     </div>
 
   </div>
@@ -457,7 +455,7 @@
 
       <div class="wfield">
         <label class="wlabel">Ambient Audio</label>
-        <p class="wstep-desc" style="color:var(--amber2);opacity:.6;font-size:.82rem;margin-bottom:10px;">Choose the soundscape players hear during gameplay.</p>
+        <p class="wstep-desc" style="color:rgba(40,168,160,0.6);font-size:.82rem;margin-bottom:10px;">Choose the soundscape players hear during gameplay.</p>
         <div class="ambient-audio-grid" id="ambient-audio-grid">
           <!-- Populated dynamically by hub.js renderAmbientAudioPicker() -->
         </div>
@@ -465,7 +463,7 @@
 
       <div class="wfield" style="margin-top:24px;">
         <label class="wlabel">Enemy Categories</label>
-        <p class="wstep-desc" style="color:var(--amber2);opacity:.6;font-size:.82rem;margin-bottom:10px;">Select the enemy types the AI GM draws from during combat.</p>
+        <p class="wstep-desc" style="color:rgba(40,168,160,0.6);font-size:.82rem;margin-bottom:10px;">Select the enemy types the AI GM draws from during combat.</p>
         <div class="enemy-cat-grid" id="enemy-cat-grid">
           <!-- Populated dynamically by hub.js renderEnemyCategoryStep() -->
         </div>
@@ -526,8 +524,8 @@
       </div>
 
       <!-- World Rules Engine -->
-      <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(201,168,76,0.1);">
-        <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px;margin-bottom:14px;">WORLD RULES</div>
+      <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(40,168,160,0.12);">
+        <div style="font-family:'Cinzel',serif;font-size:13px;color:#28a8a0;letter-spacing:2px;margin-bottom:14px;">WORLD RULES</div>
       </div>
       <div class="wfield">
         <label class="wlabel">Physics Rules</label>
@@ -586,13 +584,13 @@
       <div class="wfield">
         <label class="wlabel">Color System</label>
         <div class="color-grid">
-          <div class="color-row"><label>Primary</label><input type="color" id="cp" value="#C9A84C"><input class="winput" type="text" id="cp-hex" value="#C9A84C" style="width:90px;" oninput="syncColor(this.value)"></div>
-          <div class="color-row"><label>Secondary</label><input type="color" id="cp-secondary" value="#28A87A"><input class="winput" type="text" id="cp-secondary-hex" value="#28A87A" style="width:90px;" oninput="syncColorField('cp-secondary',this.value)"></div>
+          <div class="color-row"><label>Primary</label><input type="color" id="cp" value="#28a8a0"><input class="winput" type="text" id="cp-hex" value="#28a8a0" style="width:90px;" oninput="syncColor(this.value)"></div>
+          <div class="color-row"><label>Secondary</label><input type="color" id="cp-secondary" value="#8ab4d4"><input class="winput" type="text" id="cp-secondary-hex" value="#8ab4d4" style="width:90px;" oninput="syncColorField('cp-secondary',this.value)"></div>
           <div class="color-row"><label>Background</label><input type="color" id="cp-bg" value="#0F0D08"><input class="winput" type="text" id="cp-bg-hex" value="#0F0D08" style="width:90px;" oninput="syncColorField('cp-bg',this.value)"></div>
           <div class="color-row"><label>Surface</label><input type="color" id="cp-surface" value="#141109"><input class="winput" type="text" id="cp-surface-hex" value="#141109" style="width:90px;" oninput="syncColorField('cp-surface',this.value)"></div>
           <div class="color-row"><label>Text</label><input type="color" id="cp-text" value="#F8F3E8"><input class="winput" type="text" id="cp-text-hex" value="#F8F3E8" style="width:90px;" oninput="syncColorField('cp-text',this.value)"></div>
           <div class="color-row"><label>Muted Text</label><input type="color" id="cp-muted" value="#A07830"><input class="winput" type="text" id="cp-muted-hex" value="#A07830" style="width:90px;" oninput="syncColorField('cp-muted',this.value)"></div>
-          <div class="color-row"><label>Glow / Accent</label><input type="color" id="cp-glow" value="#C9A84C"><input class="winput" type="text" id="cp-glow-hex" value="#C9A84C" style="width:90px;" oninput="syncColorField('cp-glow',this.value)"></div>
+          <div class="color-row"><label>Glow / Accent</label><input type="color" id="cp-glow" value="#28a8a0"><input class="winput" type="text" id="cp-glow-hex" value="#28a8a0" style="width:90px;" oninput="syncColorField('cp-glow',this.value)"></div>
           <div class="color-row"><label>Danger</label><input type="color" id="cp-danger" value="#B03828"><input class="winput" type="text" id="cp-danger-hex" value="#B03828" style="width:90px;" oninput="syncColorField('cp-danger',this.value)"></div>
         </div>
       </div>
@@ -664,7 +662,7 @@
         <div class="prev-sub">A saga begins in the dark...</div>
         <div class="prev-tags">
           <span class="prev-tag" id="prev-crit"
-            style="border:1px solid #C9A84C44;color:#C9A84C;background:#C9A84C18;">CRIT!</span>
+            style="border:1px solid rgba(40,168,160,0.26);color:#28a8a0;background:rgba(40,168,160,0.09);">CRIT!</span>
           <span class="prev-tag"
             style="border:1px solid rgba(40,168,122,0.28);color:#28A87A;background:rgba(40,168,122,0.09);">SUCCESS</span>
           <span class="prev-tag"
@@ -758,7 +756,7 @@
   </div>
 
   <p class="font-display text-xs tracking-widest uppercase mb-3.5" style="color:var(--text5)">
-    <span data-tr>Radiant Company</span>
+    <span data-tr id="party-label">Radiant Company</span>
   </p>
 
   <!-- Party slot preview — populated by renderPSZ() -->
@@ -857,10 +855,10 @@
     <!-- STEP 2A: Radiant Order -->
     <div id="create-s2r" style="display:none">
       <h2 class="font-display text-2xl font-semibold tracking-wide mb-1" style="color:var(--amber2)">
-        <span data-tr>Your Order</span>
+        <span data-tr id="class-heading">Your Order</span>
       </h2>
       <p class="text-base italic mb-8" style="color:var(--text4)">
-        <span data-tr>The Stormfather watches. Choose carefully.</span>
+        <span data-tr id="class-flavor">The Stormfather watches. Choose carefully.</span>
       </p>
       <div class="class-grid grid grid-cols-2 md:grid-cols-3 gap-3" id="class-grid"></div>
       <div class="flex justify-between mt-4">
@@ -1145,20 +1143,6 @@
   <div class="game-body flex-1 flex flex-col w-full">
     <div class="game-body-top px-6 pt-4 max-w-4xl w-full mx-auto flex flex-col gap-3.5">
 
-      <!-- Print header (hidden) -->
-      <div id="print-header">
-        <div style="font-size:24pt;font-weight:bold" id="print-title">⟁ Stormlight Chronicles</div>
-        <div id="print-campaign-name" style="font-size:14pt;color:#555"></div>
-        <div id="print-date" style="font-size:10pt;color:#888"></div>
-      </div>
-
-      <!-- Export button -->
-      <div class="flex justify-end" id="export-btn-wrap">
-        <button class="btn btn-sm" onclick="exportToPDF()"
-          style="font-size:12px;border-color:var(--gold-dim);color:var(--text5)">
-          <span data-tr>⬇ Export Chronicle</span>
-        </button>
-      </div>
 
       <!-- Progress bar -->
       <div class="prog-wrap">

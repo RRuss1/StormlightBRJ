@@ -224,6 +224,23 @@ function showScreen(id){
     if (t.text)      r.setProperty('--text', t.text);
     if (t.muted)     r.setProperty('--text4', t.muted);
     if (t.glow)      r.setProperty('--glow-gold', t.glow + '25');
+    // Load world-specific fonts on demand
+    if (t.titleFont && t.titleFont !== 'Cinzel' && t.titleFont !== 'Crimson Pro') {
+      const fontId = 'font-' + t.titleFont.replace(/\s+/g, '-').toLowerCase();
+      if (!document.getElementById(fontId)) {
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(t.titleFont)}:wght@400;600;700&display=swap`;
+        document.head.appendChild(link);
+      }
+      r.setProperty('--font-d', `'${t.titleFont}', serif`);
+    }
+    // UI Style presets
+    if (t.uiStyle) document.body.setAttribute('data-ui-style', t.uiStyle.toLowerCase().replace(/\s+/g,'-'));
+    if (t.buttonStyle) document.body.setAttribute('data-btn-style', t.buttonStyle.toLowerCase().replace(/\s+/g,'-'));
+    if (t.cardStyle) document.body.setAttribute('data-card-style', t.cardStyle.toLowerCase().replace(/\s+/g,'-'));
+    if (t.bgEffect) document.body.setAttribute('data-bg-effect', t.bgEffect.toLowerCase().replace(/[\s\/]+/g,'-'));
   }
 
   // GSAP transition for hub screens
@@ -274,7 +291,10 @@ function renderCampaigns(camps){
     const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
     const isOwned = _isOwnedCampaign(cam.id);
     return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')" style="border-color:${themeColor}18;">
-      ${isOwned?`<button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>`:''}
+      <div class="camp-actions">
+        ${isOwned?`<button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>`:''}
+        <button class="camp-share" onclick="event.stopPropagation();shareCampaign('${cam.id}','${activeWorld}')" title="Copy invite link">🔗</button>
+      </div>
       <div class="camp-num">${cam.id.startsWith('Campaign_')?'Campaign':cam.id.replace('Campaign','Campaign ')}</div>
       <div class="camp-name" style="color:${themeColor};">${st&&st.campaignName?st.campaignName:cam.id}</div>
       <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+moves+'/180':'Ready to begin'}</div>
@@ -383,6 +403,17 @@ function _disownCampaign(id) {
   const owned = _getOwnedCampaigns();
   delete owned[id];
   localStorage.setItem('cyoa_owned_campaigns', JSON.stringify(owned));
+}
+
+function shareCampaign(campId, worldId) {
+  const url = window.location.origin + window.location.pathname + `#campaign?world=${encodeURIComponent(worldId)}&id=${encodeURIComponent(campId)}`;
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.createElement('div');
+    toast.textContent = 'Invite link copied!';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold);color:var(--gold);padding:8px 20px;border-radius:20px;font-family:var(--font-d);font-size:11px;letter-spacing:2px;z-index:999;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  }).catch(() => { prompt('Copy this invite link:', url); });
 }
 
 async function deleteCampaign(id){
@@ -554,6 +585,40 @@ function renderCreate(){
   createStep=1;isRadiant=true;selAncestry='human';selCultures=[];
   selRole=null;selWeapon=null;selKit=null;
   charOrigin='';charMotivation='';charObstacle='';charBackstory='';charAppearance='';
+
+  // System-aware labels for character creation
+  const sys = window.SystemData || {};
+  const sysId = sys.id || 'stormlight';
+  const typeR = document.getElementById('type-radiant');
+  const typeH = document.getElementById('type-hero');
+  if (typeR) {
+    if (sysId === 'dnd5e') {
+      typeR.querySelector('.text-3xl').textContent = '⚔';
+      typeR.querySelector('.font-display').textContent = 'Class';
+      typeR.querySelector('.italic').textContent = '"Fighter, Cleric, Rogue, or Wizard."';
+      typeR.querySelector('[style*="text5"]').textContent = 'Hit dice · Abilities · Subclass';
+    } else if (sysId !== 'stormlight') {
+      typeR.querySelector('.text-3xl').textContent = sys.glyph || '⚔';
+      typeR.querySelector('.font-display').textContent = 'Class';
+      typeR.querySelector('.italic').textContent = '"Choose your combat role."';
+      typeR.querySelector('[style*="text5"]').textContent = 'Primary path · Abilities · Progression';
+    }
+  }
+  if (typeH) {
+    if (sysId === 'dnd5e') {
+      typeH.querySelector('.text-3xl').textContent = '📜';
+      typeH.querySelector('.font-display').textContent = 'Background';
+      typeH.querySelector('.italic').textContent = '"Where you came from shapes where you\'re going."';
+      typeH.querySelector('[style*="text5"]').textContent = 'Acolyte · Criminal · Folk Hero · Noble · Sage · Soldier';
+    } else if (sysId !== 'stormlight') {
+      typeH.querySelector('.text-3xl').textContent = '✦';
+      typeH.querySelector('.font-display').textContent = 'Background';
+      typeH.querySelector('.italic').textContent = '"Your past defines your skills."';
+      typeH.querySelector('[style*="text5"]').textContent = (sys.heroRoles||[]).map(r=>r.name).join(' · ');
+    }
+  }
+
+  // System-aware submit button
   showCreateStep(1);
   renderColors();renderClasses();renderRoles();renderWeapons();renderCultureGrid();renderKits();
   updateCreateSubmitBtn();
@@ -656,12 +721,15 @@ function createNext(){
   if(createStep===1){
     showCreateStep(2);
   } else if(createStep===2){
-    if(isRadiant&&!selClass){if(err){err.textContent='Choose your Order.';err.style.display='block';}return;}
-    if(!isRadiant&&!selRole){if(err){err.textContent='Choose your Role.';err.style.display='block';}return;}
+    const _sys2 = (window.SystemData && window.SystemData.id) || 'stormlight';
+    const _classLabel = _sys2==='stormlight'?'Order':_sys2==='dnd5e'?'Class':'Class';
+    const _roleLabel = _sys2==='stormlight'?'Role':_sys2==='dnd5e'?'Background':'Background';
+    if(isRadiant&&!selClass){if(err){err.textContent='Choose your '+_classLabel+'.';err.style.display='block';}return;}
+    if(!isRadiant&&!selRole){if(err){err.textContent='Choose your '+_roleLabel+'.';err.style.display='block';}return;}
     showCreateStep(3);
   } else if(createStep===3){
     const name=document.getElementById('in-name').value.trim();
-    if(!name){if(err){err.textContent='Speak your name first.';err.style.display='block';}return;}
+    if(!name){if(err){err.textContent='Enter your name.';err.style.display='block';}return;}
     if(!selColor){if(err){err.textContent='Choose your color.';err.style.display='block';}return;}
     charBackstory=document.getElementById('in-backstory').value.trim();
     charAppearance=document.getElementById('in-appearance').value.trim();
@@ -681,7 +749,13 @@ function updateCreateSubmitBtn(){
   const hasClass=!isRadiant||!!selClass;
   const hasRole=isRadiant||!!selRole;
   const ready=hasName&&hasClass&&hasRole&&!!selColor;
-  btn.textContent=isRadiant?'Speak the First Oath →':'Enter the Storm →';
+  const _sId = (window.SystemData && window.SystemData.id) || 'stormlight';
+  const _submitTexts = {
+    stormlight: { r: 'Speak the First Oath →', h: 'Enter the Storm →' },
+    dnd5e:      { r: 'Begin Your Adventure →', h: 'Begin Your Adventure →' },
+  };
+  const _st = _submitTexts[_sId] || { r: 'Create Character →', h: 'Create Character →' };
+  btn.textContent = isRadiant ? _st.r : _st.h;
   btn.style.opacity=ready?'1':'0.55';
   btn.style.borderColor=ready?'var(--amber2)':'var(--border2)';
 }
@@ -890,9 +964,12 @@ async function onCreateChar(){
     charAppearance=appearEl?appearEl.value.trim():charAppearance||'';
 
     // ── Validate ──
+    const _s3 = (window.SystemData && window.SystemData.id) || 'stormlight';
+    const _cl = _s3==='stormlight'?'Order':_s3==='dnd5e'?'Class':'Class';
+    const _rl = _s3==='stormlight'?'Role':_s3==='dnd5e'?'Background':'Background';
     if(!name){err.textContent='Enter your name first.';err.style.display='block';return;}
-    if(isRadiant&&!selClass){err.textContent='Choose your Order.';err.style.display='block';return;}
-    if(!isRadiant&&!selRole){err.textContent='Choose your Role.';err.style.display='block';return;}
+    if(isRadiant&&!selClass){err.textContent='Choose your '+_cl+'.';err.style.display='block';return;}
+    if(!isRadiant&&!selRole){err.textContent='Choose your '+_rl+'.';err.style.display='block';return;}
     if(!isRadiant&&!selWeapon){err.textContent='Choose your weapon.';err.style.display='block';return;}
     if(!selColor){err.textContent='Choose a color.';err.style.display='block';return;}
     err.style.display='none';

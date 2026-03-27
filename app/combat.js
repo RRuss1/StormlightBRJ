@@ -341,13 +341,6 @@ function renderSheet(){
 }
 
 // ══ PDF EXPORT ══
-function exportToPDF(){
-  const h=document.getElementById('print-campaign-name');const d=document.getElementById('print-date');
-  const party=gState&&gState.players?gState.players.filter(Boolean).map(p=>p.name).join(', '):'';
-  if(h)h.textContent=((gState&&gState.campaignName)||campaignId||'Campaign')+' — '+party;
-  if(d)d.textContent='Exported '+new Date().toLocaleDateString();
-  window.print();
-}
 
 // ══ POLLING ══
 // Debounce utility
@@ -917,14 +910,14 @@ async function submitCombatAction(){
     if(/^(heal|mend|cure|restore|patch|bandage|nurse|tend|triage|soothe)\b/.test(lower))action='[HEAL] '+action;
     else if(/^(revive|stabilize|resuscitate|wake)\b/.test(lower))action='[HEAL] '+action;
     else if(/^(defend|block|shield|protect|guard|brace|parry|stance|hunker|fortify|entrench)\b/.test(lower))action='[DEFEND] '+action;
-    else if(/^(surge|lash|soulcast|lightweave|elsecall|abrasion|adhesion|cohesion|division|gravitation|illumination|progression|tension|transformation|transportation)\b/.test(lower))action='[SURGE] '+action;
+    else if(/^(surge|lash|soulcast|lightweave|elsecall|abrasion|adhesion|cohesion|division|gravitation|illumination|progression|tension|transformation|transportation|cast|spell|cantrip|fireball|magic.missile|sacred.flame|smite|hex|eldritch|invoke|channel)\b/.test(lower))action='[SURGE] '+action;
     else if(/^(scout|search|perceive|persuade|negotiate|bluff|charm|sneak|hide|stealth|inspect|investigate|examine)\b/.test(lower))action='[SKILL] '+action;
     else if(/^(attack|strike|slash|stab|smash|swing|charge|rush|shoot|throw|hit|punch|kick|cleave)\b/.test(lower))action='[ATTACK] '+action;
     // ── Fallback: scan full text for intent keywords ──
-    else if(/heal|mend|regrow|restore|tend|bandage|cure|knit|patch.*wound|stitch|treat.*injur|fix.*wound|channel.*stormlight.*into|check.*breathing|check.*wound|check.*on|pull.*behind.*shelter|drag.*to.*safety|yank.*behind|nurse|triage|aid.*allie|infuse.*with.*light|pour.*stormlight|ease.*pain|soothe/i.test(lower))action='[HEAL] '+action;
+    else if(/heal|mend|regrow|restore|tend|bandage|cure|knit|patch.*wound|stitch|treat.*injur|fix.*wound|channel.*into|check.*breathing|check.*wound|check.*on|pull.*behind.*shelter|drag.*to.*safety|yank.*behind|nurse|triage|aid.*allie|infuse.*with|pour.*energy|ease.*pain|soothe|cure.*wounds|healing.*word|lay.*on.*hands|potion/i.test(lower))action='[HEAL] '+action;
     else if(/revive|stabilize|pull.*back|rouse|bring.*back|wake.*up|save.*downed|resuscitate/i.test(lower))action='[HEAL] '+action;
     else if(/defend|block|shield|protect|brace|guard|parry|stance|hunker|cover.*allie|hold.*line|take.*position|hold.*ground|fortif|entrench|sentinel|interpose|stand.*firm|plant.*feet|ward/i.test(lower))action='[DEFEND] '+action;
-    else if(/soulcast|lash|illusion|surge|transmute|conjure|lightweave|elsecall|infuse|stormlight.*power|invoke|channel.*surge/i.test(lower))action='[SURGE] '+action;
+    else if(/soulcast|lash|illusion|surge|transmute|conjure|lightweave|elsecall|infuse|stormlight.*power|invoke|channel.*surge|cast.*spell|magic.missile|fireball|sacred.flame|burning.hands|thunder|lightning|arcane|divine|smite|hex|eldritch|cantrip|ritual/i.test(lower))action='[SURGE] '+action;
     else if(/search|scout|perceive|persuade|negotiate|bluff|charm|sneak|hide|stealth|inspect|investigate|examine|look.*around|check.*surround|sense.*danger/i.test(lower))action='[SKILL] '+action;
     else action='[ATTACK] '+action;
   }

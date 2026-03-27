@@ -622,16 +622,15 @@ function _renderWorldCard(w, isOwned, grid, createTile) {
       <button class="wcard-btn" style="border-color:${color}50;color:${color};"
         onclick="event.stopPropagation();pickWorld('${worldId}')">Play →</button>
     </div>`;
-  grid.insertBefore(card, createTile);
+  grid.appendChild(card);
 }
 
 function renderWorldsGrid() {
   const grid = document.getElementById('worlds-grid');
   if (!grid) return;
-  const createTile = grid.querySelector('.wcard-new');
 
-  // Remove all non-official, non-create cards
-  grid.querySelectorAll('.wcard:not([data-tier="official"]):not(.wcard-new)').forEach(el => el.remove());
+  // Remove all non-official cards (keep official hardcoded ones)
+  grid.querySelectorAll('.wcard:not([data-tier="official"])').forEach(el => el.remove());
 
   // 1. Render local worlds (yours — private + published)
   const myWorlds = _getSavedWorlds();
@@ -740,6 +739,13 @@ function pickWorld(worldId) {
   // Print header
   const printTitle = document.getElementById('print-title');
   if (printTitle) printTitle.textContent = glyph + ' ' + name;
+  // System-aware labels throughout game screens
+  const partyLabel = document.getElementById('party-label');
+  const classHeading = document.getElementById('class-heading');
+  const classFlavor = document.getElementById('class-flavor');
+  if (partyLabel) partyLabel.textContent = worldId==='stormlight'?'Radiant Company':worldId==='dnd5e'?'Adventuring Party':'Your Party';
+  if (classHeading) classHeading.textContent = worldId==='stormlight'?'Your Order':worldId==='dnd5e'?'Your Class':'Your Class';
+  if (classFlavor) classFlavor.textContent = worldId==='stormlight'?'The Stormfather watches. Choose carefully.':worldId==='dnd5e'?'The dungeon awaits. Choose your path.':'Choose wisely.';
 
   window.location.hash = '#campaign';
   showScreen('campaign');
@@ -766,13 +772,26 @@ window.addEventListener('hashchange', routeFromHash);
 
 /* ── HUB BOOT ── */
 function hubBoot() {
-  const hash = (window.location.hash || '').split('?')[0];
-  if (!hash || hash === '#landing' || hash === '#worlds' || hash === '#wizard') {
+  const hash = window.location.hash || '';
+  const hashBase = hash.split('?')[0];
+
+  // Handle invite links: #campaign?world=X&id=Y
+  if (hashBase === '#campaign' && hash.includes('world=') && hash.includes('id=')) {
+    const params = new URLSearchParams(hash.split('?')[1] || '');
+    const worldId = params.get('world');
+    const campId = params.get('id');
+    if (worldId && campId) {
+      pickWorld(worldId);
+      setTimeout(() => selectCampaign(campId), 500);
+      return;
+    }
+  }
+
+  if (!hashBase || hashBase === '#landing' || hashBase === '#worlds' || hashBase === '#wizard') {
     showScreen('landing');
     animateLanding(true);
     initTilt();
     initHubParticles();
-    // Start prefetching community worlds so they're ready when user clicks "Enter a World"
     prefetchWorldLibrary();
   } else {
     routeFromHash();
