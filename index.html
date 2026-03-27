@@ -93,15 +93,60 @@
 
   <!-- Dropdown menu -->
   <div class="hamburger-menu" id="hbmenu">
-    <button onclick="goTo('worlds');toggleMenu()">Worlds</button>
-    <button onclick="goTo('worlds');toggleMenu()">Campaigns</button>
-    <button onclick="toggleMenu()">Login</button>
+    <button onclick="openFAQ();toggleMenu()">FAQ</button>
+    <button onclick="openFeedback();toggleMenu()">Feedback</button>
+    <button onclick="openContribute();toggleMenu()">Contribute</button>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div class="hub-modal" id="faq-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="hub-modal-box">
+      <button class="hub-modal-close" onclick="document.getElementById('faq-modal').style.display='none'">&times;</button>
+      <div class="hub-modal-scroll" id="faq-content"></div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="hub-modal" id="feedback-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="hub-modal-box" style="max-width:480px;">
+      <button class="hub-modal-close" onclick="document.getElementById('feedback-modal').style.display='none'">&times;</button>
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold);margin-bottom:12px;">Feedback</div>
+        <p style="font-family:'Crimson Pro',serif;color:var(--muted);font-size:14px;margin-bottom:24px;">Found a bug? Have an idea? Let us know.</p>
+        <a href="https://github.com/RRuss1/CYOAHUB/issues/new" target="_blank"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
+          style="border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.08);color:var(--gold);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
+          Open GitHub Issue
+        </a>
+        <p style="color:rgba(240,230,204,0.3);font-size:11px;margin-top:16px;">Or email: <span style="color:var(--muted);">rruss7997@gmail.com</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contribute Modal -->
+  <div class="hub-modal" id="contribute-modal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="hub-modal-box" style="max-width:480px;">
+      <button class="hub-modal-close" onclick="document.getElementById('contribute-modal').style.display='none'">&times;</button>
+      <div style="text-align:center;padding:10px 0 20px;">
+        <div style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold);margin-bottom:12px;">Contribute</div>
+        <p style="font-family:'Crimson Pro',serif;color:var(--muted);font-size:14px;margin-bottom:8px;">CYOAhub is open source. Build worlds, fix bugs, add features.</p>
+        <p style="font-family:'Crimson Pro',serif;color:rgba(240,230,204,0.4);font-size:13px;margin-bottom:24px;">Create new game systems, design enemy patterns, improve the AI GM prompts, or help with UI polish.</p>
+        <a href="https://github.com/RRuss1/CYOAHUB" target="_blank"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full no-underline transition-all"
+          style="border:1px solid rgba(40,168,122,0.5);background:rgba(40,168,122,0.08);color:#28a87a;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;">
+          View on GitHub
+        </a>
+      </div>
+    </div>
   </div>
 
   <div class="landing-body">
-    <div class="landing-eyebrow" id="l-eye">Multiplayer AI-Powered RPG</div>
+    <div id="l-eye" style="text-align:center;">
+      <div style="font-family:'Cinzel',serif;font-size:clamp(16px,2.2vw,22px);letter-spacing:3px;color:#28a8a0;text-shadow:0 0 20px rgba(40,168,160,0.4),0 2px 8px rgba(0,0,0,0.7);">Boundless Worlds Await — Choose What Comes Next</div>
+      <div style="font-family:'Crimson Pro',serif;font-size:clamp(13px,1.4vw,16px);font-style:italic;color:#8ab4d4;opacity:0.85;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,0.6);">Dynamic stories. Instant choices. Infinite outcomes.</div>
+    </div>
     <h1 class="landing-title" id="l-title">
-      Choose Your Own<br>Adventure
+      Choose Your Own<br><span class="accent">Adventure</span>
     </h1>
     <p class="landing-sub" id="l-sub">
       Multiplayer AI-powered RPGs —<br>infinite worlds, solo or with friends.
@@ -129,17 +174,19 @@
     </div>
 
     <!-- Donation links -->
-    <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:40px;padding-bottom:20px;">
-      <a href="https://venmo.com/u/goretusker" target="_blank"
-        class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full no-underline transition-all"
-        style="border:1px solid rgba(0,140,255,0.4);background:rgba(0,140,255,0.07);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <rect width="24" height="24" rx="6" fill="#008CFF"/>
-          <path d="M17.5 5.5C17.9 6.3 18.1 7.1 18.1 8.2C18.1 11.5 15.2 15.8 12.8 18.5H7.2L5 6.2L10 5.7L11.1 13.4C12.2 11.5 13.6 8.5 13.6 6.5C13.6 5.4 13.4 4.6 13 4L17.5 5.5Z" fill="white"/>
-        </svg>
-        <span class="font-display text-xs tracking-widest" style="color:#008CFF;">Venmo · @goretusker</span>
-      </a>
-      <span class="text-xs" style="color:rgba(240,230,204,0.35);">(XXX) XXX - 6991</span>
+    <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:40px;padding-bottom:6px;align-items:flex-start;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <a href="https://venmo.com/u/goretusker" target="_blank"
+          class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full no-underline transition-all"
+          style="border:1px solid rgba(0,140,255,0.4);background:rgba(0,140,255,0.07);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect width="24" height="24" rx="6" fill="#008CFF"/>
+            <path d="M17.5 5.5C17.9 6.3 18.1 7.1 18.1 8.2C18.1 11.5 15.2 15.8 12.8 18.5H7.2L5 6.2L10 5.7L11.1 13.4C12.2 11.5 13.6 8.5 13.6 6.5C13.6 5.4 13.4 4.6 13 4L17.5 5.5Z" fill="white"/>
+          </svg>
+          <span class="font-display text-xs tracking-widest" style="color:#008CFF;">Venmo · @goretusker</span>
+        </a>
+        <span class="text-xs" style="color:rgba(240,230,204,0.35);">(XXX) XXX - 6991</span>
+      </div>
       <a href="https://cash.app/%24rurich31" target="_blank"
         class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full no-underline transition-all"
         style="border:1px solid rgba(0,214,50,0.4);background:rgba(0,214,50,0.07);">
@@ -152,7 +199,7 @@
         <span class="font-display text-xs tracking-widest" style="color:#00D632;">Cash App</span>
       </a>
     </div>
-    <div class="text-xs italic text-center" style="color:rgba(240,230,204,0.3);padding-bottom:30px;">API costs ~$0.003 per turn · Every bit helps</div>
+    <div class="text-xs italic text-center" style="color:rgba(240,230,204,0.25);padding-bottom:30px;">API costs ~$0.003 per turn · Every bit helps</div>
 
   </div>
 </div>
@@ -340,19 +387,23 @@
       <div class="wstep-title">How Are Heroes Measured?</div>
       <div class="wfield">
         <label class="wlabel">Choose a stat system</label>
-        <div class="wopts" data-field="statSystem" style="flex-direction:column;gap:10px;">
-          <div class="wopt" onclick="selOpt(this)" data-val="cosmere" style="text-align:left;border-radius:10px;padding:12px 15px;">
-            <strong style="display:block;font-size:10px;margin-bottom:2px;">Cosmere Stats</strong>
-            <span style="font-size:9px;opacity:0.55;">STR · SPD · INT · WIL · AWA · PRE</span>
-          </div>
-          <div class="wopt" onclick="selOpt(this)" data-val="dnd" style="text-align:left;border-radius:10px;padding:12px 15px;">
-            <strong style="display:block;font-size:10px;margin-bottom:2px;">D&amp;D Stats</strong>
-            <span style="font-size:9px;opacity:0.55;">STR · DEX · CON · INT · WIS · CHA</span>
-          </div>
-          <div class="wopt" onclick="selOpt(this)" data-val="simple" style="text-align:left;border-radius:10px;padding:12px 15px;">
-            <strong style="display:block;font-size:10px;margin-bottom:2px;">Simplified</strong>
-            <span style="font-size:9px;opacity:0.55;">Body · Mind · Spirit</span>
-          </div>
+        <div class="wopts stat-system-grid" data-field="statSystem">
+          <div class="wopt" onclick="selOpt(this)" data-val="classic"><strong>Classic D&amp;D</strong><span>STR · DEX · CON · INT · WIS · CHA</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="cosmere"><strong>Cosmere</strong><span>STR · SPD · INT · WIL · AWA · PRE</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="simple"><strong>Body-Mind-Spirit</strong><span>BODY · MIND · SPIRIT</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="physical"><strong>Physical + Mental</strong><span>STR · AGI · END · INT · WIL · CHA</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="combat"><strong>Combat-Oriented</strong><span>ATK · DEF · SPD · HP · CRIT</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="skillhybrid"><strong>Skill Hybrid</strong><span>STR · DEX · INT · PER · LUCK</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="tactical"><strong>Tactical Build</strong><span>POWER · PRECISION · CONTROL · RESOLVE · SPEED</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="arcane"><strong>Arcane Balance</strong><span>ARC · VIT · FOCUS · WILL · ESSENCE</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="dark"><strong>Dark Cost</strong><span>FLESH · WILL · SOUL · BLOOD · SHADOW</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="narrative"><strong>Roleplay Heavy</strong><span>CHARM · CUNNING · COURAGE · WISDOM · INSTINCT</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="emotional"><strong>Emotional Drive</strong><span>HOPE · FEAR · ANGER · LOVE · AMBITION</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="cosmic"><strong>Fate-Based</strong><span>FATE · CHAOS · ORDER · WILL</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="survival"><strong>Survival Horror</strong><span>HEALTH · STAMINA · SANITY · LUCK</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="cyberpunk"><strong>Cyberpunk Core</strong><span>BODY · REFLEX · TECH · INTEL · COOL</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="mythic"><strong>Mythic Scale</strong><span>MIGHT · LEGEND · DOMINION · SPIRIT</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="minimal"><strong>Trait Minimal</strong><span>EDGE · FLAW · DRIVE</span></div>
         </div>
       </div>
       <div class="wfield">
@@ -473,25 +524,129 @@
           <div class="wopt" onclick="selOpt(this)">Deep — Relationships, secrets, arcs</div>
         </div>
       </div>
+
+      <!-- World Rules Engine -->
+      <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(201,168,76,0.1);">
+        <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px;margin-bottom:14px;">WORLD RULES</div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Physics Rules</label>
+        <div class="wopts" data-field="physics">
+          <div class="wopt" onclick="selOpt(this)">Realistic</div>
+          <div class="wopt" onclick="selOpt(this)">Cinematic</div>
+          <div class="wopt" onclick="selOpt(this)">Rule of Cool</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Death Rules</label>
+        <div class="wopts" data-field="deathRules">
+          <div class="wopt" onclick="selOpt(this)">Permanent</div>
+          <div class="wopt" onclick="selOpt(this)">Revivable</div>
+          <div class="wopt" onclick="selOpt(this)">Narrative — Death serves the story</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Time Flow</label>
+        <div class="wopts" data-field="timeFlow">
+          <div class="wopt" onclick="selOpt(this)">Real-Time</div>
+          <div class="wopt" onclick="selOpt(this)">Turn-Based</div>
+          <div class="wopt" onclick="selOpt(this)">Elastic — Time bends to drama</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Travel Speed</label>
+        <div class="wopts" data-field="travelSpeed">
+          <div class="wopt" onclick="selOpt(this)">Fast Travel</div>
+          <div class="wopt" onclick="selOpt(this)">Realistic — Journey matters</div>
+          <div class="wopt" onclick="selOpt(this)">Dangerous — Random encounters</div>
+        </div>
+      </div>
+      <div class="wfield">
+        <label class="wlabel">Dialogue Style</label>
+        <div class="wopts" data-field="dialogueStyle">
+          <div class="wopt" onclick="selOpt(this)">Modern</div>
+          <div class="wopt" onclick="selOpt(this)">Archaic</div>
+          <div class="wopt" onclick="selOpt(this)">Poetic</div>
+          <div class="wopt" onclick="selOpt(this)">Mixed</div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 7 — Theme -->
     <div class="wstep" id="ws-7">
       <div class="wstep-eyebrow">Step 7 of 7 — Visual Identity</div>
       <div class="wstep-title">How Does It Look?</div>
+
       <div class="wfield">
         <label class="wlabel">Card Image</label>
         <div class="card-image-grid" id="card-image-grid"></div>
       </div>
+
+      <!-- Color System -->
       <div class="wfield">
-        <label class="wlabel">Primary Color</label>
-        <div style="display:flex;gap:11px;align-items:center;">
-          <input type="color" id="cp" value="#C9A84C"
-            style="width:42px;height:42px;border:none;background:none;border-radius:8px;cursor:pointer;">
-          <input class="winput" type="text" id="cp-hex" value="#C9A84C"
-            style="width:105px;" oninput="syncColor(this.value)">
+        <label class="wlabel">Color System</label>
+        <div class="color-grid">
+          <div class="color-row"><label>Primary</label><input type="color" id="cp" value="#C9A84C"><input class="winput" type="text" id="cp-hex" value="#C9A84C" style="width:90px;" oninput="syncColor(this.value)"></div>
+          <div class="color-row"><label>Secondary</label><input type="color" id="cp-secondary" value="#28A87A"><input class="winput" type="text" id="cp-secondary-hex" value="#28A87A" style="width:90px;" oninput="syncColorField('cp-secondary',this.value)"></div>
+          <div class="color-row"><label>Background</label><input type="color" id="cp-bg" value="#0F0D08"><input class="winput" type="text" id="cp-bg-hex" value="#0F0D08" style="width:90px;" oninput="syncColorField('cp-bg',this.value)"></div>
+          <div class="color-row"><label>Surface</label><input type="color" id="cp-surface" value="#141109"><input class="winput" type="text" id="cp-surface-hex" value="#141109" style="width:90px;" oninput="syncColorField('cp-surface',this.value)"></div>
+          <div class="color-row"><label>Text</label><input type="color" id="cp-text" value="#F8F3E8"><input class="winput" type="text" id="cp-text-hex" value="#F8F3E8" style="width:90px;" oninput="syncColorField('cp-text',this.value)"></div>
+          <div class="color-row"><label>Muted Text</label><input type="color" id="cp-muted" value="#A07830"><input class="winput" type="text" id="cp-muted-hex" value="#A07830" style="width:90px;" oninput="syncColorField('cp-muted',this.value)"></div>
+          <div class="color-row"><label>Glow / Accent</label><input type="color" id="cp-glow" value="#C9A84C"><input class="winput" type="text" id="cp-glow-hex" value="#C9A84C" style="width:90px;" oninput="syncColorField('cp-glow',this.value)"></div>
+          <div class="color-row"><label>Danger</label><input type="color" id="cp-danger" value="#B03828"><input class="winput" type="text" id="cp-danger-hex" value="#B03828" style="width:90px;" oninput="syncColorField('cp-danger',this.value)"></div>
         </div>
       </div>
+
+      <!-- UI Style Preset -->
+      <div class="wfield">
+        <label class="wlabel">UI Style</label>
+        <div class="wopts" data-field="uiStyle">
+          <div class="wopt" onclick="selOpt(this)">Minimal</div>
+          <div class="wopt" onclick="selOpt(this)">Glassmorphism</div>
+          <div class="wopt" onclick="selOpt(this)">Ornate Fantasy</div>
+          <div class="wopt" onclick="selOpt(this)">Sci-Fi HUD</div>
+          <div class="wopt" onclick="selOpt(this)">Dark Dungeon</div>
+        </div>
+      </div>
+
+      <!-- Button Style -->
+      <div class="wfield">
+        <label class="wlabel">Button Style</label>
+        <div class="wopts" data-field="buttonStyle">
+          <div class="wopt" onclick="selOpt(this)">Rounded</div>
+          <div class="wopt" onclick="selOpt(this)">Sharp</div>
+          <div class="wopt" onclick="selOpt(this)">Pill</div>
+          <div class="wopt" onclick="selOpt(this)">Engraved</div>
+          <div class="wopt" onclick="selOpt(this)">Rune-Inscribed</div>
+        </div>
+      </div>
+
+      <!-- Background Effects -->
+      <div class="wfield">
+        <label class="wlabel">Background Effects</label>
+        <div class="wopts" data-field="bgEffect">
+          <div class="wopt" onclick="selOpt(this)">None</div>
+          <div class="wopt" onclick="selOpt(this)">Fog / Mist</div>
+          <div class="wopt" onclick="selOpt(this)">Floating Particles</div>
+          <div class="wopt" onclick="selOpt(this)">Embers</div>
+          <div class="wopt" onclick="selOpt(this)">Snow / Ash</div>
+          <div class="wopt" onclick="selOpt(this)">Stars / Cosmic Dust</div>
+        </div>
+      </div>
+
+      <!-- Card Style -->
+      <div class="wfield">
+        <label class="wlabel">Card Style</label>
+        <div class="wopts" data-field="cardStyle">
+          <div class="wopt" onclick="selOpt(this)">Flat</div>
+          <div class="wopt" onclick="selOpt(this)">Elevated</div>
+          <div class="wopt" onclick="selOpt(this)">Glass</div>
+          <div class="wopt" onclick="selOpt(this)">Framed (Fantasy Borders)</div>
+          <div class="wopt" onclick="selOpt(this)">Animated Hover Tilt</div>
+        </div>
+      </div>
+
+      <!-- Title Font -->
       <div class="wfield">
         <label class="wlabel">Title Font</label>
         <div class="wopts" data-field="titleFont">

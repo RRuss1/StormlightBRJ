@@ -191,11 +191,39 @@ function showScreen(id){
     el.style.display = isHub ? '' : 'none';
   });
 
+  // Reset theme to defaults on hub screens
+  if (isHub) {
+    const r = document.documentElement.style;
+    r.setProperty('--gold', '#C9A84C');
+    r.setProperty('--teal2', '#28a87a');
+    r.setProperty('--coral', '#b03828');
+    r.setProperty('--bg', '#0f0d08');
+    r.setProperty('--bg2', '#141109');
+    r.setProperty('--text', '#F8F3E8');
+    r.setProperty('--text4', '#A07830');
+    r.setProperty('--glow-gold', 'rgba(201,168,76,0.15)');
+  }
+
   // Audio bar only visible in game/combat screens (not hub or campaign)
   const audioBar = document.getElementById('audio-bar');
   if (audioBar) {
     const isGame = ['game','combat'].includes(id);
     audioBar.style.display = isGame ? '' : 'none';
+  }
+
+  // Apply world theme to game screens (campaign, title, lobby, game, combat)
+  const isGameScreen = ['campaign','title','create','lobby','game','combat'].includes(id);
+  if (isGameScreen && window.SystemData && window.SystemData.theme) {
+    const t = window.SystemData.theme;
+    const r = document.documentElement.style;
+    if (t.primary)   r.setProperty('--gold', t.primary);
+    if (t.secondary) r.setProperty('--teal2', t.secondary);
+    if (t.danger)    r.setProperty('--coral', t.danger);
+    if (t.bg)        r.setProperty('--bg', t.bg);
+    if (t.surface)   r.setProperty('--bg2', t.surface);
+    if (t.text)      r.setProperty('--text', t.text);
+    if (t.muted)     r.setProperty('--text4', t.muted);
+    if (t.glow)      r.setProperty('--glow-gold', t.glow + '25');
   }
 
   // GSAP transition for hub screens
@@ -222,22 +250,38 @@ async function initCampaignPicker(){
 }
 function renderCampaigns(camps){
   const grid=document.getElementById('camp-grid');
-  const next=camps.length+1;
-  grid.innerHTML=camps.map(cam=>{
+  const sys = window.SystemData || {};
+  const activeWorld = sys.id || 'stormlight';
+
+  // Filter: only show campaigns for the current world
+  // Legacy campaigns without worldId/system are shown for stormlight (backward compat)
+  const filtered = camps.filter(cam => {
+    const st = cam.state;
+    if (!st) return activeWorld === 'stormlight'; // no state = legacy stormlight
+    const campWorld = st.system || st.worldId || 'stormlight';
+    return campWorld === activeWorld;
+  });
+
+  // Theme colors from active system
+  const themeColor = sys.theme?.primary || 'var(--gold)';
+  const themeSecondary = sys.theme?.secondary || 'var(--teal2)';
+
+  grid.innerHTML=filtered.map(cam=>{
     const st=cam.state;
     const phase=st?st.phase:'pregame';
     const moves=st?st.totalMoves||0:0;
     const players=st&&st.players?st.players.filter(p=>p&&!p.isNPC).map(p=>p.name).join(', '):'No players yet';
     const act=ACTS.find(a=>moves>=a.start&&moves<=a.end)||ACTS[0];
-    return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')">
-      <button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>
+    const isOwned = _isOwnedCampaign(cam.id);
+    return`<div class="camp-card${phase==='playing'?' active-camp':''}" onclick="selectCampaign('${cam.id}')" style="border-color:${themeColor}18;">
+      ${isOwned?`<button class="camp-del" onclick="event.stopPropagation();deleteCampaign('${cam.id}')" title="Delete">✕</button>`:''}
       <div class="camp-num">${cam.id.startsWith('Campaign_')?'Campaign':cam.id.replace('Campaign','Campaign ')}</div>
-      <div class="camp-name">${st&&st.campaignName?st.campaignName:cam.id}</div>
-      <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+moves+'/180':'Awaiting Radiants'}</div>
+      <div class="camp-name" style="color:${themeColor};">${st&&st.campaignName?st.campaignName:cam.id}</div>
+      <div class="camp-meta">${phase==='playing'?act.tag+' · Turn '+moves+'/180':'Ready to begin'}</div>
       <div class="camp-meta">${players}</div>
-      <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
+      <span class="camp-phase ${phase==='playing'?'phase-playing':'phase-pregame'}" style="${phase==='playing'?'border-color:'+themeSecondary+';color:'+themeSecondary:''}">${phase==='playing'?'In Progress':'Pre-Game'}</span>
     </div>`;
-  }).join('')+`<div class="camp-card new-camp" onclick="promptNewCampaign()"><div class="camp-new-icon">+</div><div class="camp-new-txt">New Campaign</div></div>`;
+  }).join('')+`<div class="camp-card new-camp" onclick="promptNewCampaign()" style="border-color:${themeColor}22;"><div class="camp-new-icon" style="color:${themeColor};">+</div><div class="camp-new-txt" style="color:${themeColor};">New Campaign</div></div>`;
   if(lang==='th')setTimeout(applyThaiToPage,100);
 }
 function promptNewCampaign(num){
@@ -263,8 +307,12 @@ async function launchNewCampaign(num,name){
   try{
     await ensureSheets();gState=await loadState();
     partySize=3;gState.partySize=3;gState.campaignName=name;
+    // Tag campaign with active world
+    gState.system = window.SystemData?.id || 'stormlight';
+    gState.worldId = gState.system;
     myChar=null;clearMyChar();
     await saveState(gState);
+    _ownCampaign(campaignId);
     document.getElementById('title-sub').textContent=name;
     renderPSZ();
     showScreen('title');
@@ -318,9 +366,32 @@ async function _doSelectCampaign(id){
     document.querySelectorAll('.camp-card').forEach(card=>card.style.opacity='1');
   }
 }
+// ══ CAMPAIGN OWNERSHIP ══
+// Owner tokens stored in localStorage. Only the creator can delete.
+function _getOwnedCampaigns() {
+  try { return JSON.parse(localStorage.getItem('cyoa_owned_campaigns') || '{}'); } catch(e) { return {}; }
+}
+function _ownCampaign(id) {
+  const owned = _getOwnedCampaigns();
+  owned[id] = Date.now();
+  localStorage.setItem('cyoa_owned_campaigns', JSON.stringify(owned));
+}
+function _isOwnedCampaign(id) {
+  return !!_getOwnedCampaigns()[id];
+}
+function _disownCampaign(id) {
+  const owned = _getOwnedCampaigns();
+  delete owned[id];
+  localStorage.setItem('cyoa_owned_campaigns', JSON.stringify(owned));
+}
+
 async function deleteCampaign(id){
-  if(!confirm('Delete '+id+' permanently?'))return;
-  try{await deleteSheet(id+'_State');await deleteSheet(id+'_Log');initCampaignPicker();}
+  if (!_isOwnedCampaign(id)) {
+    alert('You can only delete campaigns you created on this device.');
+    return;
+  }
+  if(!confirm('Delete "'+id+'" permanently? This cannot be undone.'))return;
+  try{await deleteSheet(id+'_State');await deleteSheet(id+'_Log');_disownCampaign(id);initCampaignPicker();}
   catch(e){alert('Delete failed: '+e.message);}
 }
 

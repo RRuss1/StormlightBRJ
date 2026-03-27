@@ -6,6 +6,32 @@
  * SystemData-compatible object so the game engine works with any custom world.
  */
 
+// Stat system presets — maps wizard selection to keys/names/full
+const _STAT_PRESETS = {
+  classic:    { keys:['str','dex','con','int','wis','cha'], names:['STR','DEX','CON','INT','WIS','CHA'], full:['Strength','Dexterity','Constitution','Intelligence','Wisdom','Charisma'] },
+  cosmere:    { keys:['str','spd','int','wil','awa','pre'], names:['STR','SPD','INT','WIL','AWA','PRE'], full:['Strength','Speed','Intellect','Willpower','Awareness','Presence'] },
+  simple:     { keys:['body','mind','spirit'], names:['BODY','MIND','SPIRIT'], full:['Body','Mind','Spirit'] },
+  physical:   { keys:['str','agi','end','int','wil','cha'], names:['STR','AGI','END','INT','WIL','CHA'], full:['Strength','Agility','Endurance','Intelligence','Willpower','Charisma'] },
+  combat:     { keys:['atk','def','spd','hp','crit'], names:['ATK','DEF','SPD','HP','CRIT'], full:['Attack','Defense','Speed','Hit Points','Critical'] },
+  skillhybrid:{ keys:['str','dex','int','per','luck'], names:['STR','DEX','INT','PER','LUCK'], full:['Strength','Dexterity','Intelligence','Perception','Luck'] },
+  tactical:   { keys:['power','precision','control','resolve','speed'], names:['POW','PRE','CTR','RES','SPD'], full:['Power','Precision','Control','Resolve','Speed'] },
+  arcane:     { keys:['arc','vit','focus','will','essence'], names:['ARC','VIT','FOC','WIL','ESS'], full:['Arcana','Vitality','Focus','Will','Essence'] },
+  dark:       { keys:['flesh','will','soul','blood','shadow'], names:['FLESH','WILL','SOUL','BLOOD','SHADOW'], full:['Flesh','Will','Soul','Blood','Shadow'] },
+  narrative:  { keys:['charm','cunning','courage','wisdom','instinct'], names:['CHM','CUN','COU','WIS','INS'], full:['Charm','Cunning','Courage','Wisdom','Instinct'] },
+  emotional:  { keys:['hope','fear','anger','love','ambition'], names:['HOPE','FEAR','ANGER','LOVE','AMB'], full:['Hope','Fear','Anger','Love','Ambition'] },
+  cosmic:     { keys:['fate','chaos','order','will'], names:['FATE','CHAOS','ORDER','WILL'], full:['Fate','Chaos','Order','Will'] },
+  survival:   { keys:['health','stamina','sanity','luck'], names:['HP','STA','SAN','LUCK'], full:['Health','Stamina','Sanity','Luck'] },
+  cyberpunk:  { keys:['body','reflex','tech','intel','cool'], names:['BODY','REF','TECH','INT','COOL'], full:['Body','Reflex','Tech','Intelligence','Cool'] },
+  mythic:     { keys:['might','legend','dominion','spirit'], names:['MIGHT','LEG','DOM','SPIRIT'], full:['Might','Legend','Dominion','Spirit'] },
+  minimal:    { keys:['edge','flaw','drive'], names:['EDGE','FLAW','DRIVE'], full:['Edge','Flaw','Drive'] },
+};
+
+function _resolveStats(statsOverride, systemId) {
+  if (statsOverride && statsOverride.keys) return { statKeys: statsOverride.keys, statNames: statsOverride.names, statFull: statsOverride.full };
+  const preset = _STAT_PRESETS[systemId] || _STAT_PRESETS.classic;
+  return { statKeys: preset.keys, statNames: preset.names, statFull: preset.full };
+}
+
 window.CustomSystem = {
   /**
    * Build a complete SystemData object from wizard worldConfig.
@@ -30,12 +56,21 @@ window.CustomSystem = {
       ambientAudio: cfg.ambientAudio || 'forest',
 
       theme: {
-        primary:   theme.primary   || '#C9A84C',
-        secondary: theme.secondary || '#28A87A',
-        danger:    theme.danger    || '#B03828',
-        bgTone:    theme.bgTone    || 'dark',
-        titleFont: theme.titleFont || 'Cinzel',
-        bodyFont:  theme.bodyFont  || 'Crimson Pro',
+        primary:     theme.primary     || '#C9A84C',
+        secondary:   theme.secondary   || '#28A87A',
+        danger:      theme.danger      || '#B03828',
+        bg:          theme.bg          || '#0F0D08',
+        surface:     theme.surface     || '#141109',
+        text:        theme.text        || '#F8F3E8',
+        muted:       theme.muted       || '#A07830',
+        glow:        theme.glow        || '#C9A84C',
+        bgTone:      theme.bgTone      || 'dark',
+        titleFont:   theme.titleFont   || 'Cinzel',
+        bodyFont:    theme.bodyFont    || 'Crimson Pro',
+        uiStyle:     theme.uiStyle     || 'Glassmorphism',
+        buttonStyle: theme.buttonStyle || 'Rounded',
+        bgEffect:    theme.bgEffect    || 'Floating Particles',
+        cardStyle:   theme.cardStyle   || 'Glass',
       },
 
       gmContext: {
@@ -56,9 +91,7 @@ window.CustomSystem = {
       // Use generic fantasy defaults for all data tables
       // These provide a playable baseline for any custom world
 
-      statKeys:  stats.keys  || ['str','dex','con','int','wis','cha'],
-      statNames: stats.names || ['STR','DEX','CON','INT','WIS','CHA'],
-      statFull:  stats.full  || ['Strength','Dexterity','Constitution','Intelligence','Wisdom','Charisma'],
+      ..._resolveStats(stats, cfg.statSystem),
 
       // Generic classes — warrior, mage, rogue, healer archetype
       classes: cfg.classes || [

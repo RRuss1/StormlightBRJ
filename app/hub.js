@@ -130,7 +130,11 @@ function animateLanding(boot){
 }
 
 /* ── WORLDS ANIM ── */
-function animateHub(){
+async function animateHub(){
+  // Ensure community worlds are loaded (uses cache if fresh)
+  await _fetchCommunityWorlds().catch(() => {});
+  // Render all worlds (local + community)
+  renderWorldsGrid();
   gsap.fromTo('.wcard',
     {opacity:0,y:20,scale:.97},
     {opacity:1,y:0,scale:1,duration:.4,stagger:.07,ease:'power3.out',clearProps:'all'}
@@ -144,7 +148,13 @@ function filterWorlds(tier,btn){
   document.querySelectorAll('.wtab').forEach(t=>t.classList.remove('on'));
   btn.classList.add('on');
   document.querySelectorAll('#worlds-grid .wcard:not(.wcard-new)').forEach(c=>{
-    c.style.display=(tier==='all'||c.dataset.tier===tier)?'':'none';
+    if (tier === 'all') { c.style.display = ''; return; }
+    if (tier === 'mine') {
+      // "Mine" shows both private AND community worlds you own
+      c.style.display = (c.dataset.tier === 'mine' || c.dataset.tier === 'community' && c.dataset.worldId) ? '' : 'none';
+    } else {
+      c.style.display = c.dataset.tier === tier ? '' : 'none';
+    }
   });
 }
 
@@ -262,6 +272,20 @@ function syncColor(val){
     document.getElementById('cp').value=val; updatePreview();
   }
 }
+function syncColorField(pickerId, val){
+  if(/^#[0-9A-Fa-f]{6}$/.test(val)){
+    const el = document.getElementById(pickerId);
+    if(el) el.value = val;
+  }
+}
+// Keep hex inputs synced with color pickers
+document.addEventListener('input', e => {
+  if(e.target.type==='color'){
+    const hex = document.getElementById(e.target.id+'-hex');
+    if(hex) hex.value = e.target.value;
+    if(e.target.id==='cp') updatePreview();
+  }
+});
 
 function updatePreview(){
   const p=document.getElementById('cp').value;
@@ -293,7 +317,7 @@ function finishWizard(publish){
   const magicExists   = _getWizSel('magicExists', 'Yes — Common');
   const magicSource   = _getWizSel('magicSource', 'Willpower / Inner Force');
   const magicRisk     = _getWizSel('magicRisk', 'Moderate — Mishaps');
-  const statSystem    = _getWizSel('statSystem', 'dnd');
+  const statSystem    = _getWizSel('statSystem', 'classic');
   const progression   = _getWizSel('progression', 'Level-Based (XP)');
   const namingStyle   = _getWizSel('namingStyle', 'Western Fantasy');
   const narratorStyle = _getWizSel('narratorStyle', 'Epic & Mythic');
@@ -302,6 +326,25 @@ function finishWizard(publish){
   const lethality     = _getWizSel('lethality', 'Balanced — Death is possible');
   const npcDepth      = _getWizSel('npcDepth', 'Moderate — Personalities & motives');
   const titleFont     = _getWizSel('titleFont', 'Cinzel');
+  // World Rules
+  const physics       = _getWizSel('physics', 'Cinematic');
+  const deathRules    = _getWizSel('deathRules', 'Revivable');
+  const timeFlow      = _getWizSel('timeFlow', 'Elastic — Time bends to drama');
+  const travelSpeed   = _getWizSel('travelSpeed', 'Fast Travel');
+  const dialogueStyle = _getWizSel('dialogueStyle', 'Mixed');
+  // Visual Identity
+  const uiStyle       = _getWizSel('uiStyle', 'Glassmorphism');
+  const buttonStyle   = _getWizSel('buttonStyle', 'Rounded');
+  const bgEffect      = _getWizSel('bgEffect', 'Floating Particles');
+  const cardStyle     = _getWizSel('cardStyle', 'Glass');
+  // Extended colors
+  const colorSecondary = document.getElementById('cp-secondary')?.value || '#28A87A';
+  const colorBg        = document.getElementById('cp-bg')?.value || '#0F0D08';
+  const colorSurface   = document.getElementById('cp-surface')?.value || '#141109';
+  const colorText      = document.getElementById('cp-text')?.value || '#F8F3E8';
+  const colorMuted     = document.getElementById('cp-muted')?.value || '#A07830';
+  const colorGlow      = document.getElementById('cp-glow')?.value || '#C9A84C';
+  const colorDanger    = document.getElementById('cp-danger')?.value || '#B03828';
 
   // Parse locations into array
   const locArray = locations ? locations.split(',').map(s=>s.trim()).filter(Boolean) : [];
@@ -323,8 +366,9 @@ function finishWizard(publish){
 It is powered by ${magicSource.toLowerCase()}. ${magicResource} is the resource spent to cast.
 Risk level: ${magicRisk.toLowerCase()}.`;
 
-  // Build tone instruction
-  const toneInstruction = `${tone} tone. ${narratorStyle} narration style. Story focus: ${storyFocus.toLowerCase()}. Combat frequency: ${combatFreq.toLowerCase()}. Lethality: ${lethality.toLowerCase()}. NPC depth: ${npcDepth.toLowerCase()}.`;
+  // Build tone instruction (includes world rules)
+  const toneInstruction = `${tone} tone. ${narratorStyle} narration style. Story focus: ${storyFocus.toLowerCase()}. Combat frequency: ${combatFreq.toLowerCase()}. Lethality: ${lethality.toLowerCase()}. NPC depth: ${npcDepth.toLowerCase()}.
+Physics: ${physics.toLowerCase()}. Death rules: ${deathRules.toLowerCase()}. Time: ${timeFlow.toLowerCase()}. Travel: ${travelSpeed.toLowerCase()}. Dialogue: ${dialogueStyle.toLowerCase()}.`;
 
   // Build worldConfig from ALL wizard form data
   const worldId = 'custom-' + Date.now();
@@ -332,7 +376,12 @@ Risk level: ${magicRisk.toLowerCase()}.`;
     id: worldId,
     name,
     tagline: desc || name,
-    theme: { primary: color, secondary: '#28A87A', danger: '#B03828', bgTone: 'dark', titleFont: titleFont, bodyFont: 'Crimson Pro' },
+    theme: {
+      primary: color, secondary: colorSecondary, danger: colorDanger,
+      bg: colorBg, surface: colorSurface, text: colorText, muted: colorMuted, glow: colorGlow,
+      bgTone: 'dark', titleFont: titleFont, bodyFont: 'Crimson Pro',
+      uiStyle, buttonStyle, bgEffect, cardStyle,
+    },
     magic: { name: magicName, resource: magicResource, source: magicSource, risk: magicRisk, exists: magicExists },
     stats: statSystem === 'cosmere'
       ? { keys:['str','spd','int','wil','awa','pre'], names:['STR','SPD','INT','WIL','AWA','PRE'], full:['Strength','Speed','Intellect','Willpower','Awareness','Presence'] }
@@ -351,40 +400,42 @@ Risk level: ${magicRisk.toLowerCase()}.`;
     progression,
     era,
     tech,
+    rules: { physics, deathRules, timeFlow, travelSpeed, dialogueStyle },
     enemies: { categories: _selectedEnemyCategories },
     ambientAudio: _selectedAmbientAudio,
   };
+  // Add card image and publish flag
+  worldConfig.cardImage = _selectedCardImage;
+  worldConfig.published = publish;
+  worldConfig.createdAt = new Date().toISOString();
+
   // Store config for system loader
   window._pendingWorldConfig = worldConfig;
 
-  const grid  = document.getElementById('worlds-grid');
-  const newBtn= grid.querySelector('.wcard-new');
-  const card  = document.createElement('div');
-  card.className='wcard';
-  card.dataset.tier=tier;
-  card.style.cssText=`border-color:${color}28;opacity:0;`;
-  card.innerHTML=`
-    <div class="wcard-art">
-      <img src="${_selectedCardImage}" alt="${name}" class="wcard-img">
-    </div>
-    <div class="wcard-body">
-      <div class="wcard-badges">
-        <span class="badge" style="background:${color}18;border:1px solid ${color}40;color:${color};">
-          ${publish?'🌐 Community':'🔒 Private'}
-        </span>
-      </div>
-      <div class="wcard-name" style="color:${color}">${name}</div>
-      <div class="wcard-desc">Your custom world — ready to play.</div>
-      <div class="wcard-meta">Just created · Custom</div>
-      <button class="wcard-btn" style="border-color:${color}50;color:${color};">Play →</button>
-    </div>`;
+  // Persist to localStorage
+  _saveWorld(worldConfig);
 
-  grid.insertBefore(card, newBtn);
+  // If publishing, also save to Google Sheet WorldLibrary
+  if (publish) {
+    try {
+      _publishWorldToSheet(worldConfig);
+    } catch(e) { console.warn('Publish to sheet failed:', e); }
+  }
+
+  // Re-render the worlds grid with the new card
   goTo('worlds');
-  gsap.fromTo(card,
-    {opacity:0,scale:.88,y:22},
-    {opacity:1,scale:1,y:0,duration:.5,delay:.3,ease:'back.out(1.6)'}
-  );
+  renderWorldsGrid();
+
+  // Animate the new card in
+  setTimeout(() => {
+    const newCard = document.querySelector(`.wcard[data-world-id="${worldId}"]`);
+    if (newCard) {
+      gsap.fromTo(newCard,
+        {opacity:0, scale:.88, y:22},
+        {opacity:1, scale:1, y:0, duration:.5, ease:'back.out(1.6)'}
+      );
+    }
+  }, 100);
 }
 
 /* ── 3D CARD TILT ── */
@@ -432,8 +483,226 @@ document.addEventListener('click', e => {
   }
 });
 
+/* ── PUBLISH WORLD TO SHEET ── */
+async function _publishWorldToSheet(cfg) {
+  // Uses the same tok()/SHEET_ID from ui.js (global scope)
+  if (typeof tok !== 'function' || typeof SHEET_ID === 'undefined') {
+    console.warn('Sheet API not available — world saved locally only');
+    return;
+  }
+  try {
+    const t = await tok();
+    // Ensure WorldLibrary tab exists
+    const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`, {headers:{Authorization:`Bearer ${t}`}})).json();
+    const hasTab = (info.sheets||[]).some(s => s.properties.title === 'WorldLibrary');
+    if (!hasTab) {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
+        method:'POST', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
+        body:JSON.stringify({requests:[{addSheet:{properties:{title:'WorldLibrary'}}}]})
+      });
+      // Add headers
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A1:J1?valueInputOption=RAW`, {
+        method:'PUT', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
+        body:JSON.stringify({values:[['worldId','tier','name','tagline','author','system','config','rating','plays','published']]})
+      });
+    }
+    // Append the world row
+    const row = [cfg.id, 'community', cfg.name||'', cfg.tagline||'', 'Player', 'custom', JSON.stringify(cfg), '0', '0', 'true'];
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A:J:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+      method:'POST', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
+      body:JSON.stringify({values:[row]})
+    });
+    console.log('World published to WorldLibrary sheet');
+  } catch(e) { console.warn('Publish failed:', e); }
+}
+
+/* ── WORLD OWNERSHIP & PERSISTENCE ── */
+function _getSavedWorlds() {
+  try { return JSON.parse(localStorage.getItem('cyoa_my_worlds') || '[]'); } catch(e) { return []; }
+}
+function _saveWorld(worldConfig) {
+  const worlds = _getSavedWorlds();
+  // Replace if same ID, else push
+  const idx = worlds.findIndex(w => w.id === worldConfig.id);
+  if (idx >= 0) worlds[idx] = worldConfig; else worlds.push(worldConfig);
+  localStorage.setItem('cyoa_my_worlds', JSON.stringify(worlds));
+}
+function _deleteWorld(worldId) {
+  const worlds = _getSavedWorlds().filter(w => w.id !== worldId);
+  localStorage.setItem('cyoa_my_worlds', JSON.stringify(worlds));
+}
+function _isOwnedWorld(worldId) {
+  return _getSavedWorlds().some(w => w.id === worldId);
+}
+
+function deleteWorld(worldId) {
+  if (!_isOwnedWorld(worldId)) {
+    alert('You can only delete worlds you created on this device.');
+    return;
+  }
+  if (!confirm('Delete this world permanently?')) return;
+  _deleteWorld(worldId);
+  renderWorldsGrid();
+}
+
+// ── WORLD LIBRARY CACHE (fetched from Google Sheet) ──
+let _communityWorldsCache = [];
+let _communityFetchedAt = 0;
+const _COMMUNITY_CACHE_MS = 60000; // 60s
+
+async function _fetchCommunityWorlds() {
+  if (typeof tok !== 'function' || typeof SHEET_ID === 'undefined') return [];
+  const now = Date.now();
+  if (_communityWorldsCache.length && (now - _communityFetchedAt) < _COMMUNITY_CACHE_MS) return _communityWorldsCache;
+  try {
+    const t = await tok();
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A2:J100`, {
+      headers: { Authorization: `Bearer ${t}` }
+    });
+    const data = await res.json();
+    const rows = data.values || [];
+    _communityWorldsCache = rows.map(r => {
+      let config = {};
+      try { config = JSON.parse(r[6] || '{}'); } catch(e) {}
+      return {
+        id:        r[0] || '',
+        tier:      r[1] || 'community',
+        name:      r[2] || 'Unnamed',
+        tagline:   r[3] || '',
+        author:    r[4] || 'Unknown',
+        system:    r[5] || 'custom',
+        config,
+        rating:    parseFloat(r[7]) || 0,
+        plays:     parseInt(r[8]) || 0,
+        published: r[9] === 'true',
+      };
+    }).filter(w => w.published && w.id);
+    _communityFetchedAt = now;
+    return _communityWorldsCache;
+  } catch(e) {
+    console.warn('WorldLibrary fetch failed:', e);
+    return _communityWorldsCache;
+  }
+}
+
+// Start prefetching on landing page load so worlds are ready when user clicks "Enter a World"
+function prefetchWorldLibrary() {
+  _fetchCommunityWorlds().catch(() => {});
+}
+
+function _renderWorldCard(w, isOwned, grid, createTile) {
+  const color = (w.theme && w.theme.primary) || (w.config && w.config.theme && w.config.theme.primary) || '#C9A84C';
+  const tier = isOwned ? (w.published ? 'community' : 'mine') : 'community';
+  const name = w.name || 'Custom World';
+  const tagline = w.tagline || w.config?.tagline || 'A community world.';
+  const image = w.cardImage || w.config?.cardImage || 'GameCardImgs/cosmic face.png';
+  const author = w.author || '';
+  const worldId = w.id;
+
+  const card = document.createElement('div');
+  card.className = 'wcard';
+  card.dataset.tier = tier;
+  card.dataset.worldId = worldId;
+  card.style.borderColor = color + '28';
+  card.onclick = () => pickWorld(worldId);
+  card.innerHTML = `
+    ${isOwned ? `<button class="wcard-del" onclick="event.stopPropagation();deleteWorld('${worldId}')" title="Delete world">✕</button>` : ''}
+    <div class="wcard-art">
+      <img src="${image}" alt="${name}" class="wcard-img">
+    </div>
+    <div class="wcard-body">
+      <div class="wcard-badges">
+        <span class="badge" style="background:${color}18;border:1px solid ${color}40;color:${color};">
+          ${tier === 'mine' ? '🔒 Private' : '🌐 Community'}
+        </span>
+      </div>
+      <div class="wcard-name" style="color:${color}">${name}</div>
+      <div class="wcard-desc">${tagline}</div>
+      <div class="wcard-meta">${author ? author + ' · ' : ''}Custom</div>
+      <button class="wcard-btn" style="border-color:${color}50;color:${color};"
+        onclick="event.stopPropagation();pickWorld('${worldId}')">Play →</button>
+    </div>`;
+  grid.insertBefore(card, createTile);
+}
+
+function renderWorldsGrid() {
+  const grid = document.getElementById('worlds-grid');
+  if (!grid) return;
+  const createTile = grid.querySelector('.wcard-new');
+
+  // Remove all non-official, non-create cards
+  grid.querySelectorAll('.wcard:not([data-tier="official"]):not(.wcard-new)').forEach(el => el.remove());
+
+  // 1. Render local worlds (yours — private + published)
+  const myWorlds = _getSavedWorlds();
+  const myIds = new Set(myWorlds.map(w => w.id));
+  myWorlds.forEach(w => _renderWorldCard(w, true, grid, createTile));
+
+  // 2. Render community worlds from sheet (skip duplicates with your local worlds)
+  _communityWorldsCache.forEach(cw => {
+    if (myIds.has(cw.id)) return; // already rendered as your own
+    // Store config so pickWorld can load it
+    const worldData = cw.config || {};
+    worldData.id = cw.id;
+    worldData.name = cw.name;
+    worldData.tagline = cw.tagline;
+    worldData.author = cw.author;
+    _renderWorldCard(worldData, false, grid, createTile);
+  });
+
+  // Re-init tilt for new cards
+  setTimeout(initTilt, 50);
+}
+
+/* ── MODALS (FAQ, Feedback, Contribute) ── */
+function openFAQ() {
+  const modal = document.getElementById('faq-modal');
+  modal.style.display = 'flex';
+  // Parse markdown FAQ into HTML (simple parser — handles ##, **, *, -, ---)
+  fetch('CYOAHUB_FAQ.md').then(r => r.text()).then(md => {
+    const html = md
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^---$/gm, '<hr>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    document.getElementById('faq-content').innerHTML = '<p>' + html + '</p>';
+  }).catch(() => {
+    document.getElementById('faq-content').innerHTML = '<p>FAQ could not be loaded.</p>';
+  });
+}
+
+function openFeedback() {
+  document.getElementById('feedback-modal').style.display = 'flex';
+}
+
+function openContribute() {
+  document.getElementById('contribute-modal').style.display = 'flex';
+}
+
 /* ── PICK WORLD ── */
 function pickWorld(worldId) {
+  // For custom worlds, load config from local storage or community cache
+  if (worldId && worldId.startsWith('custom-')) {
+    const saved = _getSavedWorlds().find(w => w.id === worldId);
+    if (saved) {
+      window._pendingWorldConfig = saved;
+    } else {
+      // Check community cache (someone else's published world)
+      const community = _communityWorldsCache.find(w => w.id === worldId);
+      if (community && community.config) {
+        const cfg = community.config;
+        cfg.id = community.id;
+        cfg.name = community.name;
+        cfg.tagline = community.tagline;
+        window._pendingWorldConfig = cfg;
+      }
+    }
+  }
   if (typeof loadSystem === 'function') loadSystem(worldId);
   if (typeof gState !== 'undefined' && gState) {
     gState.system = worldId;
@@ -503,6 +772,8 @@ function hubBoot() {
     animateLanding(true);
     initTilt();
     initHubParticles();
+    // Start prefetching community worlds so they're ready when user clicks "Enter a World"
+    prefetchWorldLibrary();
   } else {
     routeFromHash();
   }

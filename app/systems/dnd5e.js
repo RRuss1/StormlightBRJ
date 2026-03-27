@@ -18,7 +18,7 @@ window.DnD5eSystem = {
   // ── Theme tokens ──────────────────────────────────────────────────────
   theme: {
     primary: '#9B2335',      // Crimson
-    secondary: '#C4972F',    // Candlelight gold
+    secondary: '#C0C0C0',    // Silver
     danger: '#6B2737',       // Blood red
     bgTone: 'dark',
     titleFont: 'Cinzel',
