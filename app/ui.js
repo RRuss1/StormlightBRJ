@@ -117,56 +117,76 @@ function buildActs(seed){
 function getAct(m){return ACTS.find(a=>m>=a.start&&m<=a.end)||ACTS[0];}
 function getSprenStage(m){if(m<20)return 0;if(m<50)return 1;if(m<90)return 2;if(m<140)return 3;return 4;}
 
-// ══ JWT / SHEETS AUTH ══
-async function tok(){if(_tok&&Date.now()<_tokExp)return _tok;_tok=await getAT();_tokExp=Date.now()+3500000;return _tok;}
-async function getAT(){
-  const h={alg:'RS256',typ:'JWT'},now=Math.floor(Date.now()/1000);
-  const cl={iss:SA.client_email,scope:'https://www.googleapis.com/auth/spreadsheets',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600};
-  const b64=s=>btoa(unescape(encodeURIComponent(typeof s==='string'?s:JSON.stringify(s)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  const u=b64(h)+'.'+b64(cl);
-  const pem=SA.private_key.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g,'');
-  const der=Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
-  const key=await crypto.subtle.importKey('pkcs8',der,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(u));
-  const jwt=u+'.'+btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`});
-  return(await r.json()).access_token;
+// ══ DATABASE API (Neon via Worker) ══
+// All persistence goes through PROXY_URL/db/* routes
+async function _dbFetch(path, opts = {}) {
+  const res = await fetch(PROXY_URL + '/db' + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  return res.json();
 }
-function stateSheet(){return(campaignId||'Campaign1')+'_State';}
-function logSheet(){return(campaignId||'Campaign1')+'_Log';}
-async function sGet(range){const t=await tok();const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`,{headers:{Authorization:`Bearer ${t}`}});return(await r.json()).values||[];}
-async function sSet(range,values){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range,majorDimension:'ROWS',values})});}
-async function sApp(range,values){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({range,majorDimension:'ROWS',values})});}
-async function loadState(){try{const v=await sGet(stateSheet()+'!A1');if(v.length&&v[0][0])return JSON.parse(v[0][0]);}catch(e){}return null;}
-async function saveState(s){await sSet(stateSheet()+'!A1',[[JSON.stringify(s)]]);}
-async function loadLog(waitForGM){
-  const attempts=waitForGM?6:1;
-  for(let i=0;i<attempts;i++){
-    try{
-      const rows=await sGet(logSheet()+'!A:E');
-      const entries=rows.map(r=>{
-        let choices=[];try{if(r[3]&&r[3].trim().startsWith('['))choices=JSON.parse(r[3]);}catch(e){}
-        return{type:r[0]||'',who:r[1]||'',text:r[2]||'',choices,ts:r[4]||''};
-      }).filter(e=>e.type&&e.type.trim()!=='');
-      if(!waitForGM||entries.some(e=>e.type==='gm'))return entries;
-    }catch(e){if(i===attempts-1)return[];}
-    await new Promise(r=>setTimeout(r,1500));
+async function loadState() {
+  if (!campaignId) return null;
+  try { return await _dbFetch('/state/' + encodeURIComponent(campaignId)); } catch(e) { return null; }
+}
+async function saveState(s) {
+  if (!campaignId) return;
+  await _dbFetch('/state/' + encodeURIComponent(campaignId), {
+    method: 'PUT', body: JSON.stringify({ gState: s }),
+  });
+}
+async function loadLog(waitForGM) {
+  if (!campaignId) return [];
+  const attempts = waitForGM ? 6 : 1;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const rows = await _dbFetch('/log/' + encodeURIComponent(campaignId));
+      const entries = (Array.isArray(rows) ? rows : []).map(r => ({
+        type: r.type || '', who: r.who || '', text: r.text || '',
+        choices: (typeof r.choices === 'string' ? JSON.parse(r.choices) : r.choices) || [],
+        ts: r.ts || '',
+      })).filter(e => e.type && e.type.trim() !== '');
+      if (!waitForGM || entries.some(e => e.type === 'gm')) return entries;
+    } catch(e) { if (i === attempts - 1) return []; }
+    await new Promise(r => setTimeout(r, 1500));
   }
-  return[];
+  return [];
 }
-async function addLog(e){await sApp(logSheet()+'!A:E',[[e.type,e.who||'',e.text,JSON.stringify(e.choices||[]),new Date().toISOString()]]);}
-
-// ══ SHEET MANAGEMENT ══
-async function getSheetNames(){const t=await tok();const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();return(info.sheets||[]).map(s=>s.properties.title);}
-async function createSheet(title){const t=await tok();await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{addSheet:{properties:{title}}}]})});}
-async function deleteSheet(title){const t=await tok();const info=await(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`,{headers:{Authorization:`Bearer ${t}`}})).json();const sh=(info.sheets||[]).find(s=>s.properties.title===title);if(!sh)return;await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`,{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteSheet:{sheetId:sh.properties.sheetId}}]})});}
-async function ensureSheets(){const names=await getSheetNames();const sn=stateSheet(),ln=logSheet();if(!names.includes(sn))await createSheet(sn);if(!names.includes(ln))await createSheet(ln);if(!await loadState())await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:campaignId});}
-async function listCampaigns(){
-  const names=await getSheetNames();
-  const ids=[...new Set(names.filter(n=>n.endsWith('_State')).map(n=>n.replace('_State','')))];
-  const camps=[];
-  for(const id of ids){try{const v=await sGet(id+'_State!A1');const st=v.length&&v[0][0]?JSON.parse(v[0][0]):null;camps.push({id,state:st});}catch(e){camps.push({id,state:null});}}
+async function addLog(e) {
+  if (!campaignId) return;
+  await _dbFetch('/log/' + encodeURIComponent(campaignId), {
+    method: 'POST',
+    body: JSON.stringify({ type: e.type, who: e.who || '', text: e.text, choices: e.choices || [] }),
+  });
+}
+async function listCampaigns() {
+  const worldId = (window.SystemData && window.SystemData.id) || '';
+  const rows = await _dbFetch('/campaigns' + (worldId ? '?world=' + encodeURIComponent(worldId) : ''));
+  // Map to the shape the UI expects: [{id, state}]
+  const camps = [];
+  for (const row of (Array.isArray(rows) ? rows : [])) {
+    try {
+      const st = await _dbFetch('/state/' + encodeURIComponent(row.id));
+      camps.push({ id: row.id, name: row.name, state: (st && Object.keys(st).length) ? st : null });
+    } catch(e) { camps.push({ id: row.id, name: row.name, state: null }); }
+  }
   return camps;
+}
+async function createCampaign(name, sys, worldId, sz) {
+  return _dbFetch('/campaigns', {
+    method: 'POST',
+    body: JSON.stringify({ name, system: sys, worldId, partySize: sz || partySize }),
+  });
+}
+async function deleteCampaign(id) {
+  return _dbFetch('/campaigns/' + encodeURIComponent(id), { method: 'DELETE' });
+}
+async function ensureSheets() {
+  // Legacy compat stub — with Neon, the campaign row + empty state are created by createCampaign
+  if (!await loadState()) {
+    await saveState({ players: new Array(partySize).fill(null), turn: 0, totalMoves: 0, phase: 'pregame', partySize, campaignId, campaignName: campaignId });
+  }
 }
 
 // ══ FULL THEME DEFAULTS (must be before showScreen) ══
@@ -317,7 +337,7 @@ function _applyFullTheme(sys) {
 // ══ CAMPAIGN PICKER ══
 async function initCampaignPicker(){
   document.getElementById('camp-status').textContent='Connecting...';
-  try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
+  try{const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
   catch(e){document.getElementById('camp-status').textContent='Could not connect: '+e.message;}
 }
 function renderCampaigns(camps){
@@ -373,18 +393,16 @@ async function confirmNewCampaign(){
   await launchNewCampaign(pendingCampNum||1,name);
 }
 async function launchNewCampaign(num,name){
-  const slug=name.replace(/[^a-zA-Z0-9]/g,'').substring(0,16)||'Campaign';
-  const suffix=Math.random().toString(36).substring(2,6);
-  campaignId='Campaign_'+slug+'_'+suffix;
   document.getElementById('new-camp-modal').style.display='none';
   const status=document.getElementById('camp-status');
   if(status)status.textContent='Creating "'+name+'"...';
+  const sysId = window.SystemData?.id || 'stormlight';
   try{
-    await ensureSheets();gState=await loadState();
-    partySize=3;gState.partySize=3;gState.campaignName=name;
-    // Tag campaign with active world
-    gState.system = window.SystemData?.id || 'stormlight';
-    gState.worldId = gState.system;
+    const result = await createCampaign(name, sysId, sysId, 3);
+    campaignId = result.id;
+    gState = {players:new Array(3).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize:3,campaignId,campaignName:name,system:sysId,worldId:sysId};
+    partySize=3;
+    await saveState(gState);
     myChar=null;clearMyChar();
     await saveState(gState);
     _ownCampaign(campaignId);
@@ -477,7 +495,7 @@ async function deleteCampaign(id){
     return;
   }
   if(!confirm('Delete "'+id+'" permanently? This cannot be undone.'))return;
-  try{await deleteSheet(id+'_State');await deleteSheet(id+'_Log');_disownCampaign(id);initCampaignPicker();}
+  try{await deleteCampaign(id);_disownCampaign(id);initCampaignPicker();}
   catch(e){alert('Delete failed: '+e.message);}
 }
 
@@ -552,7 +570,6 @@ async function onEnter(){
   if(enterBtn){enterBtn.disabled=true;enterBtn.style.opacity='0.6';}
   setTitleStatus('Connecting...');
   try{
-    await ensureSheets();
     gState=await loadState();
     if(gState){partySize=gState.partySize||partySize;if(gState.locationSeed)buildActs(gState.locationSeed);}
     myChar=loadMyChar();
@@ -3289,7 +3306,7 @@ if(typeof loadVoicePreference==='undefined'){
   }
   // Game boot — show campaign picker
   showScreen('campaign');
-  try{await tok();const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
+  try{const camps=await listCampaigns();renderCampaigns(camps);document.getElementById('camp-status').textContent='';}
   catch(e){document.getElementById('camp-status').textContent='Connecting... '+e.message;}
 })();
 async function applyThaiToElement(el){

@@ -497,36 +497,18 @@ document.addEventListener('click', e => {
   }
 });
 
-/* ── PUBLISH WORLD TO SHEET ── */
+/* ── PUBLISH WORLD TO DATABASE ── */
 async function _publishWorldToSheet(cfg) {
-  // Uses the same tok()/SHEET_ID from ui.js (global scope)
-  if (typeof tok !== 'function' || typeof SHEET_ID === 'undefined') {
-    console.warn('Sheet API not available — world saved locally only');
-    return;
-  }
   try {
-    const t = await tok();
-    // Ensure WorldLibrary tab exists
-    const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`, {headers:{Authorization:`Bearer ${t}`}})).json();
-    const hasTab = (info.sheets||[]).some(s => s.properties.title === 'WorldLibrary');
-    if (!hasTab) {
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
-        method:'POST', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-        body:JSON.stringify({requests:[{addSheet:{properties:{title:'WorldLibrary'}}}]})
-      });
-      // Add headers
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A1:J1?valueInputOption=RAW`, {
-        method:'PUT', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-        body:JSON.stringify({values:[['worldId','tier','name','tagline','author','system','config','rating','plays','published']]})
-      });
-    }
-    // Append the world row
-    const row = [cfg.id, 'community', cfg.name||'', cfg.tagline||'', 'Player', 'custom', JSON.stringify(cfg), '0', '0', 'true'];
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A:J:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
-      method:'POST', headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},
-      body:JSON.stringify({values:[row]})
+    await fetch(PROXY_URL + '/db/worlds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        worldId: cfg.id, name: cfg.name || '', tagline: cfg.tagline || '',
+        author: 'Player', system: 'custom', config: cfg,
+      }),
     });
-    console.log('World published to WorldLibrary sheet');
+    console.log('World published to database');
   } catch(e) { console.warn('Publish failed:', e); }
 }
 
@@ -565,42 +547,28 @@ let _communityFetchedAt = 0;
 const _COMMUNITY_CACHE_MS = 60000; // 60s
 
 async function _fetchCommunityWorlds() {
-  if (typeof tok !== 'function' || typeof SHEET_ID === 'undefined') return [];
   const now = Date.now();
   if (_communityWorldsCache.length && (now - _communityFetchedAt) < _COMMUNITY_CACHE_MS) return _communityWorldsCache;
   try {
-    const t = await tok();
-    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/WorldLibrary!A2:J100`, {
-      headers: { Authorization: `Bearer ${t}` }
-    });
-    if (!res.ok) {
-      // WorldLibrary tab doesn't exist yet — not an error, just no community worlds
-      console.log('WorldLibrary tab not found — no community worlds to load');
-      _communityFetchedAt = Date.now(); // cache the "empty" result so we don't retry immediately
-      return [];
-    }
-    const data = await res.json();
-    const rows = data.values || [];
-    _communityWorldsCache = rows.map(r => {
-      let config = {};
-      try { config = JSON.parse(r[6] || '{}'); } catch(e) {}
-      return {
-        id:        r[0] || '',
-        tier:      r[1] || 'community',
-        name:      r[2] || 'Unnamed',
-        tagline:   r[3] || '',
-        author:    r[4] || 'Unknown',
-        system:    r[5] || 'custom',
-        config,
-        rating:    parseFloat(r[7]) || 0,
-        plays:     parseInt(r[8]) || 0,
-        published: r[9] === 'true',
-      };
-    }).filter(w => w.published && w.id);
+    const res = await fetch(PROXY_URL + '/db/worlds');
+    if (!res.ok) { _communityFetchedAt = now; return []; }
+    const rows = await res.json();
+    _communityWorldsCache = (Array.isArray(rows) ? rows : []).map(r => ({
+      id:      r.world_id || '',
+      tier:    r.tier || 'community',
+      name:    r.name || 'Unnamed',
+      tagline: r.tagline || '',
+      author:  r.author || 'Unknown',
+      system:  r.system || 'custom',
+      config:  (typeof r.config === 'string' ? JSON.parse(r.config) : r.config) || {},
+      rating:  parseFloat(r.rating) || 0,
+      plays:   parseInt(r.plays) || 0,
+      published: true,
+    })).filter(w => w.id);
     _communityFetchedAt = now;
     return _communityWorldsCache;
   } catch(e) {
-    console.warn('WorldLibrary fetch failed:', e);
+    console.warn('World library fetch failed:', e);
     return _communityWorldsCache;
   }
 }

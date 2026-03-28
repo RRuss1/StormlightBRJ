@@ -1041,7 +1041,6 @@ window.addEventListener('load', () => {
 
   // Load campaigns
   try {
-    await tok();
     const camps = await listCampaigns();
     renderCampaigns(camps);
     document.getElementById('camp-status').textContent = '';

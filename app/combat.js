@@ -441,8 +441,6 @@ async function onReset(){
   try{
     clearMyChar();
     await saveState({players:new Array(partySize).fill(null),turn:0,totalMoves:0,phase:'pregame',partySize,campaignId,campaignName:gState&&gState.campaignName||campaignId});
-    const t=await tok();
-    await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/'+encodeURIComponent(logSheet()+'!A:E')+'?valueInputOption=RAW',{method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({range:logSheet()+'!A:E',majorDimension:'ROWS',values:[['','','','','']]})});
     gState=null;myChar=null;renderPSZ();showScreen('title');
   }catch(e){alert('Reset failed: '+e.message);}
 }

@@ -13,16 +13,8 @@
 
 // ── ENV CONFIG ────────────────────────────────────────────────
 // These are read at startup. Override via env.js or window.CYOA_CONFIG.
-const SHEET_ID  = window.CYOA_CONFIG?.sheetId  || '1f2lS_y0e4eZHYBX68QHJHG-8mmI9680nBNf1fG3ZdEw';
 const PROXY_URL = window.CYOA_CONFIG?.apiUrl   || 'https://cyoahub-proxy.rruss7997.workers.dev';
 const WS_URL    = window.CYOA_CONFIG?.wsUrl    || 'wss://cyoahub-proxy.rruss7997.workers.dev/session';
-
-
-// ── SERVICE ACCOUNT (Google Sheets Auth) ────────────────────
-const SA={
-  client_email:'stormlightbrj@stormlight-rpg.iam.gserviceaccount.com',
-  private_key:`-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQClSJ0lSZVQAxUD\n44VpcHcNd2X71dz9syJ4FS3U1XOwHr4Dz4FiHThqEnm+cvjaBNaqcu4CgMOlEXt5\nsOYVy8JLvcICyhxEfh/jubSMGPUESOhGlV1T5Shmbtz2bNh7moqAeeFBiYLU5V9t\nVWO8GcMKU1KOinCrspkXq9jVCo8qLbuLC9ux6kJgZi2K2agkXaxUxKrQauZfn1YI\nBiM7SGOvdhzRlDswRhLP3xhoh0rOGXSzWzfo2/MphDfxUS9L4M6FBW3FVhHlvGNO\nDFY+gWIVD/uHlbsA1CXtjw7KdUzHtP+/QUCIyL6j6tdIsa8o9gMmW4V5m1EDg4jv\nHbwz+b+9AgMBAAECggEAGBs/pD0XtGxGp+MKxcab7pBgBPt7uFrkp5v7K8QYE/Nf\n5mFg7wTxAfOA4yiUqAO1pXWOxjmuj0g9+JE29a3awD5EajC9L7Yvg4DF1vsa3U2e\n5xCI5KATJOF9g8l7R4fSNIvSMUNTnCZ6JRGjsr8VJc/iRhzl8vzg/EVZojTgjZeS\n78GVpXHS408RuX19rsV3LEe/zeuz9SeVLc9jegbpjJk/XAb7Ipkkz6WMhvdahcya\nqheGY/SsoLhaHlensZdwDqij/DOgPMiDbbsVIUWKwegg+BnvcaLlehkn5Gl1Is6P\nSccIXiHBGB8i0g8DLA70xS6+TuEhA7fLzL1ZLlutJwKBgQDT6jZFGa2N88wNczOR\neTis8m3twI6LTSZQSdXX0nm7dd15qBaC/Ru5CuEhess+Vpv96nVmDAPyT+XBuWjl\nk6Q8810S7n/U5tk39MIBvouU+nOR/7KlIG5CxNbAILIRkVJ9W9RyYYkOIUaJ6eCM\nzsBfyei7bQtjgG46HIQSorXcnwKBgQDHqv9pYpe6ulpGbgsNwZ/ZpB5b9SiRhlGy\nZhlxA6O5C0gM0ymC3EoCi3C5Adnzm8pRNCgGxZu2u4QcuDpm5+tR8ddrz2Nsbgce\nfJbdWUFCi90U7qrQd8pAY46zdQFWqEkJY8BPHqloOlKymlGQL289BY1pR+MTpBWT\nQ6UdLoWqIwKBgQDQCbQxbh31p4uBAMF1ZP4Auxa0Oz80/g5I79NhRx1+rR06G4vO\nGFEo/cc6KORyVHBbe9q4zb7qGQnDfxO9nY200G1k8oLILcC9sCjtsXQyUxU2FUH5\n3bahEcCJaQ+nM3U53/bWO25jUsN/DP0G/snYv80cgtaVXjXYErqN2PKUnQKBgF8y\nCeAm34xpeM0HfkGqxRmxA8B4HEV1stHJl+un/pEk7c8fhjUb7jVUYgPy/AUHi+g3\nY7YG1PzEXnKK611QyYMiOMDv+ckilEZWxF74RQMDR/7I46vM0SLt1IV/DYpRZbES\nXAfc6IwG8pKwvJ5v3ytK0GcXnQ4qNxclMz28hoHdAoGAIDDnRLlZVgBdk6oijZI+\nb7jokuI9quDtomUCCHZyB+3mMq6hf9zOfKt+GsZz0Q512ezC4vbq0j5GCVT8uMRM\nYsOgyVkloyM8TeZNLE9LNVkX8MRL9gVstaBdMkqaq/Lkvn5wCuRBO69ZD5vrZPvF\n2uxw+l3wHWPcAIiPAXybsCM=\n-----END PRIVATE KEY-----\n`
-};
 
 // ══ SYSTEM LOADER + DATA ALIASES ══
 // No default system loaded at startup — loadSystem() must be called

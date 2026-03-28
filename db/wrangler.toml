@@ -1,0 +1,25 @@
+# ============================================================
+# CYOAhub Cloudflare Worker — wrangler.toml
+# ============================================================
+# Deploy: wrangler deploy
+# Secrets: wrangler secret put ANTHROPIC_KEY
+#          wrangler secret put DATABASE_URL
+# ============================================================
+
+name = "cyoahub-proxy"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Durable Objects for WebSocket sessions
+[durable_objects]
+bindings = [
+  { name = "GAME_SESSIONS", class_name = "GameSession" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["GameSession"]
+
+# Secrets (set via CLI, never in this file):
+# ANTHROPIC_KEY  — Anthropic API key
+# DATABASE_URL   — Neon Postgres connection string
