@@ -705,6 +705,8 @@ function openContribute() {
 
 /* ── PICK WORLD ── */
 function pickWorld(worldId) {
+  // Persist active world so page refresh can restore it
+  if (worldId) localStorage.setItem('cyoa_active_world', worldId);
   // For custom worlds, load config from local storage or community cache
   if (worldId && worldId.startsWith('custom-')) {
     const saved = _getSavedWorlds().find(w => w.id === worldId);
@@ -825,6 +827,30 @@ function hubBoot() {
     initTilt();
     initHubParticles();
     prefetchWorldLibrary();
+  } else if (hashBase === '#campaign' || hashBase === '#title' || hashBase === '#create' || hashBase === '#lobby' || hashBase === '#game' || hashBase === '#combat') {
+    // Restore active world on refresh (game screens need a system loaded)
+    const savedWorld = localStorage.getItem('cyoa_active_world');
+    if (savedWorld && typeof loadSystem === 'function') {
+      // For custom worlds, try to restore config from localStorage
+      if (savedWorld.startsWith('custom-')) {
+        const saved = _getSavedWorlds().find(w => w.id === savedWorld);
+        if (saved) window._pendingWorldConfig = saved;
+      }
+      loadSystem(savedWorld);
+      // Re-apply screen titles from loaded system
+      const sys = window.SystemData || {};
+      const campTitle = document.getElementById('camp-title');
+      if (campTitle) campTitle.textContent = sys.name || 'Choose Your Campaign';
+      const campGlyph = document.getElementById('camp-glyph');
+      if (campGlyph) campGlyph.textContent = sys.glyph || '⟁';
+    }
+    // Show the appropriate screen
+    if (hashBase === '#campaign') {
+      showScreen('campaign');
+      if (typeof initCampaignPicker === 'function') initCampaignPicker();
+    } else {
+      routeFromHash();
+    }
   } else {
     routeFromHash();
   }
