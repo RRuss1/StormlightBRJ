@@ -58,6 +58,27 @@ async function authLogin(username, password){
   return data;
 }
 
+async function authGoogle(credential){
+  const data = await _json('/db/auth/google','POST',{ credential });
+  if(data.token){ localStorage.setItem(TOKEN_KEY, data.token); _currentUser = data.user; }
+  return data;
+}
+
+function _initGoogleButton(){
+  if(!window.google || !window.google.accounts || !window.GOOGLE_CLIENT_ID) return;
+  // Google will call this globally when user picks an account
+  window._handleGoogleCredential = async function(response){
+    const errEl = document.querySelector('#auth-modal .auth-error');
+    try {
+      const data = await authGoogle(response.credential);
+      if(data.error){ if(errEl) errEl.textContent = data.error; return; }
+      _claimBrowserOwnership();
+      hideAuthModal();
+      renderAuthUI();
+    } catch(e){ if(errEl) errEl.textContent = 'Google sign-in failed.'; }
+  };
+}
+
 async function authGetMe(){
   const data = await _json('/db/auth/me','GET');
   _currentUser = data.user || data;
@@ -266,6 +287,12 @@ function _injectModal(){
   <button class="auth-close" onclick="Auth.hideModal()">&times;</button>
   <div id="auth-view-login">
     <h2>Sign In</h2>
+    <div id="auth-google-btn-wrap" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin:10px 0 14px;">
+      <div style="flex:1;height:1px;background:rgba(40,168,160,0.15);"></div>
+      <span style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-d,monospace);letter-spacing:2px;">OR</span>
+      <div style="flex:1;height:1px;background:rgba(40,168,160,0.15);"></div>
+    </div>
     <label>Username or Email</label>
     <input type="text" id="auth-login-user" autocomplete="username" />
     <label>Password</label>
@@ -279,7 +306,7 @@ function _injectModal(){
     <h2>Create Account</h2>
     <label>Username</label>
     <input type="text" id="auth-reg-user" autocomplete="username" />
-    <label>Email <span style="opacity:0.5;font-size:11px;">(optional)</span></label>
+    <label>Email</label>
     <input type="email" id="auth-reg-email" autocomplete="email" />
     <label>Display Name</label>
     <input type="text" id="auth-reg-display" autocomplete="name" />
@@ -319,6 +346,32 @@ function showAuthModal(view){
   _injectModal();
   _showView(view||'login');
   document.getElementById('auth-modal').hidden = false;
+  // Render Google Sign-In button (only once)
+  _renderGoogleButton();
+}
+
+function _renderGoogleButton(){
+  const wrap = document.getElementById('auth-google-btn-wrap');
+  if(!wrap || wrap.dataset.rendered) return;
+  if(!window.google || !window.google.accounts || !window.GOOGLE_CLIENT_ID){
+    // GSI not loaded yet — retry after a short delay
+    setTimeout(_renderGoogleButton, 500);
+    return;
+  }
+  _initGoogleButton();
+  google.accounts.id.initialize({
+    client_id: window.GOOGLE_CLIENT_ID,
+    callback: window._handleGoogleCredential,
+  });
+  google.accounts.id.renderButton(wrap, {
+    type: 'standard',
+    theme: 'filled_black',
+    size: 'large',
+    text: 'signin_with',
+    shape: 'pill',
+    width: 280,
+  });
+  wrap.dataset.rendered = '1';
 }
 
 function hideAuthModal(){
@@ -382,7 +435,8 @@ async function _doRegister(){
   const pass2   = document.getElementById('auth-reg-pass2').value;
   const err     = document.getElementById('auth-reg-err');
   err.textContent = '';
-  if(!user||!pass){ err.textContent='Username and password are required.'; return; }
+  if(!user||!email||!pass){ err.textContent='Username, email, and password are required.'; return; }
+  if(!/\S+@\S+\.\S+/.test(email)){ err.textContent='Enter a valid email address.'; return; }
   if(pass.length<6){ err.textContent='Password must be at least 6 characters.'; return; }
   if(pass!==pass2){ err.textContent='Passwords do not match.'; return; }
   const btn = document.getElementById('auth-reg-btn');
@@ -492,6 +546,7 @@ _injectStyles();
 window.Auth = {
   init:           initAuth,
   login:          authLogin,
+  loginGoogle:    authGoogle,
   register:       authRegister,
   logout:         logout,
   isLoggedIn:     isLoggedIn,

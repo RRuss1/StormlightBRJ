@@ -429,12 +429,10 @@ Physics: ${physics.toLowerCase()}. Death rules: ${deathRules.toLowerCase()}. Tim
   // Persist to localStorage
   _saveWorld(worldConfig);
 
-  // If publishing, also save to Google Sheet WorldLibrary
-  if (publish) {
-    try {
-      _publishWorldToSheet(worldConfig);
-    } catch(e) { console.warn('Publish to sheet failed:', e); }
-  }
+  // Always save to DB (private or published)
+  try {
+    _saveWorldToDb(worldConfig, publish);
+  } catch(e) { console.warn('DB save failed:', e); }
 
   // Re-render the worlds grid with the new card
   goTo('worlds');
@@ -497,19 +495,32 @@ document.addEventListener('click', e => {
   }
 });
 
-/* ── PUBLISH WORLD TO DATABASE ── */
-async function _publishWorldToSheet(cfg) {
+/* ── SAVE WORLD TO DATABASE ── */
+async function _saveWorldToDb(cfg, publish) {
+  const author = (window.Auth && window.Auth.getCurrentUser())
+    ? window.Auth.getCurrentUser().displayName || window.Auth.getCurrentUser().username
+    : 'Anonymous';
+  const headers = { 'Content-Type': 'application/json' };
+  // Attach auth token if logged in
+  if (window.Auth && window.Auth.isLoggedIn()) {
+    const tok = localStorage.getItem('cyoa_auth_token');
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+  }
   try {
     await fetch(PROXY_URL + '/db/worlds', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
-        worldId: cfg.id, name: cfg.name || '', tagline: cfg.tagline || '',
-        author: 'Player', system: 'custom', config: cfg,
+        worldId: cfg.id,
+        name: cfg.name || 'Custom World',
+        tagline: cfg.tagline || '',
+        author,
+        system: 'custom',
+        config: cfg,
+        published: !!publish,
       }),
     });
-    console.log('World published to database');
-  } catch(e) { console.warn('Publish failed:', e); }
+  } catch(e) { console.warn('World DB save failed:', e); }
 }
 
 /* ── WORLD OWNERSHIP & PERSISTENCE ── */
@@ -541,7 +552,7 @@ function deleteWorld(worldId) {
   renderWorldsGrid();
 }
 
-// ── WORLD LIBRARY CACHE (fetched from Google Sheet) ──
+// ── WORLD LIBRARY CACHE ──
 let _communityWorldsCache = [];
 let _communityFetchedAt = 0;
 const _COMMUNITY_CACHE_MS = 60000; // 60s
@@ -550,7 +561,11 @@ async function _fetchCommunityWorlds() {
   const now = Date.now();
   if (_communityWorldsCache.length && (now - _communityFetchedAt) < _COMMUNITY_CACHE_MS) return _communityWorldsCache;
   try {
-    const res = await fetch(PROXY_URL + '/db/worlds');
+    const headers = {};
+    // Send auth token so logged-in users see their private worlds too
+    const tok = localStorage.getItem('cyoa_auth_token');
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+    const res = await fetch(PROXY_URL + '/db/worlds', { headers });
     if (!res.ok) { _communityFetchedAt = now; return []; }
     const rows = await res.json();
     _communityWorldsCache = (Array.isArray(rows) ? rows : []).map(r => ({

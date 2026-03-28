@@ -379,25 +379,42 @@ export default {
 
     // ── WORLD LIBRARY ─────────────────────────────────────
 
-    // GET /db/worlds — list published worlds
+    // GET /db/worlds — list published worlds + user's own private worlds
     if (pathname === '/db/worlds' && method === 'GET') {
-      const rows = await sql`
-        SELECT world_id, tier, name, tagline, author, system, config, rating, plays, published
-        FROM world_library
-        WHERE published = true
-        ORDER BY tier DESC, plays DESC
-      `;
+      const authUser = await getAuthUser(request, env);
+      let rows;
+      if (authUser) {
+        // Logged in: show published worlds + own private worlds
+        rows = await sql`
+          SELECT world_id, tier, name, tagline, author, system, config, rating, plays, published, owner_id
+          FROM world_library
+          WHERE published = true OR owner_id = ${authUser.sub}
+          ORDER BY tier DESC, plays DESC
+        `;
+      } else {
+        rows = await sql`
+          SELECT world_id, tier, name, tagline, author, system, config, rating, plays, published
+          FROM world_library
+          WHERE published = true
+          ORDER BY tier DESC, plays DESC
+        `;
+      }
       return json(rows);
     }
 
-    // POST /db/worlds — publish a custom world
+    // POST /db/worlds — save a custom world (private or published)
     if (pathname === '/db/worlds' && method === 'POST') {
-      const { worldId, name, tagline, author, system, config } = await request.json();
+      const { worldId, name, tagline, author, system, config, published } = await request.json();
+      const isPublished = published === true;
+      // Get owner from auth token if present
+      const authUser = await getAuthUser(request, env);
+      const ownerId = authUser ? authUser.sub : null;
       await sql`
-        INSERT INTO world_library (world_id, tier, name, tagline, author, system, config, published)
-        VALUES (${worldId}, 'community', ${name}, ${tagline ?? ''}, ${author ?? 'Anonymous'}, ${system ?? 'custom'}, ${JSON.stringify(config ?? {})}, true)
+        INSERT INTO world_library (world_id, tier, name, tagline, author, system, config, published, owner_id)
+        VALUES (${worldId}, ${isPublished ? 'community' : 'private'}, ${name}, ${tagline ?? ''}, ${author ?? 'Anonymous'}, ${system ?? 'custom'}, ${JSON.stringify(config ?? {})}, ${isPublished}, ${ownerId})
         ON CONFLICT (world_id)
-        DO UPDATE SET name = EXCLUDED.name, tagline = EXCLUDED.tagline, config = EXCLUDED.config
+        DO UPDATE SET name = EXCLUDED.name, tagline = EXCLUDED.tagline, config = EXCLUDED.config,
+                      published = EXCLUDED.published, owner_id = COALESCE(EXCLUDED.owner_id, world_library.owner_id)
       `;
       return json({ ok: true, worldId });
     }
@@ -425,7 +442,7 @@ export default {
     // POST /db/auth/register — create account
     if (pathname === '/db/auth/register' && method === 'POST') {
       const { username, email, password, displayName } = await request.json();
-      if (!username || !password) return json({ error: 'Username and password required' }, 400);
+      if (!username || !email || !password) return json({ error: 'Username, email, and password required' }, 400);
       if (password.length < 6) return json({ error: 'Password must be at least 6 characters' }, 400);
       if (username.length < 2 || username.length > 24) return json({ error: 'Username must be 2-24 characters' }, 400);
 
@@ -514,6 +531,55 @@ export default {
       const hash = await hashPassword(newPassword);
       await sql`UPDATE users SET password_hash = ${hash} WHERE id = ${payload.sub}`;
       return json({ ok: true });
+    }
+
+    // POST /db/auth/google — verify Google ID token + create/login user
+    if (pathname === '/db/auth/google' && method === 'POST') {
+      const { credential } = await request.json();
+      if (!credential) return json({ error: 'Missing Google credential' }, 400);
+
+      // Verify the Google ID token via Google's tokeninfo endpoint
+      const gRes = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + credential);
+      if (!gRes.ok) return json({ error: 'Invalid Google token' }, 401);
+      const gData = await gRes.json();
+
+      const googleId = gData.sub;
+      const email = gData.email;
+      const name = gData.name || gData.email;
+      const avatar = gData.picture || '';
+
+      if (!googleId || !email) return json({ error: 'Google token missing required fields' }, 400);
+
+      // Check if user already exists (by Google provider_id OR matching email)
+      let [user] = await sql`SELECT id, username, display_name, email FROM users WHERE provider = 'google' AND provider_id = ${googleId}`;
+
+      if (!user) {
+        // Check if email matches an existing local account — link them
+        [user] = await sql`SELECT id, username, display_name, email FROM users WHERE email = ${email}`;
+        if (user) {
+          // Link Google to existing account
+          await sql`UPDATE users SET provider = 'google', provider_id = ${googleId}, avatar_url = ${avatar}, last_login = NOW() WHERE id = ${user.id}`;
+        } else {
+          // Create new user from Google
+          const id = crypto.randomUUID();
+          const username = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + Math.random().toString(36).slice(2, 6);
+          await sql`
+            INSERT INTO users (id, username, display_name, email, avatar_url, provider, provider_id, email_verified)
+            VALUES (${id}, ${username}, ${name}, ${email}, ${avatar}, 'google', ${googleId}, true)
+          `;
+          user = { id, username, display_name: name, email };
+        }
+      } else {
+        // Update last login + avatar
+        await sql`UPDATE users SET avatar_url = ${avatar}, last_login = NOW() WHERE id = ${user.id}`;
+      }
+
+      const token = await createJWT({ sub: user.id, username: user.username }, jwtSecret);
+      return json({
+        ok: true,
+        user: { id: user.id, username: user.username, displayName: user.display_name, email: user.email },
+        token,
+      });
     }
 
     // POST /db/auth/forgot-password — stub (needs email service to fully work)
