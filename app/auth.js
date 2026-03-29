@@ -114,20 +114,20 @@
   }
 
   async function authDeleteAccount() {
-    const data = await _json('/db/auth/delete-account', 'DELETE');
+    const data = await _json('/db/auth/account', 'DELETE');
     localStorage.removeItem(TOKEN_KEY);
     _currentUser = null;
     return data;
   }
 
   async function authUpdateProfile(displayName, avatarUrl) {
-    const data = await _json('/db/auth/profile', 'PATCH', { displayName, avatarUrl });
+    const data = await _json('/db/auth/profile', 'PUT', { displayName, avatarUrl });
     if (data.user) _currentUser = data.user;
     return data;
   }
 
   async function authClaimOwnership(campaignIds, worldIds) {
-    return _json('/db/auth/claim-ownership', 'POST', { campaignIds, worldIds });
+    return _json('/db/auth/claim', 'POST', { campaignIds, worldIds });
   }
 
   // ── SESSION ──────────────────────────────────────────────────
@@ -165,15 +165,15 @@
 
   // ── INVITE SYSTEM ────────────────────────────────────────────
   async function createInvite(campaignId, maxUses, expiresInHours) {
-    return _json('/db/auth/invites', 'POST', { campaignId, maxUses, expiresInHours });
+    return _json('/db/invite/create', 'POST', { campaignId, maxUses, expiresInHours });
   }
 
   async function validateInvite(token) {
-    return _json('/db/auth/invites/' + encodeURIComponent(token), 'GET');
+    return _json('/db/invite/' + encodeURIComponent(token), 'GET');
   }
 
   async function joinViaInvite(token, displayName) {
-    return _json('/db/auth/invites/' + encodeURIComponent(token) + '/join', 'POST', { displayName });
+    return _json('/db/invite/' + encodeURIComponent(token) + '/join', 'POST', { displayName });
   }
 
   // ── INJECT CSS ───────────────────────────────────────────────
@@ -637,4 +637,23 @@
     validateInvite: validateInvite,
     joinViaInvite: joinViaInvite,
   };
+
+  // Self-init: check token and render badge immediately on script load
+  // Uses sync check first (show pill from cached token), then async validate
+  _injectStyles();
+  if (_token()) {
+    // Optimistic render — show pill immediately from token presence
+    _currentUser = { displayName: '...' };
+    setTimeout(function () {
+      _ensureAuthSlots();
+      renderAuthUI();
+    }, 0);
+    // Then validate async — update with real name or clear if expired
+    initAuth();
+  } else {
+    setTimeout(function () {
+      _ensureAuthSlots();
+      renderAuthUI();
+    }, 0);
+  }
 })();
