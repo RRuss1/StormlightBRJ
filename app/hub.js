@@ -5,7 +5,7 @@
 // ── ALIAS — goTo delegates to the main app's showScreen ──
 const goTo = (id) => {
   // Wizard requires login
-  if (id === 'wizard' && (!window.Auth || !window.Auth.isLoggedIn())) {
+  if (id === 'wizard' && !localStorage.getItem('cyoa_auth_token')) {
     if (window.Auth) window.Auth.showModal('login');
     return;
   }
@@ -903,7 +903,7 @@ function openContribute() {
 /* ── PICK WORLD ── */
 function pickWorld(worldId) {
   // Require login to play
-  if (!window.Auth || !window.Auth.isLoggedIn()) {
+  if (!localStorage.getItem('cyoa_auth_token')) {
     if (window.Auth) window.Auth.showModal('login');
     return;
   }
@@ -1087,8 +1087,9 @@ function routeFromHash() {
 
   // Game screens — require login + world loaded
   if (GAME_SCREENS.includes(screen)) {
-    if (screen !== 'join' && (!window.Auth || !window.Auth.isLoggedIn())) {
-      // Not logged in — show landing with auth modal
+    // Check login — use token presence (sync) not validation (async) to avoid race
+    const _hasToken = !!localStorage.getItem('cyoa_auth_token');
+    if (screen !== 'join' && !_hasToken) {
       showScreen('landing');
       animateLanding(false);
       if (window.Auth) window.Auth.showModal('login');

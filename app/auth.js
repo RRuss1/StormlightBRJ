@@ -101,7 +101,15 @@
 
   async function authGetMe() {
     const data = await _json('/db/auth/me', 'GET');
-    _currentUser = data.user || data;
+    const u = data.user || data;
+    // Map snake_case DB fields to camelCase
+    _currentUser = {
+      id: u.id,
+      username: u.username,
+      displayName: u.display_name || u.displayName || u.username,
+      email: u.email,
+      avatarUrl: u.avatar_url || u.avatarUrl || '',
+    };
     return _currentUser;
   }
 
