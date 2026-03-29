@@ -30,6 +30,7 @@ const CARD_IMAGES = [
   'GameCardImgs/Stormlight.png',
   'GameCardImgs/Unicorns.png',
   'GameCardImgs/cosmic face.png',
+  'GameCardImgs/starduster.jpg',
 ];
 let _selectedCardImage = CARD_IMAGES[0]; // default selection
 
