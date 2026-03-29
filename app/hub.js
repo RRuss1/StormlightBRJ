@@ -394,24 +394,57 @@ document.addEventListener('input', (e) => {
   if (e.target.type === 'color') {
     const hex = document.getElementById(e.target.id + '-hex');
     if (hex) hex.value = e.target.value;
-    if (e.target.id === 'cp') updatePreview();
+    updatePreview(); // refresh preview on any color change
   }
 });
 
 function updatePreview() {
-  const p = document.getElementById('cp').value;
+  const pri = document.getElementById('cp')?.value || '#C9A84C';
+  const sec = document.getElementById('cp-secondary')?.value || '#28A87A';
+  const bg = document.getElementById('cp-bg')?.value || '#0F0D08';
+  const surface = document.getElementById('cp-surface')?.value || '#141109';
+  const text = document.getElementById('cp-text')?.value || '#F8F3E8';
+  const muted = document.getElementById('cp-muted')?.value || '#A07830';
+  const danger = document.getElementById('cp-danger')?.value || '#B03828';
   const n = document.getElementById('wiz-name')?.value || 'Your World Name';
+
+  // Title preview
   const pt = document.getElementById('prev-title');
   const pc = document.getElementById('prev-crit');
-  if (pt) {
-    pt.style.color = p;
-    pt.textContent = n || 'Your World Name';
-  }
-  if (pc) {
-    pc.style.color = p;
-    pc.style.borderColor = p + '44';
-    pc.style.background = p + '18';
-  }
+  if (pt) { pt.style.color = pri; pt.textContent = n || 'Your World Name'; }
+  if (pc) { pc.style.color = pri; pc.style.borderColor = pri + '44'; pc.style.background = pri + '18'; }
+
+  // ── In-game preview ──
+  // Derive bg3 (slightly lighter than bg)
+  const _hex = (h) => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return [r,g,b]; };
+  const _toHex = (r,g,b) => '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+  const _lighten = (hex, amt) => { const [r,g,b] = _hex(hex); return _toHex(r+amt,g+amt,b+amt); };
+  const bg3 = _lighten(bg, 20);
+  const bg4 = _lighten(bg, 30);
+
+  // Party pip
+  const pip = document.getElementById('prev-pip');
+  if (pip) { pip.style.background = `linear-gradient(145deg, ${bg3}, ${surface})`; pip.style.borderColor = pri + '40'; }
+  const pipDot = document.getElementById('prev-pip-dot');
+  if (pipDot) { pipDot.style.background = pri; pipDot.style.boxShadow = '0 0 8px ' + pri; }
+  const pipName = document.getElementById('prev-pip-name');
+  if (pipName) pipName.style.color = text;
+  const pipInfo = document.getElementById('prev-pip-info');
+  if (pipInfo) pipInfo.style.color = muted;
+
+  // Story text
+  const story = document.getElementById('prev-story');
+  if (story) { story.style.background = `linear-gradient(145deg, ${bg3}, ${surface})`; story.style.borderColor = pri + '20'; }
+  const storyText = document.getElementById('prev-story-text');
+  if (storyText) storyText.style.color = text;
+
+  // Action card
+  const action = document.getElementById('prev-action');
+  if (action) { action.style.background = bg4; action.style.borderColor = sec + '30'; }
+  const actionTag = document.getElementById('prev-action-tag');
+  if (actionTag) { actionTag.style.color = sec; actionTag.style.borderColor = sec + '40'; actionTag.style.background = sec + '15'; }
+  const actionText = document.getElementById('prev-action-text');
+  if (actionText) actionText.style.color = text;
 }
 
 function finishWizard(publish) {

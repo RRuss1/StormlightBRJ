@@ -47,7 +47,7 @@ window.WretchedDeepSystem = {
     errorFlavor: 'The shadows shift — something went wrong in the deep.',
     worldLore: 'The Wretched Deep — a fractured underworld of tunnels, flooded caverns, and forgotten cities built atop one another for millennia. At its heart lies the Hollow Crown, an artifact of immense power that whispers to all who draw near. Those who touch it gain terrible abilities but lose themselves piece by piece. The surface world has forgotten this place exists. Down here, factions war over fragments of the Crown while the darkness itself seems alive, watching, waiting. Every shadow has eyes. Every whisper has a voice. Trust is the first thing the Deep devours.',
     toneInstruction: 'Dark, paranoid, obsessive. Fragmented prose — short jagged sentences mixed with run-on whispered thoughts. The narrator is unreliable, sometimes addressing the player in second person, sometimes slipping into "we" as if the darkness speaks through them. Gritty survival horror meets psychological corruption. No heroes — only survivors. Every victory costs something.',
-    magicRules: 'The Corruption is fueled by Obsession — the more you fixate on something (power, revenge, the Crown, a person), the stronger your abilities become. But high Obsession warps your body and mind. At Obsession 5+, the GM describes physical changes. At 8+, you hear voices. At 10, you become an NPC — consumed. Obsession drops slowly through rest, connection with allies, or acts of selflessness.',
+    magicRules: 'The Corruption tracker (0-10) measures how deeply the Crown has sunk its hooks into you. Using Crown abilities, touching artifacts, and taking [CORRUPTION] actions raises it. Rest, selfless acts, and ally bonds lower it. At 4+, your body visibly warps (dark veins, odd growths). At 7+, the Crown whispers directly to you — others cannot hear. At 10, the Crown seizes control for one turn — it chooses your action, something dark and costly. Then Corruption drops by a third. You survive, but the consequences remain. The Obsession stat determines how powerful your Crown abilities are — high Obsession means devastating attacks but faster Corruption buildup.',
     npcFlavor: 'Names are guttural, broken — Skrave, Moltch, Drenna, Wyst. Many NPCs have forgotten their real names and go by descriptions: The Weeper, Cracked-Tooth, Old Fingers. Dialogue is clipped, suspicious, paranoid. Nobody makes eye contact. Deals are made in whispers.',
     choiceTagRules: '[COMBAT] [DISCOVERY] [DECISION] [CORRUPTION] — tag every player choice. Use [CORRUPTION] when a choice involves using the artifact or giving in to obsession.',
   },
@@ -61,8 +61,19 @@ window.WretchedDeepSystem = {
     hp: { base: 8, stat: 'will', perLevel: 4 },
     focus: { base: 2, stat: 'will' },
     magicPool: {
-      enabled: true, label: 'Obsession', formula: 'flat',
-      base: 0, stats: ['obsession'], classGated: false,
+      enabled: true, label: 'Corruption', formula: 'flat',
+      base: 0, stats: [], classGated: false,
+      maxPool: 10,
+      // Corruption tracker — separate from the Obsession stat
+      // Triggers: [CORRUPTION] actions +1, Crown enemy damage +1, Crown artifacts +2
+      // Decay: rest -1, selfless acts -1, ally connection -1
+      // Thresholds: 4=physical changes, 7=whispers, 10=Crown Seizure (1 turn, then drop by 1/3)
+      isCorruptionTracker: true,
+      thresholds: [
+        { at: 4, effect: 'physicalChange', desc: 'Dark veins become visible. Your body begins to warp.' },
+        { at: 7, effect: 'whispers', desc: 'The Crown speaks directly to you. Others cannot hear it.' },
+        { at: 10, effect: 'seizure', desc: 'The Crown takes control. One action — its choice, not yours.', dropFraction: 0.33 },
+      ],
     },
     recoveryDie: {
       stat: 'will',
@@ -303,10 +314,10 @@ window.WretchedDeepSystem = {
   },
 
   conditions: {
-    corrupted:{name:'Corrupted',desc:'Dark veins visible. Obsession rises by 1 each rest.'},
+    corrupted:{name:'Corrupted',desc:'Dark veins visible. Corruption rises by 1 each rest instead of falling.'},
     paranoid:{name:'Paranoid',desc:'Disadvantage on all social tests. Cannot benefit from allies\' help.'},
     hollow:{name:'Hollow',desc:'Cannot feel emotions. Immune to fear but cannot be healed by magic.'},
-    consumed:{name:'Consumed',desc:'Obsession at max. One more corruption effect and you become an NPC.'},
+    consumed:{name:'Crown Seizure',desc:'The Crown takes control for 1 turn. It chooses your action. Then Corruption drops by a third.'},
     blinded:{name:'Light-Blinded',desc:'Exposed to bright light. Disadvantage on attacks and perception.'},
     grasping:{name:'Grasping',desc:'Compelled to take the nearest valuable object. Will save to resist.'},
     drowning:{name:'Drowning',desc:'Suffocating. Lose HP each round. Only escape or air ends this.'},
@@ -327,11 +338,11 @@ window.WretchedDeepSystem = {
   adversaryRoles: {
     minion:{name:'Wretch',healthMult:0.5,threat:0.5,noCrit:true,rule:'Collapses on any critical hit — whimpering, not dead'},
     rival:{name:'Stalker',healthMult:1,threat:1,noCrit:false,rule:'Standard adversary — fights smart, retreats when losing'},
-    boss:{name:'Crown-Vessel',healthMult:2,threat:4,noCrit:false,rule:'Two turns per round. Corruption aura — nearby players gain 1 Obsession per round.'},
+    boss:{name:'Crown-Vessel',healthMult:2,threat:4,noCrit:false,rule:'Two turns per round. Corruption aura — nearby players gain 1 Corruption per round.'},
   },
 
-  combatOpps: ['Enemy flees into darkness','Stalactite falls on enemy position','Fungal gas disorients enemies','Water rises — changes terrain','Ancient trap activates in your favor','Crown fragment pulses — enemies flinch','Ally from the shadows helps','Enemy drops something valuable','Tunnel collapses behind enemies','Brief moment of clarity — Obsession drops by 1','Echo reveals hidden passage','Enemy turns on its allies'],
-  combatComps: ['Light source goes out','Water rises','Tunnel narrows — movement restricted','Crown whispers — all players test Will or gain Obsession','Reinforcements from the dark','Fungal spores — poison cloud','Floor gives way','Enemy was a distraction — the real threat is behind you','An ally hears the Crown and freezes','Equipment corrodes','The darkness moves','Someone screams — not one of yours'],
+  combatOpps: ['Enemy flees into darkness','Stalactite falls on enemy position','Fungal gas disorients enemies','Water rises — changes terrain','Ancient trap activates in your favor','Crown fragment pulses — enemies flinch','Ally from the shadows helps','Enemy drops something valuable','Tunnel collapses behind enemies','Brief moment of clarity — Corruption drops by 1','Echo reveals hidden passage','Enemy turns on its allies'],
+  combatComps: ['Light source goes out','Water rises','Tunnel narrows — movement restricted','Crown whispers — all players test Will or gain 1 Corruption','Reinforcements from the dark','Fungal spores — poison cloud','Floor gives way','Enemy was a distraction — the real threat is behind you','An ally hears the Crown and freezes','Equipment corrodes','The darkness moves','Someone screams — not one of yours'],
 
   // ══════════════════════════════════════════════════════════════════════
   // LORE & FLAVOR
@@ -439,7 +450,7 @@ window.WretchedDeepSystem = {
   envHazards: {
     shallows:{name:'Cave-In',desc:'The ceiling groans and drops rubble.',effect:'15% chance each round: random combatant takes 2 damage.',mechanic:'plateauCollapse'},
     drowned:{name:'Rising Water',desc:'Black water seeps from the walls, rising fast.',effect:'Players must spend movement or start drowning.',mechanic:'cognitiveDrain'},
-    crownhold:{name:'Crown Aura',desc:'The Crown fragment pulses with corruption.',effect:'Each round all players gain 1 Obsession unless they resist.',mechanic:'voidWhispers'},
+    crownhold:{name:'Crown Aura',desc:'The Crown fragment pulses with corruption.',effect:'Each round all players gain 1 Corruption unless they resist with a Will check.',mechanic:'voidWhispers'},
     ashpits:{name:'Volcanic Vents',desc:'Sulfurous gas erupts from cracks in the floor.',effect:'Players must save or take 2 heat damage.',mechanic:'cognitiveDrain'},
   },
 
@@ -458,3 +469,72 @@ window.WretchedDeepSystem = {
     {keywords:[/crown.*fragment|artifact|relic|hollow/i],enemies:[{name:'Crown Fragment Guardian',type:'Construct',baseHP:20,dmg:6,attackBonus:5},{name:'Hollow Sentinel',type:'Undead',baseHP:16,dmg:5,attackBonus:4}]},
   ],
 };
+
+// ── CORRUPTION SYSTEM PLUGIN ──────────────────────────────
+// Registers automatically when Wretched Deep is loaded
+if (window.PluginRegistry) {
+  window.PluginRegistry.register({
+    id: 'wretcheddeep-corruption',
+    name: 'Wretched Deep Corruption System',
+    hooks: {
+      onSystemLoad(sys) {
+        // Only activate for Wretched Deep
+        if (sys.id !== 'wretcheddeep') return;
+        console.log('[Corruption] System active — the Crown watches.');
+      },
+      onRoundEnd(gState) {
+        if (!gState || !window.SystemData || window.SystemData.id !== 'wretcheddeep') return;
+        const mpCfg = window.SystemData.rules && window.SystemData.rules.magicPool;
+        if (!mpCfg || !mpCfg.isCorruptionTracker) return;
+        const maxCorruption = mpCfg.maxPool || 10;
+        const thresholds = mpCfg.thresholds || [];
+        const sz = gState.partySize || 3;
+
+        gState.players.slice(0, sz).forEach(function(p, i) {
+          if (!p || p.isNPC || p.downed) return;
+          const corruption = p.investiture || 0;
+
+          // Check if any [CORRUPTION] action was taken this round
+          if (gState.pendingActions && gState.pendingActions[p.name]) {
+            const action = gState.pendingActions[p.name];
+            if (action && /\[CORRUPTION\]/i.test(action)) {
+              p.investiture = Math.min(maxCorruption, corruption + 1);
+            }
+          }
+
+          // Check thresholds
+          const curr = p.investiture || 0;
+          thresholds.forEach(function(t) {
+            if (curr >= t.at && t.effect === 'seizure') {
+              // CROWN SEIZURE — mark for GM to narrate
+              if (!gState._crownSeizures) gState._crownSeizures = [];
+              if (!gState._crownSeizures.includes(p.name)) {
+                gState._crownSeizures.push(p.name);
+                // Drop corruption by 1/3
+                p.investiture = Math.max(0, Math.round(curr * (1 - (t.dropFraction || 0.33))));
+                console.log('[Corruption] CROWN SEIZURE on ' + p.name + '! Corruption: ' + curr + ' → ' + p.investiture);
+              }
+            }
+          });
+
+          if (i >= 0 && gState.players[i]) gState.players[i] = p;
+        });
+
+        // Clear seizure flags after processing
+        if (gState._crownSeizures && gState._crownSeizures.length) {
+          // The GM prompt system will pick these up for narration
+          setTimeout(function() { delete gState._crownSeizures; }, 5000);
+        }
+      },
+      onCombatEnd(gState) {
+        if (!gState || !window.SystemData || window.SystemData.id !== 'wretcheddeep') return;
+        // Rest: reduce corruption by 1 for surviving players
+        const sz = gState.partySize || 3;
+        gState.players.slice(0, sz).forEach(function(p) {
+          if (!p || p.isNPC || p.downed) return;
+          if (p.investiture > 0) p.investiture = Math.max(0, (p.investiture || 0) - 1);
+        });
+      },
+    },
+  });
+}

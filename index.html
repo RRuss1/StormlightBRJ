@@ -752,6 +752,28 @@
         </div>
       </div>
 
+      <!-- In-game preview — shows how colors look on actual game elements -->
+      <div id="wiz-game-preview" style="margin-top:16px;border:1px solid rgba(40,168,160,0.12);border-radius:14px;padding:16px;background:rgba(0,0,0,0.3);">
+        <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:12px;">In-Game Preview</div>
+        <!-- Party pip mock -->
+        <div id="prev-pip" style="border-radius:12px;padding:12px;border:1px solid;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:10px;height:10px;border-radius:50;" id="prev-pip-dot"></div>
+            <span id="prev-pip-name" style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;letter-spacing:1px;">HERO NAME</span>
+          </div>
+          <div id="prev-pip-info" style="font-size:12px;">Warrior Lv.1 · 14/14 HP · 4/4 Focus</div>
+        </div>
+        <!-- Story text mock -->
+        <div id="prev-story" style="border-radius:12px;padding:12px;border:1px solid;margin-bottom:10px;">
+          <div id="prev-story-text" style="font-family:'Crimson Pro',serif;font-size:16px;font-style:italic;line-height:1.6;">The ancient door creaks open. Beyond it, shadows move with purpose — something is waiting.</div>
+        </div>
+        <!-- Action card mock -->
+        <div id="prev-action" style="border-radius:10px;padding:10px 12px;border:1px solid;display:flex;align-items:center;gap:8px;">
+          <span id="prev-action-tag" style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;padding:2px 8px;border-radius:12px;border:1px solid;">ATTACK</span>
+          <span id="prev-action-text" style="font-family:'Crimson Pro',serif;font-size:13px;">I drive forward and strike at the enemy's center mass.</span>
+        </div>
+      </div>
+
       <div class="wiz-finish">
         <button class="wiz-next" style="flex:1;padding:13px;" onclick="finishWizard(false)">Save as Private</button>
         <button class="btn-publish" onclick="finishWizard(true)">Publish to Hub</button>
@@ -1331,12 +1353,15 @@
 
     </div><!-- /game-layout -->
 
-    <!-- Character sheet -->
-    <div class="px-6 pb-6">
+    <!-- Character sheet + Theme editor -->
+    <div class="px-6 pb-6" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
       <button class="sheet-toggle" onclick="toggleSheet()">
         <span id="sheet-arrow">▸</span> Character Sheet
       </button>
-      <div class="sheet-panel hidden" id="sheet-panel"></div>
+      <button class="sheet-toggle" id="theme-edit-btn" onclick="toggleThemeEditor()" style="display:none;">
+        🎨 Edit Theme
+      </button>
+      <div class="sheet-panel hidden" id="sheet-panel" style="width:100%;"></div>
     </div>
   </div><!-- /game-body -->
 </div>

@@ -1333,13 +1333,48 @@ function pickColor(h, t) {
   updateCreateSubmitBtn();
 }
 
+// Sprite map for Wretched Deep class/role card images
+const _WD_CARD_SPRITE = 'CompanionOrIcon/WretchedDeep.png';
+const _WD_CARD_MAP = {
+  lurker:0, thief:1, watcher:2, whisperer:3, fleshwright:4,
+  outcast:5, scavenger:6, cultist:7, guide:8, deserter:9,
+};
+function _getClassCardImg(id, name) {
+  // Custom world uploaded images
+  const cls = (CLASSES || []).find((c) => c.id === id);
+  if (cls && cls.imgUrl) return `<div style="margin-bottom:8px;"><img src="${cls.imgUrl}" alt="${name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;opacity:0.85;"></div>`;
+  // Wretched Deep sprite sheet
+  const sys = (window.SystemData || {}).id;
+  if (sys === 'wretcheddeep') {
+    const idx = _WD_CARD_MAP[id] != null ? _WD_CARD_MAP[id] : _WD_CARD_MAP[(name || '').toLowerCase().replace(/^the\s+/, '').replace(/\s+/g, '').replace('former', '').replace('tunnel', '')];
+    if (idx != null) {
+      const col = idx % 5;
+      const row = idx < 5 ? 1 : 0; // 0-4 = archetypes (bottom row), 5-9 = past lives (top row)
+      return `<div style="margin-bottom:8px;width:100%;height:90px;border-radius:8px;overflow:hidden;background:url('${_WD_CARD_SPRITE}') ${col * 25}% ${row * 100}% / 500% 200%;opacity:0.9;"></div>`;
+    }
+  }
+  return '';
+}
+function _getRoleCardImg(id, name) {
+  const role = (HERO_ROLES || []).find((r) => r.id === id);
+  if (role && role.imgUrl) return `<div style="margin-bottom:8px;"><img src="${role.imgUrl}" alt="${name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;opacity:0.85;"></div>`;
+  const sys = (window.SystemData || {}).id;
+  if (sys === 'wretcheddeep') {
+    const idx = _WD_CARD_MAP[id] != null ? _WD_CARD_MAP[id] : _WD_CARD_MAP[(name || '').toLowerCase().replace(/^the\s+/, '').replace(/\s+/g, '').replace('former', '').replace('tunnel', '')];
+    if (idx != null) {
+      const col = idx % 5;
+      const row = idx < 5 ? 1 : 0;
+      return `<div style="margin-bottom:8px;width:100%;height:90px;border-radius:8px;overflow:hidden;background:url('${_WD_CARD_SPRITE}') ${col * 25}% ${row * 100}% / 500% 200%;opacity:0.9;"></div>`;
+    }
+  }
+  return '';
+}
+
 function renderClasses() {
   const _sprenLabel =
     (window.SystemData || {}).id === 'stormlight' ? 'Spren' : (window.SystemData || {}).id === 'dnd5e' ? 'Subclass' : 'Bond';
   document.getElementById('class-grid').innerHTML = CLASSES.map((c) => {
-    const imgHtml = c.imgUrl
-      ? `<div style="margin-bottom:8px;"><img src="${c.imgUrl}" alt="${c.name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;opacity:0.85;"></div>`
-      : '';
+    const imgHtml = _getClassCardImg(c.id, c.name);
     return `<div class="ccard${selClass && selClass.id === c.id ? ' sel' : ''}" onclick="pickClass('${c.id}')">${imgHtml}<div class="ccard-name">${c.name}</div><div class="ccard-ideal">"${c.philosophy || c.ideal || ''}"</div><div class="ccard-desc">${c.desc}</div>${c.spren ? `<div class="ccard-bonus">${_sprenLabel}: ${c.spren}</div>` : ''}<div class="ccard-bonus">Bonus: ${Object.entries(
       c.bonus
     )
@@ -1363,7 +1398,7 @@ function renderRoles() {
     (
       r
     ) => `<div class="ccard${selRole && selRole.id === r.id ? ' sel' : ''}" onclick="pickRole('${r.id}')" style="border-color:${selRole && selRole.id === r.id ? r.color : 'var(--border)'};cursor:pointer;">
-    ${r.imgUrl ? `<div style="margin-bottom:8px;"><img src="${r.imgUrl}" alt="${r.name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;opacity:0.85;"></div>` : ''}
+    ${_getRoleCardImg(r.id, r.name)}
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
       <span style="font-size:22px;">${r.icon || ''}</span>
       <div class="ccard-name">${r.name}</div>
@@ -2338,8 +2373,14 @@ async function showGameScreen() {
   showScreen('game');
   const ab = document.getElementById('audio-bar');
   if (ab) ab.style.display = 'flex';
+  // Show theme edit button for custom world owners
+  const themeBtn = document.getElementById('theme-edit-btn');
+  if (themeBtn) {
+    const sys = window.SystemData || {};
+    themeBtn.style.display = sys.id && sys.id.startsWith('custom-') ? '' : 'none';
+  }
   startPolling();
-  connectSession(); // upgrade to WS when available
+  connectSession();
   await refreshGame();
   setTimeout(initParallax, 500);
 }
@@ -2654,7 +2695,35 @@ function getSprenSVG(classId, bond, isHero, roleName) {
     return `<img class="spren-img" src="${img}" alt="Companion">`;
   }
 
-  // ── Wretched Deep / other systems: generic placeholder ──
+  // ── Wretched Deep: sprite sheet ──
+  if (sys === 'wretcheddeep') {
+    // Sprite sheet: CompanionOrIcon/WretchedDeep.png — 5 cols × 2 rows
+    // Row 0 (top): Past Lives — outcast, scavenger, cultist, guide, deserter
+    // Row 1 (bottom): Archetypes — lurker, thief, watcher, whisperer, fleshwright
+    const WD_SPRITE = 'CompanionOrIcon/WretchedDeep.png';
+    const WD_MAP = {
+      // Archetypes (bottom row)
+      lurker:      { col: 0, row: 1 },
+      thief:       { col: 1, row: 1 },
+      watcher:     { col: 2, row: 1 },
+      whisperer:   { col: 3, row: 1 },
+      fleshwright: { col: 4, row: 1 },
+      // Past Lives (top row)
+      outcast:     { col: 0, row: 0 },
+      scavenger:   { col: 1, row: 0 },
+      cultist:     { col: 2, row: 0 },
+      guide:       { col: 3, row: 0 },
+      deserter:    { col: 4, row: 0 },
+    };
+    const pos = WD_MAP[classId] || WD_MAP[(roleName || '').toLowerCase().replace(/\s+/g, '').replace('former', '').replace('tunnel', '')] || null;
+    if (pos) {
+      const xPct = pos.col * 25; // 5 cols = 0%, 25%, 50%, 75%, 100%
+      const yPct = pos.row * 100; // 2 rows = 0%, 100%
+      return `<div class="spren-img" style="width:64px;height:80px;border-radius:8px;overflow:hidden;background:url('${WD_SPRITE}') ${xPct}% ${yPct}% / 500% 200%;"></div>`;
+    }
+  }
+
+  // ── Other systems: no companion image ──
   return '';
 }
 
@@ -4593,3 +4662,60 @@ async function applyThaiToElement(el) {
 }
 
 // ══ PARALLAX ══
+
+// ══ IN-GAME THEME COLOR EDITOR (custom worlds — owner only) ══
+let _themeEditorOpen = false;
+function toggleThemeEditor() {
+  _themeEditorOpen = !_themeEditorOpen;
+  let panel = document.getElementById('theme-editor-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'theme-editor-panel';
+    panel.style.cssText = 'position:fixed;top:60px;right:12px;width:260px;background:rgba(5,12,26,0.94);backdrop-filter:blur(20px);border:1px solid rgba(40,168,160,0.15);border-radius:14px;padding:16px;z-index:200;font-family:"Crimson Pro",serif;display:none;';
+    document.body.appendChild(panel);
+  }
+  if (_themeEditorOpen) {
+    const sys = window.SystemData || {};
+    const tv = sys.themeVars || {};
+    const theme = sys.theme || {};
+    const colors = [
+      { key: 'primary', label: 'Primary', val: theme.primary || tv.primary || '#C9A84C' },
+      { key: 'secondary', label: 'Secondary', val: theme.secondary || tv.secondary || '#28A87A' },
+      { key: 'danger', label: 'Danger', val: theme.danger || tv.danger || '#B03828' },
+      { key: 'bg', label: 'Background', val: tv.bg || '#0F0D08' },
+      { key: 'text', label: 'Text', val: tv.text || '#F8F3E8' },
+      { key: 'text4', label: 'Muted Text', val: tv.text4 || '#c89840' },
+    ];
+    panel.innerHTML = '<div style="font-family:Cinzel,serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">Theme Colors<button onclick="toggleThemeEditor()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:16px;">✕</button></div>' +
+      colors.map(function(c){ return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><input type="color" value="'+c.val+'" onchange="applyThemeColor(\''+c.key+'\',this.value)" style="width:28px;height:28px;border:none;background:none;cursor:pointer;padding:0;"><span style="font-size:13px;color:rgba(255,255,255,0.6);">'+c.label+'</span></div>'; }).join('') +
+      '<button onclick="saveThemeColors()" style="width:100%;margin-top:8px;padding:8px;border:1px solid rgba(40,168,160,0.3);border-radius:8px;background:rgba(40,168,160,0.1);color:rgba(40,168,160,0.8);font-family:Cinzel,serif;font-size:12px;letter-spacing:1px;cursor:pointer;">Save to World</button>';
+    panel.style.display = '';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+function applyThemeColor(key, val) {
+  var r = document.documentElement.style;
+  if (key === 'primary') { r.setProperty('--primary', val); r.setProperty('--theme-primary', val); r.setProperty('--gold-mid', val); }
+  else if (key === 'secondary') { r.setProperty('--secondary', val); r.setProperty('--theme-secondary', val); r.setProperty('--teal2', val); }
+  else if (key === 'danger') { r.setProperty('--danger', val); r.setProperty('--theme-danger', val); }
+  else { r.setProperty('--' + key, val); }
+  if (window.SystemData) {
+    if (!window.SystemData.themeVars) window.SystemData.themeVars = {};
+    window.SystemData.themeVars[key] = val;
+    if (window.SystemData.theme) window.SystemData.theme[key] = val;
+  }
+}
+async function saveThemeColors() {
+  if (!window.SystemData || !window.SystemData.id) return;
+  var sys = window.SystemData;
+  if (!sys.id.startsWith('custom-')) { alert('Theme editing is only available for custom worlds.'); return; }
+  try {
+    await _dbFetch('/worlds', { method: 'POST', body: JSON.stringify({ worldId: sys.id, name: sys.name, tagline: sys.tagline || sys.subtitle || '', author: window.Auth && window.Auth.getCurrentUser() ? window.Auth.getCurrentUser().displayName : 'Player', system: 'custom', config: sys }) });
+    var toast = document.createElement('div');
+    toast.textContent = 'Theme saved!';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--primary,#C9A84C);color:var(--primary,#C9A84C);padding:8px 20px;border-radius:20px;font-family:var(--font-d);font-size:12px;letter-spacing:2px;z-index:999;';
+    document.body.appendChild(toast);
+    setTimeout(function(){ toast.remove(); }, 2000);
+  } catch (e) { alert('Save failed: ' + e.message); }
+}
