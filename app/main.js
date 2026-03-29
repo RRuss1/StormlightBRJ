@@ -1130,9 +1130,8 @@ window.addEventListener('load', () => {
     document.addEventListener('sc:screenChange', (e) => {
       const id = e.detail?.screen;
       if (id === 'combat') {
-        // Only start ambient chord if Storm Audio is on — respect the user's audio toggle
         if (typeof audioOn !== 'undefined' && audioOn) AmbientAudio.startCombat();
-        stormlightParticles.activate();
+        stormlightParticles.deactivate(); // particles obscure combat text — keep off
       } else if (id === 'game') {
         AmbientAudio.endCombat();
         stormlightParticles.deactivate();
