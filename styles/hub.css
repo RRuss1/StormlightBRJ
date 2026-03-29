@@ -101,7 +101,7 @@
 }
 .nav-link {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -119,7 +119,7 @@
 }
 .btn-login {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   padding: 9px 22px;
@@ -151,7 +151,7 @@
 /* Tagline above cards */
 .landing-eyebrow {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--gold-lo);
@@ -346,7 +346,7 @@
 
 .card-arrow {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-top: 8px;
@@ -431,7 +431,7 @@
 }
 .wtab {
   font-family: var(--fd);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   padding: 7px 18px;
@@ -564,7 +564,7 @@
 }
 .badge {
   font-family: var(--fd);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 3px 9px;
@@ -601,7 +601,7 @@
   line-height: 1.55;
 }
 .wcard-meta {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-bottom: 12px;
 }
@@ -610,7 +610,7 @@
   padding: 9px;
   border-radius: 7px;
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 700;
@@ -676,7 +676,7 @@
 
 .wstep-eyebrow {
   font-family: var(--fd);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: rgba(40, 168, 160, 0.5);
@@ -695,7 +695,7 @@
 }
 .wlabel {
   font-family: var(--fd);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -734,7 +734,7 @@
   background: transparent;
   color: var(--muted);
   font-family: var(--fd);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   cursor: pointer;
@@ -761,7 +761,7 @@
 }
 .wiz-back {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -772,7 +772,7 @@
 }
 .wiz-next {
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   padding: 11px 28px;
@@ -848,7 +848,7 @@
   background: linear-gradient(135deg, #28a8a0, #1a6e68);
   color: #0a1a18;
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: 700;
@@ -870,7 +870,7 @@
   background: rgba(0, 0, 0, 0.3);
 }
 .prev-eyebrow {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: rgba(240, 230, 204, 0.3);
   font-family: var(--fd);
@@ -894,7 +894,7 @@
   gap: 7px;
 }
 .prev-tag {
-  font-size: 9px;
+  font-size: 12px;
   padding: 3px 9px;
   border-radius: 20px;
   font-family: var(--fd);
@@ -908,7 +908,7 @@
   left: 52px;
   z-index: 20;
   font-family: var(--fd);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -999,7 +999,7 @@
 }
 .hamburger-menu button {
   font-family: var(--fd);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--text3, #dfc080);
@@ -1133,7 +1133,7 @@
 }
 .color-row label {
   font-family: var(--fd);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--muted);
@@ -1166,11 +1166,11 @@
   gap: 3px;
 }
 .stat-system-grid .wopt strong {
-  font-size: 10px;
+  font-size: 12px;
   display: block;
 }
 .stat-system-grid .wopt span {
-  font-size: 8.5px;
+  font-size: 12px;
   opacity: 0.5;
   letter-spacing: 0.5px;
 }
@@ -1209,7 +1209,7 @@
 .ambient-label {
   font-family: var(--font-title, 'Cinzel', serif);
   font-size: 0.75rem;
-  color: rgba(40, 168, 160, 0.8);
+  color: rgba(40, 168, 160, 1);
   letter-spacing: 1px;
 }
 
@@ -1257,8 +1257,8 @@
 }
 .enemy-cat-desc {
   width: 100%;
-  font-size: 0.72rem;
-  color: rgba(40, 168, 160, 0.4);
+  font-size: 0.8rem;
+  color: rgba(40, 168, 160, 0.75);
   line-height: 1.3;
   margin-top: -2px;
 }
@@ -1320,7 +1320,7 @@ body[data-system='dnd5e'] {
     gap: 6px;
   }
   .wopt {
-    font-size: 10px;
+    font-size: 12px;
     padding: 7px 10px;
   }
   .stat-system-grid {
@@ -1340,7 +1340,7 @@ body[data-system='dnd5e'] {
   }
   .color-row label {
     width: 60px;
-    font-size: 8px;
+    font-size: 12px;
   }
   .hub-modal-box {
     max-height: 90vh;
@@ -1355,10 +1355,10 @@ body[data-system='dnd5e'] {
   .screen-back {
     top: 16px;
     left: 16px;
-    font-size: 9px;
+    font-size: 12px;
   }
   .btn-login {
-    font-size: 9px;
+    font-size: 12px;
     padding: 7px 14px;
   }
   .landing-body {

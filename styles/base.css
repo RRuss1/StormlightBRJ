@@ -42,8 +42,8 @@
   --text: #f8f3e8;
   --text2: #f0e6cc;
   --text3: #dfc080;
-  --text4: #a07830;
-  --text5: #624e1f;
+  --text4: #c89840;
+  --text5: #9a7a3a;
 
   /* Typography */
   --font-d: 'Cinzel', serif;
@@ -93,7 +93,7 @@
   --glow-cerulean: #3498b8;
   --glow-pink: #f06090;
   --glow-crimson: #e81868;
-  --muted: rgba(240, 230, 204, 0.52);
+  --muted: rgba(240, 230, 204, 0.75);
   --fd: 'Cinzel', serif;
   --fb: 'Crimson Pro', serif;
 }

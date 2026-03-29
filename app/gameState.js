@@ -652,8 +652,30 @@ function calcEnemyHP(baseHP, actNum, avgBladeTier) {
   // Average party level scaling
   const players = ((typeof gState !== 'undefined' && gState && gState.players) || []).filter((p) => p && !p.isNPC && !p.isPlaceholder);
   const avgLevel = players.length ? players.reduce((s, p) => s + (p.level || 1), 0) / players.length : 1;
-  const levelMult = 1 + Math.max(0, avgLevel - 1) * 0.12; // +12% per level above 1
-  return Math.round(baseHP * actMult * bladeFactor * sizeMult * levelMult);
+  const levelMult = 1 + Math.max(0, avgLevel - 1) * 0.12;
+  // Stat power scaling — higher average stats = tougher enemies
+  // Baseline expectation: point-buy avg of ~2 per stat. Scale up if stats are higher.
+  let statMult = 1.0;
+  if (window.ConfigResolver && players.length) {
+    const keys = (_SD().statKeys || []);
+    if (keys.length) {
+      let totalStatAvg = 0;
+      players.forEach((p) => {
+        if (p.stats) {
+          const pAvg = keys.reduce((s, k) => s + (p.stats[k] || 0), 0) / keys.length;
+          totalStatAvg += pAvg;
+        }
+      });
+      totalStatAvg = totalStatAvg / players.length;
+      // Expected average from the stat gen method
+      const expected = window.ConfigResolver.getExpectedAvgStat();
+      // Scale: if party avg is 13 (3d8) vs expected 13, mult=1. If avg 18 (manual) vs expected 2, mult scales up.
+      if (expected > 0 && totalStatAvg > 0) {
+        statMult = Math.max(0.8, Math.min(2.5, totalStatAvg / Math.max(expected, 2)));
+      }
+    }
+  }
+  return Math.round(baseHP * actMult * bladeFactor * sizeMult * levelMult * statMult);
 }
 
 function enemyAttackRoll(enemy, target) {

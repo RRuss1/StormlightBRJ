@@ -444,6 +444,36 @@
         </div>
       </div>
       <div class="wfield">
+        <label class="wlabel">Each Starting Stat Decided By</label>
+        <p style="font-size:12px;color:rgba(40,168,160,0.5);margin-bottom:8px;">How players generate their starting attribute scores</p>
+        <div class="wopts" data-field="statGenMethod">
+          <div class="wopt" onclick="selOpt(this)" data-val="4d6drop1"><strong>4d6 Drop Lowest</strong><span>Roll 4d6, remove the lowest die. Range 3-18, avg ~12. Classic D&amp;D.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="1d20"><strong>1d20</strong><span>Roll a d20 per stat. Range 1-20, avg 10.5. Swingy and chaotic.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="2d6plus6"><strong>2d6 + 6</strong><span>Roll 2d6 and add 6. Range 8-18, avg 13. Safe floor, still random.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="3d8"><strong>3d8</strong><span>Roll 3d8. Range 3-24, avg 13.5. Higher ceiling, wilder range.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="pointbuy"><strong>Point Buy</strong><span>Distribute a fixed pool of points across stats. Full control, balanced.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="manual"><strong>Manual (Max 20)</strong><span>Assign any value 0-20 per stat. No budget, no limits. Freeform.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="none"><strong>No Stats</strong><span>This world doesn't use numeric attributes. Narrative-only.</span></div>
+        </div>
+      </div>
+
+      <!-- Point Buy Pool Size (shown only when Point Buy is selected) -->
+      <div class="wfield" id="wiz-pointbuy-pool" style="display:none;">
+        <label class="wlabel">Point Pool Size</label>
+        <p style="font-size:12px;color:rgba(40,168,160,0.5);margin-bottom:8px;">How many points players get to distribute across all stats</p>
+        <div class="wopts" data-field="pointBuyPool">
+          <div class="wopt" onclick="selOpt(this)" data-val="12"><strong>Tight (12)</strong><span>Every point matters. Tough choices, real tradeoffs.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="27"><strong>Standard (27)</strong><span>Balanced and fair. D&amp;D 5e standard. Good all-around.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="36"><strong>Generous (36)</strong><span>Heroic. Competent at most things, great at a few.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="48"><strong>Hero (48)</strong><span>Power fantasy. High stats across the board.</span></div>
+          <div class="wopt" onclick="selOpt(this)" data-val="custom"><strong>Custom</strong><span>Set your own pool size.</span></div>
+        </div>
+        <div id="wiz-pointbuy-custom" style="display:none;margin-top:8px;">
+          <input class="winput" type="number" id="wiz-pointbuy-custom-val" min="6" max="120" value="27" placeholder="Enter point total..." style="max-width:180px;">
+        </div>
+      </div>
+
+      <div class="wfield">
         <label class="wlabel">Progression Style</label>
         <div class="wopts" data-field="progression">
           <div class="wopt" onclick="selOpt(this)">Level-Based (XP)</div>

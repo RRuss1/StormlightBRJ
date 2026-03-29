@@ -33,7 +33,7 @@ window.WretchedDeepSystem = {
     primary: '#7B3F8E', goldMid: '#A070B0', goldBright: '#C8A0D8', goldDim: '#3A1E48',
     secondary: '#3A8E5C', teal: '#2A6E4C', teal2: '#3A8E5C',
     danger: '#8E2020', coral2: '#A83030',
-    text: '#E0D8E8', text2: '#C8C0D0', text3: '#9888A8', text4: '#685878', text5: '#3A2E48',
+    text: '#E8E0F0', text2: '#D0C8DA', text3: '#B0A0C0', text4: '#9080A8', text5: '#706088',
   },
 
   // ── GM Context (AI prompt injection) ──────────────────────────────────
@@ -79,6 +79,7 @@ window.WretchedDeepSystem = {
     },
     deflectableTypes: ['physical','sharp'],
     currency: { name: 'scraps', symbol: 'sc', tiers: null },
+    statGenMethod: '3d8',
     progressionType: 'corruption', progressionLabel: 'Corruption Stage', maxProgression: 10,
     turnOrder: 'fast-slow',
     healClassMultipliers: { fleshwright: 1.6 },

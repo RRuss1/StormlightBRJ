@@ -75,6 +75,7 @@ function _buildRules(cfg) {
     skillAttrMap: _buildSkillMap(keys),
     deflectableTypes: ['energy','impact','keen'],
     currency: { name: cfg.currencyName || 'gold', symbol: cfg.currencySymbol || 'gp', tiers: null },
+    statGenMethod: cfg.statGenMethod || 'pointbuy',
     progressionType: magic.exists !== false ? 'oaths' : 'milestones',
     progressionLabel: magic.exists !== false ? 'Oath' : 'Milestone',
     maxProgression: 5,
@@ -116,7 +117,7 @@ function _buildCharCreation(cfg) {
     origins: cfg.locations || null,
     startMessage: 'The party forms. The adventure begins in {location}.',
     actNames: ['The {loc}', 'Secrets of {loc}', 'The Reckoning of {loc}'],
-    attributePoints: 12, maxPerAttribute: 3,
+    attributePoints: cfg.pointBuyPool || 27, maxPerAttribute: Math.ceil((cfg.pointBuyPool || 27) / (keys.length || 6)),
     showBlade: false, showWeapon: true, showCompanion: false,
     namePlaceholder: 'What do they call you?',
   };

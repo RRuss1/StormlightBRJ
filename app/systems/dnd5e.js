@@ -31,7 +31,7 @@ window.DnD5eSystem = {
     primary: '#9B2335', goldMid: '#C0C0C0', goldBright: '#E0E0E0', goldDim: '#4A2030',
     secondary: '#C0C0C0', teal: '#808890', teal2: '#C0C0C0',
     danger: '#6B2737', coral2: '#8B3747',
-    text: '#E8E4E0', text2: '#D0CCC8', text3: '#A0A0A8', text4: '#707078', text5: '#404048',
+    text: '#E8E4E0', text2: '#D0CCC8', text3: '#B0B0B8', text4: '#909098', text5: '#686870',
   },
 
   // ── GM Context (AI prompt injection) ──────────────────────────────────
@@ -81,6 +81,7 @@ window.DnD5eSystem = {
     },
     deflectableTypes: ['slashing','piercing','bludgeoning'],
     currency: { name: 'gold', symbol: 'gp', tiers: null },
+    statGenMethod: '4d6drop1',
     progressionType: 'levels', progressionLabel: 'Level', maxProgression: 20,
     turnOrder: 'initiative',
     healClassMultipliers: { cleric: 1.5 },

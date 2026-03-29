@@ -80,6 +80,7 @@ window.StormlightSystem = {
     },
     deflectableTypes: ['energy','impact','keen'],
     currency: { name: 'marks', symbol: 'mk', tiers: { broam: 4, mark: 1 } },
+    statGenMethod: 'pointbuy',
     progressionType: 'oaths', progressionLabel: 'Ideal', maxProgression: 5,
     turnOrder: 'fast-slow',
     healClassMultipliers: { edgedancer: 1.8, bondsmith: 0 },

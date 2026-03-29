@@ -432,6 +432,93 @@
   }
 
   // ═══════════════════════════════════════════════════════════
+  // STAT GENERATION
+  // ═══════════════════════════════════════════════════════════
+
+  function _rollD(sides) {
+    return Math.floor(Math.random() * sides) + 1;
+  }
+
+  /**
+   * Roll a single stat value using the configured generation method.
+   * @returns {number} the generated stat value
+   */
+  function rollSingleStat(method) {
+    method = method || getStatGenMethod();
+    switch (method) {
+      case '4d6drop1': {
+        const dice = [_rollD(6), _rollD(6), _rollD(6), _rollD(6)];
+        dice.sort((a, b) => a - b);
+        return dice[1] + dice[2] + dice[3]; // drop lowest
+      }
+      case '1d20':
+        return _rollD(20);
+      case '2d6plus6':
+        return _rollD(6) + _rollD(6) + 6;
+      case '3d8':
+        return _rollD(8) + _rollD(8) + _rollD(8);
+      case 'manual':
+        return 10; // default starting value for manual assignment
+      case 'pointbuy':
+        return 2; // default allocation (distributed by point-buy UI)
+      case 'none':
+        return 0;
+      default:
+        return 2; // fallback to point-buy default
+    }
+  }
+
+  /**
+   * Generate a full stat array for all stat keys.
+   */
+  function rollAllStats(method) {
+    method = method || getStatGenMethod();
+    const keys = (_SD().statKeys || ['str', 'dex', 'con', 'int', 'wis', 'cha']);
+    const stats = {};
+    keys.forEach((k) => {
+      stats[k] = rollSingleStat(method);
+    });
+    return stats;
+  }
+
+  /**
+   * Get the stat generation method from config.
+   */
+  function getStatGenMethod() {
+    return (_rules().statGenMethod) || (_SD().statGenMethod) || 'pointbuy';
+  }
+
+  /**
+   * Get stat generation metadata (range, average, isRolled, etc.)
+   */
+  function getStatGenInfo(method) {
+    method = method || getStatGenMethod();
+    const info = {
+      '4d6drop1': { min: 3, max: 18, avg: 12.2, isRolled: true, label: '4d6 Drop Lowest', maxPerStat: 18 },
+      '1d20':     { min: 1, max: 20, avg: 10.5, isRolled: true, label: '1d20', maxPerStat: 20 },
+      '2d6plus6': { min: 8, max: 18, avg: 13,   isRolled: true, label: '2d6+6', maxPerStat: 18 },
+      '3d8':      { min: 3, max: 24, avg: 13.5, isRolled: true, label: '3d8', maxPerStat: 24 },
+      'pointbuy': { min: 0, max: 20, avg: null,  isRolled: false, label: 'Point Buy', maxPerStat: 20 },
+      'manual':   { min: 0, max: 20, avg: null,  isRolled: false, label: 'Manual', maxPerStat: 20 },
+      'none':     { min: 0, max: 0,  avg: 0,     isRolled: false, label: 'No Stats', maxPerStat: 0 },
+    };
+    return info[method] || info['pointbuy'];
+  }
+
+  /**
+   * Get the expected average stat value for enemy scaling.
+   */
+  function getExpectedAvgStat(method) {
+    const info = getStatGenInfo(method);
+    if (info.avg != null) return info.avg;
+    // Point buy: assume even distribution of attributePoints across stats
+    const cc = _cc();
+    const keys = (_SD().statKeys || []);
+    const pts = cc.attributePoints || 12;
+    return keys.length ? pts / keys.length : 2;
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // EXPORT
   // ═══════════════════════════════════════════════════════════
   window.ConfigResolver = {
@@ -453,5 +540,10 @@
     getMagicPoolLabel,
     getCharCreation,
     getStartMessage,
+    rollSingleStat,
+    rollAllStats,
+    getStatGenMethod,
+    getStatGenInfo,
+    getExpectedAvgStat,
   };
 })();

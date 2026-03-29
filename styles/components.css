@@ -355,7 +355,7 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   font-family: var(--font-d);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2.5px;
   color: var(--text5);
   text-transform: uppercase;
@@ -458,7 +458,7 @@
   border-radius: 20px;
   background: color-mix(in srgb, var(--secondary, #1d7a5c) 8%, transparent);
   color: var(--secondary, var(--teal2));
-  font-size: 11px;
+  font-size: 13px;
   font-family: var(--font-d);
   letter-spacing: 1px;
   cursor: pointer;
@@ -469,7 +469,7 @@
 }
 .slot-tag {
   display: inline-block;
-  font-size: 9px;
+  font-size: 12px;
   padding: 2px 10px;
   border-radius: 20px;
   background: color-mix(in srgb, var(--secondary, #28a87a) 15%, transparent);
@@ -689,7 +689,7 @@
   position: absolute;
   top: 10px;
   right: 12px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text5);
   cursor: pointer;
   border: none;
@@ -782,7 +782,7 @@
 .event-badge {
   display: inline-block;
   font-family: var(--font-d);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   padding: 3px 12px;
   border-radius: 20px;
@@ -832,7 +832,7 @@
    ───────────────────────────────────────────── */
 .turn-pill {
   font-family: var(--font-d);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1.5px;
   padding: 6px 18px;
   border-radius: 20px;
@@ -884,7 +884,7 @@
   padding: 7px 18px;
   cursor: pointer;
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text4);
   transition: all 0.2s;
@@ -1003,7 +1003,7 @@
   padding: 4px 12px;
   border-radius: 20px;
   font-family: var(--font-d);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   transition: all 0.3s;
 }
@@ -1035,7 +1035,7 @@
 }
 .tooltip-key {
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--amber2);
   background: rgba(201, 168, 76, 0.08);
@@ -1136,7 +1136,7 @@
 }
 .title-h2 {
   font-family: var(--font-d);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 5px;
   color: var(--text4);
   text-transform: uppercase;
@@ -1155,7 +1155,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 8px;
+  font-size: 12px;
   color: var(--amber);
   background: var(--bg);
   padding: 0 4px;
@@ -1170,7 +1170,7 @@
 }
 .title-quote cite {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--text5);
   margin-top: 8px;
@@ -1240,7 +1240,7 @@
 }
 .gm-label {
   font-family: var(--font-d);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--gold);
   text-transform: uppercase;
@@ -1438,7 +1438,7 @@
 /* Plot die badges */
 .plot-opportunity {
   color: var(--teal2);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   padding: 2px 8px;
   border: 1px solid var(--teal);
@@ -1447,7 +1447,7 @@
 }
 .plot-complication {
   color: var(--coral2);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   padding: 2px 8px;
   border: 1px solid var(--coral);
@@ -1467,7 +1467,7 @@
   margin-bottom: 5px;
 }
 .ccard-ideal {
-  font-size: 11px;
+  font-size: 13px;
   font-style: italic;
   color: var(--text4);
   margin-bottom: 6px;
@@ -1480,7 +1480,7 @@
   margin-bottom: 6px;
 }
 .ccard-bonus {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text5);
   font-family: var(--font-d);
   letter-spacing: 0.5px;
@@ -1492,7 +1492,7 @@
    ───────────────────────────────────────────── */
 .sbox-name {
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text5);
   text-transform: uppercase;
@@ -1511,7 +1511,7 @@
    ───────────────────────────────────────────── */
 .slot-num {
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 2px;
   color: var(--text5);
   text-transform: uppercase;
@@ -1536,7 +1536,7 @@
   letter-spacing: 0.5px;
 }
 .slot-class {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text4);
   margin-bottom: 6px;
 }
@@ -1561,7 +1561,7 @@
   text-overflow: ellipsis;
 }
 .ppip-info {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text4);
   line-height: 1.5;
   font-family: var(--font-d);
@@ -1570,7 +1570,7 @@
 }
 .ppip-tag {
   display: inline-block;
-  font-size: 9px;
+  font-size: 12px;
   font-family: var(--font-d);
   letter-spacing: 1px;
   padding: 2px 7px;
@@ -1585,7 +1585,7 @@
    COMPONENT: COMBAT ACTION INTERNALS
    ───────────────────────────────────────────── */
 .achoice-num {
-  font-size: 9px;
+  font-size: 12px;
   font-family: var(--font-d);
   letter-spacing: 1.5px;
   color: var(--text5);
@@ -1593,7 +1593,7 @@
 }
 .combat-player-label {
   font-family: var(--font-d);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: var(--amber2);
   text-transform: uppercase;
@@ -1603,7 +1603,7 @@
 }
 .combat-submitted {
   font-family: var(--font-d);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1px;
   color: var(--teal2);
   padding: 8px 12px;
@@ -1614,7 +1614,7 @@
 }
 .combat-waiting {
   font-family: var(--font-d);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1.5px;
   color: var(--text4);
   text-align: center;
@@ -1627,7 +1627,7 @@
    ───────────────────────────────────────────── */
 .dice-round-header {
   font-family: var(--font-d);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2.5px;
   color: var(--amber2);
   text-transform: uppercase;
@@ -1644,14 +1644,14 @@
 }
 .dice-name {
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   color: var(--text3);
   flex-shrink: 0;
   min-width: 80px;
 }
 .dice-roll {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text5);
   font-family: var(--font-d);
   letter-spacing: 0.3px;
@@ -1678,7 +1678,7 @@
   letter-spacing: 0.5px;
 }
 .enemy-hp {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text4);
   font-family: var(--font-d);
   margin-top: 2px;
@@ -1691,7 +1691,7 @@
 }
 .ccard-hp-label {
   font-family: var(--font-d);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--text5);
   margin-top: 2px;

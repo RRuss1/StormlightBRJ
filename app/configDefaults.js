@@ -94,6 +94,10 @@ window.ConfigDefaults = {
       crit: 'max+mod',
     },
 
+    // Stat generation method for character creation
+    // 4d6drop1, 1d20, 2d6plus6, 3d8, pointbuy, manual, none
+    statGenMethod: 'pointbuy',
+
     // Healing class overrides: { classId: multiplier }
     healClassMultipliers: {},
 

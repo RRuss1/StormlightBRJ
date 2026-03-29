@@ -361,6 +361,17 @@ function selOpt(el) {
   const field = group.dataset.field;
   if (field) _wizSelections[field] = el.dataset.val || el.textContent.trim();
   if (_ws === WS_MAX) updatePreview();
+
+  // Show/hide point buy pool picker
+  if (field === 'statGenMethod') {
+    const poolEl = document.getElementById('wiz-pointbuy-pool');
+    if (poolEl) poolEl.style.display = (_wizSelections.statGenMethod === 'pointbuy') ? '' : 'none';
+  }
+  // Show/hide custom pool input
+  if (field === 'pointBuyPool') {
+    const customEl = document.getElementById('wiz-pointbuy-custom');
+    if (customEl) customEl.style.display = (_wizSelections.pointBuyPool === 'custom') ? '' : 'none';
+  }
 }
 function _getWizSel(field, fallback) {
   return _wizSelections[field] || fallback || '';
@@ -440,6 +451,11 @@ function finishWizard(publish) {
   const magicSource = _getWizSel('magicSource', 'Willpower / Inner Force');
   const magicRisk = _getWizSel('magicRisk', 'Moderate — Mishaps');
   const statSystem = _getWizSel('statSystem', 'classic');
+  const statGenMethod = _getWizSel('statGenMethod', 'pointbuy');
+  const _poolSel = _getWizSel('pointBuyPool', '27');
+  const pointBuyPool = _poolSel === 'custom'
+    ? parseInt(document.getElementById('wiz-pointbuy-custom-val')?.value) || 27
+    : parseInt(_poolSel) || 27;
   const progression = _getWizSel('progression', 'Level-Based (XP)');
   const namingStyle = _getWizSel('namingStyle', 'Western Fantasy');
   const narratorStyle = _getWizSel('narratorStyle', 'Epic & Mythic');
@@ -524,7 +540,9 @@ Physics: ${physics.toLowerCase()}. Death rules: ${deathRules.toLowerCase()}. Tim
       cardStyle,
     },
     magic: { name: magicName, resource: magicResource, source: magicSource, risk: magicRisk, exists: magicExists, rules: magicRules },
-    statSystem, // pass the raw selection ID to custom.js _resolveStats()
+    statSystem,
+    statGenMethod,
+    pointBuyPool, // only used when statGenMethod === 'pointbuy'
     gm: {
       worldName: name,
       worldLore: gmLore,

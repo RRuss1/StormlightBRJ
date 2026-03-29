@@ -1424,38 +1424,52 @@ function getPointsLeft() {
 }
 
 function rollStats() {
-  // "Rebalance" — reset to even spread across current system's stats
   const keys = (window.SystemData && window.SystemData.statKeys) || ['str', 'spd', 'int', 'wil', 'awa', 'pre'];
-  const cc = (window.SystemData && window.SystemData.charCreation) || {};
-  const totalPts = cc.attributePoints || ATTR_POINTS_START;
-  const pts = Math.floor(totalPts / keys.length);
+  const method = window.ConfigResolver ? window.ConfigResolver.getStatGenMethod() : 'pointbuy';
+  const info = window.ConfigResolver ? window.ConfigResolver.getStatGenInfo(method) : { isRolled: false };
+
   _pbAlloc = {};
-  keys.forEach((k) => {
-    _pbAlloc[k] = pts;
-  });
-  let remaining = totalPts - keys.length * pts;
-  for (let i = 0; remaining > 0 && i < keys.length; i++) {
-    _pbAlloc[keys[i]]++;
-    remaining--;
+
+  if (method === 'none') {
+    // No stats — zero everything
+    keys.forEach((k) => { _pbAlloc[k] = 0; });
+  } else if (info.isRolled) {
+    // Roll-based: generate each stat independently
+    keys.forEach((k) => {
+      _pbAlloc[k] = window.ConfigResolver ? window.ConfigResolver.rollSingleStat(method) : 10;
+    });
+  } else if (method === 'manual') {
+    // Manual: start at 10 per stat, user adjusts freely up to maxPerStat
+    keys.forEach((k) => { _pbAlloc[k] = 10; });
+  } else {
+    // Point buy: distribute evenly
+    const cc = (window.SystemData && window.SystemData.charCreation) || {};
+    const totalPts = cc.attributePoints || ATTR_POINTS_START;
+    const pts = Math.floor(totalPts / keys.length);
+    keys.forEach((k) => { _pbAlloc[k] = pts; });
+    let remaining = totalPts - keys.length * pts;
+    for (let i = 0; remaining > 0 && i < keys.length; i++) { _pbAlloc[keys[i]]++; remaining--; }
   }
+
   rolledStats = getTotalStats();
   renderStatsPointBuy();
   const btn = document.querySelector('[onclick="rollStats()"]');
   if (btn) {
-    btn.textContent = '↻ Reset!';
-    setTimeout(() => {
-      btn.textContent = '↻ Rebalance';
-    }, 800);
+    const label = info.isRolled ? '🎲 Re-Roll' : '↻ Rebalance';
+    btn.textContent = info.isRolled ? '🎲 Rolled!' : '↻ Reset!';
+    setTimeout(() => { btn.textContent = label; }, 800);
   }
 }
 
 function adjustStat(k, delta) {
-  const b = getClassBonus();
+  const method = window.ConfigResolver ? window.ConfigResolver.getStatGenMethod() : 'pointbuy';
+  const info = window.ConfigResolver ? window.ConfigResolver.getStatGenInfo(method) : { maxPerStat: 20 };
   const cur = _pbAlloc[k] || 0;
   const newVal = cur + delta;
-  // Bounds: base alloc 0–3, total (base+bonus) capped at 5
-  if (newVal < 0 || newVal > 3) return;
-  if (delta > 0 && getPointsLeft() <= 0) return;
+  const maxPerStat = (method === 'pointbuy') ? (ATTR_MAX_CREATE || 3) : (info.maxPerStat || 20);
+  if (newVal < 0 || newVal > maxPerStat) return;
+  // Point buy: enforce budget. Rolled/manual: no budget.
+  if (method === 'pointbuy' && delta > 0 && getPointsLeft() <= 0) return;
   _pbAlloc[k] = newVal;
   rolledStats = getTotalStats();
   renderStatsPointBuy();
