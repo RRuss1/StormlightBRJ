@@ -944,6 +944,10 @@
   color: var(--text);
   min-height: 130px;
   flex-shrink: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  backface-visibility: hidden;
 }
 
 .combat-dice-ticker {

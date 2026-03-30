@@ -2249,7 +2249,7 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
   const el = document.getElementById('combat-narrative-text');
   if (el) {
     el.textContent = '...';
-    el.parentElement.style.opacity = '0.5';
+    el.style.color = 'var(--text3)';
   }
   // Structured JSON instruction appended to every combat GM prompt
   const jsonInstr = `\n\nRespond ONLY with valid JSON (no markdown fences): {"narrative":"[2-3 sentences, present tense, no HP numbers, no game jargon — translate mechanics to vivid fiction]","stateUpdates":{"conditionsAdded":[],"conditionsRemoved":[]}}`;
@@ -2301,7 +2301,7 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
     }
     if (el) {
       el.textContent = narrative;
-      el.parentElement.style.opacity = '1';
+      el.style.color = '';
     }
     if (lang === 'th' && el) {
       translateToThai(narrative)
@@ -2316,7 +2316,7 @@ Write 2 sentences: the moment the last party member falls, and what the enemy do
   } catch (e) {
     if (el) {
       el.textContent = 'The battle continues...';
-      el.parentElement.style.opacity = '1';
+      el.style.color = '';
     }
   }
   if (type === 'opening' || type === 'round') {

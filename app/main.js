@@ -290,7 +290,7 @@ function _animateCombatScreen() {
       },
       '-=0.48'
     )
-    .from('.combat-narrative', { opacity: 0, y: 14, filter: 'blur(3px)', duration: 0.4 }, '-=0.22');
+    .from('.combat-narrative', { opacity: 0, y: 14, duration: 0.4 }, '-=0.22');
 }
 
 // ── 5. COMBAT FEEDBACK ANIMATIONS ────────────────────────────
